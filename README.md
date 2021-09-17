@@ -4,14 +4,17 @@
 <br/>
 
 
-# \*\* Repo Name \*\*
+# Terraform Provider RudderStack 
 
-\*\* Repo description \*\*
+
+# Repo description
+
+In the repo, we have the implementation of RudderStack terraform provider as a bridge between Terraform and the RudderStack control plane API.  
 |:------|
 
 Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
 
-# Why Use \*\* Software Name \*\*
+# Why Use Terraform RudderStack provider 
 
 \*\* Describe what software does. \*\*
 
@@ -21,7 +24,33 @@ Questions? Please join our [Slack channel](https://resources.rudderstack.com/joi
 
 # Get Started
 
-\*\* Describe how to use the software. \*\*
+## Build provider
+
+Run the following command to build the provider
+
+```shell
+$ go build -o terraform-provider-hashicups
+```
+
+## Test sample configuration
+
+First, build and install the provider.
+
+```shell
+$ make install
+```
+
+Then, navigate to the `examples` directory. 
+
+```shell
+$ cd examples
+```
+
+Run the following command to initialize the workspace and apply the sample configuration.
+
+```shell
+$ terraform init && terraform apply
+```
 
 # License
 
@@ -67,3 +96,9 @@ We would love to see you contribute to RudderStack. Get more information on how 
 [config-generator]: https://github.com/rudderlabs/config-generator
 [config-generator-section]: https://github.com/rudderlabs/rudder-server/blob/master/README.md#rudderstack-config-generator
 [rudder-logo]: https://repository-images.githubusercontent.com/197743848/b352c900-dbc8-11e9-9d45-4deb9274101f
+# Terraform Provider Hashicups
+
+This repo is a companion repo to the [Call APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers) Learn collection. 
+
+In the collection, you will use the HashiCups provider as a bridge between Terraform and the HashiCups API. Then, extend Terraform by recreating the HashiCups provider. By the end of this collection, you will be able to take these intuitions to create your own custom Terraform provider. 
+
