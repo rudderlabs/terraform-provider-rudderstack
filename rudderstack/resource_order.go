@@ -1,4 +1,4 @@
-package hashicups
+package rudderstack 
 
 import (
 	"context"
