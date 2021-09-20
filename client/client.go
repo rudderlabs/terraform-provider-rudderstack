@@ -12,55 +12,45 @@ const HostURL string = "http://localhost:19090"
 
 // Client -
 type Client struct {
-	HostURL    string
-	HTTPClient *http.Client
-	Token      string
-	Auth       AuthStruct
+	HTTPClient     *http.Client
+	WorkspaceHost  HostAccessStruct
+	CatalogHost    HostAccessStruct
 }
 
 // AuthStruct -
-type AuthStruct struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-// AuthResponse -
-type AuthResponse struct {
-	UserID   int    `json:"user_id`
-	Username string `json:"username`
-	Token    string `json:"token"`
+type HostAccessStruct struct {
+	HTTPClient *http.Client
+	HostUrl     string `json:"hosturl"`
+	Token string `json:"token"`
+	AuthKind    bool `json:"authKind"`
 }
 
 // NewClient -
-func NewClient(host, username, password *string) (*Client, error) {
+func NewClient(workspaceHost, workspaceToken, catalogHost, catalogToken *string) (*Client, error) {
+	httpClient := &http.Client{Timeout: 10 * time.Second}
 	c := Client{
-		HTTPClient: &http.Client{Timeout: 10 * time.Second},
-		// Default Hashicups URL
-		HostURL: HostURL,
-		Auth: AuthStruct{
-			Username: *username,
-			Password: *password,
+		HTTPClient: httpClient,
+		WorkspaceHost: HostAccessStruct{
+		        HTTPClient: httpClient,
+			HostUrl: *workspaceHost,
+			Token: *workspaceToken,
+			AuthKind: true,
+		},
+		CatalogHost: HostAccessStruct{
+		        HTTPClient: httpClient,
+			HostUrl: *catalogHost,
+			Token: *catalogToken,
+			AuthKind: true,
 		},
 	}
-
-	if host != nil {
-		c.HostURL = *host
-	}
-
-	ar, err := c.SignIn()
-	if err != nil {
-		return nil, err
-	}
-
-	c.Token = ar.Token
 
 	return &c, nil
 }
 
-func (c *Client) doRequest(req *http.Request) ([]byte, error) {
-	req.Header.Set("Authorization", c.Token)
+func (ha *HostAccessStruct) doRequest(req *http.Request) ([]byte, error) {
+	req.Header.Set("Authorization", ha.Token)
 
-	res, err := c.HTTPClient.Do(req)
+	res, err := ha.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

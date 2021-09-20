@@ -26,17 +26,23 @@ type provider struct {
 func (p *provider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
-			"host": {
+			"workspaceHost": {
 				Type:     types.StringType,
 				Optional: true,
 				Computed: true,
 			},
-			"username": {
+			"workspaceToken": {
+				Type:      types.StringType,
+				Optional:  true,
+				Computed:  true,
+				Sensitive: true,
+			},
+			"catalogHost": {
 				Type:     types.StringType,
 				Optional: true,
 				Computed: true,
 			},
-			"password": {
+			"catalogToken": {
 				Type:      types.StringType,
 				Optional:  true,
 				Computed:  true,
@@ -48,9 +54,10 @@ func (p *provider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics)
 
 // Provider schema struct
 type providerData struct {
-	Username types.String `tfsdk:"username"`
-	Host     types.String `tfsdk:"host"`
-	Password types.String `tfsdk:"password"`
+	WorkspaceHost     types.String `tfsdk:"host"`
+	WorkspaceToken    types.String `tfsdk:"password"`
+	CatalogHost       types.String `tfsdk:"host"`
+	CatalogToken      types.String `tfsdk:"password"`
 }
 
 func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderRequest, resp *tfsdk.ConfigureProviderResponse) {
@@ -62,86 +69,111 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 		return
 	}
 
-	// User must provide a user to the provider
-	var username string
-	if config.Username.Unknown {
-		// Cannot connect to client with an unknown value
-		resp.Diagnostics.AddWarning(
-			"Unable to create client",
-			"Cannot use unknown value as username",
-		)
-		return
-	}
-
-	if config.Username.Null {
-		username = os.Getenv("HASHICUPS_USERNAME")
-	} else {
-		username = config.Username.Value
-	}
-
-	if username == "" {
-		// Error vs warning - empty value must stop execution
-		resp.Diagnostics.AddError(
-			"Unable to find username",
-			"Username cannot be an empty string",
-		)
-		return
-	}
-
-	// User must provide a password to the provider
-	var password string
-	if config.Password.Unknown {
+	// User must specify a workspace host
+	var workspaceHost string
+	if config.WorkspaceHost.Unknown {
 		// Cannot connect to client with an unknown value
 		resp.Diagnostics.AddError(
 			"Unable to create client",
-			"Cannot use unknown value as password",
+			"Cannot use unknown value as workspace host",
 		)
 		return
 	}
 
-	if config.Password.Null {
-		password = os.Getenv("HASHICUPS_PASSWORD")
+	if config.WorkspaceHost.Null {
+		workspaceHost = os.Getenv("RUDDERSTACK_HOST")
 	} else {
-		password = config.Password.Value
+		workspaceHost = config.WorkspaceHost.Value
 	}
 
-	if password == "" {
+	if workspaceHost == "" {
 		// Error vs warning - empty value must stop execution
 		resp.Diagnostics.AddError(
-			"Unable to find password",
-			"password cannot be an empty string",
+			"Unable to find workspace host",
+			"Workspace Host cannot be an empty string",
 		)
 		return
 	}
 
-	// User must specify a host
-	var host string
-	if config.Host.Unknown {
+	// User must provide a workspace token to the provider
+	var workspaceToken string
+	if config.WorkspaceToken.Unknown {
 		// Cannot connect to client with an unknown value
 		resp.Diagnostics.AddError(
 			"Unable to create client",
-			"Cannot use unknown value as host",
+			"Cannot use unknown value as workspace token",
 		)
 		return
 	}
 
-	if config.Host.Null {
-		host = os.Getenv("HASHICUPS_HOST")
+	if config.WorkspaceToken.Null {
+		workspaceToken = os.Getenv("RUDDERSTACK_TOKEN")
 	} else {
-		host = config.Host.Value
+		workspaceToken = config.WorkspaceToken.Value
 	}
 
-	if host == "" {
+	if workspaceToken == "" {
 		// Error vs warning - empty value must stop execution
 		resp.Diagnostics.AddError(
-			"Unable to find host",
-			"Host cannot be an empty string",
+			"Unable to find workspace token",
+			"Workspace token cannot be an empty string",
 		)
 		return
 	}
 
+	// User must specify a catalog host
+	var catalogHost string
+	if config.CatalogHost.Unknown {
+		// Cannot connect to client with an unknown value
+		resp.Diagnostics.AddError(
+			"Unable to create client",
+			"Cannot use unknown value as catalog host",
+		)
+		return
+	}
+
+	if config.CatalogHost.Null {
+		catalogHost = os.Getenv("RUDDERSTACK_CATALOG_HOST")
+	} else {
+		catalogHost = config.CatalogHost.Value
+	}
+
+	if workspaceHost == "" {
+		// Error vs warning - empty value must stop execution
+		resp.Diagnostics.AddError(
+			"Unable to find workspace host",
+			"Catalog Host cannot be an empty string",
+		)
+		return
+	}
+
+	// User must provide a workspace token to the provider
+	var workspaceToken string
+	if config.CatalogToken.Unknown {
+		// Cannot connect to client with an unknown value
+		resp.Diagnostics.AddError(
+			"Unable to create client",
+			"Cannot use unknown value as workspace token",
+		)
+		return
+	}
+
+	if config.CatalogToken.Null {
+		workspaceToken = os.Getenv("RUDDERSTACK_TOKEN")
+	} else {
+		workspaceToken = config.CatalogToken.Value
+	}
+
+	if workspaceToken == "" {
+		// Error vs warning - empty value must stop execution
+		resp.Diagnostics.AddError(
+			"Unable to find workspace token",
+			"Catalog token cannot be an empty string",
+		)
+		return
+	}
 	// Create a new HashiCups client and set it to the provider client
-	c, err := rudderclient.NewClient(&host, &username, &password)
+	c, err := rudderclient.NewClient(&workspaceHost, &workspaceToken, &catalogHost, &catalogToken)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create client",
