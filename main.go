@@ -6,6 +6,7 @@ import (
 	"terraform-provider-rudderstack/rudderstack"
 )
 
+
 func main() {
 	tfsdk.Serve(context.Background(), rudderstack.New, tfsdk.ServeOpts{
 		Name: "rudderstack",

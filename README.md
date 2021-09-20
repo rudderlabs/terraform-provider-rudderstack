@@ -5,31 +5,37 @@
 
 
 # Terraform Provider RudderStack 
-
+Currently in draft stage.
 
 # Repo description
 
-In the repo, we have the implementation of RudderStack terraform provider as a bridge between Terraform and the RudderStack control plane API.  
-|:------|
+In this repo, we implement RudderStack terraform provider. It is a plugin which acts as a bridge between Terraform and the RudderStack control plane API.  
 
 Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
 
 # Why Use Terraform RudderStack provider 
 
-\*\* Describe what software does. \*\*
+TBD
 
 # Key Features
 
-\*\* Describe key features, if necessary. \*\*
+TBD
 
 # Get Started
+
+## Setup build environment
+Make sure that following are installed.
+1. bash 
+2. go
+3. make
+4. goswagger: Use sudo apt install swagger
 
 ## Build provider
 
 Run the following command to build the provider
 
 ```shell
-$ go build -o terraform-provider-hashicups
+$ go build -o terraform-provider-rudderstack
 ```
 
 ## Test sample configuration
@@ -71,13 +77,6 @@ We would love to see you contribute to RudderStack. Get more information on how 
 - [YouTube][youtube]
 - [HackerNews][hackernews]
 - [Product Hunt][producthunt]
-
-# \*\* Optional \*\* :clap:  Our Supporters
-
-\*\* Update the repo names below. \*\*<br />
-
-[![Stargazers repo roster for @rudderlabs/rudder-server](https://reporoster.com/stars/rudderlabs/rudder-repo-template)](https://github.com/rudderlabs/rudder-repo-template/stargazers)
-[![Forkers repo roster for @rudderlabs/rudder-server](https://reporoster.com/forks/rudderlabs/rudder-repo-template)](https://github.com/rudderlabs/rudder-repo-template/network/members)
 
 <!----variables---->
 

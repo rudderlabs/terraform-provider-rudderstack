@@ -4,10 +4,11 @@ import (
 	"context"
 	"os"
 
-	"github.com/hashicorp-demoapp/hashicups-client-go"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
+	"terraform-provider-rudderstack/client"
 )
 
 var stderr = os.Stderr
@@ -18,7 +19,7 @@ func New() tfsdk.Provider {
 
 type provider struct {
 	configured bool
-	client     *hashicups.Client
+	client     *rudderclient.Client
 }
 
 // GetSchema
@@ -140,11 +141,11 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 	}
 
 	// Create a new HashiCups client and set it to the provider client
-	c, err := hashicups.NewClient(&host, &username, &password)
+	c, err := rudderclient.NewClient(&host, &username, &password)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create client",
-			"Unable to create hashicups client:\n\n"+err.Error(),
+			"Unable to create rudderstack client:\n\n"+err.Error(),
 		)
 		return
 	}
