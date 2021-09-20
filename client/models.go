@@ -1,32 +1,63 @@
 package rudderclient
 
-// Order -
-type Order struct {
-	ID    int         `json:"id,omitempty"`
-	Items []OrderItem `json:"items,omitempty"`
+import (
+    "time"
+)
+
+// Source Definition -
+type SourceDefinition struct
+{
+    ID            int                         `json:"id,omitempty"`
+    Name          string                      `json:"name"`
+    Category      string                      `json:"string"`
+    CreatedAt     time.Time                   `json:"createdAt"`
+    UpdatedAt     time.Time                   `json:"updatedAt"`
+
+    Config        SourceDefinitionConfig      `json:"config"`
 }
 
-// OrderItem -
-type OrderItem struct {
-	Coffee   Coffee `json:"coffee"`
-	Quantity int    `json:"quantity"`
+// Destination Definition -
+type DestinationDefinition struct
+{
+    ID            int                         `json:"id,omitempty"`
+    Name          string                      `json:"name"`
+    Category      string                      `json:"string"`
+    CreatedAt     time.Time                   `json:"createdAt"`
+    UpdatedAt     time.Time                   `json:"updatedAt"`
+
+    Config        DestinationDefinitionConfig `json:"config"`
 }
 
-// Coffee -
-type Coffee struct {
-	ID          int          `json:"id"`
-	Name        string       `json:"name"`
-	Teaser      string       `json:"teaser"`
-	Description string       `json:"description"`
-	Price       float64      `json:"price"`
-	Image       string       `json:"image"`
-	Ingredient  []Ingredient `json:"ingredients"`
+// Sources -
+type Source struct {
+    ID            int                         `json:"id,omitempty"`
+    Name          string                      `json:"name"`
+    Category      string                      `json:"category"`
+    CreatedAt     time.Time                   `json:"createdAt"`
+    UpdatedAt     time.Time                   `json:"updatedAt"`
+
+    Config        SourceConfig                `json:"config"`
 }
 
-// Ingredient -
-type Ingredient struct {
-	ID       int    `json:"ingredient_id"`
-	Name     string `json:"name"`
-	Quantity int    `json:"quantity"`
-	Unit     string `json:"unit"`
+// Destinations -
+type Destination struct {
+    ID            int                         `json:"id,omitempty"`
+    Name          string                      `json:"name"`
+    Category      string                      `json:"category"`
+    CreatedAt     time.Time                   `json:"createdAt"`
+    UpdatedAt     time.Time                   `json:"updatedAt"`
+
+    Config        DestinationConfig           `json:"config"`
+}
+
+type SourceConfig struct {
+}
+
+type DestinationConfig struct {
+}
+
+type SourceDefinitionConfig struct {
+}
+
+type DestinationDefinitionConfig struct {
 }

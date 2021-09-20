@@ -138,36 +138,36 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 		catalogHost = config.CatalogHost.Value
 	}
 
-	if workspaceHost == "" {
+	if catalogHost == "" {
 		// Error vs warning - empty value must stop execution
 		resp.Diagnostics.AddError(
-			"Unable to find workspace host",
+			"Unable to find catalog host",
 			"Catalog Host cannot be an empty string",
 		)
 		return
 	}
 
-	// User must provide a workspace token to the provider
-	var workspaceToken string
+	// User must provide a catalog token to the provider
+	var catalogToken string
 	if config.CatalogToken.Unknown {
 		// Cannot connect to client with an unknown value
 		resp.Diagnostics.AddError(
 			"Unable to create client",
-			"Cannot use unknown value as workspace token",
+			"Cannot use unknown value as catalog token",
 		)
 		return
 	}
 
 	if config.CatalogToken.Null {
-		workspaceToken = os.Getenv("RUDDERSTACK_TOKEN")
+		workspaceToken = os.Getenv("RUDDERSTACK_CATALOG_TOKEN")
 	} else {
 		workspaceToken = config.CatalogToken.Value
 	}
 
-	if workspaceToken == "" {
+	if catalogToken == "" {
 		// Error vs warning - empty value must stop execution
 		resp.Diagnostics.AddError(
-			"Unable to find workspace token",
+			"Unable to find catalog token",
 			"Catalog token cannot be an empty string",
 		)
 		return
