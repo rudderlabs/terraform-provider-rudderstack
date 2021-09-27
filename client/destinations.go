@@ -79,3 +79,21 @@ func (c *Client) CreateDestination(destination Destination) (*Destination, error
 
 	return &newDestination, nil
 }
+
+// DeleteDestination - Delete existing destination
+func (c *Client) DeleteDestination(destinationId string) error {
+	host := c.WorkspaceHost
+
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/destination/%d", host.Url, destinationId), nil)
+	if err != nil {
+		return err
+	}
+
+	body, err := host.doRequest(req)
+	_ = body
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

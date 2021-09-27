@@ -1,8 +1,9 @@
-package rudderstack 
+package rudderstack
 
 import (
 	"context"
 	"os"
+	// "log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -26,23 +27,23 @@ type provider struct {
 func (p *provider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
-			"workspaceHost": {
+			"host": {
 				Type:     types.StringType,
 				Optional: true,
 				Computed: true,
 			},
-			"workspaceToken": {
+			"token": {
 				Type:      types.StringType,
 				Optional:  true,
 				Computed:  true,
 				Sensitive: true,
 			},
-			"catalogHost": {
+			"catalog_host": {
 				Type:     types.StringType,
 				Optional: true,
 				Computed: true,
 			},
-			"catalogToken": {
+			"catalog_token": {
 				Type:      types.StringType,
 				Optional:  true,
 				Computed:  true,
@@ -54,10 +55,10 @@ func (p *provider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics)
 
 // Provider schema struct
 type providerData struct {
-	WorkspaceHost     types.String `tfsdk:"host"`
-	WorkspaceToken    types.String `tfsdk:"password"`
-	CatalogHost       types.String `tfsdk:"host"`
-	CatalogToken      types.String `tfsdk:"password"`
+	WorkspaceHost  types.String `tfsdk:"host"`
+	WorkspaceToken types.String `tfsdk:"token"`
+	CatalogHost    types.String `tfsdk:"catalog_host"`
+	CatalogToken   types.String `tfsdk:"catalog_token"`
 }
 
 func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderRequest, resp *tfsdk.ConfigureProviderResponse) {
@@ -159,9 +160,9 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 	}
 
 	if config.CatalogToken.Null {
-		workspaceToken = os.Getenv("RUDDERSTACK_CATALOG_TOKEN")
+		catalogToken = os.Getenv("RUDDERSTACK_CATALOG_TOKEN")
 	} else {
-		workspaceToken = config.CatalogToken.Value
+		catalogToken = config.CatalogToken.Value
 	}
 
 	if catalogToken == "" {
@@ -172,6 +173,7 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 		)
 		return
 	}
+
 	// Create a new HashiCups client and set it to the provider client
 	c, err := rudderclient.NewClient(&workspaceHost, &workspaceToken, &catalogHost, &catalogToken)
 	if err != nil {
@@ -189,7 +191,7 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 // GetResources - Defines provider resources
 func (p *provider) GetResources(_ context.Context) (map[string]tfsdk.ResourceType, diag.Diagnostics) {
 	return map[string]tfsdk.ResourceType{
-		"hashicups_order": resourceOrderType{},
+		"rudderstack_source": resourceSourceType{},
 	}, nil
 }
 

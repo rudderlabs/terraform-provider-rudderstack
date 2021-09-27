@@ -3,6 +3,7 @@ package rudderclient
 import (
 	"encoding/json"
 	"fmt"
+	// "log"
 	"net/http"
 	"strings"
 )
@@ -52,16 +53,20 @@ func (c *Client) GetSource(sourceID string) (*Source, error) {
 	return &source, nil
 }
 
+type resultBodyType struct{
+	Source Source `json:"source"`
+}
+
 // CreateSource - Create new source
 func (c *Client) CreateSource(source Source) (*Source, error) {
 	host := c.WorkspaceHost
-
 	rb, err := json.Marshal(source)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/sources", host.Url), strings.NewReader(string(rb)))
+	url := fmt.Sprintf("%ssources/", host.Url)
+	req, err := http.NewRequest("POST", url, strings.NewReader(string(rb)))
 	if err != nil {
 		return nil, err
 	}
@@ -71,11 +76,29 @@ func (c *Client) CreateSource(source Source) (*Source, error) {
 		return nil, err
 	}
 
-	newSource := Source{}
-	err = json.Unmarshal(body, &newSource)
+	resultBody := resultBodyType{}
+	err = json.Unmarshal(body, &resultBody)
 	if err != nil {
 		return nil, err
 	}
 
-	return &newSource, nil
+	return &resultBody.Source, nil
+}
+
+// DeleteSource - Delete existing source
+func (c *Client) DeleteSource(sourceId string) error {
+	host := c.WorkspaceHost
+
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/sources/%d", host.Url, sourceId), nil)
+	if err != nil {
+		return err
+	}
+
+	body, err := host.doRequest(req)
+	_ = body
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
