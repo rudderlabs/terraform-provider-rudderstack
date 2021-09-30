@@ -47,11 +47,11 @@ type resourceConnection struct {
 }
 
 func NewConnection(clientConnection *rudderclient.Connection) (Connection) {
-	sdkConnection := Connection{}
-	sdkConnection.ID = types.String{Value: clientConnection.ID}
-	sdkConnection.SourceID = types.String{Value: clientConnection.SourceID}
-	sdkConnection.DestinationID = types.String{Value: clientConnection.DestinationID};
-	return sdkConnection
+	return Connection{
+		ID                  : types.String{Value: clientConnection.ID},
+		SourceID            : types.String{Value: clientConnection.SourceID},
+		DestinationID       : types.String{Value: clientConnection.DestinationID},
+	}
 }
 
 func (sdkConnection Connection) ToClient() rudderclient.Connection {
@@ -137,6 +137,45 @@ func (r resourceConnection) Read(ctx context.Context, req tfsdk.ReadResourceRequ
 
 // Update resource
 func (r resourceConnection) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+    // Get plan values
+    var plan Connection
+    diags := req.Plan.Get(ctx, &plan)
+    resp.Diagnostics.Append(diags...)
+    if resp.Diagnostics.HasError() {
+            return
+    }
+
+    // Get current state
+    var state Connection
+    diags = req.State.Get(ctx, &state)
+    resp.Diagnostics.Append(diags...)
+    if resp.Diagnostics.HasError() {
+            return
+    }
+
+    // Convert terraform object to REST API Client object.
+    clientConnection := plan.ToClient()
+
+    // Get connection ID from current state.
+    connectionID := state.ID.Value
+
+    // Get current value of connection from API.
+    connection, err := r.p.client.UpdateConnection(connectionID, clientConnection)
+    if err != nil {
+        resp.Diagnostics.AddError(
+            "Error updating connection",
+            "Could not update connectionID "+connectionID+": "+err.Error(),
+        )
+        return
+    }
+
+    // Set state with updated value.
+    state = NewConnection(connection)
+    diags = resp.State.Set(ctx, &state)
+    resp.Diagnostics.Append(diags...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
 }
 
 // ImportState resource
