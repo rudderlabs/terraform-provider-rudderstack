@@ -64,18 +64,19 @@ type resourceSource struct {
 	p provider
 }
 
-func (clientSource rudderclient.Source) ToSdk() Source {
-	return Source{
-		ID        	        : types.String{Value: clientSource.ID},
-		Name      			: types.String{Value: clientSource.Name},
-		Type      			: types.String{Value: clientSource.Type},
-		CreatedAt 			: types.String{Value: string(clientSource.CreatedAt.Format(time.RFC850))},
-		UpdatedAt 			: types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
-	
-		Config    			: SourceConfig{
-			ID        : clientSource.Config.ID,
-		},
+func NewSource(clientSource *rudderclient.Source) (Source) {
+	sdkSource := Source{}
+	sdkSource.ID = types.String{Value: clientSource.ID}
+	sdkSource.Name = types.String{Value: clientSource.Name}
+	sdkSource.Type = types.String{Value: clientSource.Type}
+	sdkSource.CreatedAt = types.String{Value: string(clientSource.CreatedAt.Format(time.RFC850))}
+	sdkSource.UpdatedAt = types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))}
+
+	sdkSource.Config = SourceConfig{
+		ID        : clientSource.Config.ID,
 	}
+
+	return sdkSource
 }
 
 func (sdkSource Source) ToClient() rudderclient.Source {
@@ -120,7 +121,7 @@ func (r resourceSource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
 		return
 	}
 
-	state := createdSource.ToSdk()
+	state := NewSource(createdSource)
 
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -152,7 +153,7 @@ func (r resourceSource) Read(ctx context.Context, req tfsdk.ReadResourceRequest,
 		return
 	}
 
-	state = source.ToSdk()
+	state = NewSource(source)
 
 	// Set state with updated value.
 	diags = resp.State.Set(ctx, &state)

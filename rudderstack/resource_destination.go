@@ -64,18 +64,19 @@ type resourceDestination struct {
 	p provider
 }
 
-func (clientDestination rudderclient.Destination) ToSdk() Destination {
-	return Destination{
-		ID        	        : types.String{Value: clientDestination.ID},
-		Name      			: types.String{Value: clientDestination.Name},
-		Type      			: types.String{Value: clientDestination.Type},
-		CreatedAt 			: types.String{Value: string(clientDestination.CreatedAt.Format(time.RFC850))},
-		UpdatedAt 			: types.String{Value: string(clientDestination.UpdatedAt.Format(time.RFC850))},
-	
-		Config    			: DestinationConfig{
-			ID        : clientDestination.Config.ID,
-		},
+func NewDestination(clientDestination *rudderclient.Destination) (Destination) {
+	sdkDestination := Destination{}
+	sdkDestination.ID = types.String{Value: clientDestination.ID}
+	sdkDestination.Name = types.String{Value: clientDestination.Name}
+	sdkDestination.Type = types.String{Value: clientDestination.Type}
+	sdkDestination.CreatedAt = types.String{Value: string(clientDestination.CreatedAt.Format(time.RFC850))}
+	sdkDestination.UpdatedAt = types.String{Value: string(clientDestination.UpdatedAt.Format(time.RFC850))}
+
+	sdkDestination.Config = DestinationConfig{
+		ID        : clientDestination.Config.ID,
 	}
+
+	return sdkDestination
 }
 
 func (sdkDestination Destination) ToClient() rudderclient.Destination {
@@ -83,7 +84,7 @@ func (sdkDestination Destination) ToClient() rudderclient.Destination {
 		ID      		    : sdkDestination.ID.Value,
 		Name      			: sdkDestination.Name.Value,
 		Type      			: sdkDestination.Type.Value,
-		Config    			: rudderclient.SourceConfig {
+		Config    			: rudderclient.DestinationConfig {
 			ID        : sdkDestination.Config.ID,
 		},
 	}
@@ -120,7 +121,7 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
 		return
 	}
 
-	state := createdDestination.ToSdk()
+	state := NewDestination(createdDestination)
 
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -152,7 +153,7 @@ func (r resourceDestination) Read(ctx context.Context, req tfsdk.ReadResourceReq
 		return
 	}
 
-	state := destination.ToSdk()
+	state = NewDestination(destination)
 
 	// Set state with updated value.
 	diags = resp.State.Set(ctx, &state)

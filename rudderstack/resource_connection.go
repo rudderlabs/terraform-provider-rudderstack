@@ -46,12 +46,12 @@ type resourceConnection struct {
 	p provider
 }
 
-func (clientConnection rudderclient.Connection) ToSdk() Connection {
-	return Connection{
-		ID        	        : types.String{Value: clientConnection.ID},
-		SourceID        	: types.String{Value: clientConnection.SourceID},
-		DestinationID       : types.String{Value: clientConnection.DestinationID},
-	}
+func NewConnection(clientConnection *rudderclient.Connection) (Connection) {
+	sdkConnection := Connection{}
+	sdkConnection.ID = types.String{Value: clientConnection.ID}
+	sdkConnection.SourceID = types.String{Value: clientConnection.SourceID}
+	sdkConnection.DestinationID = types.String{Value: clientConnection.DestinationID};
+	return sdkConnection
 }
 
 func (sdkConnection Connection) ToClient() rudderclient.Connection {
@@ -93,7 +93,7 @@ func (r resourceConnection) Create(ctx context.Context, req tfsdk.CreateResource
 		return
 	}
 
-	state := createdConnection.ToSdk()
+	state := NewConnection(createdConnection)
 	
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -125,7 +125,7 @@ func (r resourceConnection) Read(ctx context.Context, req tfsdk.ReadResourceRequ
 		return
 	}
 
-	state = connection.ToSdk()
+	state = NewConnection(connection)
 
 	// Set state with updated value.
 	diags = resp.State.Set(ctx, &state)
