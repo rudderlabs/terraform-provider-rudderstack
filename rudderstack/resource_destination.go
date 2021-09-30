@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-rudderstack/client"
+	"github.com/rudderlabs/cp-client-go"
 )
 
 type resourceDestinationType struct{}
@@ -162,6 +162,11 @@ func (r resourceDestination) Read(ctx context.Context, req tfsdk.ReadResourceReq
 
 // Update resource
 func (r resourceDestination) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+}
+
+// ImportState resource
+func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
+	tfsdk.ResourceImportStateNotImplemented(ctx, "", resp)
 }
 
 // Delete resource

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"terraform-provider-rudderstack/client"
+	"github.com/rudderlabs/cp-client-go"
 )
 
 var stderr = os.Stderr
