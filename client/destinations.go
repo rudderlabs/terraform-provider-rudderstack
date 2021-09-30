@@ -3,6 +3,7 @@ package rudderclient
 import (
 	"encoding/json"
 	"fmt"
+	// "log"
 	"net/http"
 	"strings"
 )
@@ -52,16 +53,20 @@ func (c *Client) GetDestination(destinationID string) (*Destination, error) {
 	return &destination, nil
 }
 
+type destResultBodyType struct{
+	Destination Destination `json:"destination"`
+}
+
 // CreateDestination - Create new destination
 func (c *Client) CreateDestination(destination Destination) (*Destination, error) {
 	host := c.WorkspaceHost
-
 	rb, err := json.Marshal(destination)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/destinations", host.Url), strings.NewReader(string(rb)))
+	url := fmt.Sprintf("%sdestinations/", host.Url)
+	req, err := http.NewRequest("POST", url, strings.NewReader(string(rb)))
 	if err != nil {
 		return nil, err
 	}
@@ -71,20 +76,20 @@ func (c *Client) CreateDestination(destination Destination) (*Destination, error
 		return nil, err
 	}
 
-	newDestination := Destination{}
-	err = json.Unmarshal(body, &newDestination)
+	resultBody := destResultBodyType{}
+	err = json.Unmarshal(body, &resultBody)
 	if err != nil {
 		return nil, err
 	}
 
-	return &newDestination, nil
+	return &resultBody.Destination, nil
 }
 
 // DeleteDestination - Delete existing destination
 func (c *Client) DeleteDestination(destinationId string) error {
 	host := c.WorkspaceHost
 
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/destination/%d", host.Url, destinationId), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/destinations/%d", host.Url, destinationId), nil)
 	if err != nil {
 		return err
 	}

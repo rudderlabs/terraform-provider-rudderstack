@@ -25,17 +25,16 @@ TBD
 
 ## Setup build environment
 Make sure that following are installed.
-1. bash 
+1. bash (On Windows, consider using WSL2 Ubuntu) 
 2. go
 3. make
-4. goswagger: Use sudo apt install swagger
 
 ## Build provider
 
 Run the following command to build the provider
 
 ```shell
-$ go build -o terraform-provider-rudderstack
+$ make
 ```
 
 ## Test sample configuration

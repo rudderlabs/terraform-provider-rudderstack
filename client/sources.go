@@ -53,7 +53,7 @@ func (c *Client) GetSource(sourceID string) (*Source, error) {
 	return &source, nil
 }
 
-type resultBodyType struct{
+type srcResultBodyType struct{
 	Source Source `json:"source"`
 }
 
@@ -76,7 +76,7 @@ func (c *Client) CreateSource(source Source) (*Source, error) {
 		return nil, err
 	}
 
-	resultBody := resultBodyType{}
+	resultBody := srcResultBodyType{}
 	err = json.Unmarshal(body, &resultBody)
 	if err != nil {
 		return nil, err

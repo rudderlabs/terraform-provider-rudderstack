@@ -4,7 +4,7 @@ import (
 	"context"
 	// "strconv"
 	"time"
-	"log"
+	// "log"
 	//"math/big"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -97,7 +97,6 @@ func (r resourceSource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
 			"Error creating source",
 			"Could not create source, unexpected error: "+err.Error(),
 		)
-		log.Println("Hello4", plan.Name, plan.Type)
 		return
 	}
 

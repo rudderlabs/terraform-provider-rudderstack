@@ -22,7 +22,7 @@ provider "rudderstack" {
   catalog_token = null
 }
 
-resource "rudderstack_source" "cdp" {
+resource "rudderstack_source" "src1" {
   name = "tfsource"
   type = "Auth0"
   config = {
@@ -30,6 +30,27 @@ resource "rudderstack_source" "cdp" {
   }
 }
 
-output "edu_order" {
-  value = rudderstack_source.cdp
+resource "rudderstack_destination" "dst1" {
+  name = "tfdestination"
+  type = "Slack"
+  config = {
+    id = 0
+  }
+}
+
+resource "rudderstack_connection" "cnxn1" {
+  source_id = "${rudderstack_source.src1.id}" 
+  destination_id = "${rudderstack_destination.dst1.id}"
+}
+
+output "src1_id" {
+  value = rudderstack_source.src1.id
+}
+
+output "dst1_id" {
+  value = rudderstack_destination.dst1.id
+}
+
+output "cnxn1_id" {
+  value = rudderstack_connection.cnxn1.id
 }
