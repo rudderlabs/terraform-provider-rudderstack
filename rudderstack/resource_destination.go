@@ -64,6 +64,31 @@ type resourceDestination struct {
 	p provider
 }
 
+func (clientDestination rudderclient.Destination) ToSdk() Destination {
+	return Destination{
+		ID        	        : types.String{Value: clientDestination.ID},
+		Name      			: types.String{Value: clientDestination.Name},
+		Type      			: types.String{Value: clientDestination.Type},
+		CreatedAt 			: types.String{Value: string(clientDestination.CreatedAt.Format(time.RFC850))},
+		UpdatedAt 			: types.String{Value: string(clientDestination.UpdatedAt.Format(time.RFC850))},
+	
+		Config    			: DestinationConfig{
+			ID        : clientDestination.Config.ID,
+		},
+	}
+}
+
+func (sdkDestination Destination) ToClient() rudderclient.Destination {
+	return rudderclient.Destination {
+		ID      		    : sdkDestination.ID.Value,
+		Name      			: sdkDestination.Name.Value,
+		Type      			: sdkDestination.Type.Value,
+		Config    			: rudderclient.SourceConfig {
+			ID        : sdkDestination.Config.ID,
+		},
+	}
+}
+
 // Create a new resource
 func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
 	if !r.p.configured {
@@ -83,12 +108,7 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
 	}
 
 	// Convert terraform object to REST API Client object.
-	clientDestination := rudderclient.Destination {
-		Name      : plan.Name.Value,
-		Type      : plan.Type.Value,
-		Config    : rudderclient.DestinationConfig {
-		},
-	}
+	clientDestination := plan.ToClient()
 
 	// Create new destination
 	createdDestination, err := r.p.client.CreateDestination(clientDestination)
@@ -100,17 +120,7 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
 		return
 	}
 
-	state := Destination{
-		ID        : types.String{Value: createdDestination.ID},
-		Name      : types.String{Value: createdDestination.Name},
-		Type      : types.String{Value: createdDestination.Type},
-		CreatedAt : types.String{Value: string(createdDestination.CreatedAt.Format(time.RFC850))},
-		UpdatedAt : types.String{Value: string(createdDestination.UpdatedAt.Format(time.RFC850))},
-	
-		Config    : DestinationConfig{
-			ID        : createdDestination.Config.ID,
-		},
-	}
+	state := createdDestination.ToSdk()
 
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -142,15 +152,7 @@ func (r resourceDestination) Read(ctx context.Context, req tfsdk.ReadResourceReq
 		return
 	}
 
-	state = Destination{
-		ID        : types.String{Value: destination.ID},
-		Name      : types.String{Value: destination.Name},
-		Type      : types.String{Value: destination.Type},
-		CreatedAt : types.String{Value: string(destination.CreatedAt.Format(time.RFC850))},
-		UpdatedAt : types.String{Value: string(destination.UpdatedAt.Format(time.RFC850))},
-	
-		Config    : DestinationConfig{},
-	}
+	state := destination.ToSdk()
 
 	// Set state with updated value.
 	diags = resp.State.Set(ctx, &state)

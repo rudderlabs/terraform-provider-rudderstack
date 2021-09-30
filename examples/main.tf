@@ -9,16 +9,20 @@ terraform {
 }
 
 provider "rudderstack" {
-  # Set to default "https://api.rudderlabs.com/v2/"
+  # Set to control plane API host. Usually "https://api.rudderlabs.com/v2/".
+  # If null, falls back on env variable RUDDERSTACK_HOST.
   host = null
 
-  # Set Workspace token that can be generated at https://app.dev.rudderlabs.com/profile/tokens. Example "1fasdasdsdas".
+  # Set to access token for control plane API host. The token can be generated at https://app.dev.rudderlabs.com/profile/tokens. Example "1fasdasdsdas".
+  # If null, falls back on env variable RUDDERSTACK_TOKEN.
   token = null 
 
-  # Set to default "https://api.rudderlabs.com/"
+  # Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com/".
+  # If null, falls back on env variable RUDDERSTACK_CATALOG.
   catalog_host = null
 
-  # Set Catalog token available at https://app.rudderstack.com/home. Example "1lajsdlkjasdl".
+  # Set to access token for V1 control plane API host. The token is available at https://app.rudderstack.com/home. Example "1lajsdlkjasdl".
+  # If null, falls back on env variable RUDDERSTACK_CATALOG_TOKEN.
   catalog_token = null
 }
 

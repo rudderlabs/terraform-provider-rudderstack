@@ -64,6 +64,31 @@ type resourceSource struct {
 	p provider
 }
 
+func (clientSource rudderclient.Source) ToSdk() Source {
+	return Source{
+		ID        	        : types.String{Value: clientSource.ID},
+		Name      			: types.String{Value: clientSource.Name},
+		Type      			: types.String{Value: clientSource.Type},
+		CreatedAt 			: types.String{Value: string(clientSource.CreatedAt.Format(time.RFC850))},
+		UpdatedAt 			: types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
+	
+		Config    			: SourceConfig{
+			ID        : clientSource.Config.ID,
+		},
+	}
+}
+
+func (sdkSource Source) ToClient() rudderclient.Source {
+	return rudderclient.Source {
+		ID      		    : sdkSource.ID.Value,
+		Name      			: sdkSource.Name.Value,
+		Type      			: sdkSource.Type.Value,
+		Config    			: rudderclient.SourceConfig {
+			ID        : sdkSource.Config.ID,
+		},
+	}
+}
+
 // Create a new resource
 func (r resourceSource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
 	if !r.p.configured {
@@ -83,12 +108,7 @@ func (r resourceSource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
 	}
 
 	// Convert terraform object to REST API Client object.
-	clientSource := rudderclient.Source {
-		Name      : plan.Name.Value,
-		Type      : plan.Type.Value,
-		Config    : rudderclient.SourceConfig {
-		},
-	}
+	clientSource := plan.ToClient()
 
 	// Create new source
 	createdSource, err := r.p.client.CreateSource(clientSource)
@@ -100,17 +120,7 @@ func (r resourceSource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
 		return
 	}
 
-	state := Source{
-		ID        : types.String{Value: createdSource.ID},
-		Name      : types.String{Value: createdSource.Name},
-		Type      : types.String{Value: createdSource.Type},
-		CreatedAt : types.String{Value: string(createdSource.CreatedAt.Format(time.RFC850))},
-		UpdatedAt : types.String{Value: string(createdSource.UpdatedAt.Format(time.RFC850))},
-	
-		Config    : SourceConfig{
-			ID        : createdSource.Config.ID,
-		},
-	}
+	state := createdSource.ToSdk()
 
 	diags = resp.State.Set(ctx, state)
 	resp.Diagnostics.Append(diags...)
@@ -142,15 +152,7 @@ func (r resourceSource) Read(ctx context.Context, req tfsdk.ReadResourceRequest,
 		return
 	}
 
-	state = Source{
-		ID        : types.String{Value: source.ID},
-		Name      : types.String{Value: source.Name},
-		Type      : types.String{Value: source.Type},
-		CreatedAt : types.String{Value: string(source.CreatedAt.Format(time.RFC850))},
-		UpdatedAt : types.String{Value: string(source.UpdatedAt.Format(time.RFC850))},
-	
-		Config    : SourceConfig{},
-	}
+	state = source.ToSdk()
 
 	// Set state with updated value.
 	diags = resp.State.Set(ctx, &state)
