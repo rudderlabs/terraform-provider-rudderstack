@@ -3,6 +3,7 @@ package rudderstack
 import (
     "context"
     // "strconv"
+	"strings"
     "time"
     // "log"
     // "math/big"
@@ -207,7 +208,51 @@ func (r resourceDestination) Update(ctx context.Context, req tfsdk.UpdateResourc
 
 // ImportState resource
 func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-    tfsdk.ResourceImportStateNotImplemented(ctx, "", resp)
+	var diags diag.Diagnostics
+
+	// Get destination type/name from import request.
+    idFields := strings.Fields(req.ID)
+	destinationType := ""
+	destinationName := ""
+	if (len(idFields) == 1) {
+		destinationName = idFields[0]
+	} else if (len(idFields) == 2) {
+		destinationType = idFields[0]
+		destinationName = idFields[1]
+	} else {
+        resp.Diagnostics.AddError(
+            "Error reading import request",
+            "Could not read (destinationType, destinationName) for connection import " + req.ID,
+        )
+        return
+	}
+
+    // Get current value of destination from API.
+    destinations, err := r.p.client.FilterDestinations(destinationType, destinationName)
+    if err != nil {
+        resp.Diagnostics.AddError(
+            "Error filtering destination",
+            "Could not filter destinations by import request " + req.ID + ": "+err.Error(),
+        )
+        return
+    }
+
+	if len(destinations) != 1 {
+        resp.Diagnostics.AddError(
+            "No matching destination found",
+            "Number of destinations matching import request ==" + req.ID + " is " + string(len(destinations)) + "!= 1: " + err.Error(),
+        )
+        return
+	}
+
+    state := NewDestination(&destinations[0])
+
+    // Set state with updated value.
+    diags = resp.State.Set(ctx, &state)
+    resp.Diagnostics.Append(diags...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
 }
 
 // Delete resource

@@ -3,6 +3,7 @@ package rudderstack
 import (
     "context"
     // "strconv"
+	"strings"
     "time"
     // "log"
     //"math/big"
@@ -71,7 +72,7 @@ func NewSource(clientSource *rudderclient.Source) (Source) {
         Type                : types.String{Value: clientSource.Type},
         CreatedAt           : types.String{Value: string(clientSource.CreatedAt.Format(time.RFC850))},
         UpdatedAt           : types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
-    
+
         Config              : SourceConfig{
             ID        : clientSource.Config.ID,
         },
@@ -206,7 +207,51 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
 
 // ImportState resource
 func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-    tfsdk.ResourceImportStateNotImplemented(ctx, "", resp)
+	var diags diag.Diagnostics
+
+	// Get source type/name from import request.
+    idFields := strings.Fields(req.ID)
+	sourceType := ""
+	sourceName := ""
+	if (len(idFields) == 1) {
+		sourceName = idFields[0]
+	} else if (len(idFields) == 2) {
+		sourceType = idFields[0]
+		sourceName = idFields[1]
+	} else {
+        resp.Diagnostics.AddError(
+            "Error reading import request",
+            "Could not read (sourceType, sourceName) for connection import " + req.ID,
+        )
+        return
+	}
+
+    // Get current value of source from API.
+    sources, err := r.p.client.FilterSources(sourceType, sourceName)
+    if err != nil {
+        resp.Diagnostics.AddError(
+            "Error filtering source",
+            "Could not filter sources by import request " + req.ID + ": "+err.Error(),
+        )
+        return
+    }
+
+	if len(sources) != 1 {
+        resp.Diagnostics.AddError(
+            "No matching source found",
+            "Number of sources matching import request ==" + req.ID + " is " + string(len(sources)) + "!= 1: "+err.Error(),
+        )
+        return
+	}
+
+    state := NewSource(&sources[0])
+
+    // Set state with updated value.
+    diags = resp.State.Set(ctx, &state)
+    resp.Diagnostics.Append(diags...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
 }
 
 // Delete resource
