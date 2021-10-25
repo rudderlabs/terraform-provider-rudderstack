@@ -36,7 +36,7 @@ resource "rudderstack_source" "src1" {
 
 resource "rudderstack_destination" "dst1" {
   name = "tfdestination"
-  type = "Slack"
+  type = "SLACK"
   config = {
     id = 0
   }

@@ -76,6 +76,10 @@ github.com/rudderlabs/cp-client-go v0.0.3 h1:J4PMQRpCxwxN5Ez0yUSkmvXC0L6U5FatEhw
 github.com/rudderlabs/cp-client-go v0.0.3/go.mod h1:UlCyIwV2tHrJm2+447mXe5yvaual4+7D2TyLRdJVejc=
 github.com/rudderlabs/cp-client-go v0.0.4 h1:q1qCjnfx3d5Plpo8Q4pjutMSt0YAWnQEJHuZd/0A/zk=
 github.com/rudderlabs/cp-client-go v0.0.4/go.mod h1:UlCyIwV2tHrJm2+447mXe5yvaual4+7D2TyLRdJVejc=
+github.com/rudderlabs/cp-client-go v0.0.5 h1:Xl+PIUnY/F2M4ye9QZA/potQlSybrnXM29QWVuQZGJY=
+github.com/rudderlabs/cp-client-go v0.0.5/go.mod h1:UlCyIwV2tHrJm2+447mXe5yvaual4+7D2TyLRdJVejc=
+github.com/rudderlabs/cp-client-go v0.0.6 h1:SQFAHcIEp2qEA9A4v4yuwXK+hx/vbCL3ZbE3u9C89U8=
+github.com/rudderlabs/cp-client-go v0.0.6/go.mod h1:UlCyIwV2tHrJm2+447mXe5yvaual4+7D2TyLRdJVejc=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=

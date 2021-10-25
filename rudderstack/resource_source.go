@@ -3,9 +3,10 @@ package rudderstack
 import (
     "context"
     // "strconv"
-	"strings"
+    "strings"
     "time"
-    // "log"
+    "log"
+    "encoding/json"
     //"math/big"
 
     "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -74,18 +75,18 @@ func NewSource(clientSource *rudderclient.Source) (Source) {
         UpdatedAt           : types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
 
         Config              : SourceConfig{
-            ID        : clientSource.Config.ID,
+            ID                   : clientSource.Config.ID,
         },
     }
 }
 
 func (sdkSource Source) ToClient() rudderclient.Source {
     return rudderclient.Source {
-        ID                    : sdkSource.ID.Value,
-        Name                  : sdkSource.Name.Value,
-        Type                  : sdkSource.Type.Value,
-        Config                : rudderclient.SourceConfig {
-            ID        : sdkSource.Config.ID,
+        ID                  : sdkSource.ID.Value,
+        Name                : sdkSource.Name.Value,
+        Type                : sdkSource.Type.Value,
+        Config              : rudderclient.SourceConfig {
+            ID                   : sdkSource.Config.ID,
         },
     }
 }
@@ -169,7 +170,7 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
     diags := req.Plan.Get(ctx, &plan)
     resp.Diagnostics.Append(diags...)
     if resp.Diagnostics.HasError() {
-            return
+        return
     }
 
     // Get current state
@@ -177,7 +178,7 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
     diags = req.State.Get(ctx, &state)
     resp.Diagnostics.Append(diags...)
     if resp.Diagnostics.HasError() {
-            return
+        return
     }
 
     // Convert terraform object to REST API Client object.
@@ -185,6 +186,10 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
 
     // Get source ID from current state.
     sourceID := state.ID.Value
+
+    planRb, _ := json.Marshal(plan)
+    stateRb, _ := json.Marshal(state)
+    log.Println("Source updation being attempted planJson=", string(planRb), "stateJson=", string(stateRb))
 
     // Get current value of source from API.
     source, err := r.p.client.UpdateSource(sourceID, clientSource)
@@ -207,24 +212,24 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
 
 // ImportState resource
 func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	var diags diag.Diagnostics
+    var diags diag.Diagnostics
 
-	// Get source type/name from import request.
+    // Get source type/name from import request.
     idFields := strings.Fields(req.ID)
-	sourceType := ""
-	sourceName := ""
-	if (len(idFields) == 1) {
-		sourceName = idFields[0]
-	} else if (len(idFields) == 2) {
-		sourceType = idFields[0]
-		sourceName = idFields[1]
-	} else {
+    sourceType := ""
+    sourceName := ""
+    if (len(idFields) == 1) {
+        sourceName = idFields[0]
+    } else if (len(idFields) == 2) {
+        sourceType = idFields[0]
+        sourceName = idFields[1]
+    } else {
         resp.Diagnostics.AddError(
             "Error reading import request",
             "Could not read (sourceType, sourceName) for connection import " + req.ID,
         )
         return
-	}
+    }
 
     // Get current value of source from API.
     sources, err := r.p.client.FilterSources(sourceType, sourceName)
@@ -236,13 +241,13 @@ func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourc
         return
     }
 
-	if len(sources) != 1 {
+    if len(sources) != 1 {
         resp.Diagnostics.AddError(
             "No matching source found",
             "Number of sources matching import request ==" + req.ID + " is " + string(len(sources)) + "!= 1: "+err.Error(),
         )
         return
-	}
+    }
 
     state := NewSource(&sources[0])
 

@@ -2,7 +2,7 @@ package rudderstack
 
 import (
     "context"
-	"strings"
+    "strings"
     // "strconv"
     // "time"
     // "log"
@@ -26,7 +26,7 @@ func (r resourceConnectionType) GetSchema(_ context.Context) (tfsdk.Schema, diag
             },
             "source_id": {
                 Type:     types.StringType,
-                Computed: true,
+                Required: true,
             },
             "destination_id": {
                 Type:     types.StringType,
@@ -183,17 +183,17 @@ func (r resourceConnection) Update(ctx context.Context, req tfsdk.UpdateResource
 func (r resourceConnection) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
     var diags diag.Diagnostics
 
-	// Get src/dst ID from import request.
+    // Get src/dst ID from import request.
     idFields := strings.Fields(req.ID)
-	if (len(idFields) != 2) {
+    if (len(idFields) != 2) {
         resp.Diagnostics.AddError(
             "Error reading import request",
             "Could not read (sourceId, destinationId) for connection import " + req.ID,
         )
         return
-	}
-	sourceId := idFields[0]
-	destinationId := idFields[1]
+    }
+    sourceId := idFields[0]
+    destinationId := idFields[1]
 
     // Get current connection value from API.
     connections, err := r.p.client.FilterConnections(sourceId, destinationId)
@@ -205,13 +205,13 @@ func (r resourceConnection) ImportState(ctx context.Context, req tfsdk.ImportRes
         return
     }
 
-	if len(connections) != 1 {
+    if len(connections) != 1 {
         resp.Diagnostics.AddError(
             "No matching connection found",
             "Could not find any connection matching (src,dst) = (" + sourceId + ","+ destinationId + "): " + err.Error(),
         )
         return
-	}
+    }
 
     state := NewConnection(&connections[0])
 
