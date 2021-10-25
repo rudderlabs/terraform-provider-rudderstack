@@ -18,12 +18,12 @@ provider "rudderstack" {
   token = null 
 
   # Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com/".
-  # If null, falls back on env variable RUDDERSTACK_CATALOG.
-  catalog_host = null
+  # If null, falls back on env variable RUDDERSTACK_SCHEMA.
+  schema_host = null
 
   # Set to access token for V1 control plane API host. The token is available at https://app.rudderstack.com/home. Example "1lajsdlkjasdl".
-  # If null, falls back on env variable RUDDERSTACK_CATALOG_TOKEN.
-  catalog_token = null
+  # If null, falls back on env variable RUDDERSTACK_SCHEMA_TOKEN.
+  schema_token = null
 }
 
 resource "rudderstack_source" "src1" {

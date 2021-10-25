@@ -16,7 +16,7 @@ func main() {
 
 	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
-	
+
 	opts := &tfsdk.ServeOpts{
 		Name: "rudderstack",
 	}

@@ -59,7 +59,7 @@ $ terraform init && terraform apply
 
 # License
 
-RudderStack \*\* software name \*\* is released under the [MIT License][mit_license].
+RudderStack Terraform Provider is released under the [MIT License][mit_license].
 
 # Contribute
 
@@ -96,7 +96,9 @@ We would love to see you contribute to RudderStack. Get more information on how 
 [rudder-logo]: https://repository-images.githubusercontent.com/197743848/b352c900-dbc8-11e9-9d45-4deb9274101f
 # Terraform Provider Hashicups
 
-This repo is a companion repo to the [Call APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers) Learn collection. 
+This repo implements Terraform provider for Rudderstack Customer Data Platform.
 
-In the collection, you will use the HashiCups provider as a bridge between Terraform and the HashiCups API. Then, extend Terraform by recreating the HashiCups provider. By the end of this collection, you will be able to take these intuitions to create your own custom Terraform provider. 
+A Terraform provider like this one can be used as a bridge between Terraform and the RudderStack control plane API. Related services:
+   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for Rudderstack control plane in Golang.
+   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to Rudderstack, you can use this web app to migrate.  
 

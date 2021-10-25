@@ -38,12 +38,12 @@ func (p *provider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics)
 				Computed:  true,
 				Sensitive: true,
 			},
-			"catalog_host": {
+			"schema_host": {
 				Type:     types.StringType,
 				Optional: true,
 				Computed: true,
 			},
-			"catalog_token": {
+			"schema_token": {
 				Type:      types.StringType,
 				Optional:  true,
 				Computed:  true,
@@ -57,8 +57,8 @@ func (p *provider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics)
 type providerData struct {
 	WorkspaceHost  types.String `tfsdk:"host"`
 	WorkspaceToken types.String `tfsdk:"token"`
-	CatalogHost    types.String `tfsdk:"catalog_host"`
-	CatalogToken   types.String `tfsdk:"catalog_token"`
+	SchemaHost    types.String `tfsdk:"schema_host"`
+	SchemaToken   types.String `tfsdk:"schema_token"`
 }
 
 func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderRequest, resp *tfsdk.ConfigureProviderResponse) {
@@ -122,60 +122,60 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 		return
 	}
 
-	// User must specify a catalog host
-	var catalogHost string
-	if config.CatalogHost.Unknown {
+	// User must specify a schema host
+	var schemaHost string
+	if config.SchemaHost.Unknown {
 		// Cannot connect to client with an unknown value
 		resp.Diagnostics.AddError(
 			"Unable to create client",
-			"Cannot use unknown value as catalog host",
+			"Cannot use unknown value as schema host",
 		)
 		return
 	}
 
-	if config.CatalogHost.Null {
-		catalogHost = os.Getenv("RUDDERSTACK_CATALOG_HOST")
+	if config.SchemaHost.Null {
+		schemaHost = os.Getenv("RUDDERSTACK_SCHEMA_HOST")
 	} else {
-		catalogHost = config.CatalogHost.Value
+		schemaHost = config.SchemaHost.Value
 	}
 
-	if catalogHost == "" {
+	if schemaHost == "" {
 		// Error vs warning - empty value must stop execution
 		resp.Diagnostics.AddError(
-			"Unable to find catalog host",
-			"Catalog Host cannot be an empty string",
+			"Unable to find schema host",
+			"Schema Host cannot be an empty string",
 		)
 		return
 	}
 
-	// User must provide a catalog token to the provider
-	var catalogToken string
-	if config.CatalogToken.Unknown {
+	// User must provide a schema token to the provider
+	var schemaToken string
+	if config.SchemaToken.Unknown {
 		// Cannot connect to client with an unknown value
 		resp.Diagnostics.AddError(
 			"Unable to create client",
-			"Cannot use unknown value as catalog token",
+			"Cannot use unknown value as schema token",
 		)
 		return
 	}
 
-	if config.CatalogToken.Null {
-		catalogToken = os.Getenv("RUDDERSTACK_CATALOG_TOKEN")
+	if config.SchemaToken.Null {
+		schemaToken = os.Getenv("RUDDERSTACK_SCHEMA_TOKEN")
 	} else {
-		catalogToken = config.CatalogToken.Value
+		schemaToken = config.SchemaToken.Value
 	}
 
-	if catalogToken == "" {
+	if schemaToken == "" {
 		// Error vs warning - empty value must stop execution
 		resp.Diagnostics.AddError(
-			"Unable to find catalog token",
-			"Catalog token cannot be an empty string",
+			"Unable to find schema token",
+			"Schema token cannot be an empty string",
 		)
 		return
 	}
 
 	// Create a new HashiCups client and set it to the provider client
-	c, err := rudderclient.NewClient(&workspaceHost, &workspaceToken, &catalogHost, &catalogToken)
+	c, err := rudderclient.NewClient(&workspaceHost, &workspaceToken, &schemaHost, &schemaToken)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to create client",
