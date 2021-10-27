@@ -5,8 +5,8 @@ import (
     // "strconv"
     "strings"
     "time"
-    "log"
-    "encoding/json"
+    //"log"
+    //"encoding/json"
     //"math/big"
 
     "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -18,7 +18,7 @@ import (
 type resourceSourceType struct{}
 
 // Source Resource schema
-func (r resourceSourceType) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (r resourceSourceType) GetSchema(context context.Context) (tfsdk.Schema, diag.Diagnostics) {
     return tfsdk.Schema{
         Attributes: map[string]tfsdk.Attribute{
             "id": {
@@ -41,16 +41,7 @@ func (r resourceSourceType) GetSchema(_ context.Context) (tfsdk.Schema, diag.Dia
                 Type:     types.StringType,
                 Computed: true,
             },
-            "config": {
-                Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-                    "id": {
-                        Type:     types.NumberType,
-                        Computed: true,
-                        Optional: true,
-                    },
-                }),
-                Optional: true,
-            },
+            "config": GetConfigAttributeTree(context),
         },
     }, nil
 }
@@ -67,27 +58,29 @@ type resourceSource struct {
 }
 
 func NewSource(clientSource *rudderclient.Source) (Source) {
+    var newConfig *EncapsulatedConfigObject
+    objectPropertiesList := NewConfig(&clientSource.Config)
+    if (objectPropertiesList != nil) {
+        newConfig = &EncapsulatedConfigObject {
+            ObjectPropertiesList      : *objectPropertiesList,
+        }
+    }
     return Source{
-        ID                  : types.String{Value: clientSource.ID},
-        Name                : types.String{Value: clientSource.Name},
-        Type                : types.String{Value: clientSource.Type},
-        CreatedAt           : types.String{Value: string(clientSource.CreatedAt.Format(time.RFC850))},
-        UpdatedAt           : types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
-
-        Config              : SourceConfig{
-            ID                   : clientSource.Config.ID,
-        },
+        ID                        : types.String{Value: clientSource.ID},
+        Name                      : types.String{Value: clientSource.Name},
+        Type                      : types.String{Value: clientSource.Type},
+        CreatedAt                 : types.String{Value: string(clientSource.CreatedAt.Format(time.RFC850))},
+        UpdatedAt                 : types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
+        Config                    : newConfig,
     }
 }
 
 func (sdkSource Source) ToClient() rudderclient.Source {
     return rudderclient.Source {
-        ID                  : sdkSource.ID.Value,
-        Name                : sdkSource.Name.Value,
-        Type                : sdkSource.Type.Value,
-        Config              : rudderclient.SourceConfig {
-            ID                   : sdkSource.Config.ID,
-        },
+        ID                        : sdkSource.ID.Value,
+        Name                      : sdkSource.Name.Value,
+        Type                      : sdkSource.Type.Value,
+        Config                    : sdkSource.Config.ObjectPropertiesList.ToClient(),
     }
 }
 
@@ -186,10 +179,6 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
 
     // Get source ID from current state.
     sourceID := state.ID.Value
-
-    planRb, _ := json.Marshal(plan)
-    stateRb, _ := json.Marshal(state)
-    log.Println("Source updation being attempted planJson=", string(planRb), "stateJson=", string(stateRb))
 
     // Get current value of source from API.
     source, err := r.p.client.UpdateSource(sourceID, clientSource)

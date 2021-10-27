@@ -3,9 +3,9 @@ package rudderstack
 import (
     "context"
     // "strconv"
-	"strings"
+    "strings"
     "time"
-    // "log"
+    //"log"
     // "math/big"
 
     "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,7 +17,7 @@ import (
 type resourceDestinationType struct{}
 
 // Destination Resource schema
-func (r resourceDestinationType) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (r resourceDestinationType) GetSchema(context context.Context) (tfsdk.Schema, diag.Diagnostics) {
     return tfsdk.Schema{
         Attributes: map[string]tfsdk.Attribute{
             "id": {
@@ -40,16 +40,7 @@ func (r resourceDestinationType) GetSchema(_ context.Context) (tfsdk.Schema, dia
                 Type:     types.StringType,
                 Computed: true,
             },
-            "config": {
-                Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-                    "id": {
-                        Type:     types.NumberType,
-                        Computed: true,
-                        Optional: true,
-                    },
-                }),
-                Optional: true,
-            },
+            "config": GetConfigAttributeTree(context),
         },
     }, nil
 }
@@ -66,28 +57,32 @@ type resourceDestination struct {
 }
 
 func NewDestination(clientDestination *rudderclient.Destination) (Destination) {
-    return Destination{
+    var newConfig *EncapsulatedConfigObject
+    objectPropertiesList := NewConfig(&clientDestination.Config)
+    if (objectPropertiesList != nil) {
+        newConfig = &EncapsulatedConfigObject {
+            ObjectPropertiesList      : *objectPropertiesList,
+        }
+    }
+    retval := Destination{
         ID                        : types.String{Value: clientDestination.ID},
         Name                      : types.String{Value: clientDestination.Name},
         Type                      : types.String{Value: clientDestination.Type},
         CreatedAt                 : types.String{Value: string(clientDestination.CreatedAt.Format(time.RFC850))},
         UpdatedAt                 : types.String{Value: string(clientDestination.UpdatedAt.Format(time.RFC850))},
-    
-        Config                    : DestinationConfig{
-            ID        : clientDestination.Config.ID,
-        },
+        Config                    : newConfig,
     }
+    return retval
 }
 
 func (sdkDestination Destination) ToClient() rudderclient.Destination {
-    return rudderclient.Destination {
-        ID                    : sdkDestination.ID.Value,
-        Name                  : sdkDestination.Name.Value,
-        Type                  : sdkDestination.Type.Value,
-        Config                : rudderclient.DestinationConfig {
-            ID        : sdkDestination.Config.ID,
-        },
+    retval := rudderclient.Destination {
+        ID                        : sdkDestination.ID.Value,
+        Name                      : sdkDestination.Name.Value,
+        Type                      : sdkDestination.Type.Value,
+        Config                    : sdkDestination.Config.ObjectPropertiesList.ToClient(),
     }
+    return retval
 }
 
 // Create a new resource
@@ -208,24 +203,24 @@ func (r resourceDestination) Update(ctx context.Context, req tfsdk.UpdateResourc
 
 // ImportState resource
 func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	var diags diag.Diagnostics
+    var diags diag.Diagnostics
 
-	// Get destination type/name from import request.
+    // Get destination type/name from import request.
     idFields := strings.Fields(req.ID)
-	destinationType := ""
-	destinationName := ""
-	if (len(idFields) == 1) {
-		destinationName = idFields[0]
-	} else if (len(idFields) == 2) {
-		destinationType = idFields[0]
-		destinationName = idFields[1]
-	} else {
+    destinationType := ""
+    destinationName := ""
+    if (len(idFields) == 1) {
+        destinationName = idFields[0]
+    } else if (len(idFields) == 2) {
+        destinationType = idFields[0]
+        destinationName = idFields[1]
+    } else {
         resp.Diagnostics.AddError(
             "Error reading import request",
             "Could not read (destinationType, destinationName) for connection import " + req.ID,
         )
         return
-	}
+    }
 
     // Get current value of destination from API.
     destinations, err := r.p.client.FilterDestinations(destinationType, destinationName)
@@ -237,13 +232,13 @@ func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportRe
         return
     }
 
-	if len(destinations) != 1 {
+    if len(destinations) != 1 {
         resp.Diagnostics.AddError(
             "No matching destination found",
             "Number of destinations matching import request ==" + req.ID + " is " + string(len(destinations)) + "!= 1: " + err.Error(),
         )
         return
-	}
+    }
 
     state := NewDestination(&destinations[0])
 

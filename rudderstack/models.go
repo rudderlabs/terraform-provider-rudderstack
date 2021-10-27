@@ -6,38 +6,43 @@ import (
 
 // Sources -
 type Source struct {
-    ID        types.String            `tfsdk:"id"`
-    Name      types.String            `tfsdk:"name"`
-    Type      types.String            `tfsdk:"type"`
-    CreatedAt types.String            `tfsdk:"created_at"`
-    UpdatedAt types.String            `tfsdk:"updated_at"`
+    ID                     types.String                    `tfsdk:"id"`
+    Name                   types.String                    `tfsdk:"name"`
+    Type                   types.String                    `tfsdk:"type"`
+    CreatedAt              types.String                    `tfsdk:"created_at"`
+    UpdatedAt              types.String                    `tfsdk:"updated_at"`
 
-    Config    SourceConfig            `tfsdk:"config"`
-}
-
-// Config for source.
-type SourceConfig struct {
-    ID        int                     `tfsdk:"id"`
+    Config                 *EncapsulatedConfigObject       `tfsdk:"config"`
 }
 
 // Destinations -
 type Destination struct {
-    ID        types.String            `tfsdk:"id"`
-    Name      types.String            `tfsdk:"name"`
-    Type      types.String            `tfsdk:"type"`
-    CreatedAt types.String            `tfsdk:"created_at"`
-    UpdatedAt types.String            `tfsdk:"updated_at"`
+    ID                     types.String                    `tfsdk:"id"`
+    Name                   types.String                    `tfsdk:"name"`
+    Type                   types.String                    `tfsdk:"type"`
+    CreatedAt              types.String                    `tfsdk:"created_at"`
+    UpdatedAt              types.String                    `tfsdk:"updated_at"`
 
-    Config    DestinationConfig       `tfsdk:"config"`
-}
-
-// Config for destination.
-type DestinationConfig struct {
-    ID        int                     `tfsdk:"id"`
+    Config                 *EncapsulatedConfigObject       `tfsdk:"config"`
 }
 
 type Connection struct {
-    ID             types.String       `tfsdk:"id"`
-    SourceID       types.String       `tfsdk:"source_id"`
-    DestinationID  types.String       `tfsdk:"destination_id"`
+    ID                     types.String                    `tfsdk:"id"`
+    SourceID               types.String                    `tfsdk:"source_id"`
+    DestinationID          types.String                    `tfsdk:"destination_id"`
+}
+
+type EncapsulatedConfigObject struct {
+    ObjectPropertiesList   ObjectPropertiesList            `tfsdk:"object_as_properties_list"`
+}
+
+type ObjectPropertiesList []SingleObjectProperty
+
+type SingleObjectProperty struct {
+    Name                   types.String                    `tfsdk:"name"`
+    StrValue               types.String                    `tfsdk:"str"`
+    NumValue               types.Number                    `tfsdk:"num"`
+    BoolValue              types.Bool                      `tfsdk:"bool"`
+    ObjectValue            *ObjectPropertiesList           `tfsdk:"object_as_properties_list"`
+    ObjectsListValue       *[]EncapsulatedConfigObject     `tfsdk:"objects_list"`
 }

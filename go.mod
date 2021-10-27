@@ -13,4 +13,4 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 )
 
-// replace github.com/rudderlabs/cp-client-go v0.0.6 => ../cp-client-go
+replace github.com/rudderlabs/cp-client-go v0.0.7 => ../cp-client-go
