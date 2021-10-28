@@ -6,6 +6,7 @@ import (
     "fmt"
     "log"
     "errors"
+    "reflect"
     //"github.com/hashicorp/terraform-plugin-framework/diag"
     "github.com/hashicorp/terraform-plugin-framework/tfsdk"
     "github.com/hashicorp/terraform-plugin-framework/types"
@@ -132,65 +133,101 @@ func (objectPropertiesList ObjectPropertiesList) ToClient() map[string](ruddercl
     return clientConfig
 }
 
-func NewConfig(clientConfig *map[string](rudderclient.SingleConfigPropertyValue)) *ObjectPropertiesList {
-    if (clientConfig == nil) {
-        return nil
-    }
-    objectPropertiesList := make(ObjectPropertiesList, len(*clientConfig))
-    i := 0
-    for attrName, attrValue := range *clientConfig {
-        sdkObject := SingleObjectProperty{
-            Name: types.String{Value: attrName},
+func ObjectToConfig(objectProperties *map[string](interface{})) *ObjectPropertiesList {
+	sdkPropertiesList := make(ObjectPropertiesList, len(*objectProperties))
+	i := 0
+	for propName, propValue := range *objectProperties {
+		typeMappedPropValue := propValue.(rudderclient.SingleConfigPropertyValue)
+		sdkPropertiesList[i] = *PropertyValueToConfig(propName, &typeMappedPropValue)
+		i += 1
+	}
+	return &sdkPropertiesList
+}
+
+func ObjectArrayToConfig(objectArray *[](interface{})) (*[]EncapsulatedConfigObject) {
+	sdkArray := make([]EncapsulatedConfigObject, len(*objectArray))
+	for index, object := range *objectArray {
+		typeMappedObject, okmap := object.(map[string](interface{}))
+		if okmap {
+			sdkArray[index] = EncapsulatedConfigObject {
+				ObjectPropertiesList: *ObjectToConfig(&typeMappedObject),
+			}
+		} else {
+                     log.Panic(
+			     "Currently, we can only have array of objects. Non Object Value=",
+			     object,
+			     " & Type=",
+			     reflect.TypeOf(object))
+		}
+	}
+	return &sdkArray
+}
+
+func PropertyValueToConfig(propName string, propValue *rudderclient.SingleConfigPropertyValue) *SingleObjectProperty {
+	sdkValue := SingleObjectProperty{
+            Name: types.String{Value: propName},
             NumValue: types.Number{Null: true},
             BoolValue: types.Bool{Null: true},
             StrValue: types.String{Null: true},
         }
-        numValue, oknum := attrValue.(float64)
+
+        numValue, oknum := (*propValue).(float64)
         if oknum {
-            sdkObject.NumValue.Value = big.NewFloat(numValue)
-            sdkObject.NumValue.Null = false
-        } else {
-            boolValue, okbool := attrValue.(bool)
-            if okbool {
-                sdkObject.BoolValue.Value = boolValue
-                sdkObject.BoolValue.Null = false
-            } else {
-                strValue, okstr := attrValue.(string)
-                if okstr {
-                    sdkObject.StrValue.Value = strValue
-                    sdkObject.StrValue.Null = false
-                } else {
-                    arrayValue, okarray := attrValue.([]rudderclient.SingleConfigPropertyValue)
-                    if (okarray) {
-                        // It is an array. That means an array objects, usually of same type.
-                        objectsListValue := make([]EncapsulatedConfigObject, len(arrayValue))
-                        for index, objectInArray := range arrayValue {
-                            objectsListValue[index] = EncapsulatedConfigObject {
-                                ObjectPropertiesList: objectInArray.(ObjectPropertiesList),
-                            }
-                        }
-                        sdkObject.ObjectsListValue = &objectsListValue
-                    } else {
-                        objectValue, okobject := attrValue.(map[string](rudderclient.SingleConfigPropertyValue))
-                        if (okobject) {
-                            sdkObject.ObjectValue = NewConfig(&objectValue)
-                        } else {
-                            log.Panic("Invalid attribute value.")
-                        }
-                    }
-                }
-            }
+            sdkValue.NumValue.Value = big.NewFloat(numValue)
+            sdkValue.NumValue.Null = false
+	    return &sdkValue
         }
 
-        objectPropertiesList[i] = sdkObject
-        i += 1
-    }
+        boolValue, okbool := (*propValue).(bool)
+        if okbool {
+            sdkValue.BoolValue.Value = boolValue
+            sdkValue.BoolValue.Null = false
+	    return &sdkValue
+        }
 
-    return &objectPropertiesList
+        strValue, okstr := (*propValue).(string)
+        if okstr {
+            sdkValue.StrValue.Value = strValue
+            sdkValue.StrValue.Null = false
+	    return &sdkValue
+        }
+
+        arrayValue, okarray := (*propValue).([]interface{})
+	if okarray {
+	    sdkValue.ObjectsListValue = ObjectArrayToConfig(&arrayValue)
+	    return &sdkValue
+	}
+
+        mapValue, okmap := (*propValue).(map[string]interface{})
+	if okmap {
+	    sdkValue.ObjectValue = ObjectToConfig(&mapValue)
+	    return &sdkValue
+	}
+
+        log.Panic("Invalid attribute value. Value=", propValue, " & Type=", reflect.TypeOf(propValue))
+
+	// Never reaches here.
+	return nil
+}
+
+func RootMapToConfig(clientConfig *map[string](rudderclient.SingleConfigPropertyValue)) *EncapsulatedConfigObject {
+	if clientConfig == nil {
+		return nil
+	}
+	objectPropertiesList := make(ObjectPropertiesList, len(*clientConfig))
+	i := 0
+	for propname, propvalue := range *clientConfig {
+		objectPropertiesList[i] = *PropertyValueToConfig(propname, &propvalue)
+		i += 1
+	}
+	sdkConfig := EncapsulatedConfigObject {
+		ObjectPropertiesList: objectPropertiesList,
+	}
+	return &sdkConfig
 }
 
 func (objectPropertiesList ObjectPropertiesList) Validate() error {
-    var retErr error 
+    var retErr error
     for _, singleObjectProperty := range objectPropertiesList {
         retErr = combineError(retErr, singleObjectProperty.Validate())
     }
@@ -221,7 +258,7 @@ func (singleObjectProperty SingleObjectProperty) Validate() error {
     }
 
     if (len(nonNull) != 1) {
-        multipleKindSetErr := errors.New("Only one value kind can be set.") 
+        multipleKindSetErr := errors.New("Only one value kind can be set.")
         retErr = combineError(retErr, multipleKindSetErr)
     }
 

@@ -40,19 +40,19 @@ resource "rudderstack_destination" "dst1" {
   type = "SLACK"
   config = {
     object_as_properties_list = [
-      { name = "apiSecret", str = "002332423002332423002332423002332423" },
-/*
+      { name = "apiSecret", str = "002332423002332423002332423002332436" },
+      { name = "apiSecret2", str = "0022423002332423002332423002332436" },
       { name = "people", bool = true },
       {
         name = "peopleProperties",
-        objectsList = [
+        objects_list = [
           {
-            objectAsPropertiesList = [
+            object_as_properties_list = [
               { name = "property", str = "asfasdf" },
             ]
           },
           {
-            objectAsPropertiesList = [
+            object_as_properties_list = [
               { name = "property", str = "gasdgsdag" },
             ]
           },
@@ -60,13 +60,12 @@ resource "rudderstack_destination" "dst1" {
       },
       {
         name = "singleObjectProperty",
-        objectAsPropertiesList = [
+        object_as_properties_list = [
           { name = "propertyName1", str = "propertyValue1" },
           { name = "propertyName2", str = "propertyValue2" },
           { name = "propertyName3", bool = true },
         ],
       },
-*/
     ],
   }
 }

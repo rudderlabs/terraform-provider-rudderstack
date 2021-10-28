@@ -58,13 +58,8 @@ type resourceSource struct {
 }
 
 func NewSource(clientSource *rudderclient.Source) (Source) {
-    var newConfig *EncapsulatedConfigObject
-    objectPropertiesList := NewConfig(&clientSource.Config)
-    if (objectPropertiesList != nil) {
-        newConfig = &EncapsulatedConfigObject {
-            ObjectPropertiesList      : *objectPropertiesList,
-        }
-    }
+    newConfig := RootMapToConfig(&clientSource.Config)
+
     return Source{
         ID                        : types.String{Value: clientSource.ID},
         Name                      : types.String{Value: clientSource.Name},

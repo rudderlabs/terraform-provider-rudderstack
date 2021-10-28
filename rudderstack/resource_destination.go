@@ -5,7 +5,7 @@ import (
     // "strconv"
     "strings"
     "time"
-    //"log"
+    "log"
     // "math/big"
 
     "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -57,13 +57,8 @@ type resourceDestination struct {
 }
 
 func NewDestination(clientDestination *rudderclient.Destination) (Destination) {
-    var newConfig *EncapsulatedConfigObject
-    objectPropertiesList := NewConfig(&clientDestination.Config)
-    if (objectPropertiesList != nil) {
-        newConfig = &EncapsulatedConfigObject {
-            ObjectPropertiesList      : *objectPropertiesList,
-        }
-    }
+    newConfig := RootMapToConfig(&clientDestination.Config)
+
     retval := Destination{
         ID                        : types.String{Value: clientDestination.ID},
         Name                      : types.String{Value: clientDestination.Name},
@@ -268,7 +263,7 @@ func (r resourceDestination) Delete(ctx context.Context, req tfsdk.DeleteResourc
     if err != nil {
         resp.Diagnostics.AddError(
             "Error deleting destination",
-            "Could not read destinationID "+destinationID+": "+err.Error(),
+            "Could not delete destinationID "+destinationID+": "+err.Error(),
         )
         return
     }
