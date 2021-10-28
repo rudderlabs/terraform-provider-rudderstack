@@ -75,7 +75,7 @@ func (sdkDestination Destination) ToClient() rudderclient.Destination {
         ID                        : sdkDestination.ID.Value,
         Name                      : sdkDestination.Name.Value,
         Type                      : sdkDestination.Type.Value,
-        Config                    : sdkDestination.Config.ObjectPropertiesList.ToClient(),
+        Config                    : sdkDestination.Config.ObjectPropertiesMap.ToClient(),
     }
     return retval
 }

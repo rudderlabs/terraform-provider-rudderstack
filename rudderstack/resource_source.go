@@ -75,7 +75,7 @@ func (sdkSource Source) ToClient() rudderclient.Source {
         ID                        : sdkSource.ID.Value,
         Name                      : sdkSource.Name.Value,
         Type                      : sdkSource.Type.Value,
-        Config                    : sdkSource.Config.ObjectPropertiesList.ToClient(),
+        Config                    : sdkSource.Config.ObjectPropertiesMap.ToClient(),
     }
 }
 
