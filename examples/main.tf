@@ -5,7 +5,7 @@ terraform {
       source  = "rudderstack.com/cdp/rudderstack"
     }
   }
-  required_version = "~> 1.0.3"
+  required_version = "~> 1.1.0"
 }
 
 provider "rudderstack" {
@@ -40,8 +40,8 @@ resource "rudderstack_destination" "dst1" {
   type = "SLACK"
   config = {
     object_as_properties_list = [
-/*
       { name = "apiSecret", str = "002332423002332423002332423002332423" },
+/*
       { name = "people", bool = true },
       {
         name = "peopleProperties",

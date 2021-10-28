@@ -36,7 +36,7 @@ type EncapsulatedConfigObject struct {
     ObjectPropertiesList   ObjectPropertiesList            `tfsdk:"object_as_properties_list"`
 }
 
-type ObjectPropertiesList []SingleObjectProperty
+type ObjectPropertiesList  []SingleObjectProperty
 
 type SingleObjectProperty struct {
     Name                   types.String                    `tfsdk:"name"`

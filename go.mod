@@ -14,3 +14,5 @@ require (
 )
 
 replace github.com/rudderlabs/cp-client-go v0.0.7 => ../cp-client-go
+
+replace github.com/hashicorp/terraform-plugin-framework v0.4.2 => ../terraform-plugin-framework
