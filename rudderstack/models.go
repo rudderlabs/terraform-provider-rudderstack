@@ -33,16 +33,15 @@ type Connection struct {
 }
 
 type EncapsulatedConfigObject struct {
-    ObjectPropertiesList   ObjectPropertiesList            `tfsdk:"object_as_properties_list"`
+    ObjectPropertiesMap    ObjectPropertiesMap             `tfsdk:"object"`
 }
 
-type ObjectPropertiesList  []SingleObjectProperty
+type ObjectPropertiesMap   map[string]SingleObjectProperty
 
 type SingleObjectProperty struct {
-    Name                   types.String                    `tfsdk:"name"`
     StrValue               types.String                    `tfsdk:"str"`
     NumValue               types.Number                    `tfsdk:"num"`
     BoolValue              types.Bool                      `tfsdk:"bool"`
-    ObjectValue            *ObjectPropertiesList           `tfsdk:"object_as_properties_list"`
+    ObjectValue            *ObjectPropertiesMap            `tfsdk:"object"`
     ObjectsListValue       *[]EncapsulatedConfigObject     `tfsdk:"objects_list"`
 }

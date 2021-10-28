@@ -30,8 +30,9 @@ resource "rudderstack_source" "src1" {
   name = "tfsource"
   type = "Auth0"
   config = {
-    object_as_properties_list = [
-    ]
+    object = {
+       "a" = {str = "2"},
+    }
   }
 }
 
@@ -39,34 +40,32 @@ resource "rudderstack_destination" "dst1" {
   name = "tfdestination"
   type = "SLACK"
   config = {
-    object_as_properties_list = [
-      { name = "apiSecret", str = "002332423002332423002332423002332436" },
-      { name = "apiSecret2", str = "0022423002332423002332423002332436" },
-      { name = "people", bool = true },
-      {
-        name = "peopleProperties",
+    object = { 
+      "apiSecret" = { str = "002332423002332423002332423002332436" },
+      "apiSecret2" = { str = "0022423002332423002332423002332436" },
+      "people" = { bool = true },
+      "peopleProperties" = {
         objects_list = [
           {
-            object_as_properties_list = [
-              { name = "property", str = "asfasdf" },
-            ]
+            object = { 
+              "property" = { str = "asfasdf" },
+            },
           },
           {
-            object_as_properties_list = [
-              { name = "property", str = "gasdgsdag" },
-            ]
+            object = { 
+              "property" = { str = "gasdgsdag" },
+            },
           },
         ]
       },
-      {
-        name = "singleObjectProperty",
-        object_as_properties_list = [
-          { name = "propertyName1", str = "propertyValue1" },
-          { name = "propertyName2", str = "propertyValue2" },
-          { name = "propertyName3", bool = true },
-        ],
+      "singleObjectProperty" = {
+        object = { 
+          "propertyName1" = { str = "propertyValue1" },
+          "propertyName2" = { str = "propertyValue2" },
+          "propertyName3" = { bool = true },
+        },
       },
-    ],
+    },
   }
 }
 

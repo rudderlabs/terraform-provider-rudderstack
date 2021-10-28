@@ -18,11 +18,11 @@ func GetConfigAttributeTree(context context.Context) (tfsdk.Attribute) {
         Required: true,
         Attributes: tfsdk.SingleNestedAttributes(
             map[string] tfsdk.Attribute{
-                "object_as_properties_list": tfsdk.Attribute {
+                "object": tfsdk.Attribute {
                     Required: true,
-                    Attributes: tfsdk.ListNestedAttributes(
+                    Attributes: tfsdk.MapNestedAttributes(
                         GetObjectAsPropertiesListAttrMap(context, 4),
-                        tfsdk.ListNestedAttributesOptions{},
+                        tfsdk.MapNestedAttributesOptions{},
                     ),
                 },
             },
@@ -34,10 +34,6 @@ func GetObjectAsPropertiesListAttrMap(context context.Context, maxDepth int) (ma
     // For a single field of a rudder config object, we define its TFSDK attribute map.
     // All simple fields are always defined. Nested fields are defined only if depth isn't too much.
     objectAsPropertiesListAttrMap := map[string]tfsdk.Attribute {
-        "name": {
-            Type:     types.StringType,
-            Required: true,
-        },
         "str": {
             Type:     types.StringType,
             Optional: true,
@@ -71,11 +67,11 @@ func GetObjectAsPropertiesListAttrMap(context context.Context, maxDepth int) (ma
 
         // Object as List of attribute key-value pairs, is now being installed. 
         nextLevelObjectAsPropertiesListAttrMap := GetObjectAsPropertiesListAttrMap(context, maxDepth-1)
-        objectAsPropertiesListAttrMap["object_as_properties_list"] = tfsdk.Attribute {
+        objectAsPropertiesListAttrMap["object"] = tfsdk.Attribute {
             Optional: true,
-            Attributes: tfsdk.ListNestedAttributes(
+            Attributes: tfsdk.MapNestedAttributes(
                 nextLevelObjectAsPropertiesListAttrMap,
-                tfsdk.ListNestedAttributesOptions{},
+                tfsdk.MapNestedAttributesOptions{},
             ),
         }
 
@@ -83,11 +79,11 @@ func GetObjectAsPropertiesListAttrMap(context context.Context, maxDepth int) (ma
             Optional: true,
             Attributes: tfsdk.ListNestedAttributes(
                 map[string]tfsdk.Attribute {
-                    "object_as_properties_list": tfsdk.Attribute {
+                    "object": tfsdk.Attribute {
                         Required: true,
-                        Attributes: tfsdk.ListNestedAttributes(
+                        Attributes: tfsdk.MapNestedAttributes(
                             nextLevelObjectAsPropertiesListAttrMap,
-                            tfsdk.ListNestedAttributesOptions{},
+                            tfsdk.MapNestedAttributesOptions{},
                         ),
                     },
                 },
@@ -95,7 +91,7 @@ func GetObjectAsPropertiesListAttrMap(context context.Context, maxDepth int) (ma
             ),
         }
     } else {
-        objectAsPropertiesListAttrMap["object_as_properties_list"] = tfsdk.Attribute {
+        objectAsPropertiesListAttrMap["object"] = tfsdk.Attribute {
             Optional: true,
             Type:     types.BoolType,
         }
@@ -108,40 +104,37 @@ func GetObjectAsPropertiesListAttrMap(context context.Context, maxDepth int) (ma
     return objectAsPropertiesListAttrMap
 }
 
-func (objectPropertiesList ObjectPropertiesList) ToClient() map[string](rudderclient.SingleConfigPropertyValue) {
+func (objectPropertiesMap ObjectPropertiesMap) ToClient() map[string](rudderclient.SingleConfigPropertyValue) {
     clientConfig := map[string](rudderclient.SingleConfigPropertyValue){}
 
-    for _, singleObjectProperty := range objectPropertiesList {
-        configElementName := singleObjectProperty.Name.Value
+    for propertyName, singleObjectProperty := range objectPropertiesMap {
         if (!singleObjectProperty.StrValue.Null) {
-            clientConfig[configElementName] = singleObjectProperty.StrValue.Value
+            clientConfig[propertyName] = singleObjectProperty.StrValue.Value
         } else if (!singleObjectProperty.NumValue.Null) {
-            clientConfig[configElementName] = singleObjectProperty.NumValue.Value
+            clientConfig[propertyName] = singleObjectProperty.NumValue.Value
         } else if (!singleObjectProperty.BoolValue.Null) {
-            clientConfig[configElementName] = singleObjectProperty.BoolValue.Value
+            clientConfig[propertyName] = singleObjectProperty.BoolValue.Value
         } else if (singleObjectProperty.ObjectValue != nil) {
-            clientConfig[configElementName] = singleObjectProperty.ObjectValue.ToClient()
+            clientConfig[propertyName] = singleObjectProperty.ObjectValue.ToClient()
         } else if (singleObjectProperty.ObjectsListValue != nil) {
             clientObjList := make([]rudderclient.SingleConfigPropertyValue, len(*singleObjectProperty.ObjectsListValue))
             for index2, encapsulatedObject := range *singleObjectProperty.ObjectsListValue {
-                clientObjList[index2] = encapsulatedObject.ObjectPropertiesList.ToClient()
+                clientObjList[index2] = encapsulatedObject.ObjectPropertiesMap.ToClient()
             }
-            clientConfig[configElementName] = clientObjList
+            clientConfig[propertyName] = clientObjList
         }
     }
 
     return clientConfig
 }
 
-func ObjectToConfig(objectProperties *map[string](interface{})) *ObjectPropertiesList {
-	sdkPropertiesList := make(ObjectPropertiesList, len(*objectProperties))
-	i := 0
+func ObjectToConfig(objectProperties *map[string](interface{})) *ObjectPropertiesMap {
+	sdkPropertiesMap := make(ObjectPropertiesMap)
 	for propName, propValue := range *objectProperties {
 		typeMappedPropValue := propValue.(rudderclient.SingleConfigPropertyValue)
-		sdkPropertiesList[i] = *PropertyValueToConfig(propName, &typeMappedPropValue)
-		i += 1
+		sdkPropertiesMap[propName] = *PropertyValueToConfig(&typeMappedPropValue)
 	}
-	return &sdkPropertiesList
+	return &sdkPropertiesMap
 }
 
 func ObjectArrayToConfig(objectArray *[](interface{})) (*[]EncapsulatedConfigObject) {
@@ -150,7 +143,7 @@ func ObjectArrayToConfig(objectArray *[](interface{})) (*[]EncapsulatedConfigObj
 		typeMappedObject, okmap := object.(map[string](interface{}))
 		if okmap {
 			sdkArray[index] = EncapsulatedConfigObject {
-				ObjectPropertiesList: *ObjectToConfig(&typeMappedObject),
+				ObjectPropertiesMap: *ObjectToConfig(&typeMappedObject),
 			}
 		} else {
                      log.Panic(
@@ -163,9 +156,8 @@ func ObjectArrayToConfig(objectArray *[](interface{})) (*[]EncapsulatedConfigObj
 	return &sdkArray
 }
 
-func PropertyValueToConfig(propName string, propValue *rudderclient.SingleConfigPropertyValue) *SingleObjectProperty {
+func PropertyValueToConfig(propValue *rudderclient.SingleConfigPropertyValue) *SingleObjectProperty {
 	sdkValue := SingleObjectProperty{
-            Name: types.String{Value: propName},
             NumValue: types.Number{Null: true},
             BoolValue: types.Bool{Null: true},
             StrValue: types.String{Null: true},
@@ -214,28 +206,26 @@ func RootMapToConfig(clientConfig *map[string](rudderclient.SingleConfigProperty
 	if clientConfig == nil {
 		return nil
 	}
-	objectPropertiesList := make(ObjectPropertiesList, len(*clientConfig))
-	i := 0
-	for propname, propvalue := range *clientConfig {
-		objectPropertiesList[i] = *PropertyValueToConfig(propname, &propvalue)
-		i += 1
+	objectPropertiesMap := make(ObjectPropertiesMap, len(*clientConfig))
+	for propName, propValue := range *clientConfig {
+		objectPropertiesMap[propName] = *PropertyValueToConfig(&propValue)
 	}
 	sdkConfig := EncapsulatedConfigObject {
-		ObjectPropertiesList: objectPropertiesList,
+		ObjectPropertiesMap: objectPropertiesMap,
 	}
 	return &sdkConfig
 }
 
-func (objectPropertiesList ObjectPropertiesList) Validate() error {
+func (objectPropertiesMap ObjectPropertiesMap) Validate() error {
     var retErr error
-    for _, singleObjectProperty := range objectPropertiesList {
+    for _, singleObjectProperty := range objectPropertiesMap {
         retErr = combineError(retErr, singleObjectProperty.Validate())
     }
     return retErr
 }
 
 func (singleObjectProperty SingleObjectProperty) Validate() error {
-    var retErr error 
+    var retErr error
     nonNull := make(map[string]bool)
     if (!singleObjectProperty.StrValue.Null) {
         nonNull["str"] = true
@@ -253,7 +243,7 @@ func (singleObjectProperty SingleObjectProperty) Validate() error {
     if (singleObjectProperty.ObjectsListValue != nil) {
         nonNull["objects_list"] = true
         for _, encapsulatedObject := range *singleObjectProperty.ObjectsListValue {
-            retErr = combineError(retErr, encapsulatedObject.ObjectPropertiesList.Validate())
+            retErr = combineError(retErr, encapsulatedObject.ObjectPropertiesMap.Validate())
         }
     }
 
