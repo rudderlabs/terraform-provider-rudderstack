@@ -4,7 +4,7 @@ import (
     "context"
     // "strconv"
     "strings"
-    "time"
+    //"time"
     //"log"
     //"encoding/json"
     //"math/big"
@@ -33,6 +33,7 @@ func (r resourceSourceType) GetSchema(context context.Context) (tfsdk.Schema, di
                 Type:     types.StringType,
                 Required: true,
             },
+	    /* Not config. Cause problems when server updates them.
             "created_at": {
                 Type:     types.StringType,
                 Computed: true,
@@ -41,6 +42,7 @@ func (r resourceSourceType) GetSchema(context context.Context) (tfsdk.Schema, di
                 Type:     types.StringType,
                 Computed: true,
             },
+	    */
             "config": GetConfigJsonObjectAttributeSchema(context),
         },
     }, nil
@@ -64,8 +66,10 @@ func NewSource(clientSource *rudderclient.Source) (Source) {
         ID                        : types.String{Value: clientSource.ID},
         Name                      : types.String{Value: clientSource.Name},
         Type                      : types.String{Value: clientSource.Type},
+	/* Not config. Cause problems when server updates them.
         CreatedAt                 : types.String{Value: string(clientSource.CreatedAt.Format(time.RFC850))},
         UpdatedAt                 : types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
+	*/
         Config                    : newConfig,
     }
 }

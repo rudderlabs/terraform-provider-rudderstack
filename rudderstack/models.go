@@ -9,8 +9,10 @@ type Source struct {
     ID                     types.String                    `tfsdk:"id"`
     Name                   types.String                    `tfsdk:"name"`
     Type                   types.String                    `tfsdk:"type"`
+    /* Time stamps are not config. Server side updates cause problems.
     CreatedAt              types.String                    `tfsdk:"created_at"`
     UpdatedAt              types.String                    `tfsdk:"updated_at"`
+    */
 
     Config                 *EncapsulatedConfigObject       `tfsdk:"config"`
 }
@@ -20,8 +22,10 @@ type Destination struct {
     ID                     types.String                    `tfsdk:"id"`
     Name                   types.String                    `tfsdk:"name"`
     Type                   types.String                    `tfsdk:"type"`
+    /* Time stamps are not config. Server side updates cause problems.
     CreatedAt              types.String                    `tfsdk:"created_at"`
     UpdatedAt              types.String                    `tfsdk:"updated_at"`
+    */
 
     Config                 *EncapsulatedConfigObject       `tfsdk:"config"`
 }

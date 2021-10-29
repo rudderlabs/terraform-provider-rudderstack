@@ -4,7 +4,7 @@ import (
     "context"
     // "strconv"
     "strings"
-    "time"
+    // "time"
     // "log"
     // "math/big"
 
@@ -32,6 +32,7 @@ func (r resourceDestinationType) GetSchema(context context.Context) (tfsdk.Schem
                 Type:     types.StringType,
                 Required: true,
             },
+	    /* Not config. Cause problems when server updates them.
             "created_at": {
                 Type:     types.StringType,
                 Computed: true,
@@ -39,7 +40,7 @@ func (r resourceDestinationType) GetSchema(context context.Context) (tfsdk.Schem
             "updated_at": {
                 Type:     types.StringType,
                 Computed: true,
-            },
+            },*/
             "config": GetConfigJsonObjectAttributeSchema(context),
         },
     }, nil
@@ -71,8 +72,10 @@ func NewDestination(clientDestination *rudderclient.Destination) (Destination) {
         ID                        : types.String{Value: clientDestination.ID},
         Name                      : types.String{Value: clientDestination.Name},
         Type                      : types.String{Value: clientDestination.Type},
+	/* Not config. Cause problems when server updates them.
         CreatedAt                 : types.String{Value: string(clientDestination.CreatedAt.Format(time.RFC850))},
         UpdatedAt                 : types.String{Value: string(clientDestination.UpdatedAt.Format(time.RFC850))},
+	*/
         Config                    : newConfig,
     }
     // log.Println("SDK dest config created.", newConfig.ObjectPropertiesMap)
