@@ -1,19 +1,17 @@
 ---
-page_title: "Provider: HashiCups"
-subcategory: ""
+page_title: "Provider: RudderStack"
+subcategory: "Customer Data Platform"
 description: |-
-  Terraform provider for interacting with HashiCups API.
+  Terraform provider for interacting with RudderStack control plane API.
 ---
 
-# HashiCups Provider
+# RudderStack Provider
 
 -> Visit the [Call APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorials for an interactive getting started experience.
 
-The HashiCups provider is used to interact with a fictional coffee-shop application, HashiCups. This provider is meant to serve as an educational tool to show users how:
-1. use providers to [create, read, update and delete (CRUD) resources](https://learn.hashicorp.com/tutorials/terraform/provider-use?in=terraform/providers) using Terraform.
-1. create a custom Terraform provider.
+The RudderStack provider is used to interact with the control plane of RudderStack Customer Data Platform product. Using this provider, one can create sources, destinations, connections and transformations([TBD]) in the Rudderstack cloud:
 
-To learn how to re-create the HashiCups provider, refer to the [Call APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorials.
+Underneath, this provider uses [REST API client in Golang for](https://github.com/rudderlabs/cp-client-go) for interfacing with RudderStack control plane.
 
 Use the navigation to the left to read about the available resources.
 

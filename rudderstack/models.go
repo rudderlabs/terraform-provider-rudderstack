@@ -1,41 +1,47 @@
-package rudderstack 
+package rudderstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework/types"
+    "github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// Order -
-type Order struct {
-	ID          types.String `tfsdk:"id"`
-	Items       []OrderItem  `tfsdk:"items"`
-	LastUpdated types.String `tfsdk:"last_updated"`
+// Sources -
+type Source struct {
+    ID                     types.String                    `tfsdk:"id"`
+    Name                   types.String                    `tfsdk:"name"`
+    Type                   types.String                    `tfsdk:"type"`
+    CreatedAt              types.String                    `tfsdk:"created_at"`
+    UpdatedAt              types.String                    `tfsdk:"updated_at"`
+
+    Config                 *EncapsulatedConfigObject       `tfsdk:"config"`
 }
 
-// OrderItem -
-type OrderItem struct {
-	Coffee   Coffee `tfsdk:"coffee"`
-	Quantity int    `tfsdk:"quantity"`
+// Destinations -
+type Destination struct {
+    ID                     types.String                    `tfsdk:"id"`
+    Name                   types.String                    `tfsdk:"name"`
+    Type                   types.String                    `tfsdk:"type"`
+    CreatedAt              types.String                    `tfsdk:"created_at"`
+    UpdatedAt              types.String                    `tfsdk:"updated_at"`
+
+    Config                 *EncapsulatedConfigObject       `tfsdk:"config"`
 }
 
-// Coffee -
-// This Coffee struct is for Order.Items[].Coffee which does not have an
-// ingredients field in the schema defined by plugin framework. Since the
-// resource schema must match the struct exactly (extra field will return an
-// error). This struct has Ingredients commented out.
-type Coffee struct {
-	ID          int          `tfsdk:"id"`
-	Name        types.String `tfsdk:"name"`
-	Teaser      types.String `tfsdk:"teaser"`
-	Description types.String `tfsdk:"description"`
-	Price       types.Number `tfsdk:"price"`
-	Image       types.String `tfsdk:"image"`
-	// Ingredients []Ingredient   `tfsdk:"ingredients"`
+type Connection struct {
+    ID                     types.String                    `tfsdk:"id"`
+    SourceID               types.String                    `tfsdk:"source_id"`
+    DestinationID          types.String                    `tfsdk:"destination_id"`
 }
 
-// Ingredient -
-// type Ingredient struct {
-// 	ID       int    `tfsdk:"ingredient_id"`
-// 	Name     string `tfsdk:"name"`
-// 	Quantity int    `tfsdk:"quantity"`
-// 	Unit     string `tfsdk:"unit"`
-// }
+type EncapsulatedConfigObject struct {
+    ObjectPropertiesMap    ObjectPropertiesMap             `tfsdk:"object"`
+}
+
+type ObjectPropertiesMap   map[string]SingleObjectProperty
+
+type SingleObjectProperty struct {
+    StrValue               types.String                    `tfsdk:"str"`
+    NumValue               types.Number                    `tfsdk:"num"`
+    BoolValue              types.Bool                      `tfsdk:"bool"`
+    ObjectValue            *ObjectPropertiesMap            `tfsdk:"object"`
+    ObjectsListValue       *[]EncapsulatedConfigObject     `tfsdk:"objects_list"`
+}

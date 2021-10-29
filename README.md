@@ -5,31 +5,36 @@
 
 
 # Terraform Provider RudderStack 
-
+Currently in draft stage.
 
 # Repo description
 
-In the repo, we have the implementation of RudderStack terraform provider as a bridge between Terraform and the RudderStack control plane API.  
-|:------|
+In this repo, we implement RudderStack terraform provider. It is a plugin which acts as a bridge between Terraform and the RudderStack control plane API.  
 
 Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
 
 # Why Use Terraform RudderStack provider 
 
-\*\* Describe what software does. \*\*
+TBD
 
 # Key Features
 
-\*\* Describe key features, if necessary. \*\*
+TBD
 
 # Get Started
+
+## Setup build environment
+Make sure that following are installed.
+1. bash (On Windows, consider using WSL2 Ubuntu) 
+2. go
+3. make
 
 ## Build provider
 
 Run the following command to build the provider
 
 ```shell
-$ go build -o terraform-provider-hashicups
+$ make
 ```
 
 ## Test sample configuration
@@ -54,7 +59,7 @@ $ terraform init && terraform apply
 
 # License
 
-RudderStack \*\* software name \*\* is released under the [MIT License][mit_license].
+RudderStack Terraform Provider is released under the [MIT License][mit_license].
 
 # Contribute
 
@@ -71,13 +76,6 @@ We would love to see you contribute to RudderStack. Get more information on how 
 - [YouTube][youtube]
 - [HackerNews][hackernews]
 - [Product Hunt][producthunt]
-
-# \*\* Optional \*\* :clap:  Our Supporters
-
-\*\* Update the repo names below. \*\*<br />
-
-[![Stargazers repo roster for @rudderlabs/rudder-server](https://reporoster.com/stars/rudderlabs/rudder-repo-template)](https://github.com/rudderlabs/rudder-repo-template/stargazers)
-[![Forkers repo roster for @rudderlabs/rudder-server](https://reporoster.com/forks/rudderlabs/rudder-repo-template)](https://github.com/rudderlabs/rudder-repo-template/network/members)
 
 <!----variables---->
 
@@ -98,7 +96,9 @@ We would love to see you contribute to RudderStack. Get more information on how 
 [rudder-logo]: https://repository-images.githubusercontent.com/197743848/b352c900-dbc8-11e9-9d45-4deb9274101f
 # Terraform Provider Hashicups
 
-This repo is a companion repo to the [Call APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers) Learn collection. 
+This repo implements Terraform provider for Rudderstack Customer Data Platform.
 
-In the collection, you will use the HashiCups provider as a bridge between Terraform and the HashiCups API. Then, extend Terraform by recreating the HashiCups provider. By the end of this collection, you will be able to take these intuitions to create your own custom Terraform provider. 
+A Terraform provider like this one can be used as a bridge between Terraform and the RudderStack control plane API. Related services:
+   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for Rudderstack control plane in Golang.
+   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to Rudderstack, you can use this web app to migrate.  
 
