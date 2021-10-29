@@ -37,32 +37,50 @@ resource "rudderstack_source" "src1" {
 
 resource "rudderstack_destination" "dst1" {
   name = "tfdestination"
-  type = "SLACK"
+  type = "GA"
   config = {
     object = { 
-      "apiSecret": { str = "002332423002332423002332423002332436" },
-      "apiSecret2": { str = "0022423002332423002332423002332436" },
-      "people": { bool = true },
-      "peopleProperties": {
+      "trackingID": { str = "UA-908213012-193" },
+      "doubleClick": { bool = true },
+      "enhancedLinkAttribution": { bool = true },
+      "includeSearch": { bool = true },
+      "enableServerSideIdentify": { bool = true },
+      "serverSideIdentifyEventCategory": { str = "mnd,msdnf" },
+      "serverSideIdentifyEventAction": { str = ",mn,m" },
+      "disableMd5": { bool = true },
+      "anonymizeIp": { bool = true },
+      "enhancedEcommerce": { bool = true },
+      "nonInteraction": { bool = true },
+      "sendUserId": { bool = true },
+      "dimensions": {
         objects_list = [
           {
-            object = { 
-              "property": { str = "asfasdf" },
-            },
-          },
-          {
-            object = { 
-              "property": { str = "gasdgsdag" },
-            },
-          },
+             object = {
+               "from": { str = "mas." },
+               "to": { str = "3" },
+             }
+          }
         ]
       },
-      "singleObjectProperty": {
-        object = { 
-          "propertyName1": { str = "propertyValue1" },
-          "propertyName2": { str = "propertyValue2" },
-          "propertyName3": { bool = true },
-        },
+      "metrics": {
+        objects_list = [
+          {
+             object = {
+               "from": { str = "kksad1222" },
+               "to": { str = "2" },
+             }
+          }
+        ]
+      },
+      "contentGroupings": {
+        objects_list = [
+          {
+             object = {
+               "from": { str = "lkjdlkjsdf" },
+               "to": { str = "lkjlkjsdf" },
+             }
+          }
+        ]
       },
     },
   }
