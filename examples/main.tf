@@ -30,8 +30,7 @@ resource "rudderstack_source" "src1" {
   name = "tfsource"
   type = "Auth0"
   config = {
-    object = {
-       "a" = {str = "2"},
+    object = { 
     }
   }
 }
@@ -41,28 +40,28 @@ resource "rudderstack_destination" "dst1" {
   type = "SLACK"
   config = {
     object = { 
-      "apiSecret" = { str = "002332423002332423002332423002332436" },
-      "apiSecret2" = { str = "0022423002332423002332423002332436" },
-      "people" = { bool = true },
-      "peopleProperties" = {
+      "apiSecret": { str = "002332423002332423002332423002332436" },
+      "apiSecret2": { str = "0022423002332423002332423002332436" },
+      "people": { bool = true },
+      "peopleProperties": {
         objects_list = [
           {
             object = { 
-              "property" = { str = "asfasdf" },
+              "property": { str = "asfasdf" },
             },
           },
           {
             object = { 
-              "property" = { str = "gasdgsdag" },
+              "property": { str = "gasdgsdag" },
             },
           },
         ]
       },
-      "singleObjectProperty" = {
+      "singleObjectProperty": {
         object = { 
-          "propertyName1" = { str = "propertyValue1" },
-          "propertyName2" = { str = "propertyValue2" },
-          "propertyName3" = { bool = true },
+          "propertyName1": { str = "propertyValue1" },
+          "propertyName2": { str = "propertyValue2" },
+          "propertyName3": { bool = true },
         },
       },
     },

@@ -5,7 +5,7 @@ import (
     // "strconv"
     "strings"
     "time"
-    "log"
+    // "log"
     // "math/big"
 
     "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -40,7 +40,7 @@ func (r resourceDestinationType) GetSchema(context context.Context) (tfsdk.Schem
                 Type:     types.StringType,
                 Computed: true,
             },
-            "config": GetConfigAttributeTree(context),
+            "config": GetConfigJsonObjectAttributeSchema(context),
         },
     }, nil
 }
@@ -57,7 +57,15 @@ type resourceDestination struct {
 }
 
 func NewDestination(clientDestination *rudderclient.Destination) (Destination) {
-    newConfig := RootMapToConfig(&clientDestination.Config)
+    // log.Println("SDK dest config creation started.")
+    // if (clientDestination.Config == nil) {
+    //     log.Println("Got Client dest config nil.")
+    // } else if (len(clientDestination.Config) == 0) {
+    //     log.Println("Got Client dest config empty.")
+    // }
+
+    newConfig := ConvertApiClientConfigToTerraform(&clientDestination.Config)
+    // log.Println("New SDK config gGenerated.", newConfig)
 
     retval := Destination{
         ID                        : types.String{Value: clientDestination.ID},
@@ -67,21 +75,25 @@ func NewDestination(clientDestination *rudderclient.Destination) (Destination) {
         UpdatedAt                 : types.String{Value: string(clientDestination.UpdatedAt.Format(time.RFC850))},
         Config                    : newConfig,
     }
+    // log.Println("SDK dest config created.", newConfig.ObjectPropertiesMap)
     return retval
 }
 
 func (sdkDestination Destination) ToClient() rudderclient.Destination {
+    // log.Println("Client dest config creation started.")
     retval := rudderclient.Destination {
         ID                        : sdkDestination.ID.Value,
         Name                      : sdkDestination.Name.Value,
         Type                      : sdkDestination.Type.Value,
-        Config                    : sdkDestination.Config.ObjectPropertiesMap.ToClient(),
+        Config                    : sdkDestination.Config.ObjectPropertiesMap.TerraformToApiClient(),
     }
+    // log.Println("Client dest config created.")
     return retval
 }
 
 // Create a new resource
 func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+    // log.Println("SDK dest creation started.")
     if !r.p.configured {
         resp.Diagnostics.AddError(
             "Provider not configured",
@@ -90,6 +102,7 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
         return
     }
 
+    // log.Println("SDK dest creation in progress 1.")
     // Retrieve values from plan
     var plan Destination
     diags := req.Plan.Get(ctx, &plan)
@@ -122,6 +135,7 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
 
 // Read resource information
 func (r resourceDestination) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+    // log.Println("SDK dest read started.")
     // Get current state
     var state Destination
     diags := req.State.Get(ctx, &state)
@@ -155,6 +169,7 @@ func (r resourceDestination) Read(ctx context.Context, req tfsdk.ReadResourceReq
 
 // Update resource
 func (r resourceDestination) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+    // log.Println("SDK dest update started.")
     // Get plan values
     var plan Destination
     diags := req.Plan.Get(ctx, &plan)

@@ -41,7 +41,7 @@ func (r resourceSourceType) GetSchema(context context.Context) (tfsdk.Schema, di
                 Type:     types.StringType,
                 Computed: true,
             },
-            "config": GetConfigAttributeTree(context),
+            "config": GetConfigJsonObjectAttributeSchema(context),
         },
     }, nil
 }
@@ -58,7 +58,7 @@ type resourceSource struct {
 }
 
 func NewSource(clientSource *rudderclient.Source) (Source) {
-    newConfig := RootMapToConfig(&clientSource.Config)
+    newConfig := ConvertApiClientConfigToTerraform(&clientSource.Config)
 
     return Source{
         ID                        : types.String{Value: clientSource.ID},
@@ -70,12 +70,12 @@ func NewSource(clientSource *rudderclient.Source) (Source) {
     }
 }
 
-func (sdkSource Source) ToClient() rudderclient.Source {
+func (sdkSource Source) TerraformToApiClient() rudderclient.Source {
     return rudderclient.Source {
         ID                        : sdkSource.ID.Value,
         Name                      : sdkSource.Name.Value,
         Type                      : sdkSource.Type.Value,
-        Config                    : sdkSource.Config.ObjectPropertiesMap.ToClient(),
+        Config                    : sdkSource.Config.ObjectPropertiesMap.TerraformToApiClient(),
     }
 }
 
@@ -98,7 +98,7 @@ func (r resourceSource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
     }
 
     // Convert terraform object to REST API Client object.
-    clientSource := plan.ToClient()
+    clientSource := plan.TerraformToApiClient()
 
     // Create new source
     createdSource, err := r.p.client.CreateSource(clientSource)
@@ -170,7 +170,7 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
     }
 
     // Convert terraform object to REST API Client object.
-    clientSource := plan.ToClient()
+    clientSource := plan.TerraformToApiClient()
 
     // Get source ID from current state.
     sourceID := state.ID.Value
