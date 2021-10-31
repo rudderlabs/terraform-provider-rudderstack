@@ -1,7 +1,4 @@
-def jsonToRudderTree(json):
-    """
-    Takes an arbitrary JSON. Returns 
-    """
+def jsonToTerraformTreeWithIndents(json):
     elementryType = None
     if isinstance(json, str):
         elementryType = "str"
@@ -20,10 +17,10 @@ def jsonToRudderTree(json):
         else:
             retlist = []
             for index, jsonElement in enumerate(json):
-                jsonElementRudderTree = jsonToRudderTree(jsonElement)
+                jsonElementTerraformTree = jsonToTerraformTreeWithIndents(jsonElement)
                 if index != len(json) - 1:
-                    jsonElementRudderTree = appendComma(jsonElementRudderTree)
-                retlist.append(jsonElementRudderTree)
+                    jsonElementTerraformTree = appendComma(jsonElementTerraformTree)
+                retlist.append(jsonElementTerraformTree)
             return [(0, "{"), (2, "objects_list = ["), (4, retlist), (2, "]"), (0, "}")]
     elif isinstance(json, dict):
         if len(json) == 0:
@@ -32,73 +29,65 @@ def jsonToRudderTree(json):
             retlist = []
             for index, (jsonKey, jsonValue) in enumerate(json.items()):
                 jsonKeyStr = "\'{0}\'".format(jsonKey) if isinstance(jsonKey, str) else str(jsonKey)
-                jsonValueRudderTree = jsonToRudderTree(jsonValue)
+                jsonValueTerraformTree = jsonToTerraformTreeWithIndents(jsonValue)
                 if index != len(json) - 1:
-                    jsonValueRudderTree = appendComma(jsonValueRudderTree)
-                retlist.append([(0, jsonKeyStr +  ":"), jsonValueRudderTree])
+                    jsonValueTerraformTree = appendComma(jsonValueTerraformTree)
+                retlist.append([(0, jsonKeyStr +  ":"), jsonValueTerraformTree])
             
             return [(0, "{"), (2, "object = {"), (4, retlist), (2, "}"), (0, "}")]
     else:
-        import pdb;pdb.set_trace()
         raise NotImplementedError("Unknown type in json", json)
+        import pdb;pdb.set_trace()
 
-def rudderTreeToIndentedTerraformConfig(rudderTree, indent="", maxWidth=80):
-    if isinstance(rudderTree, tuple):
-        tupleIndent, value = rudderTree
-        if isinstance(value, list):
-            result = rudderTreeToIndentedTerraformConfig(value, tupleIndent*" " + indent, maxWidth)
-            return result
+def terraformTreeToIndentedTerraformCli(terraformTreeWithIndents, indent="", maxWidth=80):
+    if isinstance(terraformTreeWithIndents, tuple):
+        nodeIndent, nodeTree = terraformTreeWithIndents
+        if isinstance(nodeTree, list):
+            return terraformTreeToIndentedTerraformCli(nodeTree, nodeIndent*" " + indent, maxWidth)
         else:
-            return rudderTree[1], True
+            return nodeTree, True
+    elif isinstance(terraformTreeWithIndents, list):
+        childTerraformCliList = []
+        isSingleLine = True
+        joinedLength = len(indent) + len(terraformTreeWithIndents) - 1
+        for childNode in terraformTreeWithIndents:
+                childTerraformCli, isChildSingleLine = terraformTreeToIndentedTerraformCli(childNode, indent, maxWidth)
+                isSingleLine = isSingleLine and isChildSingleLine
+                joinedLength += len(childTerraformCli)
+                childTerraformCliList.append(childTerraformCli)
+        if len(childTerraformCliList) == 1 or (isSingleLine and joinedLength < maxWidth):
+            return " ".join(childTerraformCliList), True
+        else:
+            for i, childNode in enumerate(terraformTreeWithIndents):
+                if isinstance(childNode, tuple):
+                    childNodeIndent, childNodeValue = childNode
+                    childTerraformCliList[i] = (childNodeIndent * " ") + childTerraformCliList[i]
+
+            return ("\n" + indent).join(childTerraformCliList), False
     else:
-        rudderTreeStrs = []
-        canJoin = True
-        joinedLength = len(indent)
-        for el in rudderTree:
-                elStr, canJoinEl = rudderTreeToIndentedTerraformConfig(el, indent, maxWidth)
-                canJoin = canJoin and canJoinEl
-                joinedLength += len(elStr)
-                rudderTreeStrs.append(elStr)
-        if len(rudderTreeStrs) == 1 or (canJoin and joinedLength < maxWidth):
-            return " ".join(rudderTreeStrs), True
-        else:
-            for i, el in enumerate(rudderTree):
-                if isinstance(el, tuple):
-                    tupleIndent, elValue = el
-                    rudderTreeStrs[i] = (tupleIndent * " ") + rudderTreeStrs[i]
+        raise NotImplementedError("Unknown object in terraformTreeWithIndents", terraformTreeWithIndents)
+        import pdb;pdb.set_trace()
 
-            return ("\n" + indent).join(rudderTreeStrs), False
+def jsonToIndentedTerraformCli(json):
+    terraformTreeWithIndents = jsonToTerraformTreeWithIndents(json)
+    terraformCli, isSingleLine = terraformTreeToIndentedTerraformCli(terraformTreeWithIndents)
+    return terraformCli
 
-def jsonToIndentedTerraformConfig(json):
-    rudderTree = jsonToRudderTree(json)
-    rudderStr, canJoin = rudderTreeToIndentedTerraformConfig(rudderTree)
-    return rudderStr
-
-def appendComma(rudderTree):
-    rudderNode = rudderTree
-    parentRudderNode = None
-    while not isinstance(rudderNode, tuple):
-        assert(isinstance(rudderNode, list))
-        parentRudderNode = rudderNode
-        rudderNode = rudderNode[len(rudderNode) - 1]
-    indent, strValue = rudderNode
+def appendComma(terraformTreeWithIndents):
+    lastTupleNode = terraformTreeWithIndents
+    parentToLastTupleNode = None
+    while not isinstance(lastTupleNode, tuple):
+        assert(isinstance(lastTupleNode, list))
+        parentToLastTupleNode = lastTupleNode
+        lastTupleNode = lastTupleNode[len(lastTupleNode) - 1]
+    indent, strValue = lastTupleNode
     strValue = strValue + ","
-    if parentRudderNode == None:
-        rudderTree = (indent, strValue)
+    if parentToLastTupleNode == None:
+        terraformTreeWithIndents = (indent, strValue)
     else:
-        parentRudderNode[len(parentRudderNode) - 1] = (indent, strValue)
+        parentToLastTupleNode[len(parentToLastTupleNode) - 1] = (indent, strValue)
 
-    return rudderTree
-
-def ignoreFunction():
-   if isinstance(jsonElementRudderTree, str):
-       jsonElementRudderTree = jsonElementRudderTree + ","
-   else:
-       jsonElementRudderTree.append(",")
-   if isinstance(jsonValueRudderTree, str):
-       jsonValueRudderTree = jsonValueRudderTree + ","
-   else:
-       jsonValueRudderTree.append(",")
+    return terraformTreeWithIndents
 
 jsons = [
         {
@@ -144,4 +133,4 @@ jsons = [
 ]
 
 for index, json in enumerate(jsons):
-    print("\nFor index {0}, rudder ---->\n{1}\n----------\n".format(index, jsonToIndentedTerraformConfig(json)))
+    print("\nFor index {0}, rudder ---->\n{1}\n----------\n".format(index, jsonToIndentedTerraformCli(json)))
