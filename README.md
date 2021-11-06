@@ -8,17 +8,11 @@
 
 # Description
 
-In this repo, we implement RudderStack terraform provider. It is a plugin which acts as a bridge between Terraform and the RudderStack control plane API.  
+This repo implements RudderStack terraform provider. Use it to access RudderStack control plane API from within Terraform.  
+
+Click [here](doc/index.md) for more documentation.
 
 Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
-
-# Why Use Terraform RudderStack provider 
-
-TBD
-
-# Key Features
-
-TBD
 
 # Get Started
 
