@@ -1,6 +1,11 @@
 # Rudderstack Provider
 Use the Rudderstack provider to interact with control plane API of the Ruddertack CDP.
 
+## Resources 
+   1. [Source](resources/source.md)
+   1. [Destination](resources/destination.md)
+   1. [Connection](resources/connection.md)
+
 ## Example Usage 
 Terraform 1.1.0 and later:
 ```
