@@ -1,5 +1,5 @@
 # Source or Destination Config (Common Attribute)
-REST API for Rudderstack defines CRUD operations on Rudderstack sources and destinations. In those CRUD operatoins, configuration of sources and destinations is modelled as a JSON object. To define config of such a source or a destination in this provider, the JSON object needs to be converted into terraform schema [Config](#nestedatt-config).
+REST API for Rudderstack defines CRUD operations on Rudderstack sources and destinations. In those CRUD operations, configuration of sources and destinations is modelled as a JSON object. To define config of such a source or a destination in this provider, the JSON object needs to be converted into terraform schema [Config](#nestedatt-config).
 
 ## Example usage
 Checkout destination config example [here](destination.md#example). 
@@ -12,14 +12,12 @@ Any JSON object can be converted into equivalent rudderstack provider config. Ex
 
 #### Examples
 Any JSON object can be converted into equivalent terraform config.
-|--------------------|---------------------------------------------------------|
 |JSON Config Object  | Equivalent Terraform Config                             |
 |--------------------|---------------------------------------------------------|
 |{}                  | { object = {} }                                         |
 |{"a":1,"b":"strval"}| { object = {"a":{int = 1},"b":{str="strval"}} }         |
 |{"a":[]}            | { object = {"a":{object_list=[]}} }                     |
 |{"a":{}}            | { object = {"a":{object={}}} }                     |
-|--------------------|---------------------------------------------------------|
 
 Required:
 
@@ -30,18 +28,13 @@ Required:
 Each JSON value can be converted equivalent rudderstack provider config as follows.
 
 #### Examples
-|--------------------|--------------------------|---------------------------------------------------------|
 |JSON Config Value   | Remark                   | Equivalent Representation in Terraform                  |
 |--------------------|--------------------------|---------------------------------------------------------|
 |123                 | Integer                  | { int = 123 }                                           |
 |"arbit string"      | String                   | { str = "arbit string" }                                |
 |true                | Boolean                  | { bool = true }                                         |
 |{"a":1,"b":"strval"}| JSON Object              | { object = {"a":{int = 1},"b":{str="strval"}} }         |
-|[{}, {"a":1}]       | JSON List of Objects     | { object_list = [                                       |
-|                    |                          |        { object = {} },                                    |
-|                    |                          |        { object = {"a":{int = 1},"b":{str="strval"}} }  |
-|                    |                          | ] },                                                    |
-|---------------------------------------------------------------------------------------------------------|
+|[{}, {"a":1}]       | JSON List of Objects     | { object_list = [<BR/>  { object = {} },<BR/>  { object = {"a":{int = 1},"b":{str="strval"}} }<BR/>] }|
 
 #### Attributes:
 
