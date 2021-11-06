@@ -79,7 +79,7 @@ rudderstack provider config as in examples below.
 
 <a id="nestedatt--config--str"></a>
 ### Nested Schema for `config value`
-Each JSON value can be converted to equivalent rudderstack provider config as follows.
+Each JSON value can be converted into equivalent rudderstack provider config as follows.
 
 #### Examples
 |JSON Config Value   | Remark                   | Equivalent Representation in Terraform                  |

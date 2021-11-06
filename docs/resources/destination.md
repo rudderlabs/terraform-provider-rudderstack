@@ -1,4 +1,4 @@
-# rudderstack_destination (Resource)
+# Resource rudderstack_destination
 Manages a Rudderstack CDP destination.
 
 <a id="example"></a>

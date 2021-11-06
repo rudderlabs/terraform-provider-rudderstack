@@ -26,7 +26,7 @@ provider "rudderstack" {
 
   # [Deprecated, Optional]
   # Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com/".
-  # If null, falls back on env variable RUDDERSTACK_SCHEMA.
+  # If null, falls back on env variable RUDDERSTACK_SCHEMA_HOST.
   schema_host = null
 
   # [Deprecated, Optional]

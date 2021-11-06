@@ -1,4 +1,4 @@
-# rudderstack_source (Resource)
+# Resource rudderstack_source
 Manages a Rudderstack CDP source.
 
 ## Example Usage
