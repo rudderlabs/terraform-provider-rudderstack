@@ -34,7 +34,7 @@ Each JSON value can be converted equivalent rudderstack provider config as follo
 |"arbit string"      | String                   | { str = "arbit string" }                                |
 |true                | Boolean                  | { bool = true }                                         |
 |{"a":1,"b":"strval"}| JSON Object              | { object = {"a":{int = 1},"b":{str="strval"}} }         |
-|[{}, {"a":1}]       | JSON List of Objects     | { object_list = [<BR/>  { object = {} },<BR/>  { object = {"a":{int = 1},"b":{str="strval"}} }<BR/>] }|
+|[{}, {"a":1}]       | JSON List of Objects     | { object_list = [<BR/>.  { object = {} },<BR/>.  { object = {"a":{int = 1},"b":{str="strval"}} }<BR/>] }|
 
 #### Attributes:
 
