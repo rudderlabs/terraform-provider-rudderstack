@@ -5,7 +5,7 @@ terraform {
       source  = "rudderstack.com/cdp/rudderstack"
     }
   }
-  required_version = "~> 1.1.0"
+  required_version = "~> 1.0.9"
 }
 
 provider "rudderstack" {
@@ -18,7 +18,7 @@ provider "rudderstack" {
   token = null 
 
   # Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com/".
-  # If null, falls back on env variable RUDDERSTACK_SCHEMA.
+  # If null, falls back on env variable RUDDERSTACK_SCHEMA_HOST.
   schema_host = null
 
   # Set to access token for V1 control plane API host. The token is available at https://app.rudderstack.com/home. Example "1lajsdlkjasdl".

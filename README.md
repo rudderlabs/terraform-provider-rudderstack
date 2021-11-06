@@ -5,21 +5,14 @@
 
 
 # Terraform Provider RudderStack 
-Currently in draft stage.
 
-# Repo description
+# Description
 
-In this repo, we implement RudderStack terraform provider. It is a plugin which acts as a bridge between Terraform and the RudderStack control plane API.  
+This repo implements RudderStack terraform provider. Use it to access RudderStack control plane API from within Terraform.  
+
+Click [here](docs/index.md) for more documentation.
 
 Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
-
-# Why Use Terraform RudderStack provider 
-
-TBD
-
-# Key Features
-
-TBD
 
 # Get Started
 
@@ -56,6 +49,10 @@ Run the following command to initialize the workspace and apply the sample confi
 ```shell
 $ terraform init && terraform apply
 ```
+
+# Related 
+   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for Rudderstack control plane in Golang.
+   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to Rudderstack, you can use this web app to migrate.  
 
 # License
 
@@ -94,11 +91,4 @@ We would love to see you contribute to RudderStack. Get more information on how 
 [config-generator]: https://github.com/rudderlabs/config-generator
 [config-generator-section]: https://github.com/rudderlabs/rudder-server/blob/master/README.md#rudderstack-config-generator
 [rudder-logo]: https://repository-images.githubusercontent.com/197743848/b352c900-dbc8-11e9-9d45-4deb9274101f
-# Terraform Provider Hashicups
-
-This repo implements Terraform provider for Rudderstack Customer Data Platform.
-
-A Terraform provider like this one can be used as a bridge between Terraform and the RudderStack control plane API. Related services:
-   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for Rudderstack control plane in Golang.
-   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to Rudderstack, you can use this web app to migrate.  
 

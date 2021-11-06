@@ -1,35 +1,133 @@
----
-page_title: "Provider: RudderStack"
-subcategory: "Customer Data Platform"
-description: |-
-  Terraform provider for interacting with RudderStack control plane API.
----
+# Rudderstack Provider
+Use the Rudderstack's Terraform provider plugin to interact with control plane API of the Ruddertack CDP from within Terraform.
 
-# RudderStack Provider
-
--> Visit the [Call APIs with Terraform Providers](https://learn.hashicorp.com/collections/terraform/providers?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS) Learn tutorials for an interactive getting started experience.
-
-The RudderStack provider is used to interact with the control plane of RudderStack Customer Data Platform product. Using this provider, one can create sources, destinations, connections and transformations([TBD]) in the Rudderstack cloud:
-
-Underneath, this provider uses [REST API client in Golang for](https://github.com/rudderlabs/cp-client-go) for interfacing with RudderStack control plane.
-
-Use the navigation to the left to read about the available resources.
-
-## Example Usage
-
-Do not keep your authentication password in HCL for production environments, use Terraform environment variables.
-
-```terraform
-provider "hashicups" {
-  username = "education"
-  password = "test123"
+## Example Usage 
+Terraform 1.1.0 and later:
+```
+terraform {
+  required_providers {
+    rudderstack = {
+      version = "~> 0.0.1"
+      source  = "rudderstack.com/cdp"
+    }
+  }
+  required_version = "~> 1.0.9"
 }
+
+provider "rudderstack" {
+  # Set to control plane API host. Usually "https://api.rudderlabs.com/v2/".
+  # If null, falls back on env variable RUDDERSTACK_HOST.
+  host = null
+
+  # Set to access token for control plane API host.
+  # The token can be generated at https://app.dev.rudderlabs.com/profile/tokens. Example "1fasdasdsdas".
+  # If null, falls back on env variable RUDDERSTACK_TOKEN.
+  token = null 
+
+  # [Deprecated, Optional]
+  # Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com/".
+  # If null, falls back on env variable RUDDERSTACK_SCHEMA_HOST.
+  schema_host = null
+
+  # [Deprecated, Optional]
+  # Set to access token for V1 control plane API host.
+  # The token is available at https://app.rudderstack.com/home. Example "1lajsdlkjasdl".
+  # If null, falls back on env variable RUDDERSTACK_SCHEMA_TOKEN.
+  schema_token = null
+}
+
+resource "rudderstack_source" "src1" {
+  name = "tfsource"
+  type = "Auth0"
+  config = {
+    object = { 
+    }
+  }
+}
+
+resource "rudderstack_destination" "dst1" {
+  name = "tfdestination"
+  type = "GA"
+  config = {
+    object = { 
+      "trackingID": { str = "UA-908213012-193" },
+      "doubleClick": { bool = true },
+      "enhancedLinkAttribution": { bool = true },
+      "includeSearch": { bool = true },
+      "enableServerSideIdentify": { bool = true },
+      "serverSideIdentifyEventCategory": { str = "mnd,msdnf" },
+      "serverSideIdentifyEventAction": { str = ",mn,m" },
+      "disableMd5": { bool = true },
+      "anonymizeIp": { bool = true },
+      "enhancedEcommerce": { bool = true },
+      "nonInteraction": { bool = true },
+      "sendUserId": { bool = true },
+      "dimensions": {
+        objects_list = [
+          {
+             object = {
+               "from": { str = "mas." },
+               "to": { str = "3" },
+             }
+          }
+        ]
+      },
+      "metrics": {
+        objects_list = [
+          {
+             object = {
+               "from": { str = "kksad1222" },
+               "to": { str = "2" },
+             }
+          }
+        ]
+      },
+      "contentGroupings": {
+        objects_list = [
+          {
+             object = {
+               "from": { str = "lkjdlkjsdf" },
+               "to": { str = "lkjlkjsdf" },
+             }
+          }
+        ]
+      },
+    },
+  }
+}
+
+resource "rudderstack_connection" "cnxn1" {
+  source_id = "${rudderstack_source.src1.id}" 
+  destination_id = "${rudderstack_destination.dst1.id}"
+}
+
+output "src1_id" {
+  value = rudderstack_source.src1.id
+}
+
+output "dst1_id" {
+  value = rudderstack_destination.dst1.id
+}
+
+output "cnxn1_id" {
+  value = rudderstack_connection.cnxn1.id
+}
+
 ```
 
-## Schema
+### Attributes 
 
-### Optional
+- **host** (String, Optional)
+  Set to control plane API host. Usually "https://api.rudderlabs.com/v2/". If null, it falls back on env variable RUDDERSTACK_HOST. For the provider to work, value must be set, one way or another.
+- **token** (String, Sensitive, Optional)
+  Set to access token for control plane API host. The token can be generated at https://app.dev.rudderlabs.com/profile/tokens. Example "1fasdasdsdas". If null, it falls back on env variable RUDDERSTACK_TOKEN. For the provider to work, value must be set, one way or another.
+- **schema_host** (String, Optional, *Deprecated*)
+  Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com/". If null, falls back on env variable RUDDERSTACK_SCHEMA.
+- **schema_token** (String, Sensitive, Optional, *Deprecated*)
+  Set to access token for V1 control plane API host. The token is available at https://app.rudderstack.com/home. Example "1lajsdlkjasdl". If null, falls back on env variable RUDDERSTACK_SCHEMA_TOKEN.
 
-- **username** (String, Optional) Username to authenticate to HashiCups API
-- **password** (String, Optional) Password to authenticate to HashiCups API
-- **host** (String, Optional) HashiCups API address (defaults to `localhost:19090`)
+## Resources 
+   1. [Source](resources/source.md)
+   1. [Destination](resources/destination.md)
+   1. [Connection](resources/connection.md)
+
