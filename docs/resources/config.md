@@ -2,14 +2,68 @@
 Configuration of Rudderstack sources and destinations are JSON objects. Any such JSON object can be mapped into [terraform schema](#nestedatt-config) of Rudderstack's Terraform provider as shown in the examples.
 
 ## Example usage
-Check out a destination config example [here](destination.md#example). 
+Config attribute for a supported resource is set as follows.
+```
+  .
+  .
+  config = {
+    object = {
+      "trackingID": { str = "UA-908213012-193" },
+      "doubleClick": { bool = true },
+      "enhancedLinkAttribution": { bool = true },
+      "includeSearch": { bool = true },
+      "enableServerSideIdentify": { bool = true },
+      "serverSideIdentifyEventCategory": { str = "myEventCategory1" },
+      "serverSideIdentifyEventAction": { str = "myEventAction1" },
+      "disableMd5": { bool = true },
+      "anonymizeIp": { bool = true },
+      "enhancedEcommerce": { bool = true },
+      "nonInteraction": { bool = true },
+      "sendUserId": { bool = true },
+      "dimensions": {
+        objects_list = [
+          {
+             object = {
+               "from": { str = "myDimensionSource" },
+               "to": { str = "3" },
+             }
+          }
+        ]
+      },
+      "metrics": {
+        objects_list = [
+          {
+             object = {
+               "from": { str = "myMetricSource" },
+               "to": { str = "2" },
+             }
+          }
+        ]
+      },
+      "contentGroupings": {
+        objects_list = [
+          {
+             object = {
+               "from": { str = "myContentGroupingSource" },
+               "to": { str = "myContentGroupingDest" },
+             }
+          }
+        ]
+      },
+    },
+  }
+  .
+  .
+```
+
+Check out a complete destination config example [here](destination.md#example). 
 
 ## Config Schema
 
 <a id="nestedatt--config"></a>
 ### Nested Schema for `config`
-Config of any source or destination is represented as JSON. Any such JSON object can be converted into equivalent
-rudderstack provider config as follows.
+Config of any source or destination is represented as a JSON object. Any such JSON object can be converted into equivalent
+rudderstack provider config as in examples below.
 
 #### Examples
 |JSON Config Object  | Equivalent Terraform Config                             |
@@ -38,7 +92,7 @@ Each JSON value can be converted to equivalent rudderstack provider config as fo
 
 #### Attributes:
 
-Depending on the kind of JSON value, *EXACTLY ONE* of the following attributes should be set.
+Depending on the kind of JSON value, *EXACTLY ONE* of the following attributes must be set.
 
 - **bool** (Boolean) Set this attribute if the JSON value is a boolean.
 - **num** (Number) Set this attribute if the JSON value is an integer or float.
