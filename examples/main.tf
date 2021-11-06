@@ -13,7 +13,7 @@ provider "rudderstack" {
   # If null, falls back on env variable RUDDERSTACK_HOST.
   host = null
 
-  # Set to access token for control plane API host. The token can be generated at https://app.dev.rudderlabs.com/profile/tokens. Example "1fasdasdsdas".
+  # Set to access token for control plane API host. The token can be generated at https://app.rudderlabs.com/profile/tokens. Example "1fasdasdsdas".
   # If null, falls back on env variable RUDDERSTACK_TOKEN.
   token = null 
 

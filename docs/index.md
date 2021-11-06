@@ -20,7 +20,7 @@ provider "rudderstack" {
   host = null
 
   # Set to access token for control plane API host.
-  # The token can be generated at https://app.dev.rudderlabs.com/profile/tokens. Example "1fasdasdsdas".
+  # The token can be generated at https://app.rudderlabs.com/profile/tokens. Example "1fasdasdsdas".
   # If null, falls back on env variable RUDDERSTACK_TOKEN.
   token = null 
 
@@ -120,7 +120,7 @@ output "cnxn1_id" {
 - **host** (String, Optional)
   Set to control plane API host. Usually "https://api.rudderlabs.com/v2/". If null, it falls back on env variable RUDDERSTACK_HOST. For the provider to work, value must be set, one way or another.
 - **token** (String, Sensitive, Optional)
-  Set to access token for control plane API host. The token can be generated at https://app.dev.rudderlabs.com/profile/tokens. Example "1fasdasdsdas". If null, it falls back on env variable RUDDERSTACK_TOKEN. For the provider to work, value must be set, one way or another.
+  Set to access token for control plane API host. The token can be generated at https://app.rudderlabs.com/profile/tokens. Example "1fasdasdsdas". If null, it falls back on env variable RUDDERSTACK_TOKEN. For the provider to work, value must be set, one way or another.
 - **schema_host** (String, Optional, *Deprecated*)
   Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com/". If null, falls back on env variable RUDDERSTACK_SCHEMA.
 - **schema_token** (String, Sensitive, Optional, *Deprecated*)
