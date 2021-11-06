@@ -20,7 +20,7 @@ resource "rudderstack_source" "src1" {
 - **name** (String, Required) Specifies name of the resource.
 - **type** (String, Required) Selects category of the CDP source to be created. Examples include iOS, Android, Auth0, etc.
   Consult Rudderstack documentation for list of supported source types.  
-- **config** (Attributes) (see [here for nested schema](config.md))
+- **config** (Attributes) (See [here for nested schema](config.md))
 
 ### Read-Only
 
