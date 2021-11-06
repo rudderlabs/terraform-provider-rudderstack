@@ -11,7 +11,7 @@ terraform {
       source  = "rudderstack.com/cdp"
     }
   }
-  required_version = "~> 1.1.0"
+  required_version = "~> 1.0.9"
 }
 
 provider "rudderstack" {
