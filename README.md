@@ -5,9 +5,8 @@
 
 
 # Terraform Provider RudderStack 
-Currently in draft stage.
 
-# Repo description
+# Description
 
 In this repo, we implement RudderStack terraform provider. It is a plugin which acts as a bridge between Terraform and the RudderStack control plane API.  
 
