@@ -50,6 +50,10 @@ Run the following command to initialize the workspace and apply the sample confi
 $ terraform init && terraform apply
 ```
 
+# Related 
+   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for Rudderstack control plane in Golang.
+   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to Rudderstack, you can use this web app to migrate.  
+
 # License
 
 RudderStack Terraform Provider is released under the [MIT License][mit_license].
@@ -87,11 +91,4 @@ We would love to see you contribute to RudderStack. Get more information on how 
 [config-generator]: https://github.com/rudderlabs/config-generator
 [config-generator-section]: https://github.com/rudderlabs/rudder-server/blob/master/README.md#rudderstack-config-generator
 [rudder-logo]: https://repository-images.githubusercontent.com/197743848/b352c900-dbc8-11e9-9d45-4deb9274101f
-# Terraform Provider Hashicups
-
-This repo implements Terraform provider for Rudderstack Customer Data Platform.
-
-A Terraform provider like this one can be used as a bridge between Terraform and the RudderStack control plane API. Related services:
-   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for Rudderstack control plane in Golang.
-   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to Rudderstack, you can use this web app to migrate.  
 
