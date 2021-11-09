@@ -1,5 +1,5 @@
 # Source or Destination Config
-Configuration of RudderStack sources and destinations are JSON objects. Any such JSON object can be mapped into [terraform schema](#nestedatt-config) and used as the config attribute of the source/destination applicable.
+Configuration of RudderStack sources and destinations are JSON objects. Any such JSON object can be mapped into [config schema](#nestedatt-config) and used as the config attribute of the source/destination applicable.
 
 ## Example usage
 Config attribute for the supported source/destination resource is set as follows.
