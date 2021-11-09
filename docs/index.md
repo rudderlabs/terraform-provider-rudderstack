@@ -2,13 +2,13 @@
 Use the RudderStack's Terraform provider plugin to interact with control plane API of the RudderStack CDP from within Terraform.
 
 ## Example Usage 
-Terraform 1.1.0 and later:
+Terraform 1.0.9 and later:
 ```
 terraform {
   required_providers {
     rudderstack = {
       source  = "rudderlabs/rudderstack"
-      version = "~> 0.2.0"
+      version = "~> 0.2.1"
     }
   }
   required_version = "~> 1.0.9"
