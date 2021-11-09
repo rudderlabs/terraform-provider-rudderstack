@@ -51,8 +51,8 @@ $ terraform init && terraform apply
 ```
 
 # Related 
-   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for Rudderstack control plane in Golang.
-   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to Rudderstack, you can use this web app to migrate.  
+   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for RudderStack control plane in Golang.
+   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to RudderStack, you can use this web app to migrate.  
 
 # License
 

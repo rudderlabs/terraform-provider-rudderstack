@@ -1,8 +1,8 @@
 # Source or Destination Config
-Configuration of Rudderstack sources and destinations are JSON objects. Any such JSON object can be mapped into [terraform schema](#nestedatt-config) of Rudderstack's Terraform provider as shown in the examples.
+Configuration of RudderStack sources and destinations are JSON objects. Any such JSON object can be mapped into [config schema](#nestedatt-config) and used as the config attribute of the source/destination applicable.
 
 ## Example usage
-Config attribute for a supported resource is set as follows.
+Config attribute for the supported source/destination resource is set as follows.
 ```
   .
   .
@@ -56,7 +56,7 @@ Config attribute for a supported resource is set as follows.
   .
 ```
 
-Check out a complete destination config example [here](destination.md#example). 
+Check out a complete destination config example [here](../resources/destination.md#example). 
 
 ## Config Schema
 
@@ -77,7 +77,7 @@ rudderstack provider config as in examples below.
 
 - **object** (Attributes Map, Required): object is a required attribute, mapping string keys to values. Values in the attribute map must comply with [config value schema](#nestedatt--config--value).
 
-<a id="nestedatt--config--str"></a>
+<a id="nestedatt--config--value"></a>
 ### Nested Schema for `config value`
 Each JSON value can be converted into equivalent rudderstack provider config as follows.
 
@@ -97,6 +97,6 @@ Depending on the kind of JSON value, *EXACTLY ONE* of the following attributes m
 - **bool** (Boolean) Set this attribute if the JSON value is a boolean.
 - **num** (Number) Set this attribute if the JSON value is an integer or float.
 - **str** (String) Set this attribute if the JSON value is a string.
-- **object** (Attributes Map) Set this attribute if the JSON value is an object. Define it as a string map, each value in attribute map following [this schema](#nestedatt--config--object)
-- **objects_list** (Attributes List) Set this attribute if the JSON value is a list of objects. Define it as a list, each value in the attribute list following [this schema](#nestedatt--config--objects)
+- **object** (Attributes Map) Set this attribute if the JSON value is an object. Define it as a string map, each value in attribute map following [this schema](#nestedatt--config--value)
+- **objects_list** (Attributes List) Set this attribute if the JSON value is a list of objects. Define it as a list, each value in the attribute list following [this schema](#nestedatt--config--value)
 

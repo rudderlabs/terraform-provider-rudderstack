@@ -1,5 +1,5 @@
 # rudderstack_connection (Resource)
-Manages a connection between Rudderstack source and Rudderstack destination.
+Manages a connection between RudderStack source and RudderStack destination.
 
 ## Example Usage
 ```
