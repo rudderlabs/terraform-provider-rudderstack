@@ -1,5 +1,5 @@
-# Rudderstack Provider
-Use the Rudderstack's Terraform provider plugin to interact with control plane API of the Rudderstack CDP from within Terraform.
+# RudderStack Provider
+Use the RudderStack's Terraform provider plugin to interact with control plane API of the RudderStack CDP from within Terraform.
 
 ## Example Usage 
 Terraform 1.1.0 and later:

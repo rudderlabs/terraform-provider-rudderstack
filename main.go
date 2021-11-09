@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	log.Println("Terraform Provider Rudderstack started.")
+	log.Println("Terraform Provider RudderStack started.")
 
 	var debugMode bool
 
