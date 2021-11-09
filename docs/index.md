@@ -7,8 +7,8 @@ Terraform 1.1.0 and later:
 terraform {
   required_providers {
     rudderstack = {
-      version = "~> 0.0.1"
-      source  = "rudderstack.com/cdp"
+      source  = "rudderlabs/rudderstack"
+      version = "~> 0.2.0"
     }
   }
   required_version = "~> 1.0.9"
