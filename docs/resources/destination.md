@@ -1,6 +1,18 @@
 # Resource rudderstack_destination
 Manages a RudderStack CDP destination.
 
+## Attribute Reference
+
+### Required
+
+- **name** (String, Required) Specifies name of the resource.
+- **type** (String, Required) Selects category of the CDP destination to be created. Examples include GA(Google Analytics), Webhook, Kissmetrics, etc.  Consult RudderStack documentation for list of supported source types.
+- **config** (Attributes, Required) Check [this](../guides/config.md) for schema and how to create config.
+
+### Read-Only
+
+- **id** (String) The ID of this resource.
+
 <a id="example"></a>
 ## Example Usage
 ```
@@ -55,15 +67,3 @@ resource "rudderstack_destination" "dst1" {
   }
 }
 ```
-
-## Argument Reference
-
-### Required
-
-- **name** (String, Required) Specifies name of the resource.
-- **type** (String, Required) Selects category of the CDP destination to be created. Examples include GA(Google Analytics), Webhook, Kissmetrics, etc.  Consult RudderStack documentation for list of supported source types.
-- **config** (Attributes, Required) (Check [this](../guides/config.md) for schema)
-
-### Read-Only
-
-- **id** (String) The ID of this resource.

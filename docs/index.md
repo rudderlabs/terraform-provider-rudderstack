@@ -1,6 +1,11 @@
 # RudderStack Provider
 Use the RudderStack's Terraform provider plugin to interact with control plane API of the RudderStack CDP from within Terraform.
 
+## Supported Resources 
+   1. [Source](resources/source.md)
+   1. [Destination](resources/destination.md)
+   1. [Connection](resources/connection.md)
+
 ## Example Usage 
 Terraform 1.0.9 and later:
 ```
@@ -125,9 +130,4 @@ output "cnxn1_id" {
   Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com/". If null, falls back on env variable RUDDERSTACK_SCHEMA.
 - **schema_token** (String, Sensitive, Optional, *Deprecated*)
   Set to access token for V1 control plane API host. The token is available at https://app.rudderstack.com/home. Example "1lajsdlkjasdl". If null, falls back on env variable RUDDERSTACK_SCHEMA_TOKEN.
-
-## Resources 
-   1. [Source](resources/source.md)
-   1. [Destination](resources/destination.md)
-   1. [Connection](resources/connection.md)
 
