@@ -10,11 +10,14 @@
 
 This repo implements RudderStack terraform provider. Use it to access RudderStack control plane API from within Terraform.  
 
-Click [here](docs/index.md) for more documentation.
-
 Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
 
-# Get Started
+# Getting Started
+Good place to start with Terraform is [here](https://www.terraform.io/intro/index.html). Next, checkout example configuration for RudderStack Terraform Provider [below](#example). Detailed documentation for RudderStack Terraform
+Provider is available [here](docs/index.md). 
+
+<a id="example"></a>
+# Example RudderStack Terraform Provider configuration 
 
 ## Setup build environment
 Make sure that following are installed.
