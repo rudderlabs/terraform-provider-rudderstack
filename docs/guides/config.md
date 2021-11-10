@@ -2,8 +2,7 @@
 Configuration of RudderStack sources and destinations are JSON objects. Any such JSON object can be mapped into [config schema](#nestedatt-config) and used as the config attribute of the source/destination applicable.
 
 ## Creating the config
-Best way for creating source or destination config in Terraform is via the web UI
-[here](https://app.rudderstack.com/). Detailed steps follow.
+Best way for creating source or destination config for use with Terraform RudderStack provider is via [web UI](https://app.rudderstack.com/), using detailed steps that follow.
    1. Login into https://app.rudderstack.com/.
    1. Create your sources, destinations, connections and transformations using the web UI. 
    1. Obtain a Rudderstack workspace token, by follow steps below.
