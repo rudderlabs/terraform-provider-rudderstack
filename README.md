@@ -6,26 +6,26 @@
 
 # Terraform Provider RudderStack 
 
-# Description
+## Description
 
 This repo implements RudderStack terraform provider. Use it to access RudderStack control plane API from within Terraform.  
 
 Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
 
-# Getting Started
+## Getting Started
 Good place to start with Terraform is [here](https://www.terraform.io/intro/index.html). Next, checkout example configuration for RudderStack Terraform Provider [below](#example). Detailed documentation for RudderStack Terraform
 Provider is available [here](docs/index.md). 
 
-<a id="example"></a>
-# Example RudderStack Terraform Provider configuration 
-
 ## Setup build environment
+
+### Pre Requisites
+
 Make sure that following are installed.
 1. bash (On Windows, consider using WSL2 Ubuntu) 
 2. go
 3. make
 
-## Build provider
+### Build provider
 
 Run the following command to build the provider
 
@@ -33,7 +33,8 @@ Run the following command to build the provider
 $ make
 ```
 
-## Test sample configuration
+<a id="example"></a>
+### Test sample configuration
 
 First, build and install the provider.
 
@@ -53,19 +54,20 @@ Run the following command to initialize the workspace and apply the sample confi
 $ terraform init && terraform apply
 ```
 
-# Related 
+## Related 
    1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for RudderStack control plane in Golang.
-   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to RudderStack, you can use this web app to migrate.  
+   2) https://github.com/rudderlabs/rscp_pyclient : This repo implements REST API client for RudderStack control plane in Python. Few helper methods, useful for RudderStack's Terraform provider also found there.
+   3) https://github.com/rudderlabs/segment-migrator: If you are trying to migrate from Segment to RudderStack, you can use [this](https://segment-migrator.dev-rudder.rudderlabs.com/) web app to migrate.  
 
-# License
+## License
 
 RudderStack Terraform Provider is released under the [MIT License][mit_license].
 
-# Contribute
+## Contribute
 
 We would love to see you contribute to RudderStack. Get more information on how to contribute [here](CONTRIBUTING.md).
 
-# Follow Us
+## Follow Us
 
 - [RudderStack Blog][rudderstack-blog]
 - [Slack][slack]
