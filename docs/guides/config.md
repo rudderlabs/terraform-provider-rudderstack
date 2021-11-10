@@ -6,10 +6,10 @@ Best way for creating source or destination config for use with Terraform Rudder
    1. Login into https://app.rudderstack.com/.
    1. Create your sources, destinations, connections and transformations using the web UI. 
    1. Obtain a Rudderstack workspace token, by follow steps below.
-      a) Visit https://app.rudderstack.com/home and login.
-      a) Click on Settings at the bottom left.
-      a) Select "Personal Access Tokens".
-      a) Create a new Personal Access Token and copy it for use here.
+      1. Visit https://app.rudderstack.com/home and login.
+      1. Click on Settings at the bottom left.
+      1. Select "Personal Access Tokens".
+      1. Create a new Personal Access Token and copy it for use here.
    1. Make sure that scripts dependencies are installed using pip.
       python3 path/to/terraform-provider-rudderstack/scripts/requirements.txt
    1. Run the python script [here](../../scripts/deployedConfig2Terraform.py) to convert config on the server into Terraform CLI.  
