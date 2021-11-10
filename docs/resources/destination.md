@@ -7,7 +7,7 @@ Manages a RudderStack CDP destination.
 
 - **name** (String, Required) Specifies name of the resource.
 - **type** (String, Required) Selects category of the CDP destination to be created. Examples include GA(Google Analytics), Webhook, Kissmetrics, etc.  Consult RudderStack documentation for list of supported source types.
-- **config** (Attributes, Required) Check [this](../guides/config.md) for schema and <mark>how to create config</mark>.
+- **config** (Attributes, Required) Check [this](../guides/config.md) for schema and ==how to create config==.
 
 ### Read-Only
 
