@@ -76,6 +76,7 @@ Config attribute for the supported source/destination resource is set as follows
 
 Check out a complete destination config example [here](../resources/destination.md#example). 
 
+<a id="config-schema"></a>
 ## Config Schema
 
 <a id="nestedatt--config"></a>
