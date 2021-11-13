@@ -159,8 +159,10 @@ func (r resourceDestination) Read(ctx context.Context, req tfsdk.ReadResourceReq
         )
         return
     }
+    // log.Println("SDK dest read value=", destination.Config)
 
     state = NewDestination(destination)
+    // log.Println("SDK dest value being set=", state.Config)
 
     // Set state with updated value.
     diags = resp.State.Set(ctx, &state)
@@ -286,10 +288,6 @@ func (r resourceDestination) Delete(ctx context.Context, req tfsdk.DeleteResourc
         return
     }
 
-    // Set state.
-    diags = resp.State.Set(ctx, nil)
-    resp.Diagnostics.Append(diags...)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+    // Remove state.
+    resp.State.RemoveResource(ctx)
 }

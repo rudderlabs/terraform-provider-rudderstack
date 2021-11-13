@@ -156,6 +156,9 @@ func ConvertApiClientObjectToTerraform(objectProperties *map[string](interface{}
     for propName, propValue := range *objectProperties {
         typeMappedPropValue := propValue.(rudderclient.SingleConfigPropertyValue)
         sdkPropertiesMap[propName] = *ConvertApiClientElementToTerraform(&typeMappedPropValue)
+        //if (propName == "android") {
+        //        log.Println("Android value we got is ", sdkPropertiesMap[propName], "propValue was", propValue, " with type", reflect.TypeOf(propValue));
+        //}
     }
     return &sdkPropertiesMap
 }
@@ -241,6 +244,9 @@ func ConvertApiClientConfigToTerraform(
     objectPropertiesMap := make(ObjectPropertiesMap, len(*clientConfig))
     for propName, propValue := range *clientConfig {
         objectPropertiesMap[propName] = *ConvertApiClientElementToTerraform(&propValue)
+        //if (propName == "android") {
+        //        log.Println("Android value we got is ", objectPropertiesMap[propName], "propValue was", propValue);
+        //}
     }
     sdkConfig := EncapsulatedConfigObject {
         ObjectPropertiesMap: objectPropertiesMap,

@@ -247,9 +247,5 @@ func (r resourceConnection) Delete(ctx context.Context, req tfsdk.DeleteResource
     }
 
     // Set state.
-    diags = resp.State.Set(ctx, nil)
-    resp.Diagnostics.Append(diags...)
-    if resp.Diagnostics.HasError() {
-        return
-    }
+    resp.State.RemoveResource(ctx)
 }

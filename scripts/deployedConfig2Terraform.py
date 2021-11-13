@@ -82,7 +82,7 @@ else:
                 if "config" in resourceConfig:
                     terraformConfigTreeWithIndents = jsonToTerraformTreeWithIndents(resourceConfig["config"])
                     terraformTreeWithIndents.append((2, "config = {"))
-                    terraformTreeWithIndents.append((4, terraformConfigTreeWithIndents))
+                    terraformTreeWithIndents.append((4, terraformConfigTreeWithIndents[1:-1]))
                     terraformTreeWithIndents.append((2, "}"))
 
             terraformTreeWithIndents.append((0, "}"))

@@ -270,6 +270,6 @@ func (r resourceSource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequ
         return
     }
 
-    // Set state.
+    // Remove state.
     resp.State.RemoveResource(ctx)
 }
