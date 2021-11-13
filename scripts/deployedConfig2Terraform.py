@@ -67,8 +67,6 @@ else:
                 resourceIndex)))
 
             if resourceKind == "connection":
-                terraformTreeWithIndents.append((2, "name = \"cnxn{0}\"".format(resourceIndex)))
-
                 srcIndex = resourceIdMap["source"][resourceConfig["sourceId"]]
                 terraformTreeWithIndents.append((2, "source_id = \"${{rudderstack_source.src{0}.id}}\"".format(srcIndex)))
 
