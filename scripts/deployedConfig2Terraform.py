@@ -2,7 +2,7 @@ import sys
 
 from rscp_pyclient.constants import getRudderWorkspaceUrl, getRudderSchemaRetrievalUrl, getRudderFilepath 
 from rscp_pyclient.getRudderStackConfig import downloadRudderEndpointV2, downloadRudderstackSchemas
-from rscp_pyclient.json2TerraformCli import jsonToTerraformTreeWithIndents, terraformTreeToIndentedTerraformCli
+from rscp_pyclient.json2TerraformCli import jsonToTerraformTreeWithIndents, terraformTreeToIndentedTerraformCli, addText
 
 # V2 endpoints that are usually downloaded which retrieving any particular Rudderstack workspace.
 endpointsV2ToDownload = ["/sources", "/destinations", "/connections"]
@@ -67,11 +67,14 @@ else:
                 resourceIndex)))
 
             if resourceKind == "connection":
-                srcIndex = resourceIdMap["source"][resourceConfig["sourceId"]]
-                terraformTreeWithIndents.append((2, "source_id = \"${{rudderstack_source.src{0}.id}}\"".format(srcIndex)))
+                try:
+                    srcIndex = resourceIdMap["source"][resourceConfig["sourceId"]]
+                    dstIndex = resourceIdMap["destination"][resourceConfig["destinationId"]]
 
-                dstIndex = resourceIdMap["destination"][resourceConfig["destinationId"]]
-                terraformTreeWithIndents.append((2, "destination_id = \"${{rudderstack_destination.dst{0}.id}}\"".format(dstIndex)))
+                    terraformTreeWithIndents.append((2, "source_id = \"${{rudderstack_source.src{0}.id}}\"".format(srcIndex)))
+                    terraformTreeWithIndents.append((2, "destination_id = \"${{rudderstack_destination.dst{0}.id}}\"".format(dstIndex)))
+                except KeyError:
+                    continue
             else:
                 if "name" in resourceConfig:
                     terraformTreeWithIndents.append((2, "name = \"{0}\"".format(resourceConfig["name"])))
@@ -81,9 +84,8 @@ else:
 
                 if "config" in resourceConfig:
                     terraformConfigTreeWithIndents = jsonToTerraformTreeWithIndents(resourceConfig["config"])
-                    terraformTreeWithIndents.append((2, "config = {"))
-                    terraformTreeWithIndents.append((4, terraformConfigTreeWithIndents[1:-1]))
-                    terraformTreeWithIndents.append((2, "}"))
+                    addText(terraformConfigTreeWithIndents, "config = ", suffixIfTrueElsePrefix=False)
+                    terraformTreeWithIndents.append((2, terraformConfigTreeWithIndents))
 
             terraformTreeWithIndents.append((0, "}"))
             terraformTreeWithIndents.append((0, ""))
