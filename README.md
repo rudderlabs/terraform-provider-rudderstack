@@ -17,9 +17,9 @@ Good place to start with Terraform is [here](https://www.terraform.io/intro/inde
 Provider is available [here](docs/index.md). 
 
 <a id="example"></a>
-# Example RudderStack Terraform Provider configuration 
+# Setup dev and build env 
 
-## Setup build environment
+## PreRequisites 
 Make sure that following are installed.
 1. bash (On Windows, consider using WSL2 Ubuntu) 
 2. go
@@ -27,21 +27,25 @@ Make sure that following are installed.
 
 ## Build provider
 
-Run the following command to build the provider
+Run the following command to build and install the provider
 
 ```shell
 $ make
-```
-
-## Test sample configuration
-
-First, build and install the provider.
-
-```shell
 $ make install
 ```
 
-Then, navigate to the `examples` directory. 
+Next, make sure that your ~/.terraformrc has the following lines. 
+```
+provider_installation {
+  dev_overrides {
+    "rudderlabs/rudderstack" = "~/.terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.5/linux_amd64/"
+  }
+}
+```
+The above ensures that that locally built terraform provider binary is unsed instead of the one available at registry.terraform.io
+
+## Test sample configuration
+Navigate to the `examples` directory. 
 
 ```shell
 $ cd examples
@@ -54,8 +58,11 @@ $ terraform init && terraform apply
 ```
 
 # Related 
-   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for RudderStack control plane in Golang.
-   2) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to RudderStack, you can use this web app to migrate.  
+   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for RudderStack Control Plain in Golang.
+   1) https://github.com/rudderlabs/rscp_pyclient : This repo implements REST API client for RudderStack Control Plain in Python. Few additional RudderStack related helpful methods also available.
+   1) https://github.com/rudderlabs/segment-migrator : Source code for segment migrator web app. Helps migrate from
+      Segment to RudderStack.
+   1) https://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to RudderStack, you can use this web app to migrate. 
 
 # License
 
