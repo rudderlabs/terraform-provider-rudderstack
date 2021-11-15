@@ -42,7 +42,7 @@ provider_installation {
   }
 }
 ```
-The above ensures that that locally built terraform provider binary is unsed instead of the one available at registry.terraform.io
+The above ensures that that locally built terraform provider binary is used instead of the one available at registry.terraform.io
 
 ## Test sample configuration
 Navigate to the `examples` directory. 
