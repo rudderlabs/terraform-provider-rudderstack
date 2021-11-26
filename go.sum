@@ -60,10 +60,8 @@ github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQ
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
-github.com/rudderlabs/cp-client-go v0.0.8 h1:8qO72flfzmyrsDrWpnaQpCLCsX0I5UzCsF6+WACpTo8=
-github.com/rudderlabs/cp-client-go v0.0.8/go.mod h1:UlCyIwV2tHrJm2+447mXe5yvaual4+7D2TyLRdJVejc=
-github.com/rudderlabs/cp-client-go v0.0.9 h1:S4sYI+JlARNubg+xNHRw2ta8VJm1FnMgMkHsQRM6Zsc=
-github.com/rudderlabs/cp-client-go v0.0.9/go.mod h1:UlCyIwV2tHrJm2+447mXe5yvaual4+7D2TyLRdJVejc=
+github.com/rudderlabs/cp-client-go v0.0.10 h1:l2kfWjipGp0i/jE/cMt0lfTKK5Oc4aMkUcAZdCbE88s=
+github.com/rudderlabs/cp-client-go v0.0.10/go.mod h1:UlCyIwV2tHrJm2+447mXe5yvaual4+7D2TyLRdJVejc=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
