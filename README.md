@@ -56,6 +56,18 @@ Run the following command to initialize the workspace and apply the sample confi
 ```shell
 $ terraform init && terraform apply
 ```
+## Make new release
+### Create a new tag with properly named version number.
+``` shell
+git tag vX.Y.Z
+git push
+```
+
+### Create new release.
+
+``` shell
+goreleaser release --rm-dist
+``` 
 
 # Related 
    1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for RudderStack Control Plain in Golang.
