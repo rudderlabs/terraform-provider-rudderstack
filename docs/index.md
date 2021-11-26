@@ -24,9 +24,13 @@ provider "rudderstack" {
   # If null, falls back on env variable RUDDERSTACK_HOST.
   host = null
 
-  # Set to access token for control plane API host.
-  # The token can be generated at https://app.rudderlabs.com/profile/tokens. Example "1fasdasdsdas".
-  # If null, falls back on env variable RUDDERSTACK_TOKEN.
+  # Set to access token for control plane API host. If null, falls back on env variable RUDDERSTACK_TOKEN.
+  #
+  # The token can be generated using steps below:
+  # 1. Click <a href="https://app.rudderstack.com/home">here</a> and login.
+  # 2. Click on Settings at the bottom left.
+  # 3. Select "Personal Access Tokens".
+  # 4. Create a new Personal Access Token and copy it for pasting here.
   token = null 
 
   # [Deprecated, Optional]
@@ -35,9 +39,11 @@ provider "rudderstack" {
   schema_host = null
 
   # [Deprecated, Optional]
-  # Set to access token for V1 control plane API host.
-  # The token is available at https://app.rudderstack.com/home. Example "1lajsdlkjasdl".
-  # If null, falls back on env variable RUDDERSTACK_SCHEMA_TOKEN.
+  # Set to access token for V1 control plane API host. If null, falls back on env variable RUDDERSTACK_SCHEMA_TOKEN.
+  #
+  # The token can be retrieved using steps below.
+  # 1. Click <a href="https://app.rudderstack.com/home">here</a> and login.
+  # 2. Copy the hexadecimal token string specified above data plane URL for pasting here.
   schema_token = null
 }
 
