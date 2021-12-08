@@ -38,7 +38,7 @@ Next, make sure that your ~/.terraformrc has the following lines.
 ```
 provider_installation {
   dev_overrides {
-    "rudderlabs/rudderstack" = "~/.terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.5/linux_amd64/"
+    "rudderlabs/rudderstack" = "~/.terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.6/linux_amd64/"
   }
 }
 ```
