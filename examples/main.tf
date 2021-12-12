@@ -2,14 +2,14 @@ terraform {
   required_providers {
     rudderstack = {
       source  = "rudderlabs/rudderstack"
-      version = "~> 0.2.6"
+      version = "~> 0.2.7"
     }
   }
   required_version = "~> 1.0.9"
 }
 
 provider "rudderstack" {
-  # Set to control plane API host. Usually "https://api.rudderlabs.com/v2/".
+  # Set to control plane API host. Usually "https://api.rudderlabs.com/v2".
   # If null, falls back on env variable RUDDERSTACK_HOST.
   host = null
 
@@ -20,9 +20,9 @@ provider "rudderstack" {
   # 2. Click on Settings at the bottom left.
   # 3. Select "Personal Access Tokens".
   # 4. Create a new Personal Access Token and copy it for pasting here 
-  token = null 
+  token = null
 
-  # Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com/".
+  # Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com".
   # If null, falls back on env variable RUDDERSTACK_SCHEMA_HOST.
   schema_host = null
 
@@ -124,6 +124,12 @@ resource "rudderstack_destination" "dst1" {
       },
     },
   }
+}
+
+resource "rudderstack_source" "src0" {
+  name = "test-1"
+  type = "Javascript"
+  config = { object = {} }
 }
 
 resource "rudderstack_connection" "cnxn1" {

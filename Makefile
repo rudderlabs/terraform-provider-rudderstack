@@ -3,7 +3,7 @@ HOSTNAME=rudderstack.com
 NAMESPACE=rudderlabs
 NAME=rudderstack
 BINARY=terraform-provider-${NAME}
-VERSION=0.2.5
+VERSION=0.2.7
 OS_ARCH=linux_amd64
 
 default: install
