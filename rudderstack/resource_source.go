@@ -5,7 +5,7 @@ import (
     // "strconv"
     "strings"
     //"time"
-    //"log"
+    "log"
     //"encoding/json"
     //"math/big"
 
@@ -33,7 +33,7 @@ func (r resourceSourceType) GetSchema(context context.Context) (tfsdk.Schema, di
                 Type:     types.StringType,
                 Required: true,
             },
-	    /* Not config. Cause problems when server updates them.
+            /* Not config. Cause problems when server updates them.
             "created_at": {
                 Type:     types.StringType,
                 Computed: true,
@@ -42,7 +42,7 @@ func (r resourceSourceType) GetSchema(context context.Context) (tfsdk.Schema, di
                 Type:     types.StringType,
                 Computed: true,
             },
-	    */
+            */
             "config": GetConfigJsonObjectAttributeSchema(context),
         },
     }, nil
@@ -66,10 +66,10 @@ func NewSource(clientSource *rudderclient.Source) (Source) {
         ID                        : types.String{Value: clientSource.ID},
         Name                      : types.String{Value: clientSource.Name},
         Type                      : types.String{Value: clientSource.Type},
-	/* Not config. Cause problems when server updates them.
+        /* Not config. Cause problems when server updates them.
         CreatedAt                 : types.String{Value: string(clientSource.CreatedAt.Format(time.RFC850))},
         UpdatedAt                 : types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
-	*/
+        */
         Config                    : newConfig,
     }
 }
@@ -104,17 +104,55 @@ func (r resourceSource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
     // Convert terraform object to REST API Client object.
     clientSource := plan.TerraformToApiClient()
 
-    // Create new source
-    createdSource, err := r.p.client.CreateSource(clientSource)
+    existingSources, err := r.p.client.FilterSources(clientSource.Type, clientSource.Name)
     if err != nil {
         resp.Diagnostics.AddError(
-            "Error creating source",
+            "Error filtering for existing sources",
             "Could not create source, unexpected error: "+err.Error(),
         )
         return
     }
 
-    state := NewSource(createdSource)
+    state := Source{}
+    if len(existingSources) == 0 {
+	log.Println("Existing source not found, type=", clientSource.Type, ", name=", clientSource.Name)
+
+        // Create new source. 
+        createdSource, err2 := r.p.client.CreateSource(clientSource)
+        if err2 != nil {
+            resp.Diagnostics.AddError(
+                "Error creating source",
+                "Could not create source, unexpected error: "+err2.Error(),
+            )
+            return
+        }
+
+        state = NewSource(createdSource)
+    } else {
+        if len(existingSources) > 1 {
+            resp.Diagnostics.AddWarning(
+                "Anomaly creating source",
+                "Filtered source for type/name but got too many sources. Picking the first",
+            )
+            log.Println("Filtered source for type/name but got too many sources. Picking the first",
+                "type=", clientSource.Type, "name=", clientSource.Name, "existing=", existingSources)
+        }
+
+        // Use existing source.
+	sourceID := existingSources[0].ID
+	log.Println("ReUsing existing source ID=", sourceID)
+        source, err := r.p.client.UpdateSource(sourceID, clientSource)
+        if err != nil {
+            resp.Diagnostics.AddError(
+                "Error updating source",
+                "Could not update sourceID "+sourceID+": "+err.Error(),
+            )
+            return
+        }
+
+        state = NewSource(source)
+    }
+
     diags = resp.State.Set(ctx, state)
     resp.Diagnostics.Append(diags...)
     if resp.Diagnostics.HasError() {
@@ -214,7 +252,7 @@ func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourc
     } else {
         resp.Diagnostics.AddError(
             "Error reading import request",
-            "Could not read (sourceType, sourceName) for connection import " + req.ID,
+            "Could not read (sourceType, sourceName) for source import " + req.ID,
         )
         return
     }
