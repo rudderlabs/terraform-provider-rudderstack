@@ -2,7 +2,7 @@ terraform {
   required_providers {
     rudderstack = {
       source  = "rudderlabs/rudderstack"
-      version = "~> 0.2.7"
+      version = "~> 0.2.8"
     }
   }
   required_version = "~> 1.0.9"
@@ -107,7 +107,7 @@ resource "rudderstack_destination" "dst1" {
           {
              object = {
                "from": { str = "kksad1222" },
-               "to": { str = "2" },
+               "to": { str = "3" },
              }
           }
         ]

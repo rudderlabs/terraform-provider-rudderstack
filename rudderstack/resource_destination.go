@@ -5,7 +5,7 @@ import (
     // "strconv"
     "strings"
     // "time"
-    // "log"
+    "log"
     // "math/big"
 
     "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -32,7 +32,7 @@ func (r resourceDestinationType) GetSchema(context context.Context) (tfsdk.Schem
                 Type:     types.StringType,
                 Required: true,
             },
-	    /* Not config. Cause problems when server updates them.
+            /* Not config. Cause problems when server updates them.
             "created_at": {
                 Type:     types.StringType,
                 Computed: true,
@@ -72,10 +72,10 @@ func NewDestination(clientDestination *rudderclient.Destination) (Destination) {
         ID                        : types.String{Value: clientDestination.ID},
         Name                      : types.String{Value: clientDestination.Name},
         Type                      : types.String{Value: clientDestination.Type},
-	/* Not config. Cause problems when server updates them.
+        /* Not config. Cause problems when server updates them.
         CreatedAt                 : types.String{Value: string(clientDestination.CreatedAt.Format(time.RFC850))},
         UpdatedAt                 : types.String{Value: string(clientDestination.UpdatedAt.Format(time.RFC850))},
-	*/
+        */
         Config                    : newConfig,
     }
     // log.Println("SDK dest config created.", newConfig.ObjectPropertiesMap)
@@ -117,17 +117,53 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
     // Convert terraform object to REST API Client object.
     clientDestination := plan.ToClient()
 
-    // Create new destination
-    createdDestination, err := r.p.client.CreateDestination(clientDestination)
+    existingDestinations, err := r.p.client.FilterDestinations(clientDestination.Type, clientDestination.Name)
     if err != nil {
         resp.Diagnostics.AddError(
-            "Error creating destination",
+            "Error filtering for existing destinations",
             "Could not create destination, unexpected error: "+err.Error(),
         )
         return
     }
 
-    state := NewDestination(createdDestination)
+    state := Destination{}
+    if len(existingDestinations) == 0 {
+	log.Println("Existing destination not found, type=", clientDestination.Type, ", name=", clientDestination.Name)
+        // Create new destination. 
+        createdDestination, err2 := r.p.client.CreateDestination(clientDestination)
+        if err2 != nil {
+            resp.Diagnostics.AddError(
+                "Error creating destination",
+                "Could not create destination, unexpected error: "+err2.Error(),
+            )
+            return
+        }
+
+        state = NewDestination(createdDestination)
+    } else {
+        if len(existingDestinations) > 1 {
+            resp.Diagnostics.AddWarning(
+                "Anomaly creating destination",
+                "Filtered destination for type/name but got too many destinations. Picking the first",
+            )
+            log.Println("Filtered destination for type/name but got too many destinations. Picking the first",
+                "type=", clientDestination.Type, "name=", clientDestination.Name, "existing=", existingDestinations)
+        }
+
+        // Use existing destination.
+	destinationID := existingDestinations[0].ID
+	log.Println("ReUsing existing destination ID=", destinationID)
+        destination, err := r.p.client.UpdateDestination(destinationID, clientDestination)
+        if err != nil {
+            resp.Diagnostics.AddError(
+                "Error updating destination",
+                "Could not update destinationID "+destinationID+": "+err.Error(),
+            )
+            return
+        }
+
+        state = NewDestination(destination)
+    }
 
     diags = resp.State.Set(ctx, state)
     resp.Diagnostics.Append(diags...)
@@ -232,7 +268,7 @@ func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportRe
     } else {
         resp.Diagnostics.AddError(
             "Error reading import request",
-            "Could not read (destinationType, destinationName) for connection import " + req.ID,
+            "Could not read (destinationType, destinationName) for destination import " + req.ID,
         )
         return
     }

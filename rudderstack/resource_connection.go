@@ -5,7 +5,7 @@ import (
     "strings"
     // "strconv"
     // "time"
-    // "log"
+    "log"
     //"math/big"
 
     "github.com/hashicorp/terraform-plugin-framework/diag"
@@ -84,18 +84,41 @@ func (r resourceConnection) Create(ctx context.Context, req tfsdk.CreateResource
     // Convert terraform object to REST API Client object.
     clientConnection := plan.ToClient()
 
-    // Create new source
-    createdConnection, err := r.p.client.CreateConnection(clientConnection)
+    existingConnections, err := r.p.client.FilterConnections(clientConnection.SourceID, clientConnection.DestinationID)
     if err != nil {
         resp.Diagnostics.AddError(
-            "Error creating connection",
+            "Error filtering for existing connections",
             "Could not create connection, unexpected error: "+err.Error(),
         )
         return
     }
 
-    state := NewConnection(createdConnection)
-    
+    state := Connection{}
+    if len(existingConnections) == 0 {
+	log.Println("Existing connection not found, src=", clientConnection.SourceID, ", dst=", clientConnection.DestinationID)
+        // Create new connection. 
+        createdConnection, err2 := r.p.client.CreateConnection(clientConnection)
+        if err2 != nil {
+            resp.Diagnostics.AddError(
+                "Error creating connection",
+                "Could not create connection, unexpected error: "+err2.Error(),
+            )
+            return
+        }
+
+        state = NewConnection(createdConnection)
+    } else if len(existingConnections) == 1 {
+	log.Println("ReUsing existing connection")
+        // Use existing connection.
+        state = NewConnection(&existingConnections[0])
+    } else {
+        resp.Diagnostics.AddError(
+            "Error creating connection",
+            "Filtered connection for source/destination but got too many connections: ",
+        )
+        return
+    }
+
     diags = resp.State.Set(ctx, state)
     resp.Diagnostics.Append(diags...)
     if resp.Diagnostics.HasError() {
