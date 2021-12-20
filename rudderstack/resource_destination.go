@@ -32,6 +32,10 @@ func (r resourceDestinationType) GetSchema(context context.Context) (tfsdk.Schem
                 Type:     types.StringType,
                 Required: true,
             },
+            "allow_same_name": {
+                Type:     types.BoolType,
+                Optional: true,
+            },
             /* Not config. Cause problems when server updates them.
             "created_at": {
                 Type:     types.StringType,
@@ -57,7 +61,7 @@ type resourceDestination struct {
     p provider
 }
 
-func NewDestination(clientDestination *rudderclient.Destination) (Destination) {
+func NewDestination(clientDestination *rudderclient.Destination, allowSameName types.Bool) (Destination) {
     // log.Println("SDK dest config creation started.")
     // if (clientDestination.Config == nil) {
     //     log.Println("Got Client dest config nil.")
@@ -72,6 +76,7 @@ func NewDestination(clientDestination *rudderclient.Destination) (Destination) {
         ID                        : types.String{Value: clientDestination.ID},
         Name                      : types.String{Value: clientDestination.Name},
         Type                      : types.String{Value: clientDestination.Type},
+        AllowSameName             : allowSameName,
         /* Not config. Cause problems when server updates them.
         CreatedAt                 : types.String{Value: string(clientDestination.CreatedAt.Format(time.RFC850))},
         UpdatedAt                 : types.String{Value: string(clientDestination.UpdatedAt.Format(time.RFC850))},
@@ -127,8 +132,43 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
     }
 
     state := Destination{}
-    if len(existingDestinations) == 0 {
-	log.Println("Existing destination not found, type=", clientDestination.Type, ", name=", clientDestination.Name)
+    allowSameName := !plan.AllowSameName.Null && plan.AllowSameName.Value
+
+    if len(existingDestinations) > 0 {
+        logStr := "Found "
+        if len(existingDestinations) > 1 {
+            logStr += "more than one pre-existing destinations"
+        } else {
+            logStr += "a pre-existing destination"
+        }
+        logStr += " with matching type/name."
+
+        if (allowSameName) {
+            logStr = "Warning: " + logStr + " Creating another one."
+            resp.Diagnostics.AddWarning(
+                "Anomaly creating destination",
+                logStr,
+            )
+        } else {
+            logStr = "Error: " + logStr + " Giving up.\n"
+            logStr += "Fix by following one of the options below:\n"
+            logStr += "1) Invoke ImportState command to import the upstream resource into local terraform state.\n"
+            logStr += "2) Resolve name conflict by changing the name of either upstream or downstream resource.\n"
+            logStr += "3) Force same name by setting ForceSameName=true in the terraform resource config."
+            resp.Diagnostics.AddError(
+                "Anomaly creating destination",
+                logStr,
+            )
+        }
+        log.Println(logStr,
+            "type=", clientDestination.Type,
+            "name=", clientDestination.Name,
+            "existing=", existingDestinations)
+    } else {
+        log.Println("Existing destination not found, type=", clientDestination.Type, ", name=", clientDestination.Name)
+    }
+
+    if len(existingDestinations) == 0 || allowSameName {
         // Create new destination. 
         createdDestination, err2 := r.p.client.CreateDestination(clientDestination)
         if err2 != nil {
@@ -139,36 +179,13 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
             return
         }
 
-        state = NewDestination(createdDestination)
-    } else {
-        if len(existingDestinations) > 1 {
-            resp.Diagnostics.AddWarning(
-                "Anomaly creating destination",
-                "Filtered destination for type/name but got too many destinations. Picking the first",
-            )
-            log.Println("Filtered destination for type/name but got too many destinations. Picking the first",
-                "type=", clientDestination.Type, "name=", clientDestination.Name, "existing=", existingDestinations)
-        }
+        state = NewDestination(createdDestination, plan.AllowSameName)
 
-        // Use existing destination.
-	destinationID := existingDestinations[0].ID
-	log.Println("ReUsing existing destination ID=", destinationID)
-        destination, err := r.p.client.UpdateDestination(destinationID, clientDestination)
-        if err != nil {
-            resp.Diagnostics.AddError(
-                "Error updating destination",
-                "Could not update destinationID "+destinationID+": "+err.Error(),
-            )
+        diags = resp.State.Set(ctx, state)
+        resp.Diagnostics.Append(diags...)
+        if resp.Diagnostics.HasError() {
             return
         }
-
-        state = NewDestination(destination)
-    }
-
-    diags = resp.State.Set(ctx, state)
-    resp.Diagnostics.Append(diags...)
-    if resp.Diagnostics.HasError() {
-        return
     }
 }
 
@@ -197,7 +214,7 @@ func (r resourceDestination) Read(ctx context.Context, req tfsdk.ReadResourceReq
     }
     // log.Println("SDK dest read value=", destination.Config)
 
-    state = NewDestination(destination)
+    state = NewDestination(destination, state.AllowSameName)
     // log.Println("SDK dest value being set=", state.Config)
 
     // Set state with updated value.
@@ -244,7 +261,7 @@ func (r resourceDestination) Update(ctx context.Context, req tfsdk.UpdateResourc
     }
 
     // Set state with updated value.
-    state = NewDestination(destination)
+    state = NewDestination(destination, plan.AllowSameName)
     diags = resp.State.Set(ctx, &state)
     resp.Diagnostics.Append(diags...)
     if resp.Diagnostics.HasError() {
@@ -291,7 +308,7 @@ func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportRe
         return
     }
 
-    state := NewDestination(&destinations[0])
+    state := NewDestination(&destinations[0], types.Bool{Null: true})
 
     // Set state with updated value.
     diags = resp.State.Set(ctx, &state)

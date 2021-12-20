@@ -2,10 +2,10 @@ terraform {
   required_providers {
     rudderstack = {
       source  = "rudderlabs/rudderstack"
-      version = "~> 0.2.8"
+      version = "~> 0.2.9"
     }
   }
-  required_version = "~> 1.0.9"
+  required_version = "~> 1.1.0"
 }
 
 provider "rudderstack" {
@@ -44,6 +44,7 @@ resource "rudderstack_source" "src1" {
 }
 
 resource "rudderstack_destination" "pub_sub_events" {
+  allow_same_name = true
   config = {
     object = {
         "eventDelivery" = {

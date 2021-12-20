@@ -33,6 +33,10 @@ func (r resourceSourceType) GetSchema(context context.Context) (tfsdk.Schema, di
                 Type:     types.StringType,
                 Required: true,
             },
+            "allow_same_name": {
+                Type:     types.BoolType,
+                Optional: true,
+            },
             /* Not config. Cause problems when server updates them.
             "created_at": {
                 Type:     types.StringType,
@@ -59,13 +63,14 @@ type resourceSource struct {
     p provider
 }
 
-func NewSource(clientSource *rudderclient.Source) (Source) {
+func NewSource(clientSource *rudderclient.Source, allowSameName types.Bool) (Source) {
     newConfig := ConvertApiClientConfigToTerraform(&clientSource.Config)
 
     return Source{
         ID                        : types.String{Value: clientSource.ID},
         Name                      : types.String{Value: clientSource.Name},
         Type                      : types.String{Value: clientSource.Type},
+        AllowSameName             : allowSameName,
         /* Not config. Cause problems when server updates them.
         CreatedAt                 : types.String{Value: string(clientSource.CreatedAt.Format(time.RFC850))},
         UpdatedAt                 : types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
@@ -114,9 +119,43 @@ func (r resourceSource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
     }
 
     state := Source{}
-    if len(existingSources) == 0 {
-	log.Println("Existing source not found, type=", clientSource.Type, ", name=", clientSource.Name)
+    allowSameName := !plan.AllowSameName.Null && plan.AllowSameName.Value
 
+    if len(existingSources) > 0 {
+        logStr := "Found "
+        if len(existingSources) > 1 {
+            logStr += "more than one pre-existing sources"
+        } else {
+            logStr += "a pre-existing source"
+        }
+        logStr += " with matching type/name."
+
+        if (allowSameName) {
+            logStr = "Warning: " + logStr + " Creating another one."
+            resp.Diagnostics.AddWarning(
+                "Anomaly creating source",
+                logStr,
+            )
+        } else {
+            logStr = "Error: " + logStr + " Giving up.\n"
+            logStr += "Fix by following one of the options below:\n"
+            logStr += "1) Invoke ImportState command to import the upstream resource into local terraform state.\n"
+            logStr += "2) Resolve name conflict by changing the name of either upstream or downstream resource.\n"
+            logStr += "3) Force same name by setting ForceSameName=true in the terraform resource config."
+            resp.Diagnostics.AddError(
+                "Anomaly creating source",
+                logStr,
+            )
+        }
+        log.Println(logStr,
+            "type=", clientSource.Type,
+            "name=", clientSource.Name,
+            "existing=", existingSources)
+    } else {
+        log.Println("No existing source with same type/name found, type=", clientSource.Type, ", name=", clientSource.Name)
+    }
+
+    if len(existingSources) == 0 || allowSameName {
         // Create new source. 
         createdSource, err2 := r.p.client.CreateSource(clientSource)
         if err2 != nil {
@@ -127,36 +166,14 @@ func (r resourceSource) Create(ctx context.Context, req tfsdk.CreateResourceRequ
             return
         }
 
-        state = NewSource(createdSource)
-    } else {
-        if len(existingSources) > 1 {
-            resp.Diagnostics.AddWarning(
-                "Anomaly creating source",
-                "Filtered source for type/name but got too many sources. Picking the first",
-            )
-            log.Println("Filtered source for type/name but got too many sources. Picking the first",
-                "type=", clientSource.Type, "name=", clientSource.Name, "existing=", existingSources)
-        }
+        state = NewSource(createdSource, plan.AllowSameName)
+        state.AllowSameName = plan.AllowSameName
 
-        // Use existing source.
-	sourceID := existingSources[0].ID
-	log.Println("ReUsing existing source ID=", sourceID)
-        source, err := r.p.client.UpdateSource(sourceID, clientSource)
-        if err != nil {
-            resp.Diagnostics.AddError(
-                "Error updating source",
-                "Could not update sourceID "+sourceID+": "+err.Error(),
-            )
+        diags = resp.State.Set(ctx, state)
+        resp.Diagnostics.Append(diags...)
+        if resp.Diagnostics.HasError() {
             return
         }
-
-        state = NewSource(source)
-    }
-
-    diags = resp.State.Set(ctx, state)
-    resp.Diagnostics.Append(diags...)
-    if resp.Diagnostics.HasError() {
-        return
     }
 }
 
@@ -183,7 +200,7 @@ func (r resourceSource) Read(ctx context.Context, req tfsdk.ReadResourceRequest,
         return
     }
 
-    state = NewSource(source)
+    state = NewSource(source, state.AllowSameName)
 
     // Set state with updated value.
     diags = resp.State.Set(ctx, &state)
@@ -217,7 +234,7 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
     // Get source ID from current state.
     sourceID := state.ID.Value
 
-    // Get current value of source from API.
+    // Update source with current value of source.
     source, err := r.p.client.UpdateSource(sourceID, clientSource)
     if err != nil {
         resp.Diagnostics.AddError(
@@ -228,7 +245,7 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
     }
 
     // Set state with updated value.
-    state = NewSource(source)
+    state = NewSource(source, plan.AllowSameName)
     diags = resp.State.Set(ctx, &state)
     resp.Diagnostics.Append(diags...)
     if resp.Diagnostics.HasError() {
@@ -275,7 +292,7 @@ func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourc
         return
     }
 
-    state := NewSource(&sources[0])
+    state := NewSource(&sources[0], types.Bool{Null: true})
 
     // Set state with updated value.
     diags = resp.State.Set(ctx, &state)
