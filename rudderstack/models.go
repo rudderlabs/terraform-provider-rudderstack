@@ -9,6 +9,7 @@ type Source struct {
     ID                     types.String                    `tfsdk:"id"`
     Name                   types.String                    `tfsdk:"name"`
     Type                   types.String                    `tfsdk:"type"`
+    AllowSameName          types.Bool                      `tfsdk:"allow_same_name"`
     /* Time stamps are not config. Server side updates cause problems.
     CreatedAt              types.String                    `tfsdk:"created_at"`
     UpdatedAt              types.String                    `tfsdk:"updated_at"`
@@ -22,6 +23,8 @@ type Destination struct {
     ID                     types.String                    `tfsdk:"id"`
     Name                   types.String                    `tfsdk:"name"`
     Type                   types.String                    `tfsdk:"type"`
+    AllowSameName          types.Bool                      `tfsdk:"allow_same_name"`
+
     /* Time stamps are not config. Server side updates cause problems.
     CreatedAt              types.String                    `tfsdk:"created_at"`
     UpdatedAt              types.String                    `tfsdk:"updated_at"`
