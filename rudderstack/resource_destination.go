@@ -154,7 +154,7 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
             logStr += "Fix by following one of the options below:\n"
             logStr += "1) Invoke ImportState command to import the upstream resource into local terraform state.\n"
             logStr += "2) Resolve name conflict by changing the name of either upstream or downstream resource.\n"
-            logStr += "3) Force same name by setting ForceSameName=true in the terraform resource config."
+            logStr += "3) Force same name by setting allow_same_name=true in the terraform resource config."
             resp.Diagnostics.AddError(
                 "Anomaly creating destination",
                 logStr,
