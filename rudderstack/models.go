@@ -16,6 +16,7 @@ type Source struct {
     */
 
     Config                 *EncapsulatedConfigObject       `tfsdk:"config"`
+    IsEnabled              types.Bool                      `tfsdk:"enabled"`
 }
 
 // Destinations -
@@ -31,12 +32,14 @@ type Destination struct {
     */
 
     Config                 *EncapsulatedConfigObject       `tfsdk:"config"`
+    IsEnabled              types.Bool                      `tfsdk:"enabled"`
 }
 
 type Connection struct {
     ID                     types.String                    `tfsdk:"id"`
     SourceID               types.String                    `tfsdk:"source_id"`
     DestinationID          types.String                    `tfsdk:"destination_id"`
+    IsEnabled              types.Bool                      `tfsdk:"enabled"`
 }
 
 type EncapsulatedConfigObject struct {

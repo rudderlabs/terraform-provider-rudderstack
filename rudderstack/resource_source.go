@@ -2,7 +2,7 @@ package rudderstack
 
 import (
     "context"
-    // "strconv"
+    "strconv"
     "strings"
     //"time"
     "log"
@@ -48,6 +48,10 @@ func (r resourceSourceType) GetSchema(context context.Context) (tfsdk.Schema, di
             },
             */
             "config": GetConfigJsonObjectAttributeSchema(context),
+            "enabled": {
+                Type:     types.BoolType,
+                Computed: true,
+            },
         },
     }, nil
 }
@@ -76,6 +80,7 @@ func NewSource(clientSource *rudderclient.Source, allowSameName types.Bool) (Sou
         UpdatedAt                 : types.String{Value: string(clientSource.UpdatedAt.Format(time.RFC850))},
         */
         Config                    : newConfig,
+        IsEnabled                 : types.Bool{Value: clientSource.IsEnabled},
     }
 }
 
@@ -85,6 +90,7 @@ func (sdkSource Source) TerraformToApiClient() rudderclient.Source {
         Name                      : sdkSource.Name.Value,
         Type                      : sdkSource.Type.Value,
         Config                    : sdkSource.Config.ObjectPropertiesMap.TerraformToApiClient(),
+        IsEnabled                 : sdkSource.IsEnabled.Value,
     }
 }
 
@@ -200,6 +206,14 @@ func (r resourceSource) Read(ctx context.Context, req tfsdk.ReadResourceRequest,
         return
     }
 
+    if source.IsDeleted {
+        resp.Diagnostics.AddError(
+            "Target source deleted",
+            "Target source has been marked as deleted. Could not read sourceID "+sourceID+": "+err.Error(),
+        )
+        return
+    }
+
     state = NewSource(source, state.AllowSameName)
 
     // Set state with updated value.
@@ -257,42 +271,49 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
 func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
     var diags diag.Diagnostics
 
-    // Get source type/name from import request.
-    idFields := strings.Fields(req.ID)
-    sourceType := ""
-    sourceName := ""
-    if (len(idFields) == 1) {
-        sourceName = idFields[0]
-    } else if (len(idFields) == 2) {
-        sourceType = idFields[0]
-        sourceName = idFields[1]
-    } else {
-        resp.Diagnostics.AddError(
-            "Error reading import request",
-            "Could not read (sourceType, sourceName) for source import " + req.ID,
-        )
-        return
+    helpStr := "Either specify source ID or '{sourceType}/{sourceName}' for source import."
+    // Get source type/name from import request..
+    source, getErr := r.p.client.GetSource(req.ID)
+    if getErr != nil {
+        sourceType := ""
+        sourceName := ""
+
+        idFields := strings.SplitN(req.ID, "/", 2)
+        if (len(idFields) == 1) {
+            sourceName = idFields[0]
+        } else if (len(idFields) == 2) {
+            sourceType = idFields[0]
+            sourceName = idFields[1]
+        } else {
+            resp.Diagnostics.AddError(
+                "Error parsing source import request",
+		"Error parsing '" + req.ID + "'. " + helpStr,
+            )
+            return
+        }
+
+        // Get current value of source from API.
+        sources, err := r.p.client.FilterSources(sourceType, sourceName)
+        if err != nil {
+            resp.Diagnostics.AddError(
+                "Error filtering source",
+		"Could not filter sources by import request " + req.ID + ". Error:"+err.Error() + ". " + helpStr,
+            )
+            return
+        }
+
+        if len(sources) != 1 {
+            resp.Diagnostics.AddError(
+                "No matching source found",
+                "Number of sources matching import request '" + req.ID + "' is " + strconv.Itoa(len(sources)) + " != 1. " + helpStr,
+            )
+            return
+        }
+
+	source = &sources[0]
     }
 
-    // Get current value of source from API.
-    sources, err := r.p.client.FilterSources(sourceType, sourceName)
-    if err != nil {
-        resp.Diagnostics.AddError(
-            "Error filtering source",
-            "Could not filter sources by import request " + req.ID + ": "+err.Error(),
-        )
-        return
-    }
-
-    if len(sources) != 1 {
-        resp.Diagnostics.AddError(
-            "No matching source found",
-            "Number of sources matching import request ==" + req.ID + " is " + string(len(sources)) + "!= 1: "+err.Error(),
-        )
-        return
-    }
-
-    state := NewSource(&sources[0], types.Bool{Null: true})
+    state := NewSource(source, types.Bool{Null: true})
 
     // Set state with updated value.
     diags = resp.State.Set(ctx, &state)

@@ -3,7 +3,7 @@ package rudderstack
 import (
     "context"
     "strings"
-    // "strconv"
+    "strconv"
     // "time"
     "log"
     //"math/big"
@@ -32,6 +32,10 @@ func (r resourceConnectionType) GetSchema(_ context.Context) (tfsdk.Schema, diag
                 Type:     types.StringType,
                 Required: true,
             },
+            "enabled": {
+                Type:     types.BoolType,
+                Computed: true,
+            },
         },
     }, nil
 }
@@ -52,14 +56,16 @@ func NewConnection(clientConnection *rudderclient.Connection) (Connection) {
         ID                  : types.String{Value: clientConnection.ID},
         SourceID            : types.String{Value: clientConnection.SourceID},
         DestinationID       : types.String{Value: clientConnection.DestinationID},
+        IsEnabled           : types.Bool{Value: clientConnection.IsEnabled},
     }
 }
 
 func (sdkConnection Connection) ToClient() rudderclient.Connection {
     return rudderclient.Connection {
         ID                  : sdkConnection.ID.Value,
-        SourceID              : sdkConnection.SourceID.Value,
+        SourceID            : sdkConnection.SourceID.Value,
         DestinationID       : sdkConnection.DestinationID.Value,
+        IsEnabled           : sdkConnection.IsEnabled.Value,
     }
 }
 
@@ -149,6 +155,14 @@ func (r resourceConnection) Read(ctx context.Context, req tfsdk.ReadResourceRequ
         return
     }
 
+    if connection.IsDeleted {
+        resp.Diagnostics.AddError(
+            "Target connection deleted",
+            "Target connection has been marked as deleted. Could not read connection (connectionId) " + connectionId + ": " + err.Error(),
+        )
+        return
+    }
+
     state = NewConnection(connection)
 
     // Set state with updated value.
@@ -206,37 +220,44 @@ func (r resourceConnection) Update(ctx context.Context, req tfsdk.UpdateResource
 func (r resourceConnection) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
     var diags diag.Diagnostics
 
-    // Get src/dst ID from import request.
-    idFields := strings.Fields(req.ID)
-    if (len(idFields) != 2) {
-        resp.Diagnostics.AddError(
-            "Error reading import request",
-            "Could not read (sourceId, destinationId) for connection import " + req.ID,
-        )
-        return
-    }
-    sourceId := idFields[0]
-    destinationId := idFields[1]
+    helpStr := "Either specify connection ID or '{sourceId},{destinationId}' for destination import."
+    connection, getErr := r.p.client.GetConnection(req.ID)
 
-    // Get current connection value from API.
-    connections, err := r.p.client.FilterConnections(sourceId, destinationId)
-    if err != nil {
-        resp.Diagnostics.AddError(
-            "Error filtering connection",
-            "Could not read connection (sourceId, destinationId) = (" + sourceId + ","+ destinationId + ") : " + err.Error(),
-        )
-        return
+    if (getErr != nil) {
+        // Get src/dst ID from import request.
+        idFields := strings.SplitN(req.ID, ",", 2)
+        if (len(idFields) != 2) {
+            resp.Diagnostics.AddError(
+                "Error parsing connection import request",
+                "Could not parse " + req.ID + ". " + helpStr,
+            )
+            return
+        }
+        sourceId := idFields[0]
+        destinationId := idFields[1]
+
+        // Get current connection value from API.
+        connections, err := r.p.client.FilterConnections(sourceId, destinationId)
+        if err != nil {
+            resp.Diagnostics.AddError(
+                "Error filtering connection",
+		"Could not filter conections by import request " + req.ID + ". Error:"+err.Error() + ". " + helpStr,
+            )
+            return
+        }
+
+        if len(connections) != 1 {
+            resp.Diagnostics.AddError(
+                "No matching connection found",
+                "Number of connections matching import request '" + req.ID + "' is " + strconv.Itoa(len(connections)) + " != 1. " + helpStr,
+            )
+            return
+        }
+
+	connection = &connections[0]
     }
 
-    if len(connections) != 1 {
-        resp.Diagnostics.AddError(
-            "No matching connection found",
-            "Could not find any connection matching (src,dst) = (" + sourceId + ","+ destinationId + "): " + err.Error(),
-        )
-        return
-    }
-
-    state := NewConnection(&connections[0])
+    state := NewConnection(connection)
 
     // Set state with updated value.
     diags = resp.State.Set(ctx, &state)
