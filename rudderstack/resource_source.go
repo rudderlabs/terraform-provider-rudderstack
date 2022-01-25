@@ -207,11 +207,13 @@ func (r resourceSource) Read(ctx context.Context, req tfsdk.ReadResourceRequest,
     }
 
     if source.IsDeleted {
-        resp.Diagnostics.AddError(
+        resp.Diagnostics.AddWarning(
             "Target source deleted",
-            "Target source has been marked as deleted. Could not read sourceID "+sourceID+": "+err.Error(),
+            "Target source has been marked as deleted. Could not read sourceID "+sourceID+".",
         )
-        return
+
+	resp.State.RemoveResource(ctx)
+	return
     }
 
     state = NewSource(source, state.AllowSameName)

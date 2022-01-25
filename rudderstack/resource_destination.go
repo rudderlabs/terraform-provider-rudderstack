@@ -221,11 +221,13 @@ func (r resourceDestination) Read(ctx context.Context, req tfsdk.ReadResourceReq
     // log.Println("SDK dest read value=", destination.Config)
 
     if destination.IsDeleted {
-        resp.Diagnostics.AddError(
+        resp.Diagnostics.AddWarning(
             "Target destination deleted",
-            "Target destination has been marked as deleted. Could not read destinationID "+destinationID+": "+err.Error(),
+            "Target destination has been marked as deleted. Could not read destinationID "+destinationID+".",
         )
-        return
+
+	resp.State.RemoveResource(ctx)
+	return
     }
 
     state = NewDestination(destination, state.AllowSameName)

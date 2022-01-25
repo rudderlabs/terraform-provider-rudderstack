@@ -156,11 +156,12 @@ func (r resourceConnection) Read(ctx context.Context, req tfsdk.ReadResourceRequ
     }
 
     if connection.IsDeleted {
-        resp.Diagnostics.AddError(
+        resp.Diagnostics.AddWarning(
             "Target connection deleted",
-            "Target connection has been marked as deleted. Could not read connection (connectionId) " + connectionId + ": " + err.Error(),
+            "Target connection has been marked as deleted. Could not read connectionID "+connectionId+".",
         )
-        return
+	resp.State.RemoveResource(ctx)
+	return
     }
 
     state = NewConnection(connection)
@@ -220,7 +221,7 @@ func (r resourceConnection) Update(ctx context.Context, req tfsdk.UpdateResource
 func (r resourceConnection) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
     var diags diag.Diagnostics
 
-    helpStr := "Either specify {connectionGuid} or {sourceId},{destinationId} for connection import."
+    helpStr := "Either specify {connectionGuid} or {sourceGuid},{destinationGuid} for connection import."
     connection, getErr := r.p.client.GetConnection(req.ID)
 
     if (getErr != nil) {
