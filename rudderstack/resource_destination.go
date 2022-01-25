@@ -287,7 +287,7 @@ func (r resourceDestination) Update(ctx context.Context, req tfsdk.UpdateResourc
 func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
     var diags diag.Diagnostics
 
-    helpStr := "Either specify destination ID or '{destinationType}/{destinationName}' for destination import."
+    helpStr := "Either specify {destinationGuid} or {destinationName} or {destinationType}/{destinationName} for destination import."
 
     destination, getErr := r.p.client.GetDestination(req.ID)
     if getErr != nil {
@@ -304,7 +304,7 @@ func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportRe
         } else {
             resp.Diagnostics.AddError(
                 "Error parsing destination import request",
-		"Error parsing '" + req.ID + "'. " + helpStr,
+                "Error parsing '" + req.ID + "'. " + helpStr,
             )
             return
         }
@@ -314,7 +314,7 @@ func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportRe
         if err != nil {
             resp.Diagnostics.AddError(
                 "Error filtering destination",
-		"Could not filter destinations by import request '" + req.ID + "'. Error:"+err.Error() + ". " + helpStr,
+                "Could not filter destinations by import request '" + req.ID + "'. Error:"+err.Error() + ". " + helpStr,
             )
             return
         }
@@ -327,7 +327,7 @@ func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportRe
             return
         }
 
-	destination = &destinations[0]
+        destination = &destinations[0]
     }
 
     state := NewDestination(destination, types.Bool{Null: true})

@@ -271,7 +271,7 @@ func (r resourceSource) Update(ctx context.Context, req tfsdk.UpdateResourceRequ
 func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
     var diags diag.Diagnostics
 
-    helpStr := "Either specify source ID or '{sourceType}/{sourceName}' for source import."
+    helpStr := "Either specify {sourceGuid} or {sourceName} or {sourceType}/{sourceName} for source import."
     // Get source type/name from import request..
     source, getErr := r.p.client.GetSource(req.ID)
     if getErr != nil {
@@ -287,7 +287,7 @@ func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourc
         } else {
             resp.Diagnostics.AddError(
                 "Error parsing source import request",
-		"Error parsing '" + req.ID + "'. " + helpStr,
+                "Error parsing '" + req.ID + "'. " + helpStr,
             )
             return
         }
@@ -297,7 +297,7 @@ func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourc
         if err != nil {
             resp.Diagnostics.AddError(
                 "Error filtering source",
-		"Could not filter sources by import request " + req.ID + ". Error:"+err.Error() + ". " + helpStr,
+                "Could not filter sources by import request " + req.ID + ". Error:"+err.Error() + ". " + helpStr,
             )
             return
         }
@@ -310,7 +310,7 @@ func (r resourceSource) ImportState(ctx context.Context, req tfsdk.ImportResourc
             return
         }
 
-	source = &sources[0]
+        source = &sources[0]
     }
 
     state := NewSource(source, types.Bool{Null: true})

@@ -101,7 +101,7 @@ func (r resourceConnection) Create(ctx context.Context, req tfsdk.CreateResource
 
     state := Connection{}
     if len(existingConnections) == 0 {
-	log.Println("Existing connection not found, src=", clientConnection.SourceID, ", dst=", clientConnection.DestinationID)
+        log.Println("Existing connection not found, src=", clientConnection.SourceID, ", dst=", clientConnection.DestinationID)
         // Create new connection. 
         createdConnection, err2 := r.p.client.CreateConnection(clientConnection)
         if err2 != nil {
@@ -114,7 +114,7 @@ func (r resourceConnection) Create(ctx context.Context, req tfsdk.CreateResource
 
         state = NewConnection(createdConnection)
     } else if len(existingConnections) == 1 {
-	log.Println("ReUsing existing connection")
+        log.Println("ReUsing existing connection")
         // Use existing connection.
         state = NewConnection(&existingConnections[0])
     } else {
@@ -220,7 +220,7 @@ func (r resourceConnection) Update(ctx context.Context, req tfsdk.UpdateResource
 func (r resourceConnection) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
     var diags diag.Diagnostics
 
-    helpStr := "Either specify connection ID or '{sourceId},{destinationId}' for destination import."
+    helpStr := "Either specify {connectionGuid} or {sourceId},{destinationId} for connection import."
     connection, getErr := r.p.client.GetConnection(req.ID)
 
     if (getErr != nil) {
@@ -241,7 +241,7 @@ func (r resourceConnection) ImportState(ctx context.Context, req tfsdk.ImportRes
         if err != nil {
             resp.Diagnostics.AddError(
                 "Error filtering connection",
-		"Could not filter conections by import request " + req.ID + ". Error:"+err.Error() + ". " + helpStr,
+                "Could not filter conections by import request " + req.ID + ". Error:"+err.Error() + ". " + helpStr,
             )
             return
         }
@@ -254,7 +254,7 @@ func (r resourceConnection) ImportState(ctx context.Context, req tfsdk.ImportRes
             return
         }
 
-	connection = &connections[0]
+        connection = &connections[0]
     }
 
     state := NewConnection(connection)
