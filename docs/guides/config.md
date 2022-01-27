@@ -41,7 +41,7 @@ Config attribute for the supported source/destination resource is set as follows
       "nonInteraction": { bool = true },
       "sendUserId": { bool = true },
       "dimensions": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "myDimensionSource" },
@@ -51,7 +51,7 @@ Config attribute for the supported source/destination resource is set as follows
         ]
       },
       "metrics": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "myMetricSource" },
@@ -61,7 +61,7 @@ Config attribute for the supported source/destination resource is set as follows
         ]
       },
       "contentGroupings": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "myContentGroupingSource" },
@@ -119,5 +119,5 @@ Depending on the kind of JSON value, *EXACTLY ONE* of the following attributes m
 - **num** (Number) Set this attribute if the JSON value is an integer or float.
 - **str** (String) Set this attribute if the JSON value is a string.
 - **object** (Attributes Map) Set this attribute if the JSON value is an object. Define it as a string map, each value in attribute map following [this schema](#nestedatt--config--value)
-- **objects_list** (Attributes List) Set this attribute if the JSON value is a list of objects. Define it as a list, each value in the attribute list following [this schema](#nestedatt--config--value)
+- **list** (Attributes List) Set this attribute if the JSON value is a list of objects. Define it as a list, each value in the attribute list following [this schema](#nestedatt--config--value)
 
