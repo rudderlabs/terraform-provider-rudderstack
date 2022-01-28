@@ -15,7 +15,7 @@ Best way for creating source or destination config for use with Terraform Rudder
    1. Clone the source repo of terraform-provider-rudderstack.
       *     git clone https://github.com/rudderlabs/terraform-provider-rudderstack
       *     cd terraform-provider-rudderstack
-   1. Make sure that all dependencies of the python script are installed.
+   1. Make sure that all dependencies of the python script are installed and updated.
       *     pip3 install -U -r ./scripts/requirements.txt
    1. Run deployedConfig2Terraform.py in the scripts folder to convert config currently deployed on the server into Terraform CLI.
       *     python3 scripts/deployedConfig2Terraform.py {RudderStack_Workspace_Token}
