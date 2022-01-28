@@ -91,7 +91,7 @@ rudderstack provider config as in examples below.
 |--------------------|---------------------------------------------------------|
 |{}                  | { object = {} }                                         |
 |{"a":1,"b":"strval"}| { object = {"a":{int = 1},"b":{str="strval"}} }         |
-|{"a":[]}            | { object = {"a":{object_list=[]}} }                     |
+|{"a":[]}            | { object = {"a":{list=[]}} }                     |
 |{"a":{}}            | { object = {"a":{object={}}} }                     |
 
 #### Attributes
@@ -109,7 +109,7 @@ Each JSON value can be converted into equivalent rudderstack provider config as 
 |"arbit string"      | String                   | { str = "arbit string" }                                |
 |true                | Boolean                  | { bool = true }                                         |
 |{"a":1,"b":"strval"}| JSON Object              | { object = {"a":{int = 1},"b":{str="strval"}} }         |
-|[{}, {"a":1}]       | JSON List of Objects     | { object_list = [<BR/>.  { object = {} },<BR/>.  { object = {"a":{int = 1},"b":{str="strval"}} }<BR/>] }|
+|[{}, 2, {"a":1}]    | List of JSON Elements    | { list = [<BR/>.  { object = {} },<BR/>. 2,<BR/>.  { object = {"a":{int = 1},"b":{str="strval"}} }<BR/>] }|
 
 #### Attributes:
 
@@ -119,5 +119,5 @@ Depending on the kind of JSON value, *EXACTLY ONE* of the following attributes m
 - **num** (Number) Set this attribute if the JSON value is an integer or float.
 - **str** (String) Set this attribute if the JSON value is a string.
 - **object** (Attributes Map) Set this attribute if the JSON value is an object. Define it as a string map, each value in attribute map following [this schema](#nestedatt--config--value)
-- **list** (Attributes List) Set this attribute if the JSON value is a list of objects. Define it as a list, each value in the attribute list following [this schema](#nestedatt--config--value)
-
+- **list** (Elements List) Set this attribute if the JSON value is a list. Define it as a list, each value in the attribute list following [this schema](#nestedatt--config--value)
+- **objects_list** (Objects List, Obsolete) This is obsolete. Replace all occurences by list.
