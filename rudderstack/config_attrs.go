@@ -128,11 +128,11 @@ func GetJsonElementAttrMapSchema(context context.Context, maxDepth int) map[stri
 
 // Takes a Terraform side map of properties of an arbitrary object.
 // Converts it into an equivalent JSON object as acceptable to the Rudder API client.
-func (objectPropertiesMap JsonObjectMap) TerraformToApiClient() map[string](rudderclient.SingleConfigPropertyValue) {
-	// log.Println("Starting JsonObjectTerraformToApiClient for SDK JsonObjectMap", objectPropertiesMap)
+func (jsonObjectMap JsonObjectMap) TerraformToApiClient() map[string](rudderclient.SingleConfigPropertyValue) {
+	// log.Println("Starting JsonObjectTerraformToApiClient for SDK JsonObjectMap", jsonObjectMap)
 	clientConfig := map[string](rudderclient.SingleConfigPropertyValue){}
 
-	for propertyName, singleObjectProperty := range objectPropertiesMap {
+	for propertyName, singleObjectProperty := range jsonObjectMap {
 		if !singleObjectProperty.StrValue.Null {
 			clientConfig[propertyName] = singleObjectProperty.StrValue.Value
 		} else if !singleObjectProperty.NumValue.Null {
@@ -247,23 +247,23 @@ func ConvertApiClientConfigToTerraform(
 	if clientConfig == nil {
 		return nil
 	}
-	objectPropertiesMap := make(JsonObjectMap, len(*clientConfig))
+	jsonObjectMap := make(JsonObjectMap, len(*clientConfig))
 	for propName, propValue := range *clientConfig {
 		// log.Println(propName, propValue)
-		objectPropertiesMap[propName] = *ConvertApiClientElementToTerraform(&propValue)
+		jsonObjectMap[propName] = *ConvertApiClientElementToTerraform(&propValue)
 		//if (propName == "android") {
-		//        log.Println("Android value we got is ", objectPropertiesMap[propName], "propValue was", propValue);
+		//        log.Println("Android value we got is ", jsonObjectMap[propName], "propValue was", propValue);
 		//}
 	}
 	sdkConfig := EncapsulatedConfigObject{
-		JsonObjectMap: objectPropertiesMap,
+		JsonObjectMap: jsonObjectMap,
 	}
 	return &sdkConfig
 }
 
-func (objectPropertiesMap JsonObjectMap) Validate() error {
+func (jsonObjectMap JsonObjectMap) Validate() error {
 	var retErr error
-	for _, singleObjectProperty := range objectPropertiesMap {
+	for _, singleObjectProperty := range jsonObjectMap {
 		retErr = combineError(retErr, singleObjectProperty.Validate())
 	}
 	return retErr
