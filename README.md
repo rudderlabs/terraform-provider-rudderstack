@@ -13,8 +13,12 @@ This repo implements RudderStack terraform provider. Use it to access RudderStac
 Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
 
 # Getting Started
-Good place to start with Terraform is [here](https://www.terraform.io/intro/index.html). Next, checkout example configuration for RudderStack Terraform Provider [below](#example). Detailed documentation for RudderStack Terraform
+Good place to start with Terraform is [here](https://www.terraform.io/intro/index.html). Next, checkout how to setup example configuration for RudderStack Terraform Provider [below](#example). Detailed documentation for RudderStack Terraform
 Provider is available [here](docs/index.md). 
+
+## Scripting Flowchart
+Follow the flowchart below to create your Terraform scripts.
+![Flowchart for building and managing RudderStack's Terraform config](docs/TerraformScriptingFlowchart.png)
 
 <a id="example"></a>
 # Setup dev and build env 
