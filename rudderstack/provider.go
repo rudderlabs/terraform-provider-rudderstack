@@ -41,12 +41,12 @@ func (p *provider) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics)
             "schema_host": {
                 Type:     types.StringType,
                 Optional: true,
-                Computed: true,
+                // Computed: true,
             },
             "schema_token": {
                 Type:      types.StringType,
                 Optional:  true,
-                Computed:  true,
+                // Computed:  true,
                 Sensitive: true,
             },
         },
@@ -126,11 +126,10 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
     var schemaHost string
     if config.SchemaHost.Unknown {
         // Cannot connect to client with an unknown value
-        resp.Diagnostics.AddError(
-            "Unable to create client",
-            "Cannot use unknown value as schema host",
+        resp.Diagnostics.AddWarning(
+            "Unknown schema host when building client",
+            "Value for schema host unspecified",
         )
-        return
     }
 
     if config.SchemaHost.Null {
@@ -141,22 +140,20 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 
     if schemaHost == "" {
         // Error vs warning - empty value must stop execution
-        resp.Diagnostics.AddError(
+        resp.Diagnostics.AddWarning(
             "Unable to find schema host",
-            "Schema Host cannot be an empty string",
+            "Schema Host determined to be an empty string",
         )
-        return
     }
 
     // User must provide a schema token to the provider
     var schemaToken string
     if config.SchemaToken.Unknown {
         // Cannot connect to client with an unknown value
-        resp.Diagnostics.AddError(
-            "Unable to create client",
-            "Cannot use unknown value as schema token",
+        resp.Diagnostics.AddWarning(
+            "Unknown schema token when building client",
+            "Value for schema token unspecified",
         )
-        return
     }
 
     if config.SchemaToken.Null {
@@ -167,11 +164,10 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 
     if schemaToken == "" {
         // Error vs warning - empty value must stop execution
-        resp.Diagnostics.AddError(
+        resp.Diagnostics.AddWarning(
             "Unable to find schema token",
-            "Schema token cannot be an empty string",
+            "Schema token determined to be an empty string",
         )
-        return
     }
 
     // Create a new HashiCups client and set it to the provider client

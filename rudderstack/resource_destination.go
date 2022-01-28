@@ -2,7 +2,7 @@ package rudderstack
 
 import (
     "context"
-    // "strconv"
+    "strconv"
     "strings"
     // "time"
     "log"
@@ -46,6 +46,10 @@ func (r resourceDestinationType) GetSchema(context context.Context) (tfsdk.Schem
                 Computed: true,
             },*/
             "config": GetConfigJsonObjectAttributeSchema(context),
+            "enabled": {
+                Type:     types.BoolType,
+                Computed: true,
+            },
         },
     }, nil
 }
@@ -82,6 +86,7 @@ func NewDestination(clientDestination *rudderclient.Destination, allowSameName t
         UpdatedAt                 : types.String{Value: string(clientDestination.UpdatedAt.Format(time.RFC850))},
         */
         Config                    : newConfig,
+        IsEnabled                 : types.Bool{Value: clientDestination.IsEnabled},
     }
     // log.Println("SDK dest config created.", newConfig.ObjectPropertiesMap)
     return retval
@@ -94,6 +99,7 @@ func (sdkDestination Destination) ToClient() rudderclient.Destination {
         Name                      : sdkDestination.Name.Value,
         Type                      : sdkDestination.Type.Value,
         Config                    : sdkDestination.Config.ObjectPropertiesMap.TerraformToApiClient(),
+        IsEnabled                 : sdkDestination.IsEnabled.Value,
     }
     // log.Println("Client dest config created.")
     return retval
@@ -154,7 +160,7 @@ func (r resourceDestination) Create(ctx context.Context, req tfsdk.CreateResourc
             logStr += "Fix by following one of the options below:\n"
             logStr += "1) Invoke ImportState command to import the upstream resource into local terraform state.\n"
             logStr += "2) Resolve name conflict by changing the name of either upstream or downstream resource.\n"
-            logStr += "3) Force same name by setting ForceSameName=true in the terraform resource config."
+            logStr += "3) Force same name by setting allow_same_name=true in the terraform resource config."
             resp.Diagnostics.AddError(
                 "Anomaly creating destination",
                 logStr,
@@ -213,6 +219,16 @@ func (r resourceDestination) Read(ctx context.Context, req tfsdk.ReadResourceReq
         return
     }
     // log.Println("SDK dest read value=", destination.Config)
+
+    if destination.IsDeleted {
+        resp.Diagnostics.AddWarning(
+            "Target destination deleted",
+            "Target destination has been marked as deleted. Could not read destinationID "+destinationID+".",
+        )
+
+	resp.State.RemoveResource(ctx)
+	return
+    }
 
     state = NewDestination(destination, state.AllowSameName)
     // log.Println("SDK dest value being set=", state.Config)
@@ -273,42 +289,50 @@ func (r resourceDestination) Update(ctx context.Context, req tfsdk.UpdateResourc
 func (r resourceDestination) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
     var diags diag.Diagnostics
 
-    // Get destination type/name from import request.
-    idFields := strings.Fields(req.ID)
-    destinationType := ""
-    destinationName := ""
-    if (len(idFields) == 1) {
-        destinationName = idFields[0]
-    } else if (len(idFields) == 2) {
-        destinationType = idFields[0]
-        destinationName = idFields[1]
-    } else {
-        resp.Diagnostics.AddError(
-            "Error reading import request",
-            "Could not read (destinationType, destinationName) for destination import " + req.ID,
-        )
-        return
+    helpStr := "Either specify {destinationGuid} or {destinationName} or {destinationType}/{destinationName} for destination import."
+
+    destination, getErr := r.p.client.GetDestination(req.ID)
+    if getErr != nil {
+        // Get destination type/name from import request.
+        destinationType := ""
+        destinationName := ""
+
+        idFields := strings.SplitN(req.ID, "/", 2)
+        if (len(idFields) == 1) {
+            destinationName = idFields[0]
+        } else if (len(idFields) == 2) {
+            destinationType = idFields[0]
+            destinationName = idFields[1]
+        } else {
+            resp.Diagnostics.AddError(
+                "Error parsing destination import request",
+                "Error parsing '" + req.ID + "'. " + helpStr,
+            )
+            return
+        }
+
+        // Get current value of destination from API.
+        destinations, err := r.p.client.FilterDestinations(destinationType, destinationName)
+        if err != nil {
+            resp.Diagnostics.AddError(
+                "Error filtering destination",
+                "Could not filter destinations by import request '" + req.ID + "'. Error:"+err.Error() + ". " + helpStr,
+            )
+            return
+        }
+
+        if len(destinations) != 1 {
+            resp.Diagnostics.AddError(
+                "No matching destination found",
+                "Number of destinations matching import request '" + req.ID + "' is " + strconv.Itoa(len(destinations)) + " != 1. " + helpStr,
+            )
+            return
+        }
+
+        destination = &destinations[0]
     }
 
-    // Get current value of destination from API.
-    destinations, err := r.p.client.FilterDestinations(destinationType, destinationName)
-    if err != nil {
-        resp.Diagnostics.AddError(
-            "Error filtering destination",
-            "Could not filter destinations by import request " + req.ID + ": "+err.Error(),
-        )
-        return
-    }
-
-    if len(destinations) != 1 {
-        resp.Diagnostics.AddError(
-            "No matching destination found",
-            "Number of destinations matching import request ==" + req.ID + " is " + string(len(destinations)) + "!= 1: " + err.Error(),
-        )
-        return
-    }
-
-    state := NewDestination(&destinations[0], types.Bool{Null: true})
+    state := NewDestination(destination, types.Bool{Null: true})
 
     // Set state with updated value.
     diags = resp.State.Set(ctx, &state)
