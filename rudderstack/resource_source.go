@@ -89,7 +89,7 @@ func (sdkSource Source) TerraformToApiClient() rudderclient.Source {
         ID                        : sdkSource.ID.Value,
         Name                      : sdkSource.Name.Value,
         Type                      : sdkSource.Type.Value,
-        Config                    : sdkSource.Config.ObjectPropertiesMap.TerraformToApiClient(),
+        Config                    : sdkSource.Config.JsonObjectMap.TerraformToApiClient(),
         IsEnabled                 : sdkSource.IsEnabled.Value,
     }
 }

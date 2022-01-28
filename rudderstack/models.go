@@ -43,24 +43,16 @@ type Connection struct {
 }
 
 type EncapsulatedConfigObject struct {
-	ObjectPropertiesMap ObjectPropertiesMap `tfsdk:"object"`
+	JsonObjectMap JsonObjectMap `tfsdk:"object"`
 }
 
-type ObjectPropertiesMap map[string]SingleObjectProperty
+type JsonObjectMap map[string]JsonElement
 
-type BaseElementProperty struct {
-	StrValue  types.String `tfsdk:"str"`
-	NumValue  types.Number `tfsdk:"num"`
-	BoolValue types.Bool   `tfsdk:"bool"`
-}
-
-type CompoundElementProperty struct {
-	BaseElementProperty
-	ObjectValue *ObjectPropertiesMap `tfsdk:"object"`
-}
-
-type SingleObjectProperty struct {
-	CompoundElementProperty
-	ListValue *[]CompoundElementProperty        `tfsdk:"list"`
-	ObjectsListValue *[]CompoundElementProperty `tfsdk:"objects_list"`
+type JsonElement struct {
+	StrValue  types.String          `tfsdk:"str"`
+	NumValue  types.Number          `tfsdk:"num"`
+	BoolValue types.Bool            `tfsdk:"bool"`
+	ObjectValue *JsonObjectMap      `tfsdk:"object"`
+	ListValue *[]JsonElement        `tfsdk:"list"`
+	ObjectsListValue *[]JsonElement `tfsdk:"objects_list"`
 }

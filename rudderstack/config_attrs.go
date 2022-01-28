@@ -95,15 +95,7 @@ func GetJsonElementAttrMapSchema(context context.Context, maxDepth int) map[stri
 			Optional:           true,
 			DeprecationMessage: "Rename all occurences of attributes named 'objects_list' with 'list'.",
 			Attributes: tfsdk.ListNestedAttributes(
-				map[string]tfsdk.Attribute{
-					"object": {
-						Required: true,
-						Attributes: tfsdk.MapNestedAttributes(
-							nextLevelObjectAsPropertiesListAttrMap,
-							tfsdk.MapNestedAttributesOptions{},
-						),
-					},
-				},
+				nextLevelObjectAsPropertiesListAttrMap,
 				tfsdk.ListNestedAttributesOptions{},
 			),
 		}
@@ -111,27 +103,7 @@ func GetJsonElementAttrMapSchema(context context.Context, maxDepth int) map[stri
 		objectAsPropertiesListAttrMap["list"] = tfsdk.Attribute{
 			Optional: true,
 			Attributes: tfsdk.ListNestedAttributes(
-				map[string]tfsdk.Attribute{
-					"str": {
-						Type:     types.StringType,
-						Optional: true,
-					},
-					"num": {
-						Type:     types.NumberType,
-						Optional: true,
-					},
-					"bool": {
-						Type:     types.BoolType,
-						Optional: true,
-					},
-					"object": {
-						Required: true,
-						Attributes: tfsdk.MapNestedAttributes(
-							nextLevelObjectAsPropertiesListAttrMap,
-							tfsdk.MapNestedAttributesOptions{},
-						),
-					},
-				},
+				nextLevelObjectAsPropertiesListAttrMap,
 				tfsdk.ListNestedAttributesOptions{},
 			),
 		}
@@ -155,57 +127,46 @@ func GetJsonElementAttrMapSchema(context context.Context, maxDepth int) map[stri
 }
 
 // Takes a Terraform side map of properties of an arbitrary object.
-// If it is actually an elemental object, then a converted JSON object is returned.
-// Else, nil is returned.
-func (baseElementalProperty BaseElementProperty) TerraformToApiClient() rudderclient.SingleConfigPropertyValue {
-	if !baseElementalProperty.StrValue.Null {
-		return baseElementalProperty.StrValue.Value
-	} else if !baseElementalProperty.NumValue.Null {
-		return baseElementalProperty.NumValue.Value
-	} else if !baseElementalProperty.BoolValue.Null {
-		return baseElementalProperty.BoolValue.Value
-	} else {
-		return nil
-	}
-}
-
-// Takes a Terraform side map of properties of an arbitrary object.
 // Converts it into an equivalent JSON object as acceptable to the Rudder API client.
-func (objectPropertiesMap ObjectPropertiesMap) TerraformToApiClient() map[string](rudderclient.SingleConfigPropertyValue) {
-	// log.Println("Starting JsonObjectTerraformToApiClient for SDK ObjectPropertiesMap", objectPropertiesMap)
+func (objectPropertiesMap JsonObjectMap) TerraformToApiClient() map[string](rudderclient.SingleConfigPropertyValue) {
+	// log.Println("Starting JsonObjectTerraformToApiClient for SDK JsonObjectMap", objectPropertiesMap)
 	clientConfig := map[string](rudderclient.SingleConfigPropertyValue){}
 
 	for propertyName, singleObjectProperty := range objectPropertiesMap {
-		elementalProperty := singleObjectProperty.TerraformToApiClient()
-
-		var listValue *[]CompoundElementProperty
-		if singleObjectProperty.ListValue != nil {
-			listValue = singleObjectProperty.ListValue
-		} else if singleObjectProperty.ObjectsListValue != nil {
-			listValue = singleObjectProperty.ObjectsListValue
-		}
-
-		if elementalProperty != nil {
-			clientConfig[propertyName] = elementalProperty
+		if !singleObjectProperty.StrValue.Null {
+			clientConfig[propertyName] = singleObjectProperty.StrValue.Value
+		} else if !singleObjectProperty.NumValue.Null {
+			clientConfig[propertyName] = singleObjectProperty.NumValue.Value
+		} else if !singleObjectProperty.BoolValue.Null {
+			clientConfig[propertyName] = singleObjectProperty.BoolValue.Value
 		} else if singleObjectProperty.ObjectValue != nil {
 			clientConfig[propertyName] = singleObjectProperty.ObjectValue.TerraformToApiClient()
-		} else if listValue != nil {
-			clientObjList := make([]rudderclient.SingleConfigPropertyValue, len(*listValue))
-			for index2, encapsulatedObject := range *listValue {
-				clientObjList[index2] = encapsulatedObject.ObjectValue.TerraformToApiClient()
+		} else {
+			var listValue *[]JsonElement
+			if singleObjectProperty.ListValue != nil {
+				listValue = singleObjectProperty.ListValue
+			} else if singleObjectProperty.ObjectsListValue != nil {
+				listValue = singleObjectProperty.ObjectsListValue
 			}
-			clientConfig[propertyName] = clientObjList
+
+			if listValue != nil {
+				clientObjList := make([]rudderclient.SingleConfigPropertyValue, len(*listValue))
+				for index2, encapsulatedObject := range *listValue {
+					clientObjList[index2] = encapsulatedObject.ObjectValue.TerraformToApiClient()
+				}
+				clientConfig[propertyName] = clientObjList
+			}
 		}
 	}
 
-	// log.Println("Completed ToClient for SDK ObjectPropertiesMap", clientConfig)
+	// log.Println("Completed ToClient for SDK JsonObjectMap", clientConfig)
 	return clientConfig
 }
 
 // Takes an arbitrary JSON object compatible with API client as input.
 // Returns an object properties map compatible with Terraform.
-func ConvertApiClientObjectToTerraform(objectProperties *map[string](interface{})) *ObjectPropertiesMap {
-	sdkPropertiesMap := make(ObjectPropertiesMap)
+func ConvertApiClientObjectToTerraform(objectProperties *map[string](interface{})) *JsonObjectMap {
+	sdkPropertiesMap := make(JsonObjectMap)
 	for propName, propValue := range *objectProperties {
 		typeMappedPropValue := propValue.(rudderclient.SingleConfigPropertyValue)
 		sdkPropertiesMap[propName] = *ConvertApiClientElementToTerraform(&typeMappedPropValue)
@@ -218,34 +179,22 @@ func ConvertApiClientObjectToTerraform(objectProperties *map[string](interface{}
 
 // Takes an arbitrary JSON array compatible with API client as input.
 // Returns an array of config objects compatible with Terraform.
-func ConvertApiClientArrayToTerraform(objectArray *[](rudderclient.SingleConfigPropertyValue)) *[]CompoundElementProperty {
-	compoundElementsArray := make([]CompoundElementProperty, len(*objectArray))
+func ConvertApiClientArrayToTerraform(objectArray *[](interface{})) *[]JsonElement {
+	jsonElementsArray := make([]JsonElement, len(*objectArray))
 
-	for index, object := range *objectArray {
-		typeMappedObject, okmap := object.(map[string](interface{}))
-		if okmap {
-			compoundElementsArray[index] = CompoundElementProperty{
-				ObjectValue: ConvertApiClientObjectToTerraform(&typeMappedObject),
-			}
-		} else {
-			baseElementProperty, okBaseElement := ConvertApiClientBaseElementToTerraform(&object)
-			if okBaseElement {
-				compoundElementsArray[index].BaseElementProperty = *baseElementProperty
-			} else {
-				log.Panic(
-					"Currently, we can only have array containing objects or base elements. NetiherObjectNorElemental Value =",
-					object,
-					" & Type=",
-					reflect.TypeOf(object))
-			}
-		}
+	for index, singleConfigPropertyValue := range *objectArray {
+		typedProperty, oktypedProperty := (singleConfigPropertyValue).(rudderclient.SingleConfigPropertyValue)
+		jsonElementsArray[index] = *ConvertApiClientElementToTerraform(&typedProperty)
 	}
 
-	return &compoundElementsArray
+	return &jsonElementsArray
 }
 
-func ConvertApiClientBaseElementToTerraform(propValue *rudderclient.SingleConfigPropertyValue) (*BaseElementProperty, bool) {
-	sdkValue := BaseElementProperty{
+// A arbtirary JSON value(including JSON objects, JSON arrays or even elementry values) is called JSON element.
+// Takes an arbitrary JSON element compatible with API client as input.
+// Returns an instance of JsonElement compatible with Terraform.
+func ConvertApiClientElementToTerraform(propValue *rudderclient.SingleConfigPropertyValue) *JsonElement {
+	sdkValue := JsonElement{
 		NumValue:  types.Number{Null: true},
 		BoolValue: types.Bool{Null: true},
 		StrValue:  types.String{Null: true},
@@ -255,57 +204,36 @@ func ConvertApiClientBaseElementToTerraform(propValue *rudderclient.SingleConfig
 	if oknum {
 		sdkValue.NumValue.Value = big.NewFloat(numValue)
 		sdkValue.NumValue.Null = false
-		return &sdkValue, true
+		return &sdkValue
 	}
 
 	boolValue, okbool := (*propValue).(bool)
 	if okbool {
 		sdkValue.BoolValue.Value = boolValue
 		sdkValue.BoolValue.Null = false
-		return &sdkValue, true
+		return &sdkValue
 	}
 
 	strValue, okstr := (*propValue).(string)
 	if okstr {
 		sdkValue.StrValue.Value = strValue
 		sdkValue.StrValue.Null = false
-		return &sdkValue, true
+		return &sdkValue
 	}
 
-	return &sdkValue, false
-}
-
-// A arbtirary JSON value(including JSON objects, JSON arrays or even elementry values) is called JSON element.
-// Takes an arbitrary JSON element compatible with API client as input.
-// Returns an instance of SingleObjectProperty compatible with Terraform.
-func ConvertApiClientElementToTerraform(propValue *rudderclient.SingleConfigPropertyValue) *SingleObjectProperty {
-	baseElementalValue, okBaseElement := ConvertApiClientBaseElementToTerraform(propValue)
-	sdkValue := SingleObjectProperty{
-		CompoundElementProperty: CompoundElementProperty{
-			BaseElementProperty: *baseElementalValue,
-		},
+	arrayValue, okarray := (*propValue).([]interface{})
+	if okarray {
+		sdkValue.ListValue = ConvertApiClientArrayToTerraform(&arrayValue)
+		return &sdkValue
 	}
 
-	if !okBaseElement {
-		arrayValue, okarray := (*propValue).([]rudderclient.SingleConfigPropertyValue)
-		if okarray {
-			compoundElementsArray := ConvertApiClientArrayToTerraform(&arrayValue)
-			if compoundElementsArray != nil {
-				sdkValue.ListValue = compoundElementsArray
-			} else {
-				log.Panic("Either have array of objects, or array of elemental values. Value=", propValue, " & Type=", reflect.TypeOf(propValue))
-			}
-			return &sdkValue
-		}
-
-		mapValue, okmap := (*propValue).(map[string]interface{})
-		if okmap {
-			sdkValue.ObjectValue = ConvertApiClientObjectToTerraform(&mapValue)
-			return &sdkValue
-		}
+	mapValue, okmap := (*propValue).(map[string]interface{})
+	if okmap {
+		sdkValue.ObjectValue = ConvertApiClientObjectToTerraform(&mapValue)
+		return &sdkValue
 	}
 
-	log.Panic("Invalid attribute value. Value=", propValue, " & Type=", reflect.TypeOf(propValue))
+	log.Panic("Invalid attribute value. Value=", *propValue, " & Type=", reflect.TypeOf(propValue))
 
 	// Never reaches here.
 	return nil
@@ -319,20 +247,21 @@ func ConvertApiClientConfigToTerraform(
 	if clientConfig == nil {
 		return nil
 	}
-	objectPropertiesMap := make(ObjectPropertiesMap, len(*clientConfig))
+	objectPropertiesMap := make(JsonObjectMap, len(*clientConfig))
 	for propName, propValue := range *clientConfig {
+		// log.Println(propName, propValue)
 		objectPropertiesMap[propName] = *ConvertApiClientElementToTerraform(&propValue)
 		//if (propName == "android") {
 		//        log.Println("Android value we got is ", objectPropertiesMap[propName], "propValue was", propValue);
 		//}
 	}
 	sdkConfig := EncapsulatedConfigObject{
-		ObjectPropertiesMap: objectPropertiesMap,
+		JsonObjectMap: objectPropertiesMap,
 	}
 	return &sdkConfig
 }
 
-func (objectPropertiesMap ObjectPropertiesMap) Validate() error {
+func (objectPropertiesMap JsonObjectMap) Validate() error {
 	var retErr error
 	for _, singleObjectProperty := range objectPropertiesMap {
 		retErr = combineError(retErr, singleObjectProperty.Validate())
@@ -340,71 +269,43 @@ func (objectPropertiesMap ObjectPropertiesMap) Validate() error {
 	return retErr
 }
 
-func (baseElementProperty BaseElementProperty) Validate(nullOk bool) (map[string]bool, error) {
+func (jsonElement JsonElement) Validate() error {
 	var retErr error
 	nonNulls := make(map[string]bool)
-	if !baseElementProperty.StrValue.Null {
+	if !jsonElement.StrValue.Null {
 		nonNulls["str"] = true
 	}
-	if !baseElementProperty.NumValue.Null {
+	if !jsonElement.NumValue.Null {
 		nonNulls["num"] = true
 	}
-	if !baseElementProperty.BoolValue.Null {
+	if !jsonElement.BoolValue.Null {
 		nonNulls["bool"] = true
 	}
 
-	if !nullOk && len(nonNulls) == 0 {
-		retErr = errors.New("Atleast one value must be set in the BaseElementProperty.")
-	} else if len(nonNulls) > 1 {
-		retErr = errors.New("Atmost one value kind can be set in the BaseElementProperty.")
-	}
-
-	return nonNulls, retErr
-}
-
-func (compoundElementProperty CompoundElementProperty) Validate(nullOk bool) (map[string]bool, error) {
-	nonNulls, retErr := compoundElementProperty.BaseElementProperty.Validate(true)
-
-	if compoundElementProperty.ObjectValue != nil {
+	if jsonElement.ObjectValue != nil {
 		nonNulls["object"] = true
-		retErr = combineError(retErr, compoundElementProperty.ObjectValue.Validate())
+		retErr = combineError(retErr, jsonElement.ObjectValue.Validate())
 	}
 
-	if !nullOk && len(nonNulls) == 0 {
-		noValueSetErr := errors.New("Atleast one value must be set in the CompoundElementProperty.")
-		combineError(retErr, noValueSetErr)
-	} else if len(nonNulls) > 1 {
-		multipleKindSetErr := errors.New("Atmost one value kind can be set in the CompoundElementProperty.")
-		retErr = combineError(retErr, multipleKindSetErr)
-	}
-
-	return nonNulls, retErr
-}
-
-func (singleObjectProperty SingleObjectProperty) Validate() error {
-	nonNulls, retErr := singleObjectProperty.CompoundElementProperty.Validate(true)
-
-	if singleObjectProperty.ListValue != nil {
+	if jsonElement.ListValue != nil {
 		nonNulls["list"] = true
-		for _, compoundElementProperty := range *singleObjectProperty.ListValue {
-			_, listElementErr := compoundElementProperty.Validate(false)
-			retErr = combineError(retErr, listElementErr)
+		for _, jsonElementListEntry := range *jsonElement.ListValue {
+			retErr = combineError(retErr, jsonElementListEntry.Validate())
 		}
 	}
 
-	if singleObjectProperty.ObjectsListValue != nil {
+	if jsonElement.ObjectsListValue != nil {
 		nonNulls["objects_list"] = true
-		for _, compoundElementProperty := range *singleObjectProperty.ObjectsListValue {
-			_, listElementErr := compoundElementProperty.Validate(false)
-			retErr = combineError(retErr, listElementErr)
+		for _, jsonElementListEntry := range *jsonElement.ObjectsListValue {
+			retErr = combineError(retErr, jsonElementListEntry.Validate())
 		}
 	}
 
 	if len(nonNulls) == 0 {
-		noValueSetErr := errors.New("Atleast one value must be set in the SingleObjectProperty.")
+		noValueSetErr := errors.New("Atleast one value must be set in the JsonElement.")
 		retErr = combineError(retErr, noValueSetErr)
 	} else if len(nonNulls) > 1 {
-		multipleKindSetErr := errors.New("Atmost one value kind can be set in the SingleObjectProperty.")
+		multipleKindSetErr := errors.New("Atmost one value kind can be set in the JsonElement.")
 		retErr = combineError(retErr, multipleKindSetErr)
 	}
 

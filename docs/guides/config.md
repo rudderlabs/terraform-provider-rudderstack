@@ -6,7 +6,7 @@ Configuration of RudderStack sources and destinations are JSON objects. Any such
 Best way for creating source or destination config for use with Terraform RudderStack provider is via [web UI](https://app.rudderstack.com/), using detailed steps that follow.
    1. Login into https://app.rudderstack.com/.
    1. Create your sources, destinations, connections and transformations using the web UI. 
-      1. [Note] Currently(v0.2.11), transformations are not supported yet.
+      1. [Note] Currently(v0.2.12), transformations are not supported yet.
    1. Obtain a Rudderstack workspace token, by following steps below.
       1. Visit https://app.rudderstack.com/home and login.
       1. Click on Settings at the bottom left.
