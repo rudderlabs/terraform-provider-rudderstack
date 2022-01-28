@@ -129,18 +129,18 @@ func GetJsonElementAttrMapSchema(context context.Context, maxDepth int) map[stri
 // Takes a Terraform side map of properties of an arbitrary object.
 // Converts it into an equivalent JSON object as acceptable to the Rudder API client.
 func (jsonObjectMap JsonObjectMap) TerraformToApiClient() map[string](rudderclient.SingleConfigPropertyValue) {
-	// log.Println("Starting JsonObjectTerraformToApiClient for SDK JsonObjectMap", jsonObjectMap)
-	clientConfig := map[string](rudderclient.SingleConfigPropertyValue){}
+	// log.Println("Starting TerraformToApiClient for SDK JsonObjectMap", jsonObjectMap)
+	clientSideObject := map[string](rudderclient.SingleConfigPropertyValue){}
 
 	for propertyName, singleObjectProperty := range jsonObjectMap {
 		if !singleObjectProperty.StrValue.Null {
-			clientConfig[propertyName] = singleObjectProperty.StrValue.Value
+			clientSideObject[propertyName] = singleObjectProperty.StrValue.Value
 		} else if !singleObjectProperty.NumValue.Null {
-			clientConfig[propertyName] = singleObjectProperty.NumValue.Value
+			clientSideObject[propertyName] = singleObjectProperty.NumValue.Value
 		} else if !singleObjectProperty.BoolValue.Null {
-			clientConfig[propertyName] = singleObjectProperty.BoolValue.Value
+			clientSideObject[propertyName] = singleObjectProperty.BoolValue.Value
 		} else if singleObjectProperty.ObjectValue != nil {
-			clientConfig[propertyName] = singleObjectProperty.ObjectValue.TerraformToApiClient()
+			clientSideObject[propertyName] = singleObjectProperty.ObjectValue.TerraformToApiClient()
 		} else {
 			var listValue *[]JsonElement
 			if singleObjectProperty.ListValue != nil {
@@ -154,40 +154,13 @@ func (jsonObjectMap JsonObjectMap) TerraformToApiClient() map[string](rudderclie
 				for index2, encapsulatedObject := range *listValue {
 					clientObjList[index2] = encapsulatedObject.ObjectValue.TerraformToApiClient()
 				}
-				clientConfig[propertyName] = clientObjList
+				clientSideObject[propertyName] = clientObjList
 			}
 		}
 	}
 
-	// log.Println("Completed ToClient for SDK JsonObjectMap", clientConfig)
-	return clientConfig
-}
-
-// Takes an arbitrary JSON object compatible with API client as input.
-// Returns an object properties map compatible with Terraform.
-func ConvertApiClientObjectToTerraform(objectProperties *map[string](interface{})) *JsonObjectMap {
-	sdkPropertiesMap := make(JsonObjectMap)
-	for propName, propValue := range *objectProperties {
-		typeMappedPropValue := propValue.(rudderclient.SingleConfigPropertyValue)
-		sdkPropertiesMap[propName] = *ConvertApiClientElementToTerraform(&typeMappedPropValue)
-		//if (propName == "android") {
-		//        log.Println("Android value we got is ", sdkPropertiesMap[propName], "propValue was", propValue, " with type", reflect.TypeOf(propValue));
-		//}
-	}
-	return &sdkPropertiesMap
-}
-
-// Takes an arbitrary JSON array compatible with API client as input.
-// Returns an array of config objects compatible with Terraform.
-func ConvertApiClientArrayToTerraform(objectArray *[](interface{})) *[]JsonElement {
-	jsonElementsArray := make([]JsonElement, len(*objectArray))
-
-	for index, singleConfigPropertyValue := range *objectArray {
-		typedProperty, oktypedProperty := (singleConfigPropertyValue).(rudderclient.SingleConfigPropertyValue)
-		jsonElementsArray[index] = *ConvertApiClientElementToTerraform(&typedProperty)
-	}
-
-	return &jsonElementsArray
+	// log.Println("Completed ToClient for SDK JsonObjectMap", clientSideObject)
+	return clientSideObject
 }
 
 // A arbtirary JSON value(including JSON objects, JSON arrays or even elementry values) is called JSON element.
@@ -247,18 +220,45 @@ func ConvertApiClientConfigToTerraform(
 	if clientConfig == nil {
 		return nil
 	}
-	jsonObjectMap := make(JsonObjectMap, len(*clientConfig))
+	terraformSideConfigMap := make(JsonObjectMap, len(*clientConfig))
 	for propName, propValue := range *clientConfig {
 		// log.Println(propName, propValue)
-		jsonObjectMap[propName] = *ConvertApiClientElementToTerraform(&propValue)
+		terraformSideConfigMap[propName] = *ConvertApiClientElementToTerraform(&propValue)
 		//if (propName == "android") {
-		//        log.Println("Android value we got is ", jsonObjectMap[propName], "propValue was", propValue);
+		//        log.Println("Android value we got is ", terraformSideConfigMap[propName], "propValue was", propValue);
 		//}
 	}
-	sdkConfig := EncapsulatedConfigObject{
-		JsonObjectMap: jsonObjectMap,
+	terraformSideConfig := EncapsulatedConfigObject{
+		JsonObjectMap: terraformSideConfigMap,
 	}
-	return &sdkConfig
+	return &terraformSideConfig
+}
+
+// Takes an arbitrary JSON object compatible with API client as input.
+// Returns an object properties map compatible with Terraform.
+func ConvertApiClientObjectToTerraform(objectProperties *map[string](interface{})) *JsonObjectMap {
+	terraformSideObjectMap := make(JsonObjectMap)
+	for propName, propValue := range *objectProperties {
+		typeMappedPropValue := propValue.(rudderclient.SingleConfigPropertyValue)
+		terraformSideObjectMap[propName] = *ConvertApiClientElementToTerraform(&typeMappedPropValue)
+		//if (propName == "android") {
+		//        log.Println("Android value we got is ", terraformSideObjectMap[propName], "propValue was", propValue, " with type", reflect.TypeOf(propValue));
+		//}
+	}
+	return &terraformSideObjectMap
+}
+
+// Takes an arbitrary JSON array compatible with API client as input.
+// Returns an array of config objects compatible with Terraform.
+func ConvertApiClientArrayToTerraform(objectArray *[](interface{})) *[]JsonElement {
+	terraformSideElementsArray := make([]JsonElement, len(*objectArray))
+
+	for index, singleConfigPropertyValue := range *objectArray {
+		typedProperty, oktypedProperty := (singleConfigPropertyValue).(rudderclient.SingleConfigPropertyValue)
+		terraformSideElementsArray[index] = *ConvertApiClientElementToTerraform(&typedProperty)
+	}
+
+	return &terraformSideElementsArray
 }
 
 func (jsonObjectMap JsonObjectMap) Validate() error {
