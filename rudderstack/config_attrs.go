@@ -3,10 +3,11 @@ package rudderstack
 import (
 	"context"
 	"errors"
-	"fmt"
+	// "fmt"
 	"log"
 	"math/big"
 	"reflect"
+	"go.uber.org/multierr"
 
 	//"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -254,7 +255,7 @@ func ConvertApiClientArrayToTerraform(objectArray *[](interface{})) *[]JsonEleme
 	terraformSideElementsArray := make([]JsonElement, len(*objectArray))
 
 	for index, singleConfigPropertyValue := range *objectArray {
-		typedProperty, oktypedProperty := (singleConfigPropertyValue).(rudderclient.SingleConfigPropertyValue)
+		typedProperty, _ := (singleConfigPropertyValue).(rudderclient.SingleConfigPropertyValue)
 		terraformSideElementsArray[index] = *ConvertApiClientElementToTerraform(&typedProperty)
 	}
 
@@ -264,7 +265,7 @@ func ConvertApiClientArrayToTerraform(objectArray *[](interface{})) *[]JsonEleme
 func (jsonObjectMap JsonObjectMap) Validate() error {
 	var retErr error
 	for _, singleObjectProperty := range jsonObjectMap {
-		retErr = combineError(retErr, singleObjectProperty.Validate())
+		retErr = multierr.Combine(retErr, singleObjectProperty.Validate())
 	}
 	return retErr
 }
@@ -284,40 +285,30 @@ func (jsonElement JsonElement) Validate() error {
 
 	if jsonElement.ObjectValue != nil {
 		nonNulls["object"] = true
-		retErr = combineError(retErr, jsonElement.ObjectValue.Validate())
+		retErr = multierr.Combine(retErr, jsonElement.ObjectValue.Validate())
 	}
 
 	if jsonElement.ListValue != nil {
 		nonNulls["list"] = true
 		for _, jsonElementListEntry := range *jsonElement.ListValue {
-			retErr = combineError(retErr, jsonElementListEntry.Validate())
+			retErr = multierr.Combine(retErr, jsonElementListEntry.Validate())
 		}
 	}
 
 	if jsonElement.ObjectsListValue != nil {
 		nonNulls["objects_list"] = true
 		for _, jsonElementListEntry := range *jsonElement.ObjectsListValue {
-			retErr = combineError(retErr, jsonElementListEntry.Validate())
+			retErr = multierr.Combine(retErr, jsonElementListEntry.Validate())
 		}
 	}
 
 	if len(nonNulls) == 0 {
 		noValueSetErr := errors.New("Atleast one value must be set in the JsonElement.")
-		retErr = combineError(retErr, noValueSetErr)
+		retErr = multierr.Combine(retErr, noValueSetErr)
 	} else if len(nonNulls) > 1 {
 		multipleKindSetErr := errors.New("Atmost one value kind can be set in the JsonElement.")
-		retErr = combineError(retErr, multipleKindSetErr)
+		retErr = multierr.Combine(retErr, multipleKindSetErr)
 	}
 
 	return retErr
-}
-
-func combineError(err1 error, err2 error) error {
-	if err1 == nil {
-		return err2
-	} else if err2 == nil {
-		return err1
-	} else {
-		return fmt.Errorf("%w; %w", err1, err2)
-	}
 }
