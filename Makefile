@@ -4,7 +4,7 @@ NAMESPACE=rudderlabs
 NAME=rudderstack
 BINARY=terraform-provider-${NAME}
 VERSION=0.2.12
-OS_ARCH=$(go env GOOS)_$(go env GOARCH)
+OS_ARCH=$(shell go env GOOS)_$(shell go env GOARCH)
 
 default: install
 
