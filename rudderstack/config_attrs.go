@@ -42,10 +42,10 @@ func GetConfigJsonObjectAttributeSchema(context context.Context) tfsdk.Attribute
 //     1) integer 5 becomes { int = 5}
 //    2) string "mystr" becomes { str = "mystr" }
 //      3) boolean false becomes { bool = false }
-//      4) Object { "a":1, "b":2 } becomes { object = ... }
-//      4) Array [ {..}, {..} ] becomes { object_list = [ ... ] }
+//      4) Object { "a":1, "b":2 } becomes { object = {"a": {int = 1}, ...} }
+//      4) Array [ {..}, {..} ] becomes { list = [ ... ] }
 //
-// Supported attributes in above examples are int, str, bool, object and object_list.
+// Supported attributes in above examples are int, str, bool, object and list.
 // This method returns a mapping of above attribute names to their schema.
 func GetJsonElementAttrMapSchema(context context.Context, maxDepth int) map[string]tfsdk.Attribute {
 	// For a single field of a rudder config object, we define its TFSDK attribute map.
@@ -92,17 +92,19 @@ func GetJsonElementAttrMapSchema(context context.Context, maxDepth int) map[stri
 			),
 		}
 
-		objectAsPropertiesListAttrMap["objects_list"] = tfsdk.Attribute{
-			Optional:           true,
-			DeprecationMessage: "Rename all occurences of attributes named 'objects_list' with 'list'.",
+		// List can be list of any of the JSON element equivalents.
+		objectAsPropertiesListAttrMap["list"] = tfsdk.Attribute{
+			Optional: true,
 			Attributes: tfsdk.ListNestedAttributes(
 				nextLevelObjectAsPropertiesListAttrMap,
 				tfsdk.ListNestedAttributesOptions{},
 			),
 		}
 
-		objectAsPropertiesListAttrMap["list"] = tfsdk.Attribute{
-			Optional: true,
+		// This is now deprecated.
+		objectAsPropertiesListAttrMap["objects_list"] = tfsdk.Attribute{
+			Optional:           true,
+			DeprecationMessage: "Rename all occurences of attributes named 'objects_list' with 'list'.",
 			Attributes: tfsdk.ListNestedAttributes(
 				nextLevelObjectAsPropertiesListAttrMap,
 				tfsdk.ListNestedAttributesOptions{},
@@ -115,20 +117,24 @@ func GetJsonElementAttrMapSchema(context context.Context, maxDepth int) map[stri
 			Optional: true,
 			Type:     types.BoolType,
 		}
-		objectAsPropertiesListAttrMap["objects_list"] = tfsdk.Attribute{
-			Optional: true,
-			Type:     types.BoolType,
-		}
 		objectAsPropertiesListAttrMap["list"] = tfsdk.Attribute{
 			Optional: true,
 			Type:     types.BoolType,
 		}
+
+		// This is now deprecated
+		objectAsPropertiesListAttrMap["objects_list"] = tfsdk.Attribute{
+			Optional: true,
+			Type:     types.BoolType,
+		}
 	}
+
 	return objectAsPropertiesListAttrMap
 }
 
 // Takes a Terraform side map of properties of an arbitrary object.
 // Converts it into an equivalent JSON object as acceptable to the Rudder API client.
+// An JSON object is merely a dictionary of string properties.
 func (jsonObjectMap JsonObjectMap) TerraformToApiClient() map[string](rudderclient.SingleConfigPropertyValue) {
 	// log.Println("Starting TerraformToApiClient for SDK JsonObjectMap", jsonObjectMap)
 	clientSideObject := map[string](rudderclient.SingleConfigPropertyValue){}
@@ -168,7 +174,7 @@ func (jsonObjectMap JsonObjectMap) TerraformToApiClient() map[string](rudderclie
 // Takes an arbitrary JSON element compatible with API client as input.
 // Returns an instance of JsonElement compatible with Terraform.
 func ConvertApiClientElementToTerraform(propValue *rudderclient.SingleConfigPropertyValue) *JsonElement {
-	sdkValue := JsonElement{
+	terraformSideValue := JsonElement{
 		NumValue:  types.Number{Null: true},
 		BoolValue: types.Bool{Null: true},
 		StrValue:  types.String{Null: true},
@@ -176,35 +182,35 @@ func ConvertApiClientElementToTerraform(propValue *rudderclient.SingleConfigProp
 
 	numValue, oknum := (*propValue).(float64)
 	if oknum {
-		sdkValue.NumValue.Value = big.NewFloat(numValue)
-		sdkValue.NumValue.Null = false
-		return &sdkValue
+		terraformSideValue.NumValue.Value = big.NewFloat(numValue)
+		terraformSideValue.NumValue.Null = false
+		return &terraformSideValue
 	}
 
 	boolValue, okbool := (*propValue).(bool)
 	if okbool {
-		sdkValue.BoolValue.Value = boolValue
-		sdkValue.BoolValue.Null = false
-		return &sdkValue
+		terraformSideValue.BoolValue.Value = boolValue
+		terraformSideValue.BoolValue.Null = false
+		return &terraformSideValue
 	}
 
 	strValue, okstr := (*propValue).(string)
 	if okstr {
-		sdkValue.StrValue.Value = strValue
-		sdkValue.StrValue.Null = false
-		return &sdkValue
+		terraformSideValue.StrValue.Value = strValue
+		terraformSideValue.StrValue.Null = false
+		return &terraformSideValue
 	}
 
 	arrayValue, okarray := (*propValue).([]interface{})
 	if okarray {
-		sdkValue.ListValue = ConvertApiClientArrayToTerraform(&arrayValue)
-		return &sdkValue
+		terraformSideValue.ListValue = ConvertApiClientArrayToTerraform(&arrayValue)
+		return &terraformSideValue
 	}
 
 	mapValue, okmap := (*propValue).(map[string]interface{})
 	if okmap {
-		sdkValue.ObjectValue = ConvertApiClientObjectToTerraform(&mapValue)
-		return &sdkValue
+		terraformSideValue.ObjectValue = ConvertApiClientObjectToTerraform(&mapValue)
+		return &terraformSideValue
 	}
 
 	log.Panic("Invalid attribute value. Value=", *propValue, " & Type=", reflect.TypeOf(propValue))
