@@ -1,5 +1,5 @@
 # RudderStack Provider
-Use the RudderStack's Terraform provider plugin to interact with control plane API of the RudderStack CDP from within Terraform.
+Use the RudderStack's Terraform provider plugin to interact with control plane API of the RudderStack CDP from within Terraform. If you are new, make sure to review the flowchart for Terraform scripting for RudderStack [here](https://github.com/rudderlabs/terraform-provider-rudderstack/#terraform-scripting-flowchart-for-rudderstack).
 
 ## Supported Resources 
    1. [Source](resources/source.md)
@@ -13,7 +13,7 @@ terraform {
   required_providers {
     rudderstack = {
       source  = "rudderlabs/rudderstack"
-      version = "~> 0.2.11"
+      version = "~> 0.2.12"
     }
   }
   required_version = "~> 1.0.9"
@@ -74,7 +74,7 @@ resource "rudderstack_destination" "dst1" {
       "nonInteraction": { bool = true },
       "sendUserId": { bool = true },
       "dimensions": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "mas." },
@@ -84,7 +84,7 @@ resource "rudderstack_destination" "dst1" {
         ]
       },
       "metrics": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "kksad1222" },
@@ -94,7 +94,7 @@ resource "rudderstack_destination" "dst1" {
         ]
       },
       "contentGroupings": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "lkjdlkjsdf" },

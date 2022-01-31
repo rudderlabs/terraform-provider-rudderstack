@@ -93,5 +93,15 @@ else:
             completeTerraformTree.append(terraformTreeWithIndents)
 
     completeTerraformCliIndented = terraformTreeToIndentedTerraformCli(completeTerraformTree)[0]
+    print("""
+# ****************************************************************************
+#                               IMPORTANT NOTE  
+# ****************************************************************************
+# The following shows all your resource declarations currently in force at RudderStack, as Terraform HCI. 
+# To manage these resources via Terraform, copy these declarations into your terraform scripts.
+# The declarations below *DO NOT* form a complete terraform script.
+# In particular, make sure that provider declarations are also part of your terraform scripts. 
+
+    """)
     print(completeTerraformCliIndented)
 

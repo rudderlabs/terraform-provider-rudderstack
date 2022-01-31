@@ -34,7 +34,7 @@ resource "rudderstack_destination" "dst1" {
       "nonInteraction": { bool = true },
       "sendUserId": { bool = true },
       "dimensions": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "mas." },
@@ -44,7 +44,7 @@ resource "rudderstack_destination" "dst1" {
         ]
       },
       "metrics": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "kksad1222" },
@@ -54,7 +54,7 @@ resource "rudderstack_destination" "dst1" {
         ]
       },
       "contentGroupings": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "lkjdlkjsdf" },

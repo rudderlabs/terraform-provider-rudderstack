@@ -6,7 +6,7 @@ Configuration of RudderStack sources and destinations are JSON objects. Any such
 Best way for creating source or destination config for use with Terraform RudderStack provider is via [web UI](https://app.rudderstack.com/), using detailed steps that follow.
    1. Login into https://app.rudderstack.com/.
    1. Create your sources, destinations, connections and transformations using the web UI. 
-      1. [Note] Currently(v0.2.11), transformations are not supported yet.
+      1. [Note] Currently(v0.2.12), transformations are not supported yet.
    1. Obtain a Rudderstack workspace token, by following steps below.
       1. Visit https://app.rudderstack.com/home and login.
       1. Click on Settings at the bottom left.
@@ -15,7 +15,7 @@ Best way for creating source or destination config for use with Terraform Rudder
    1. Clone the source repo of terraform-provider-rudderstack.
       *     git clone https://github.com/rudderlabs/terraform-provider-rudderstack
       *     cd terraform-provider-rudderstack
-   1. Make sure that all dependencies of the python script are installed.
+   1. Make sure that all dependencies of the python script are installed and updated.
       *     pip3 install -U -r ./scripts/requirements.txt
    1. Run deployedConfig2Terraform.py in the scripts folder to convert config currently deployed on the server into Terraform CLI.
       *     python3 scripts/deployedConfig2Terraform.py {RudderStack_Workspace_Token}
@@ -41,7 +41,7 @@ Config attribute for the supported source/destination resource is set as follows
       "nonInteraction": { bool = true },
       "sendUserId": { bool = true },
       "dimensions": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "myDimensionSource" },
@@ -51,7 +51,7 @@ Config attribute for the supported source/destination resource is set as follows
         ]
       },
       "metrics": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "myMetricSource" },
@@ -61,7 +61,7 @@ Config attribute for the supported source/destination resource is set as follows
         ]
       },
       "contentGroupings": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "myContentGroupingSource" },
@@ -91,7 +91,7 @@ rudderstack provider config as in examples below.
 |--------------------|---------------------------------------------------------|
 |{}                  | { object = {} }                                         |
 |{"a":1,"b":"strval"}| { object = {"a":{int = 1},"b":{str="strval"}} }         |
-|{"a":[]}            | { object = {"a":{object_list=[]}} }                     |
+|{"a":[]}            | { object = {"a":{list=[]}} }                     |
 |{"a":{}}            | { object = {"a":{object={}}} }                     |
 
 #### Attributes
@@ -109,7 +109,7 @@ Each JSON value can be converted into equivalent rudderstack provider config as 
 |"arbit string"      | String                   | { str = "arbit string" }                                |
 |true                | Boolean                  | { bool = true }                                         |
 |{"a":1,"b":"strval"}| JSON Object              | { object = {"a":{int = 1},"b":{str="strval"}} }         |
-|[{}, {"a":1}]       | JSON List of Objects     | { object_list = [<BR/>.  { object = {} },<BR/>.  { object = {"a":{int = 1},"b":{str="strval"}} }<BR/>] }|
+|[{}, 2, {"a":1}]    | List of JSON Elements    | { list = [<BR/>.  { object = {} },<BR/>. 2,<BR/>.  { object = {"a":{int = 1},"b":{str="strval"}} }<BR/>] }|
 
 #### Attributes:
 
@@ -119,5 +119,5 @@ Depending on the kind of JSON value, *EXACTLY ONE* of the following attributes m
 - **num** (Number) Set this attribute if the JSON value is an integer or float.
 - **str** (String) Set this attribute if the JSON value is a string.
 - **object** (Attributes Map) Set this attribute if the JSON value is an object. Define it as a string map, each value in attribute map following [this schema](#nestedatt--config--value)
-- **objects_list** (Attributes List) Set this attribute if the JSON value is a list of objects. Define it as a list, each value in the attribute list following [this schema](#nestedatt--config--value)
-
+- **list** (Elements List) Set this attribute if the JSON value is a list. Define it as a list, each value in the attribute list following [this schema](#nestedatt--config--value)
+- **objects_list** (Objects List, Obsolete) This is obsolete. Replace all occurences by list.

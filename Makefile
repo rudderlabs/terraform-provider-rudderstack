@@ -3,8 +3,8 @@ HOSTNAME=rudderstack.com
 NAMESPACE=rudderlabs
 NAME=rudderstack
 BINARY=terraform-provider-${NAME}
-VERSION=0.2.11
-OS_ARCH=linux_amd64
+VERSION=0.2.12
+OS_ARCH=$(shell go env GOOS)_$(shell go env GOARCH)
 
 default: install
 
@@ -13,6 +13,7 @@ build:
 
 release:
 	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
+	GOOS=darwin GOARCH=arm64 go build -o ./bin/${BINARY}_${VERSION}_darwin_arm64
 	GOOS=freebsd GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_freebsd_386
 	GOOS=freebsd GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_freebsd_amd64
 	GOOS=freebsd GOARCH=arm go build -o ./bin/${BINARY}_${VERSION}_freebsd_arm

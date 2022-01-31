@@ -98,7 +98,7 @@ func (sdkDestination Destination) ToClient() rudderclient.Destination {
         ID                        : sdkDestination.ID.Value,
         Name                      : sdkDestination.Name.Value,
         Type                      : sdkDestination.Type.Value,
-        Config                    : sdkDestination.Config.ObjectPropertiesMap.TerraformToApiClient(),
+        Config                    : sdkDestination.Config.JsonObjectMap.TerraformToApiClient(),
         IsEnabled                 : sdkDestination.IsEnabled.Value,
     }
     // log.Println("Client dest config created.")

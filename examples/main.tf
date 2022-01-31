@@ -2,7 +2,7 @@ terraform {
   required_providers {
     rudderstack = {
       source  = "rudderlabs/rudderstack"
-      version = "~> 0.2.11"
+      version = "~> 0.2.12"
     }
   }
   required_version = "~> 1.1.0"
@@ -54,7 +54,7 @@ resource "rudderstack_destination" "pub_sub_events" {
           str = "1637088430000"
         },
         "eventToTopicMap" = {
-          objects_list = [
+          list = [
               {
                 object = {
                     "from" = {
@@ -94,7 +94,7 @@ resource "rudderstack_destination" "dst1" {
       "nonInteraction": { bool = true },
       "sendUserId": { bool = true },
       "dimensions": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "mas." },
@@ -103,8 +103,10 @@ resource "rudderstack_destination" "dst1" {
           }
         ]
       },
+      "blacklistedEvents" = { list = [ { object = { } } ] },
+      "whitelistedEvents" = { list = [ { object = { } } ] },
       "metrics": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "kksad1222" },
@@ -114,7 +116,7 @@ resource "rudderstack_destination" "dst1" {
         ]
       },
       "contentGroupings": {
-        objects_list = [
+        list = [
           {
              object = {
                "from": { str = "lkjdlkjsdf" },
@@ -123,6 +125,7 @@ resource "rudderstack_destination" "dst1" {
           }
         ]
       },
+      "eventFilteringOption" = { str = "disable" }
     },
   }
 }

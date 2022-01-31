@@ -13,8 +13,13 @@ This repo implements RudderStack terraform provider. Use it to access RudderStac
 Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
 
 # Getting Started
-Good place to start with Terraform is [here](https://www.terraform.io/intro/index.html). Next, checkout example configuration for RudderStack Terraform Provider [below](#example). Detailed documentation for RudderStack Terraform
-Provider is available [here](docs/index.md). 
+1. If you are not familiar with Terraform platform, then a good place to start is [here](https://www.terraform.io/intro/index.html).
+2. If you are interested in developing enhancements to RudderStack's Terraform provider, the best place to start is by creating a local build and test environment using an example configuration [here](#example).
+3. If you are a user interested in managing your production RudderStack resources via Terraform, you can get detailed documentation for our Terraform Provider [here](docs/index.md). 
+
+## Terraform Scripting Flowchart for RudderStack
+To create and maintain RudderStack's resources in Terraform, you can follow the flowchart below. 
+![Flowchart for building and managing RudderStack's Terraform config](docs/TerraformScriptingForRudderStackFlowchart.png)
 
 <a id="example"></a>
 # Setup dev and build env 
@@ -38,7 +43,7 @@ Next, make sure that your ~/.terraformrc has the following lines.
 ```
 provider_installation {
   dev_overrides {
-    "rudderlabs/rudderstack" = "~/.terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.11/linux_amd64/"
+    "rudderlabs/rudderstack" = "~/.terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.12/linux_amd64/"
   }
 }
 ```
