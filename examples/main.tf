@@ -11,7 +11,7 @@ terraform {
 provider "rudderstack" {
   # Set to control plane API host. Usually "https://api.rudderlabs.com/v2".
   # If null, falls back on env variable RUDDERSTACK_HOST.
-  host = null
+  host = "https://api.rudderlabs.com/v2"
 
   # Set to access token for control plane API host. If null, falls back on env variable RUDDERSTACK_TOKEN.
   #
@@ -20,18 +20,19 @@ provider "rudderstack" {
   # 2. Click on Settings at the bottom left.
   # 3. Select "Personal Access Tokens".
   # 4. Create a new Personal Access Token and copy it for pasting here 
-  token = null
+  # token = "24SOW0YWwulUUyLg9xFWnkHhUbY"
+  token = ""
 
   # Set to V1 control plane API host to be used. Usually "https://api.rudderlabs.com".
   # If null, falls back on env variable RUDDERSTACK_SCHEMA_HOST.
-  schema_host = null
+  schema_host = "https://api.rudderlabs.com"
 
   # Set to access token for V1 control plane API host. If null, falls back on env variable RUDDERSTACK_SCHEMA_TOKEN.
   #
   # The token can be retrieved using steps below.
   # 1. Click <a href="https://app.rudderstack.com/home">here</a> and login.
   # 2. Copy the hexadecimal token string specified above data plane URL for pasting here.
-  schema_token = null
+  schema_token = ""
 }
 
 resource "rudderstack_source" "src1" {
@@ -103,6 +104,28 @@ resource "rudderstack_destination" "dst1" {
           }
         ]
       },
+               "blacklistedEvents" = {
+                   list = [
+                       {
+                           object = {
+                           
+                            }
+                        },
+                    ]
+                },
+          
+            
+               "whitelistedEvents" = {
+                  list = [
+                       {
+                           object = {
+                               
+                            }
+                        },
+                    ]
+                },
+
+
       "metrics": {
         list = [
           {
@@ -123,6 +146,10 @@ resource "rudderstack_destination" "dst1" {
           }
         ]
       },
+          "eventFilteringOption" = {
+                  str = "disable"
+                }
+
     },
   }
 }
