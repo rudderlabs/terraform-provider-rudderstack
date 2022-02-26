@@ -77,10 +77,12 @@ goreleaser release --rm-dist
 # Related 
    1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for RudderStack Control Plain in Golang.
    1) https://github.com/rudderlabs/rscp_pyclient : This repo implements REST API client for RudderStack Control Plain in Python. Few additional RudderStack related helpful methods also available.
+
+<!--
    1) https://github.com/rudderlabs/segment-migrator : Source code for segment migrator web app. Helps migrate from
       Segment to RudderStack.
    1) http://segment-migrator.dev-rudder.rudderlabs.com/ : If you are trying to migrate from Segment to RudderStack, you can use this web app to migrate. 
-
+-->
 # License
 
 RudderStack Terraform Provider is released under the [MIT License][mit_license].
