@@ -4,8 +4,9 @@ go 1.16
 
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.1
-	github.com/rudderlabs/rudder-api-go v0.0.1
+	github.com/rudderlabs/rudder-api-go v0.0.0-20220316104807-cd9e918fa9e1
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.12.1
 	github.com/tidwall/sjson v1.2.4
@@ -17,4 +18,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-replace github.com/rudderlabs/rudder-api-go v0.0.1 => ../rudder-api-go
+// replace github.com/rudderlabs/rudder-api-go v0.0.1 => ../rudder-api-go

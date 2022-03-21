@@ -12,20 +12,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
+	_ "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations"
 	"github.com/stretchr/testify/mock"
 )
 
-func TestSourceResource(t *testing.T) {
-	for source, cm := range configs.Sources.Entries() {
-		sources := &mockSourcesService{}
+func TestDestinationResource(t *testing.T) {
+	for destination, cm := range configs.Destinations.Entries() {
+		destinations := &mockDestinationsService{}
 
-		sources.On("Create", mock.Anything, &client.Source{
-			Type:      cm.APIType,
-			Name:      "example",
-			IsEnabled: true,
-			Config:    json.RawMessage(cm.TestConfigs[0].APICreate),
-		}).Return(&client.Source{
+		destinations.On("Create", mock.Anything, mock.MatchedBy(func(d *client.Destination) bool {
+			return d.Type == cm.APIType &&
+				d.ID == "" &&
+				d.Name == "example" &&
+				d.IsEnabled &&
+				testutil.JSONEq(string(d.Config), cm.TestConfigs[0].APICreate)
+		})).Return(&client.Destination{
 			ID:        "some-id",
 			Type:      cm.APIType,
 			Name:      "example",
@@ -35,13 +38,13 @@ func TestSourceResource(t *testing.T) {
 			UpdatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 		}, nil)
 
-		sources.On("Update", mock.Anything, &client.Source{
-			ID:        "some-id",
-			Type:      cm.APIType,
-			Name:      "example-updated",
-			IsEnabled: true,
-			Config:    json.RawMessage(cm.TestConfigs[0].APIUpdate),
-		}).Return(&client.Source{
+		destinations.On("Update", mock.Anything, mock.MatchedBy(func(d *client.Destination) bool {
+			return d.Type == cm.APIType &&
+				d.ID == "some-id" &&
+				d.Name == "example-updated" &&
+				d.IsEnabled &&
+				testutil.JSONEq(string(d.Config), cm.TestConfigs[0].APIUpdate)
+		})).Return(&client.Destination{
 			ID:        "some-id",
 			Type:      cm.APIType,
 			Name:      "example-updated",
@@ -51,7 +54,7 @@ func TestSourceResource(t *testing.T) {
 			UpdatedAt: timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 		}, nil)
 
-		sources.On("Get", mock.Anything, "some-id").Return(&client.Source{
+		destinations.On("Get", mock.Anything, "some-id").Return(&client.Destination{
 			ID:        "some-id",
 			Type:      cm.APIType,
 			Name:      "example",
@@ -61,7 +64,7 @@ func TestSourceResource(t *testing.T) {
 			UpdatedAt: timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 		}, nil).Times(3)
 
-		sources.On("Get", mock.Anything, "some-id").Return(&client.Source{
+		destinations.On("Get", mock.Anything, "some-id").Return(&client.Destination{
 			ID:        "some-id",
 			Type:      cm.APIType,
 			Name:      "example-updated",
@@ -71,14 +74,14 @@ func TestSourceResource(t *testing.T) {
 			UpdatedAt: timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 		}, nil).Twice()
 
-		sources.On("Delete", mock.Anything, "some-id").Return(nil)
+		destinations.On("Delete", mock.Anything, "some-id").Return(nil)
 
 		resource.UnitTest(t, resource.TestCase{
 			ProviderFactories: map[string]func() (*schema.Provider, error){
 				"rudderstack": func() (*schema.Provider, error) {
 					return NewWithConfigureClientFunc(func(_ context.Context, d *schema.ResourceData) (*Client, diag.Diagnostics) {
 						return &Client{
-							Sources: sources,
+							Destinations: destinations,
 						}, diag.Diagnostics{}
 					}), nil
 				},
@@ -90,13 +93,13 @@ func TestSourceResource(t *testing.T) {
 							access_token = "some-access-token"
 						}
 
-						resource "rudderstack_source_%s" "example" {
+						resource "rudderstack_destination_%s" "example" {
 							name = "example"
 							config {
 								%s
 							}
 						}
-					`, source, cm.TestConfigs[0].TerraformCreate),
+					`, destination, cm.TestConfigs[0].TerraformCreate),
 					Check: func(state *terraform.State) error {
 						return nil
 					},
@@ -107,13 +110,13 @@ func TestSourceResource(t *testing.T) {
 							access_token = "some-access-token"
 						}
 
-						resource "rudderstack_source_%s" "example" {
+						resource "rudderstack_destination_%s" "example" {
 							name = "example-updated"
 							config {
 								%s
 							}
 						}
-					`, source, cm.TestConfigs[0].TerraformUpdate),
+					`, destination, cm.TestConfigs[0].TerraformUpdate),
 					Check: func(state *terraform.State) error {
 						return nil
 					},
@@ -123,30 +126,26 @@ func TestSourceResource(t *testing.T) {
 	}
 }
 
-type mockSourcesService struct {
+type mockDestinationsService struct {
 	mock.Mock
 }
 
-func (m *mockSourcesService) Get(ctx context.Context, id string) (*client.Source, error) {
+func (m *mockDestinationsService) Get(ctx context.Context, id string) (*client.Destination, error) {
 	args := m.Called(ctx, id)
-	return args.Get(0).(*client.Source), args.Error(1)
+	return args.Get(0).(*client.Destination), args.Error(1)
 }
 
-func (m *mockSourcesService) Create(ctx context.Context, source *client.Source) (*client.Source, error) {
-	args := m.Called(ctx, source)
-	return args.Get(0).(*client.Source), args.Error(1)
+func (m *mockDestinationsService) Create(ctx context.Context, destination *client.Destination) (*client.Destination, error) {
+	args := m.Called(ctx, destination)
+	return args.Get(0).(*client.Destination), args.Error(1)
 }
 
-func (m *mockSourcesService) Update(ctx context.Context, source *client.Source) (*client.Source, error) {
-	args := m.Called(ctx, source)
-	return args.Get(0).(*client.Source), args.Error(1)
+func (m *mockDestinationsService) Update(ctx context.Context, destination *client.Destination) (*client.Destination, error) {
+	args := m.Called(ctx, destination)
+	return args.Get(0).(*client.Destination), args.Error(1)
 }
 
-func (m *mockSourcesService) Delete(ctx context.Context, id string) error {
+func (m *mockDestinationsService) Delete(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
-}
-
-func timePtr(t time.Time) *time.Time {
-	return &t
 }

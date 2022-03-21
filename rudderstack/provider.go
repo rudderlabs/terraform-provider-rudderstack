@@ -63,7 +63,6 @@ func resourcesMap() map[string]*schema.Resource {
 func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag.Diagnostics) {
 	host := d.Get("host").(string)
 	accessToken := d.Get("access_token").(string)
-	fmt.Println("CONFIGURE", accessToken)
 	client, err := NewAPIClient(accessToken, client.WithBaseURL(host))
 	if err != nil {
 		return nil, diag.FromErr(err)

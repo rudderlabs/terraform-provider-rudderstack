@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
+	_ "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations"
 )
 
 func main() {

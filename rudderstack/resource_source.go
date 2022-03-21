@@ -2,6 +2,7 @@ package rudderstack
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -55,9 +56,12 @@ func resourceSourceCreate(cm configs.ConfigMeta) schema.CreateContextFunc {
 		}
 
 		source := &client.Source{}
-		populateSourceFromState(cm, source, d)
+		err := populateSourceFromState(cm, source, d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-		source, err := c.Sources.Create(ctx, source)
+		source, err = c.Sources.Create(ctx, source)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("could not create source: %w", err))
 		}
@@ -96,9 +100,12 @@ func resourceSourceUpdate(cm configs.ConfigMeta) schema.UpdateContextFunc {
 		}
 
 		source := &client.Source{}
-		populateSourceFromState(cm, source, d)
+		err := populateSourceFromState(cm, source, d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-		source, err := c.Sources.Update(ctx, source)
+		source, err = c.Sources.Update(ctx, source)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("could not create source: %w", err))
 		}
@@ -125,12 +132,25 @@ func resourceSourceDelete(cm configs.ConfigMeta) schema.DeleteContextFunc {
 	}
 }
 
-func populateSourceFromState(cm configs.ConfigMeta, source *client.Source, d *schema.ResourceData) {
+func populateSourceFromState(cm configs.ConfigMeta, source *client.Source, d *schema.ResourceData) error {
 	source.ID = d.Id()
 	source.Type = cm.APIType
 	source.Name = d.Get("name").(string)
 	source.IsEnabled = d.Get("enabled").(bool)
-	source.Config, _ = cm.ParseResourceData(d)
+
+	if c := d.Get("config"); c != nil {
+		state, err := json.Marshal(c)
+		if err != nil {
+			return err
+		}
+		apiConfig, err := cm.StateToAPI(string(state))
+		if err != nil {
+			return err
+		}
+		source.Config = json.RawMessage(apiConfig)
+	}
+
+	return nil
 }
 
 func storeSourceToState(cm configs.ConfigMeta, source *client.Source, d *schema.ResourceData) error {
@@ -141,8 +161,26 @@ func storeSourceToState(cm configs.ConfigMeta, source *client.Source, d *schema.
 	if err := d.Set("enabled", source.IsEnabled); err != nil {
 		return err
 	}
-	if err := cm.StoreResourceData(source.Config, d); err != nil {
+
+	state, err := cm.APIToState(string(source.Config))
+	if err != nil {
 		return err
 	}
+
+	properties := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(state), &properties); err != nil {
+		return err
+	}
+
+	if len(properties) > 0 {
+		if err := d.Set("config", []interface{}{properties}); err != nil {
+			return err
+		}
+	} else {
+		if err := d.Set("config", []interface{}{}); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
