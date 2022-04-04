@@ -284,6 +284,8 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rudderlabs/rudder-api-go v0.0.0-20220316104807-cd9e918fa9e1 h1:ezMXWsyNeEqdgxAZQo3ZAOk6wNlN1SecuNvqG6g4WNw=
 github.com/rudderlabs/rudder-api-go v0.0.0-20220316104807-cd9e918fa9e1/go.mod h1:RbBPCSwO5PM8BwIQE+hxeeMf63IjVq/QLwjQZmyYlEk=
+github.com/rudderlabs/rudder-api-go v0.0.0-20220404073614-5d8429e14959 h1:FjdCjC7imRpNLeHdTp9TFHABPUZfYdVVrWLWmztIljg=
+github.com/rudderlabs/rudder-api-go v0.0.0-20220404073614-5d8429e14959/go.mod h1:RbBPCSwO5PM8BwIQE+hxeeMf63IjVq/QLwjQZmyYlEk=
 github.com/sebdah/goldie v1.0.0/go.mod h1:jXP4hmWywNEwZzhMuv2ccnqTSFpuq8iyQhtQdkkZBH4=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
 github.com/sergi/go-diff v1.1.0/go.mod h1:STckp+ISIX8hZLjrqAeVduY0gWCT9IjLuqbuNXdaHfM=
