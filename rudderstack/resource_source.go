@@ -177,7 +177,7 @@ func storeSourceToState(cm configs.ConfigMeta, source *client.Source, d *schema.
 			return err
 		}
 	} else {
-		if err := d.Set("config", []interface{}{}); err != nil {
+		if err := d.Set("config", []interface{}{map[string]interface{}{}}); err != nil {
 			return err
 		}
 	}
