@@ -176,11 +176,15 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 	if err := d.Set("enabled", destination.IsEnabled); err != nil {
 		return err
 	}
-	if err := d.Set("created_at", destination.CreatedAt.String()); err != nil {
-		return err
+	if destination.CreatedAt != nil {
+		if err := d.Set("created_at", destination.CreatedAt.String()); err != nil {
+			return err
+		}
 	}
-	if err := d.Set("updated_at", destination.UpdatedAt.String()); err != nil {
-		return err
+	if destination.UpdatedAt != nil {
+		if err := d.Set("updated_at", destination.UpdatedAt.String()); err != nil {
+			return err
+		}
 	}
 
 	state, err := cm.APIToState(string(destination.Config))

@@ -46,7 +46,11 @@ func New() *schema.Provider {
 }
 
 func resourcesMap() map[string]*schema.Resource {
-	resources := map[string]*schema.Resource{}
+	resources := map[string]*schema.Resource{
+		"rudderstack_connection": resourceConnection(),
+	}
+
+	// append sources and destinations from integration registries
 	for k, v := range configs.Sources.Entries() {
 		key := fmt.Sprintf("rudderstack_source_%s", k)
 		resource := resourceSource(v)

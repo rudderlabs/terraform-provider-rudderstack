@@ -174,6 +174,16 @@ func storeSourceToState(cm configs.ConfigMeta, source *client.Source, d *schema.
 	if err := d.Set("enabled", source.IsEnabled); err != nil {
 		return err
 	}
+	if source.CreatedAt != nil {
+		if err := d.Set("created_at", source.CreatedAt.String()); err != nil {
+			return err
+		}
+	}
+	if source.UpdatedAt != nil {
+		if err := d.Set("updated_at", source.UpdatedAt.String()); err != nil {
+			return err
+		}
+	}
 
 	state, err := cm.APIToState(string(source.Config))
 	if err != nil {
