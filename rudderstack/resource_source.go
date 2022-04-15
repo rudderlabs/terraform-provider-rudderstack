@@ -22,7 +22,7 @@ func resourceSource(cm configs.ConfigMeta) *schema.Resource {
 }
 
 func resourceSourceSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
-	return map[string]*schema.Schema{
+	s := map[string]*schema.Schema{
 		"id": {
 			Type:     schema.TypeString,
 			Computed: true,
@@ -36,16 +36,29 @@ func resourceSourceSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
 			Optional: true,
 			Default:  true,
 		},
-		"config": {
+		"created_at": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"updated_at": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+	}
+
+	if !cm.SkipConfig {
+		s["config"] = &schema.Schema{
 			Type:     schema.TypeList,
-			Optional: cm.OptionalConfig,
-			Required: !cm.OptionalConfig,
+			Optional: cm.SkipConfig,
+			Required: !cm.SkipConfig,
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: cm.ConfigSchema,
 			},
-		},
+		}
 	}
+
+	return s
 }
 
 func resourceSourceCreate(cm configs.ConfigMeta) schema.CreateContextFunc {

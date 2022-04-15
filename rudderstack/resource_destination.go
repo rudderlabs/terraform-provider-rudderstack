@@ -22,7 +22,7 @@ func resourceDestination(cm configs.ConfigMeta) *schema.Resource {
 }
 
 func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
-	return map[string]*schema.Schema{
+	s := map[string]*schema.Schema{
 		"id": {
 			Type:     schema.TypeString,
 			Computed: true,
@@ -36,15 +36,6 @@ func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema 
 			Optional: true,
 			Default:  true,
 		},
-		"config": {
-			Type:     schema.TypeList,
-			Optional: cm.OptionalConfig,
-			Required: !cm.OptionalConfig,
-			MaxItems: 1,
-			Elem: &schema.Resource{
-				Schema: cm.ConfigSchema,
-			},
-		},
 		"created_at": {
 			Type:     schema.TypeString,
 			Computed: true,
@@ -54,6 +45,20 @@ func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema 
 			Computed: true,
 		},
 	}
+
+	if !cm.SkipConfig {
+		s["config"] = &schema.Schema{
+			Type:     schema.TypeList,
+			Optional: cm.SkipConfig,
+			Required: !cm.SkipConfig,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: cm.ConfigSchema,
+			},
+		}
+	}
+
+	return s
 }
 
 func resourceDestinationCreate(cm configs.ConfigMeta) schema.CreateContextFunc {

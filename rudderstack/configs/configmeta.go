@@ -5,11 +5,11 @@ import (
 )
 
 type ConfigMeta struct {
-	APIType        string
-	OptionalConfig bool
-	ConfigSchema   map[string]*schema.Schema
-	Properties     []ConfigProperty
-	TestConfigs    []TestConfig
+	APIType      string
+	SkipConfig   bool
+	ConfigSchema map[string]*schema.Schema
+	Properties   []ConfigProperty
+	TestConfigs  []TestConfig
 }
 
 func (cm *ConfigMeta) StateToAPI(state string) (string, error) {
