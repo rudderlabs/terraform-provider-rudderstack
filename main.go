@@ -24,7 +24,7 @@ func main() {
 	}
 
 	if debugMode {
-		err := plugin.Debug(context.Background(), "rudderstack", opts)
+		err := plugin.Debug(context.Background(), "rudderlabs/rudderstack", opts)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
