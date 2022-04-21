@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -37,8 +38,9 @@ func resourceSourceSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
 			Default:  true,
 		},
 		"created_at": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "IOS",
 		},
 		"updated_at": {
 			Type:     schema.TypeString,
@@ -175,12 +177,14 @@ func storeSourceToState(cm configs.ConfigMeta, source *client.Source, d *schema.
 		return err
 	}
 	if source.CreatedAt != nil {
-		if err := d.Set("created_at", source.CreatedAt.String()); err != nil {
+		createdAt := source.CreatedAt.Format(time.RFC3339)
+		if err := d.Set("created_at", createdAt); err != nil {
 			return err
 		}
 	}
 	if source.UpdatedAt != nil {
-		if err := d.Set("updated_at", source.UpdatedAt.String()); err != nil {
+		updatedAt := source.UpdatedAt.Format(time.RFC3339)
+		if err := d.Set("updated_at", updatedAt); err != nil {
 			return err
 		}
 	}

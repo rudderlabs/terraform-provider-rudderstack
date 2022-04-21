@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -177,12 +178,14 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 		return err
 	}
 	if destination.CreatedAt != nil {
-		if err := d.Set("created_at", destination.CreatedAt.String()); err != nil {
+		createdAt := destination.CreatedAt.Format(time.RFC3339)
+		if err := d.Set("created_at", createdAt); err != nil {
 			return err
 		}
 	}
 	if destination.UpdatedAt != nil {
-		if err := d.Set("updated_at", destination.UpdatedAt.String()); err != nil {
+		updatedAt := destination.UpdatedAt.Format(time.RFC3339)
+		if err := d.Set("updated_at", updatedAt); err != nil {
 			return err
 		}
 	}

@@ -3,6 +3,7 @@ package rudderstack
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -143,12 +144,14 @@ func storeConnectionToState(connection *client.Connection, d *schema.ResourceDat
 		return err
 	}
 	if connection.CreatedAt != nil {
-		if err := d.Set("created_at", connection.CreatedAt.String()); err != nil {
+		createdAt := connection.CreatedAt.Format(time.RFC3339)
+		if err := d.Set("created_at", createdAt); err != nil {
 			return err
 		}
 	}
 	if connection.UpdatedAt != nil {
-		if err := d.Set("updated_at", connection.UpdatedAt.String()); err != nil {
+		updatedAt := connection.UpdatedAt.Format(time.RFC3339)
+		if err := d.Set("updated_at", updatedAt); err != nil {
 			return err
 		}
 	}

@@ -2,6 +2,7 @@ package rudderstack
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	_ "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations"
 	"github.com/stretchr/testify/mock"
 )
@@ -25,8 +27,8 @@ func TestConnectionResource(t *testing.T) {
 		ID:            "some-id",
 		SourceID:      "source-id",
 		DestinationID: "destination-id",
-		CreatedAt:     timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt:     timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt:     testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt:     testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
 
 	connections.On("Update", mock.Anything, &client.Connection{
@@ -38,8 +40,8 @@ func TestConnectionResource(t *testing.T) {
 		ID:            "some-id",
 		SourceID:      "source-id-2",
 		DestinationID: "destination-id-2",
-		CreatedAt:     timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt:     timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt:     testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt:     testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
 
 	connections.On("Get", mock.Anything, "some-id").Return(&client.Connection{
@@ -47,17 +49,17 @@ func TestConnectionResource(t *testing.T) {
 		SourceID:      "source-id",
 		DestinationID: "destination-id",
 		IsEnabled:     true,
-		CreatedAt:     timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt:     timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt:     testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt:     testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Times(3)
 
 	connections.On("Get", mock.Anything, "some-id").Return(&client.Connection{
 		ID:            "some-id",
-		SourceID:      "source-id",
-		DestinationID: "destination-id",
+		SourceID:      "source-id-2",
+		DestinationID: "destination-id-2",
 		IsEnabled:     true,
-		CreatedAt:     timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt:     timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt:     testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt:     testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Twice()
 
 	connections.On("Delete", mock.Anything, "some-id").Return(nil)
@@ -85,6 +87,18 @@ func TestConnectionResource(t *testing.T) {
 					}
 				`,
 				Check: func(state *terraform.State) error {
+					resources := state.RootModule().Resources
+					resource, ok := resources["rudderstack_connection.example"]
+					if !ok {
+						return fmt.Errorf("resource not found in state")
+					}
+					attributes := resource.Primary.Attributes
+					if c, ok := attributes["created_at"]; !ok || c != "2010-01-02T03:04:05Z" {
+						return fmt.Errorf("created_at was not set properly in state")
+					}
+					if c, ok := attributes["updated_at"]; !ok || c != "2010-01-02T03:04:05Z" {
+						return fmt.Errorf("updated_at was not set properly in state")
+					}
 					return nil
 				},
 			},
@@ -95,11 +109,23 @@ func TestConnectionResource(t *testing.T) {
 					}
 
 					resource "rudderstack_connection" "example" {
-						source_id      = "source-id"
-						destination_id = "destination-id"
+						source_id      = "source-id-2"
+						destination_id = "destination-id-2"
 					}
 				`,
 				Check: func(state *terraform.State) error {
+					resources := state.RootModule().Resources
+					resource, ok := resources["rudderstack_connection.example"]
+					if !ok {
+						return fmt.Errorf("resource not found in state")
+					}
+					attributes := resource.Primary.Attributes
+					if c, ok := attributes["created_at"]; !ok || c != "2010-01-02T03:04:05Z" {
+						return fmt.Errorf("created_at was not set properly in state")
+					}
+					if c, ok := attributes["updated_at"]; !ok || c != "2010-02-02T03:04:05Z" {
+						return fmt.Errorf("update_at was not set properly in state")
+					}
 					return nil
 				},
 			},
