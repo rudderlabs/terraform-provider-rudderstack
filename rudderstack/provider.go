@@ -22,17 +22,21 @@ func NewWithConfigureClientFunc(f ConfigureClientFunc) *schema.Provider {
 			return f(ctx, d)
 		},
 		Schema: map[string]*schema.Schema{
-			"host": {
+			"api_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("RUDDERSTACK_API_HOST", "https://api.rudderstack.com/v2"),
-				Description: "The hostname of Rudderstack API interface",
+				DefaultFunc: schema.EnvDefaultFunc("RUDDERSTACK_API_URL", "https://api.rudderstack.com/v2"),
+				Description: "The base URL of Rudderstack API. If not set, the provider will first look for a value in the " +
+					"`RUDDERSTACK_API_URL` environmental value, and finally default to `https://api.rudderstack.com/v2` " +
+					"if that is missing.",
 			},
 			"access_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("RUDDERSTACK_ACCESS_TOKEN", ""),
-				Description: "The API access token used to authenticate you Rudderstack account",
+				Description: "The Rudderstack API access token used to authenticate you Rudderstack account. If not set, the provider " +
+					"will look for that value in the `RUDDERSTACK_ACCESS_TOKEN` environmental value, " +
+					"and fail with an error if that is missing.",
 			},
 		},
 		ResourcesMap: resourcesMap(),
@@ -65,10 +69,10 @@ func resourcesMap() map[string]*schema.Resource {
 }
 
 func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag.Diagnostics) {
-	host := d.Get("host").(string)
+	apiUrl := d.Get("api_url").(string)
 	accessToken := d.Get("access_token").(string)
 	client, err := NewAPIClient(accessToken,
-		client.WithBaseURL(host),
+		client.WithBaseURL(apiUrl),
 		client.WithUserAgent("terraform-provider-rudderstack/0.3.0"))
 	if err != nil {
 		return nil, diag.FromErr(err)

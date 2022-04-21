@@ -9,5 +9,6 @@ terraform {
 }
 
 provider "rudderstack" {
+  # api_url      = "https://api.rudderstack.com/v2"
   # access_token = ""
 }
