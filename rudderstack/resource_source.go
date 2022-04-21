@@ -37,6 +37,10 @@ func resourceSourceSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
 			Optional: true,
 			Default:  true,
 		},
+		"write_key": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
 		"created_at": {
 			Type:        schema.TypeString,
 			Computed:    true,
@@ -174,6 +178,9 @@ func storeSourceToState(cm configs.ConfigMeta, source *client.Source, d *schema.
 		return err
 	}
 	if err := d.Set("enabled", source.IsEnabled); err != nil {
+		return err
+	}
+	if err := d.Set("write_key", source.WriteKey); err != nil {
 		return err
 	}
 	if source.CreatedAt != nil {
