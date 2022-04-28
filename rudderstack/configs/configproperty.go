@@ -1,6 +1,9 @@
 package configs
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -22,11 +25,24 @@ type FromStateFunc func(config string, state string) (string, error)
 type ToStateFunc func(state string, config string) (string, error)
 
 // Simple returns a ConfigProperty that maps an API config key to a terraform config key
-// and vice versa.
-func Simple(apiKey, terraformKey string) ConfigProperty {
+// and vice versa. Additional ValueFilter filters can be applied to ignore a field in state
+// depending on its value.
+func Simple(apiKey, terraformKey string, filters ...ValueFilter) ConfigProperty {
 	return ConfigProperty{
-		FromStateFunc: copyFromState(apiKey, terraformKey),
+		FromStateFunc: copyFromState(apiKey, terraformKey, filters...),
 		ToStateFunc:   copyToState(apiKey, terraformKey),
+	}
+}
+
+type ValueFilter func(a interface{}) bool
+
+// SkipZeroValue is a ValueFilter that returns true if the value is golang's zero value or an empty slice.
+func SkipZeroValue(a interface{}) bool {
+	switch v := a.(type) {
+	case []interface{}:
+		return len(v) == 0
+	default:
+		return reflect.ValueOf(a).IsZero()
 	}
 }
 
@@ -67,11 +83,73 @@ func Discriminator(apiKey string, values DiscriminatorValues) ConfigProperty {
 // to a terraform state key of a config.
 type DiscriminatorValues map[string]string
 
-func copyFromState(apiKey, terraformKey string) FromStateFunc {
+func ArrayWithObject(rootAPIKey string, nestedAPIField string, terraformKey string) ConfigProperty {
+	return ConfigProperty{
+		FromStateFunc: func(config, state string) (string, error) {
+			result := config
+			v := gjson.Get(state, terraformKey)
+			if v.Exists() && v.Value() != nil {
+				switch a := v.Value().(type) {
+				case []interface{}:
+					contents := []interface{}{}
+					for _, i := range a {
+						contents = append(contents, map[string]interface{}{nestedAPIField: i})
+					}
+
+					if len(contents) > 0 {
+						r, err := sjson.Set(result, rootAPIKey, contents)
+						if err != nil {
+							return result, err
+						}
+						result = r
+					}
+				default:
+					return result, fmt.Errorf("provided value was not an array")
+				}
+
+			}
+			return result, nil
+		},
+		ToStateFunc: func(state, config string) (string, error) {
+			result := state
+
+			r := gjson.Get(config, rootAPIKey)
+			if r.Exists() && r.IsArray() {
+				contents := []interface{}{}
+				for _, i := range r.Value().([]interface{}) {
+					if m, ok := i.(map[string]interface{}); ok {
+						if v, ok := m[nestedAPIField]; ok {
+							contents = append(contents, v)
+						}
+					}
+				}
+				s, err := sjson.Set(result, terraformKey, contents)
+				if err != nil {
+					return result, err
+				}
+				result = s
+			}
+
+			return result, nil
+		},
+	}
+}
+
+func applyFilters(a interface{}, filters []ValueFilter) bool {
+	for _, o := range filters {
+		if o(a) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func copyFromState(apiKey, terraformKey string, options ...ValueFilter) FromStateFunc {
 	return func(config string, state string) (string, error) {
 		result := config
 		v := gjson.Get(state, terraformKey)
-		if v.Exists() && v.Value() != nil {
+		if v.Exists() && v.Value() != nil && applyFilters(v.Value(), options) {
 			sresult, err := sjson.Set(result, apiKey, v.Value())
 			if err != nil {
 				return result, err

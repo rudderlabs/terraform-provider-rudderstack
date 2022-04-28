@@ -36,6 +36,17 @@ func TestConditionalTrue(t *testing.T) {
 	assert.JSONEq(t, `{ "p": true, "t": { "s": "123" } }`, s)
 }
 
+func TestSkipZeroValue(t *testing.T) {
+	assert.True(t, configs.SkipZeroValue(""))
+	assert.True(t, configs.SkipZeroValue(0))
+	assert.True(t, configs.SkipZeroValue(false))
+	assert.True(t, configs.SkipZeroValue([]interface{}{}))
+	assert.False(t, configs.SkipZeroValue("123"))
+	assert.False(t, configs.SkipZeroValue(123))
+	assert.False(t, configs.SkipZeroValue(true))
+	assert.False(t, configs.SkipZeroValue([]interface{}{1, 2, 3}))
+}
+
 func TestConditionalFalse(t *testing.T) {
 	p := configs.Conditional("a.b", "t.s", func(state string) bool {
 		return false
@@ -82,3 +93,34 @@ func TestEquals(t *testing.T) {
 	assert.False(t, f(`{"a":"NOT VALUE"}`))
 	assert.False(t, f(`{"b":"VALUE"}`))
 }
+
+func TestArrayWithObject(t *testing.T) {
+	p := configs.ArrayWithObject("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web")
+
+	a, err := p.FromStateFunc(`{}`, `{ "onetrust_cookie_categories": [ { "web": [ "a", "b" ] } ]}`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"oneTrustCookieCategories": {
+			"web": [
+				{ "oneTrustCookieCategory": "a" },
+				{ "oneTrustCookieCategory": "b" }
+			]
+		}
+	}`, a)
+
+	s, err := p.ToStateFunc(`{}`, `{
+		"oneTrustCookieCategories": {
+			"web": [
+				{ "oneTrustCookieCategory": "a" },
+				{ "oneTrustCookieCategory": "b" }
+			]
+		}
+	}`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"onetrust_cookie_categories": [{
+			"web": [ "a", "b" ]
+		}]
+	}`, s)
+}
+
