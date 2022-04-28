@@ -5,30 +5,31 @@ import (
 	"flag"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	"terraform-provider-rudderstack/rudderstack"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
+	_ "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations"
 )
 
 func main() {
-	log.Println("Terraform Provider RudderStack started.")
-
 	var debugMode bool
 
 	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 
-	opts := &tfsdk.ServeOpts{
-		Name: "rudderstack",
+	opts := &plugin.ServeOpts{
+		ProviderFunc: func() *schema.Provider {
+			return rudderstack.New()
+		},
 	}
 
-	/*
 	if debugMode {
-		err := tfsdk.Debug(context.Background(), rudderstack.New, opts)
+		err := plugin.Debug(context.Background(), "rudderlabs/rudderstack", opts)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
+		return
 	}
-	*/
 
-	tfsdk.Serve(context.Background(), rudderstack.New, *opts)
+	plugin.Serve(opts)
 }
