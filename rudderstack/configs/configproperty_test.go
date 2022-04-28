@@ -65,7 +65,7 @@ func TestConditionalFalse(t *testing.T) {
 }
 
 func TestDiscriminator(t *testing.T) {
-	p := configs.Discriminator("f", map[string]string{
+	p := configs.Discriminator("f", map[string]interface{}{
 		"foo": "FOO",
 		"bar": "BAR",
 	})

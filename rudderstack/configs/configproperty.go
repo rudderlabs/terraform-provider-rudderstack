@@ -81,7 +81,7 @@ func Discriminator(apiKey string, values DiscriminatorValues) ConfigProperty {
 
 // DiscriminatorValues is a map of API config values for discriminator fields, mapped
 // to a terraform state key of a config.
-type DiscriminatorValues map[string]string
+type DiscriminatorValues map[string]interface{}
 
 func ArrayWithObject(rootAPIKey string, nestedAPIField string, terraformKey string) ConfigProperty {
 	return ConfigProperty{
