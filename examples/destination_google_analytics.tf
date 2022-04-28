@@ -2,7 +2,7 @@ resource "rudderstack_destination_google_analytics" "example" {
   name = "my-google-analytics"
 
   config {
-    tracking_id = "google analytics tracking id"
+    tracking_id = "UA-0000-0000"
 
     # double_click              = true
     # enhanced_link_attribution = true

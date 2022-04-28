@@ -9,7 +9,7 @@ resource "rudderstack_destination_redshift" "example" {
     password = "postgres"
 
     namespace          = "example"
-    enabled_sse        = true
+    enable_sse         = true
     use_rudder_storage = false
 
 
