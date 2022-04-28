@@ -1,0 +1,51 @@
+package destinations_test
+
+import (
+	"testing"
+
+	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
+	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
+)
+
+func TestDestinationResourceWebhook(t *testing.T) {
+	testutil.AssertDestination(t, "webhook", []c.TestConfig{
+		{
+			TerraformCreate: `
+				webhook_url = "https://example.com/some/path?query=a"
+				webhook_method = "GET"
+			`,
+			APICreate: `{
+				"webhookUrl": "https://example.com/some/path?query=a",
+				"webhookMethod": "GET"
+			}`,
+			TerraformUpdate: `
+				webhook_url = "https://example.com/some/path?query=a"
+				webhook_method = "GET"
+				headers = [
+					{
+						from = "a1"
+						to   = "b1"
+					},
+					{
+						from = "a2"
+						to   = "b2"
+					}
+				]
+			`,
+			APIUpdate: `{
+				"webhookUrl": "https://example.com/some/path?query=a",
+				"webhookMethod": "GET",
+				"headers": [
+					{
+						"from": "a1",
+						"to": "b1"
+					},
+					{
+						"from": "a2",
+						"to": "b2"
+					}
+				]
+			}`,
+		},
+	})
+}
