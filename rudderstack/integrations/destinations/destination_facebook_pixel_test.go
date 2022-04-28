@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
+	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestDestinationResourceFacebookPixel(t *testing.T) {
-	testutil.AssertDestination(t, "facebook_pixel", []c.TestConfig{
+	cmt.AssertDestination(t, "facebook_pixel", []c.TestConfig{
 		{
 			TerraformCreate: `
 				pixel_id = "abc123"

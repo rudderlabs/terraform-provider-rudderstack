@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
+	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestDestinationResourceCustomerIO(t *testing.T) {
-	testutil.AssertDestination(t, "customerio", []c.TestConfig{
+	cmt.AssertDestination(t, "customerio", []c.TestConfig{
 		{
 			TerraformCreate: `
 				site_id = "cd820c1b31d8f2696f3b"

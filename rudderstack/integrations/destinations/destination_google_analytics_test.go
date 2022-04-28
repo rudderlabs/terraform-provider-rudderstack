@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
+	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestDestinationResourceGoogleAnalytics(t *testing.T) {
-	testutil.AssertDestination(t, "google_analytics", []c.TestConfig{
+	cmt.AssertDestination(t, "google_analytics", []c.TestConfig{
 		{
 			TerraformCreate: `
 				tracking_id = "UA-00-0000"

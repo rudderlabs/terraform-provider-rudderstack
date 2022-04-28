@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
+	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestDestinationResourceAmplitude(t *testing.T) {
-	testutil.AssertDestination(t, "amplitude", []c.TestConfig{
+	cmt.AssertDestination(t, "amplitude", []c.TestConfig{
 		{
 			TerraformCreate: `
 				api_key = "123abc"

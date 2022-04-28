@@ -1,8 +1,7 @@
-package testutil
+package cm
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -12,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	"github.com/stretchr/testify/mock"
@@ -25,15 +25,13 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 		Type:      cm.APIType,
 		Name:      "example",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APICreate),
 	}).Return(&client.Source{
 		ID:        "some-id",
 		Type:      cm.APIType,
 		Name:      "example",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APICreate),
-		CreatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
 
 	sources.On("Update", mock.Anything, &client.Source{
@@ -41,15 +39,13 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APIUpdate),
 	}).Return(&client.Source{
 		ID:        "some-id",
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APIUpdate),
-		CreatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
 
 	sources.On("Get", mock.Anything, "some-id").Return(&client.Source{
@@ -57,9 +53,8 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 		Type:      cm.APIType,
 		Name:      "example",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APICreate),
-		CreatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Times(3)
 
 	sources.On("Get", mock.Anything, "some-id").Return(&client.Source{
@@ -67,9 +62,8 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APIUpdate),
-		CreatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Twice()
 
 	sources.On("Delete", mock.Anything, "some-id").Return(nil)
@@ -93,11 +87,8 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 
 					resource "rudderstack_source_%s" "example" {
 						name = "example"
-						config {
-							%s
-						}
 					}
-				`, source, testConfigs[0].TerraformCreate),
+				`, source),
 				Check: func(state *terraform.State) error {
 					return nil
 				},
@@ -110,11 +101,8 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 
 					resource "rudderstack_source_%s" "example" {
 						name = "example-updated"
-						config {
-							%s
-						}
 					}
-				`, source, testConfigs[0].TerraformUpdate),
+				`, source),
 				Check: func(state *terraform.State) error {
 					return nil
 				},

@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
+	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestDestinationResourceS3Datalake(t *testing.T) {
-	testutil.AssertDestination(t, "s3_datalake", []c.TestConfig{
+	cmt.AssertDestination(t, "s3_datalake", []c.TestConfig{
 		{
 			TerraformCreate: `
 				bucket_name = "bucket"

@@ -1,4 +1,4 @@
-package testutil
+package cm
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	"github.com/stretchr/testify/mock"
@@ -26,15 +27,15 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 			d.ID == "" &&
 			d.Name == "example" &&
 			d.IsEnabled &&
-			JSONEq(string(d.Config), testConfigs[0].APICreate)
+			testutil.JSONEq(string(d.Config), testConfigs[0].APICreate)
 	})).Return(&client.Destination{
 		ID:        "some-id",
 		Type:      cm.APIType,
 		Name:      "example",
 		IsEnabled: true,
 		Config:    json.RawMessage(testConfigs[0].APICreate),
-		CreatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
 
 	destinations.On("Update", mock.Anything, mock.MatchedBy(func(d *client.Destination) bool {
@@ -42,15 +43,15 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 			d.ID == "some-id" &&
 			d.Name == "example-updated" &&
 			d.IsEnabled &&
-			JSONEq(string(d.Config), testConfigs[0].APIUpdate)
+			testutil.JSONEq(string(d.Config), testConfigs[0].APIUpdate)
 	})).Return(&client.Destination{
 		ID:        "some-id",
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
 		Config:    json.RawMessage(testConfigs[0].APIUpdate),
-		CreatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
 
 	destinations.On("Get", mock.Anything, "some-id").Return(&client.Destination{
@@ -59,8 +60,8 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 		Name:      "example",
 		IsEnabled: true,
 		Config:    json.RawMessage(testConfigs[0].APICreate),
-		CreatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Times(3)
 
 	destinations.On("Get", mock.Anything, "some-id").Return(&client.Destination{
@@ -69,8 +70,8 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 		Name:      "example-updated",
 		IsEnabled: true,
 		Config:    json.RawMessage(testConfigs[0].APIUpdate),
-		CreatedAt: timePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: timePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Twice()
 
 	destinations.On("Delete", mock.Anything, "some-id").Return(nil)

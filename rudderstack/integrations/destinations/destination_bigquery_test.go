@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
+	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestDestinationResourceBigQuery(t *testing.T) {
-	testutil.AssertDestination(t, "bigquery", []c.TestConfig{
+	cmt.AssertDestination(t, "bigquery", []c.TestConfig{
 		{
 			TerraformCreate: `
 				project     = "project"

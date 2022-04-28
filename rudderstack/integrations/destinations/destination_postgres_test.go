@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
+	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestDestinationResourcePostgres(t *testing.T) {
-	testutil.AssertDestination(t, "postgres", []c.TestConfig{
+	cmt.AssertDestination(t, "postgres", []c.TestConfig{
 		{
 			TerraformCreate: `
 				host = "example.com"

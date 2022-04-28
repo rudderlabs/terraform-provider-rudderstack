@@ -20,6 +20,6 @@ func JSONEq(a, b string) bool {
 	return reflect.DeepEqual(am, bm)
 }
 
-func timePtr(t time.Time) *time.Time {
+func TimePtr(t time.Time) *time.Time {
 	return &t
 }
