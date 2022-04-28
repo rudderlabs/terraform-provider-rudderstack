@@ -9,7 +9,6 @@ type ConfigMeta struct {
 	SkipConfig   bool
 	ConfigSchema map[string]*schema.Schema
 	Properties   []ConfigProperty
-	TestConfigs  []TestConfig
 }
 
 func (cm *ConfigMeta) StateToAPI(state string) (string, error) {
