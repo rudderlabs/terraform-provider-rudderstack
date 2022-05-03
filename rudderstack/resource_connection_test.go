@@ -50,7 +50,7 @@ func TestConnectionResource(t *testing.T) {
 		DestinationID: "destination-id",
 		IsEnabled:     true,
 		CreatedAt:     testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt:     testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt:     testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Times(3)
 
 	connections.On("Get", mock.Anything, "some-id").Return(&client.Connection{

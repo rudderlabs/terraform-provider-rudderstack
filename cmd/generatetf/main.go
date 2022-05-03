@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 
@@ -14,6 +15,9 @@ var (
 )
 
 func main() {
+	importFlag := flag.Bool("import", false, "generate terraform import commands")
+	flag.Parse()
+
 	var err error
 	cl, err = setupClient()
 	if err != nil {
@@ -39,13 +43,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	bytes, err := generator.Generate(sources, destinations, connections)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not generate terraform HCL: %s\n", err.Error())
-		os.Exit(1)
+	if *importFlag {
+		bytes, err := generator.GenerateImportScript(sources, destinations, connections)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "could not generate terraform import script: %s\n", err.Error())
+			os.Exit(1)
+		}
+		fmt.Println(string(bytes))
+	} else {
+		bytes, err := generator.GenerateTerraform(sources, destinations, connections)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "could not generate terraform HCL: %s\n", err.Error())
+			os.Exit(1)
+		}
+		fmt.Println(string(bytes))
 	}
-
-	fmt.Println(string(bytes))
 }
 
 func setupClient() (*client.Client, error) {
@@ -54,7 +66,7 @@ func setupClient() (*client.Client, error) {
 		return nil, fmt.Errorf("no access token in specified. Please provide one through the RUDDERSTACK_ACCESS_TOKEN environmental variable")
 	}
 
-	baseURL := os.Getenv("RUDDERSTACK_API_HOST")
+	baseURL := os.Getenv("RUDDERSTACK_API_URL")
 	if baseURL == "" {
 		baseURL = client.BASE_URL_V2
 	}
