@@ -19,6 +19,9 @@ func resourceDestination(cm configs.ConfigMeta) *schema.Resource {
 		ReadContext:   resourceDestinationRead(cm),
 		UpdateContext: resourceDestinationUpdate(cm),
 		DeleteContext: resourceDestinationDelete(cm),
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceDestinationImportState(cm),
+		},
 	}
 }
 
@@ -145,6 +148,20 @@ func resourceDestinationDelete(cm configs.ConfigMeta) schema.DeleteContextFunc {
 
 		d.SetId("")
 		return diag.Diagnostics{}
+	}
+}
+
+func resourceDestinationImportState(cm configs.ConfigMeta) schema.StateContextFunc {
+	return func(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		diagnostics := resourceDestinationRead(cm)(ctx, d, m)
+		if diagnostics.HasError() {
+			for _, diagnostic := range diagnostics {
+				if diagnostic.Severity == diag.Error {
+					return nil, fmt.Errorf("could not import connection: %s", diagnostic.Summary)
+				}
+			}
+		}
+		return []*schema.ResourceData{d}, nil
 	}
 }
 

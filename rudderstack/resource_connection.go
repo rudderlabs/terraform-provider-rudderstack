@@ -43,6 +43,9 @@ func resourceConnection() *schema.Resource {
 		ReadContext:   resourceConnectionRead,
 		UpdateContext: resourceConnectionUpdate,
 		DeleteContext: resourceConnectionDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceConnectionImportState,
+		},
 	}
 }
 
@@ -120,6 +123,18 @@ func resourceConnectionDelete(ctx context.Context, d *schema.ResourceData, m int
 
 	d.SetId("")
 	return diag.Diagnostics{}
+}
+
+func resourceConnectionImportState(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	diagnostics := resourceConnectionRead(ctx, d, m)
+	if diagnostics.HasError() {
+		for _, diagnostic := range diagnostics {
+			if diagnostic.Severity == diag.Error {
+				return nil, fmt.Errorf("could not import connection: %s", diagnostic.Summary)
+			}
+		}
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func populateConnectionFromState(connection *client.Connection, d *schema.ResourceData) error {
