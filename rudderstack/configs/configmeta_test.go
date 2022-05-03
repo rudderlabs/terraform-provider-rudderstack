@@ -12,7 +12,7 @@ func TestConfigMetaStateToAPI(t *testing.T) {
 	cm := configs.ConfigMeta{
 		Properties: []configs.ConfigProperty{
 			configs.Simple("simple", "s"),
-			configs.Discriminator("discriminator", map[string]string{
+			configs.Discriminator("discriminator", map[string]interface{}{
 				"d": "VALUE",
 			}),
 			configs.Conditional("conditional", "c1", configs.Equals("f", "FOO")),
@@ -39,7 +39,7 @@ func TestConfigMetaAPIToState(t *testing.T) {
 	cm := configs.ConfigMeta{
 		Properties: []configs.ConfigProperty{
 			configs.Simple("simple", "s"),
-			configs.Discriminator("discriminator", map[string]string{
+			configs.Discriminator("discriminator", map[string]interface{}{
 				"c1": "FOO",
 				"c2": "BAR",
 			}),

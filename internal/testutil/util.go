@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-// TimePtr converts a time value to a pointer. Useful for creating *time.Time values in tests.
-func TimePtr(t time.Time) *time.Time {
-	return &t
-}
-
 // JSONEq returns true if JSON strings a & b are equal.
 // Returns false if any of them is not a valid json
 func JSONEq(a, b string) bool {
@@ -23,4 +18,8 @@ func JSONEq(a, b string) bool {
 	}
 
 	return reflect.DeepEqual(am, bm)
+}
+
+func TimePtr(t time.Time) *time.Time {
+	return &t
 }
