@@ -15,12 +15,12 @@ import (
 func TestGeneratorTerraform(t *testing.T) {
 	sources := []client.Source{
 		{
-			ID:   "1",
+			ID:   "id-javascript",
 			Name: "source-1",
 			Type: "Javascript",
 		},
 		{
-			ID:   "2",
+			ID:   "id-http",
 			Name: "source-2",
 			Type: "HTTP",
 		},
@@ -102,22 +102,22 @@ func TestGeneratorTerraform(t *testing.T) {
 	connections := []client.Connection{
 		{
 			ID:            "id-connection-1",
-			SourceID:      "id-source-1",
-			DestinationID: "id-destination-1",
+			SourceID:      "id-javascript",
+			DestinationID: "id-postgres",
 		},
 		{
 			ID:            "id-connection-2",
-			SourceID:      "id-source-2",
-			DestinationID: "id-destination-2",
+			SourceID:      "id-http",
+			DestinationID: "id-facebook-pixel",
 		},
 	}
 
 	var expected = `
-resource "rudderstack_source_javascript" "src_1" {
+resource "rudderstack_source_javascript" "src_id-javascript" {
   name = "source-1"
 }
 
-resource "rudderstack_source_http" "src_2" {
+resource "rudderstack_source_http" "src_id-http" {
   name = "source-2"
 }
 
@@ -170,13 +170,13 @@ resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
 }
 
 resource "rudderstack_connection" "cnxn_id-connection-1" {
-  source_id      = "id-source-1"
-  destination_id = "id-destination-1"
+  source_id      = rudderstack_source_javascript.src_id-javascript.id
+  destination_id = rudderstack_destination_postgres.dst_id-postgres.id
 }
 
 resource "rudderstack_connection" "cnxn_id-connection-2" {
-  source_id      = "id-source-2"
-  destination_id = "id-destination-2"
+  source_id      = rudderstack_source_http.src_id-http.id
+  destination_id = rudderstack_destination_facebook_pixel.dst_id-facebook-pixel.id
 }
 `
 
