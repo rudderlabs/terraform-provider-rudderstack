@@ -30,6 +30,7 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 		Type:      cm.APIType,
 		Name:      "example",
 		IsEnabled: true,
+		WriteKey:  "some-write-key",
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
@@ -39,6 +40,7 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
+		WriteKey:  "some-write-key",
 	}).Return(&client.Source{
 		ID:        "some-id",
 		Type:      cm.APIType,
@@ -53,8 +55,9 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 		Type:      cm.APIType,
 		Name:      "example",
 		IsEnabled: true,
+		WriteKey:  "some-write-key",
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Times(3)
 
 	sources.On("Get", mock.Anything, "some-id").Return(&client.Source{
@@ -62,6 +65,7 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
+		WriteKey:  "some-write-key",
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Twice()
@@ -90,6 +94,21 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 					}
 				`, source),
 				Check: func(state *terraform.State) error {
+					resources := state.RootModule().Resources
+					resource, ok := resources[fmt.Sprintf("rudderstack_source_%s.example", source)]
+					if !ok {
+						return fmt.Errorf("resource not found in state")
+					}
+					attributes := resource.Primary.Attributes
+					if c, ok := attributes["created_at"]; !ok || c != "2010-01-02T03:04:05Z" {
+						return fmt.Errorf("created_at was not set properly in state")
+					}
+					if c, ok := attributes["updated_at"]; !ok || c != "2010-01-02T03:04:05Z" {
+						return fmt.Errorf("update_at was not set properly in state")
+					}
+					if c, ok := attributes["write_key"]; !ok || c != "some-write-key" {
+						return fmt.Errorf("write_key was not set properly in state")
+					}
 					return nil
 				},
 			},
@@ -104,6 +123,18 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 					}
 				`, source),
 				Check: func(state *terraform.State) error {
+					resources := state.RootModule().Resources
+					resource, ok := resources[fmt.Sprintf("rudderstack_source_%s.example", source)]
+					if !ok {
+						return fmt.Errorf("resource not found in state")
+					}
+					attributes := resource.Primary.Attributes
+					if c, ok := attributes["created_at"]; !ok || c != "2010-01-02T03:04:05Z" {
+						return fmt.Errorf("created_at was not set properly in state")
+					}
+					if c, ok := attributes["updated_at"]; !ok || c != "2010-02-02T03:04:05Z" {
+						return fmt.Errorf("update_at was not set properly in state")
+					}
 					return nil
 				},
 			},
