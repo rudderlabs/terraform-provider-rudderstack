@@ -7,6 +7,7 @@ require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/hcl/v2 v2.3.0
 	github.com/hashicorp/terraform-exec v0.16.0 // indirect
+	github.com/hashicorp/terraform-plugin-docs v0.7.0 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.1
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/rudderlabs/rudder-api-go v0.0.0-20220414103425-da0abcae77eb

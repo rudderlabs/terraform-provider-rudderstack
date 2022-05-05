@@ -32,21 +32,25 @@ func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema 
 			Computed: true,
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Human readable name of the destination. The value has to be unique across all destinations.",
 		},
 		"enabled": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "An enabled destination allows data to be sent to it.",
 		},
 		"created_at": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Time when the resource was created, in ISO 8601 format.",
 		},
 		"updated_at": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Time when the resource was last updated, in ISO 8601 format.",
 		},
 	}
 
@@ -55,6 +59,8 @@ func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema 
 			Type:     schema.TypeList,
 			Optional: cm.SkipConfig,
 			Required: !cm.SkipConfig,
+			Description: "Destination specific configuration. Check the nested block documenation " +
+				"for more information.",
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: cm.ConfigSchema,
