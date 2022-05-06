@@ -83,7 +83,7 @@ func Discriminator(apiKey string, values DiscriminatorValues) ConfigProperty {
 // to a terraform state key of a config.
 type DiscriminatorValues map[string]interface{}
 
-func ArrayWithObject(rootAPIKey string, nestedAPIField string, terraformKey string) ConfigProperty {
+func ArrayWithStrings(rootAPIKey string, nestedAPIField string, terraformKey string) ConfigProperty {
 	return ConfigProperty{
 		FromStateFunc: func(config, state string) (string, error) {
 			result := config
@@ -120,6 +120,89 @@ func ArrayWithObject(rootAPIKey string, nestedAPIField string, terraformKey stri
 					if m, ok := i.(map[string]interface{}); ok {
 						if v, ok := m[nestedAPIField]; ok {
 							contents = append(contents, v)
+						}
+					}
+				}
+				s, err := sjson.Set(result, terraformKey, contents)
+				if err != nil {
+					return result, err
+				}
+				result = s
+			}
+
+			return result, nil
+		},
+	}
+}
+
+func ArrayWithObjects(rootAPIKey string, terraformKey string, fields map[string]string) ConfigProperty {
+	// we also need the inverse field map to convert terraform keys to api keys
+	inverseFields := map[string]string{}
+	for a, t := range fields {
+		inverseFields[t] = a
+	}
+
+	return ConfigProperty{
+		FromStateFunc: func(config, state string) (string, error) {
+			result := config
+			v := gjson.Get(state, terraformKey)
+			if v.Exists() && v.Value() != nil {
+				switch a := v.Value().(type) {
+				case []interface{}:
+
+					contents := []interface{}{}
+					for _, i := range a {
+						av := map[string]interface{}{} // api value
+
+						// iterate terraform values
+						if tv, ok := i.(map[string]interface{}); ok {
+							// iterate api value fields
+							for tf, v := range tv {
+								if af, ok := inverseFields[tf]; ok {
+									av[af] = v
+								}
+							}
+
+							if len(av) > 0 {
+								contents = append(contents, av)
+							}
+						}
+					}
+
+					if len(contents) > 0 {
+						r, err := sjson.Set(result, rootAPIKey, contents)
+						if err != nil {
+							return result, err
+						}
+						result = r
+					}
+				default:
+					return result, fmt.Errorf("provided value was not an array")
+				}
+
+			}
+			return result, nil
+		},
+		ToStateFunc: func(state, config string) (string, error) {
+			result := state
+
+			r := gjson.Get(config, rootAPIKey)
+			if r.Exists() && r.IsArray() {
+				contents := []interface{}{}
+				for _, i := range r.Value().([]interface{}) {
+					tv := map[string]interface{}{} // terraform value
+
+					// iterate api values
+					if av, ok := i.(map[string]interface{}); ok {
+						// iterate terraform value fields
+						for af, v := range av {
+							if tf, ok := fields[af]; ok {
+								tv[tf] = v
+							}
+						}
+
+						if len(tv) > 0 {
+							contents = append(contents, tv)
 						}
 					}
 				}

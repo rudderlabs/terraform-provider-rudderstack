@@ -14,9 +14,9 @@ func init() {
 			c.Simple("deviceTokenEventName", "device_token_event_name", c.SkipZeroValue),
 			c.Simple("datacenterEU", "datacenter_eu", c.SkipZeroValue),
 			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
-			c.ArrayWithObject("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
-			c.ArrayWithObject("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
-			c.ArrayWithObject("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
+			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
+			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 			c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
 				"event_filtering.0.whitelist": "whitelistedEvents",
 				"event_filtering.0.blacklist": "blacklistedEvents",
