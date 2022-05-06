@@ -32,26 +32,31 @@ func resourceSourceSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
 			Computed: true,
 		},
 		"name": {
-			Type:     schema.TypeString,
-			Required: true,
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Human readable name of the source. The value has to be unique across all sources.",
 		},
 		"enabled": {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
+			Description: "An enabled source allows data to be read from it. For event stream sources " +
+				"this controls wether events can be sent to that source by various SDKs.",
 		},
 		"write_key": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "The write key that identifies the source in RudderStack data plane.",
 		},
 		"created_at": {
 			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "IOS",
+			Description: "Time when the resource was created, in ISO 8601 format.",
 		},
 		"updated_at": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Time when the resource was last updated, in ISO 8601 format.",
 		},
 	}
 
@@ -60,6 +65,8 @@ func resourceSourceSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
 			Type:     schema.TypeList,
 			Optional: cm.SkipConfig,
 			Required: !cm.SkipConfig,
+			Description: "Source specific configuration. Check the nested block documenation " +
+				"for more information.",
 			MaxItems: 1,
 			Elem: &schema.Resource{
 				Schema: cm.ConfigSchema,

@@ -61,7 +61,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 		IsEnabled: true,
 		Config:    json.RawMessage(testConfigs[0].APICreate),
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
-		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
+		UpdatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Times(3)
 
 	destinations.On("Get", mock.Anything, "some-id").Return(&client.Destination{
@@ -101,6 +101,18 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 					}
 				`, destination, testConfigs[0].TerraformCreate),
 				Check: func(state *terraform.State) error {
+					resources := state.RootModule().Resources
+					resource, ok := resources[fmt.Sprintf("rudderstack_destination_%s.example", destination)]
+					if !ok {
+						return fmt.Errorf("resource not found in state")
+					}
+					attributes := resource.Primary.Attributes
+					if c, ok := attributes["created_at"]; !ok || c != "2010-01-02T03:04:05Z" {
+						return fmt.Errorf("created_at was not set properly in state")
+					}
+					if c, ok := attributes["updated_at"]; !ok || c != "2010-01-02T03:04:05Z" {
+						return fmt.Errorf("update_at was not set properly in state")
+					}
 					return nil
 				},
 			},
@@ -118,6 +130,18 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 					}
 				`, destination, testConfigs[0].TerraformUpdate),
 				Check: func(state *terraform.State) error {
+					resources := state.RootModule().Resources
+					resource, ok := resources[fmt.Sprintf("rudderstack_destination_%s.example", destination)]
+					if !ok {
+						return fmt.Errorf("resource not found in state")
+					}
+					attributes := resource.Primary.Attributes
+					if c, ok := attributes["created_at"]; !ok || c != "2010-01-02T03:04:05Z" {
+						return fmt.Errorf("created_at was not set properly in state")
+					}
+					if c, ok := attributes["updated_at"]; !ok || c != "2010-02-02T03:04:05Z" {
+						return fmt.Errorf("update_at was not set properly in state")
+					}
 					return nil
 				},
 			},
