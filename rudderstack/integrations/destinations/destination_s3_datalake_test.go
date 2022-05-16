@@ -26,6 +26,7 @@ func TestDestinationResourceS3Datalake(t *testing.T) {
 			TerraformUpdate: `
 				bucket_name = "bucket"
 
+				namespace	  = "namespace"
 				prefix        = "prefix"
 				access_key_id = "..."
 				access_key    = "..."
@@ -41,6 +42,7 @@ func TestDestinationResourceS3Datalake(t *testing.T) {
 			`,
 			APIUpdate: `{
 				"bucketName": "bucket",
+				"namespace": "namespace",
 				"prefix": "prefix",
 				"accessKeyID": "...",
 				"accessKey": "...",
