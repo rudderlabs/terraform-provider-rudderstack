@@ -44,8 +44,10 @@ func init() {
 			"namespace": {
 				Type:     schema.TypeString,
 				Optional: true,
-				// TODO: panic: error parsing regexp: invalid or unsupported Perl syntax: `(?!`
-				// ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^((?!pg_|PG_|pG_|Pg_).{0,64})$"),
+				ValidateDiagFunc: c.ValidateAll(
+					c.StringMatchesRegexp("(^env[.].*)|^(.{0,64})$"),
+					c.StringNotMatchesRegexp("^(pg_|PG_|pG_|Pg_)"),
+				),
 			},
 			"credentials": {
 				Type:             schema.TypeString,
