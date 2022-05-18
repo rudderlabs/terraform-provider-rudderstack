@@ -40,7 +40,6 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
-		WriteKey:  "some-write-key",
 	}).Return(&client.Source{
 		ID:        "some-id",
 		Type:      cm.APIType,

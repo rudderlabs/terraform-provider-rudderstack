@@ -23,8 +23,8 @@ func init() {
 			c.Simple("enhancedEcommerce", "enhanced_ecommerce", c.SkipZeroValue),
 			c.Simple("nonInteraction", "non_interaction", c.SkipZeroValue),
 			c.Simple("sendUserId", "send_user_id", c.SkipZeroValue),
-			c.ArrayWithObject("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
-			c.ArrayWithObject("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
+			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
+			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 			c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
 				"event_filtering.0.whitelist": "whitelistedEvents",
 				"event_filtering.0.blacklist": "blacklistedEvents",
@@ -34,13 +34,13 @@ func init() {
 			c.Simple("trackNamedPages.web", "track_named_pages.0.web"),
 			c.Simple("sampleRate.web", "sample_rate.0.web"),
 			c.Simple("siteSpeedSampleRate.web", "site_speed_sample_rate.0.web"),
-			c.ArrayWithObject("resetCustomDimensionsOnPage.web", "resetCustomDimensionsOnPage", "reset_custom_dimensions_on_page.0.web"),
+			c.ArrayWithStrings("resetCustomDimensionsOnPage.web", "resetCustomDimensionsOnPage", "reset_custom_dimensions_on_page.0.web"),
 			c.Simple("setAllMappedProps.web", "set_all_mapped_props.0.web"),
 			c.Simple("domain.web", "domain.0.web"),
 			c.Simple("optimize.web", "optimize.0.web"),
 			c.Simple("useGoogleAmpClientId.web", "use_google_amp_client_id.0.web"),
 			c.Simple("namedTracker.web", "named_tracker.0.web"),
-			c.ArrayWithObject("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"tracking_id": {
