@@ -6,55 +6,55 @@ import (
 )
 
 func init() {
-	c.Destinations.Register("customerio", c.ConfigMeta{
-		APIType: "CUSTOMERIO",
+	c.Destinations.Register("vwo", c.ConfigMeta{
+		APIType: "VWO",
 		Properties: []c.ConfigProperty{
-			c.Simple("siteID", "site_id"),
-			c.Simple("apiKey", "api_key"),
-			c.Simple("deviceTokenEventName", "device_token_event_name", c.SkipZeroValue),
-			c.Simple("datacenterEU", "datacenter_eu", c.SkipZeroValue),
-			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
-			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.Simple("accountId", "account_id"),
+			c.Simple("isSPA", "is_spa", c.SkipZeroValue),
+			c.Simple("sendExperimentTrack", "send_experiment_track", c.SkipZeroValue),
+			c.Simple("sendExperimentIdentify", "send_experiment_identify", c.SkipZeroValue),
+			c.Simple("libraryTolerance", "library_tolerance", c.SkipZeroValue),
+			c.Simple("settingsTolerance", "settings_tolerance", c.SkipZeroValue),
+			c.Simple("useExistingJquery", "use_existing_jquery", c.SkipZeroValue),
 			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 			c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
 				"event_filtering.0.whitelist": "whitelistedEvents",
 				"event_filtering.0.blacklist": "blacklistedEvents",
 			}),
+			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
-			"site_id": {
+			"account_id": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
-			"api_key": {
-				Type:             schema.TypeString,
-				Required:         true,
-				Sensitive:        true,
-				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			"is_spa": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
-			"device_token_event_name": {
+			"send_experiment_track": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"send_experiment_identify": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"library_tolerance": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
-			"datacenter_eu": {
+			"settings_tolerance": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			},
+			"use_existing_jquery": {
 				Type:     schema.TypeBool,
 				Optional: true,
-			},
-			"use_native_sdk": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"web": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-					},
-				},
 			},
 			"event_filtering": {
 				Type:     schema.TypeList,
@@ -81,18 +81,15 @@ func init() {
 					},
 				},
 			},
-			"onetrust_cookie_categories": {
+			"use_native_sdk": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeBool,
 							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 					},
 				},

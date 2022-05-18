@@ -94,8 +94,8 @@ func TestEquals(t *testing.T) {
 	assert.False(t, f(`{"b":"VALUE"}`))
 }
 
-func TestArrayWithObject(t *testing.T) {
-	p := configs.ArrayWithObject("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web")
+func TestArrayWithStrings(t *testing.T) {
+	p := configs.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web")
 
 	a, err := p.FromStateFunc(`{}`, `{ "onetrust_cookie_categories": [ { "web": [ "a", "b" ] } ]}`)
 	require.NoError(t, err)
@@ -124,3 +124,38 @@ func TestArrayWithObject(t *testing.T) {
 	}`, s)
 }
 
+func TestArrayWithObjects(t *testing.T) {
+	p := configs.ArrayWithObjects("eventChannelSettings", "event_channel_settings", map[string]string{
+		"eventName":    "name",
+		"eventChannel": "channel",
+		"eventRegex":   "regex",
+	})
+
+	a, err := p.FromStateFunc(`{}`, `{
+		"event_channel_settings": [
+			{ "name": "n1", "channel": "c1", "regex": "r1" },
+			{ "name": "n2", "channel": "c2", "regex": "r2" }
+		]
+	}`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"eventChannelSettings": [
+			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1" },
+			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2" }
+		]
+	}`, a)
+
+	s, err := p.ToStateFunc(`{}`, `{
+		"eventChannelSettings": [
+			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1", "extra": "e1" },
+			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2", "extra": "e2" }
+		]
+	}`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"event_channel_settings": [
+			{ "name": "n1", "channel": "c1", "regex": "r1" },
+			{ "name": "n2", "channel": "c2", "regex": "r2" }
+		]
+	}`, s)
+}
