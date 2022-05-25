@@ -16,7 +16,7 @@
 
 # RudderStack Terraform Provider
 
-This repository contains all the necessary resources to help you implement the RudderStack Terraform provider. You can use this provider to programmatically access the [RudderStack control plane](https://www.rudderstack.com/docs/get-started/rudderstack-architecture/#control-plane) via Terraform and seamlessly manage your source-destination configurations.
+This repository implements the RudderStack Terraform provider. You can use this provider to programmatically access the [RudderStack control plane](https://www.rudderstack.com/docs/get-started/rudderstack-architecture/#control-plane) via Terraform and seamlessly manage your source-destination configurations.
 
 Questions? Join our [Slack community](https://resources.rudderstack.com/join-rudderstack-slack) for quick support.
 
@@ -25,12 +25,6 @@ Questions? Join our [Slack community](https://resources.rudderstack.com/join-rud
 - If you new to the Terraform platform, then their [docs](https://www.terraform.io/intro) are a good place to start.
 - If you are interested in enhancing the RudderStack Terraform provider, create a local build and test your environment using an example configuration listed [here](#example).
 - To manage your production RudderStack resources via Terraform, get detailed documentation for the Terraform Provider [here](docs/index.md).
-
-## Terraform scripting flowchart for RudderStack
-
-To create and maintain RudderStack's resources in Terraform, you can follow the below flowchart below:
-
-![Flowchart for building and managing RudderStack's Terraform config](docs/TerraformScriptingForRudderStackFlowchart.png)
 
 <a id="example"></a>
 # Setting up the development and build environment
@@ -50,17 +44,22 @@ $ make
 $ make install
 ```
 
-2. Next, make sure that your `~/.terraformrc` has the following lines: 
+2. Next, make sure that your `/.terraformrc` file has the following lines: 
 
 ```
 provider_installation {
   dev_overrides {
-    "rudderlabs/rudderstack" = "~/.terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.12/linux_amd64/"
+    "rudderlabs/rudderstack" = /users/abc/terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.12/linux_amd64/"
   }
 }
 ```
 
 The above snippet ensures that you use the locally built Terraform provider binary instead of the one available at the [Terraform Registry](https://registry.terraform.io).
+
+A few things to note here:
+
+- Use the full path, that is, `/users/xyz/.terraform.d/....` depending on your home directory.
+- The `linux_amd64` part depends on your system's architecture. For example, on Macs it is `darwin_amd64`. This is essentially the path that is reported after the `make install` command runs.
 
 ## Testing the sample configuration
 
