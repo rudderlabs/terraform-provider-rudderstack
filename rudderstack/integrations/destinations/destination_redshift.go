@@ -55,7 +55,10 @@ func init() {
 			"namespace": {
 				Type:     schema.TypeString,
 				Required: true,
-				// ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(?!pg_|PG_|pG_|Pg_).*"),
+				ValidateDiagFunc: c.ValidateAll(
+					c.StringMatchesRegexp("(^env[.].*)|^(.{0,64})$"),
+					c.StringNotMatchesRegexp("^(pg_|PG_|pG_|Pg_)"),
+				),
 			},
 			"enable_sse": {
 				Type:     schema.TypeBool,

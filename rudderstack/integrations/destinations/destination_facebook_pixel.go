@@ -18,10 +18,8 @@ func init() {
 			c.Simple("testEventCode", "test_event_code", c.SkipZeroValue),
 			c.Simple("eventsToEvents", "events_to_events", c.SkipZeroValue),
 			c.ArrayWithStrings("eventCustomProperties", "eventCustomProperties", "event_custom_properties"),
-			// TODO: figure out why blacklistPiiProperties is different than whitelistPiiProperties and what blacklist hash is about
 			c.ArrayWithStrings("blacklistPiiProperties", "blacklistPiiProperties", "blacklist_pii_properties"),
 			c.ArrayWithStrings("whitelistPiiProperties", "whitelistPiiProperties", "whitelist_pii_properties"),
-
 			c.Simple("categoryToContent", "category_to_content", c.SkipZeroValue),
 			c.Simple("legacyConversionPixelId.from", "legacy_conversion_pixel_id.0.from"),
 			c.Simple("legacyConversionPixelId.to", "legacy_conversion_pixel_id.0.to"),

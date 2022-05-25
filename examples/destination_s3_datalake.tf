@@ -4,6 +4,7 @@ resource "rudderstack_destination_s3_datalake" "example" {
   config {
     bucket_name = "bucket"
 
+    # namespace     = "..."
     # prefix        = "prefix"
     # access_key_id = "..."
     # access_key    = "..."

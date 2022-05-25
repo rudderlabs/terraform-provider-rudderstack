@@ -10,6 +10,7 @@ func init() {
 		APIType: "S3_DATALAKE",
 		Properties: []c.ConfigProperty{
 			c.Simple("bucketName", "bucket_name"),
+			c.Simple("namespace", "namespace", c.SkipZeroValue),
 			c.Simple("prefix", "prefix", c.SkipZeroValue),
 			c.Simple("accessKeyID", "access_key_id", c.SkipZeroValue),
 			c.Simple("accessKey", "access_key", c.SkipZeroValue),
@@ -24,6 +25,14 @@ func init() {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			},
+			"namespace": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateDiagFunc: c.ValidateAll(
+					c.StringMatchesRegexp("(^env[.].*)|^(.{0,64})$"),
+					c.StringNotMatchesRegexp("^(pg_|PG_|pG_|Pg_)"),
+				),
 			},
 			"prefix": {
 				Type:             schema.TypeString,
