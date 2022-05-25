@@ -24,13 +24,13 @@ Running the tool requires a RudderStack personal access token to be set in the `
 Once you set this token, you can generate the script using the following command:
 
 ```sh
-go run ./cmd/generatetf
+go run ./scripts/bootstrap-terraform.sh
 ```
 
 The following example sets the personal access token and outputs the script to the `rudderstack.tf` file:
 
 ```sh
-RUDDERSTACK_ACCESS_TOKEN=my_rudderstack_access_token go run ./cmd/generatetf > rudderstack.tf
+RUDDERSTACK_ACCESS_TOKEN=my_rudderstack_access_token ./scripts/bootstrap-terraform.sh > rudderstack.tf
 ```
 
 ## Step 3: Generate the Terraform script
@@ -72,7 +72,7 @@ terraform import rudderstack_destination_postgres.dest_dev id
 Since your generated script might contain many resources, remembering the IDs of all of them and running the Terraform commands manually can be very tedious. To avoid this, you can use the same tool used to generate the Terraform script that lists all the Terraform commands for any imported resource:
 
 ```sh
-RUDDERSTACK_ACCESS_TOKEN=my_rudderstack_access_token go run ./cmd/generatetf -import
+RUDDERSTACK_ACCESS_TOKEN=my_rudderstack_access_token ./scripts/bootstrap-terraform-import.sh
 ```
 
 ## Step 5: Add any sensitive configuration fields
