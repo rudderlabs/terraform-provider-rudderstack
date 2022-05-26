@@ -20,30 +20,36 @@ func init() {
 			"email": {
 				Type:     schema.TypeString,
 				Required: true,
+				Description: "Enter the email used to log into your Zendesk dashboard.",
 				// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"api_token": {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
+				Description: "Enter the Zendesk API token used to authenticate the request. To create an API token, refer to this [Zendesk support page](https://support.zendesk.com/hc/en-us/articles/226022787-Generating-a-new-API-token-).",
 				// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"domain": {
 				Type:     schema.TypeString,
 				Required: true,
+				Description: "Enter your Zendesk subdomain without `.zendesk.com`",
 				// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"create_users_as_verified": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enabling this setting creates verified users in Zendesk, that is, the email verification is skipped.",
 			},
 			"send_group_calls_without_user_id": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enable this setting if you don't want to associate the user with a group. ",
 			},
 			"remove_users_from_organization": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enable this setting to remove users from an organization.",
 			},
 		},
 	})
