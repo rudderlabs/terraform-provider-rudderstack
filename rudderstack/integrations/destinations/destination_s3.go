@@ -19,27 +19,32 @@ func init() {
 			"bucket_name": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description: "Enter the name of your S3 bucket.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"prefix": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description: "Enter a prefix which RudderStack associates as the path prefix to all the files stored in your S3 bucket.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"access_key_id": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description: "Enter your AWS access key ID.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"access_key": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Sensitive:        true,
+				Description: "Enter your AWS secret access key.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"enable_sse": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "This setting enables server-side encryption.",
 			},
 		},
 	})
