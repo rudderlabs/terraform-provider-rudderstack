@@ -30,44 +30,53 @@ func init() {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Sensitive:        true,
+				Description: "This field is required only for the cloud mode setup where you can enter the API Secret generated through the Google Analytics dashboard.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"types_of_client": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description: "Select the client type as gtag or Firebase.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(gtag|firebase)$"),
 			},
 			"measurement_id": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description: "Enter the Measurement Id which is the identifier for a data stream.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(G-.{1,100})$|^$"),
 			},
 			"firebase_app_id": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description: "Enter the Firebase App ID which is the identifier for Firebase app.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"block_page_view_event": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enable this setting to disable sending `page_view` events on load. This setting is applicable only for device mode.",
 			},
 			"extend_page_view_params": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enable this setting to send `url` and `search` along with any other custom property to the `page` call of the RudderStack SDK. This setting is applicable only for device mode.",
 			},
 			"send_user_id": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "If enabled, the user ID is set to the identified visitors and sent to Google Analytics 4.",
 			},
 			"event_filtering": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: "With this option, you can determine which events are blocked or allowed to flow through to Google Analytics 4.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"whitelist": {
 							Type:         schema.TypeList,
 							Optional:     true,
+							Description: "Enter the event names to be whitelisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -76,6 +85,7 @@ func init() {
 						"blacklist": {
 							Type:         schema.TypeList,
 							Optional:     true,
+							Description: "Enter the event names to be blacklisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -88,6 +98,7 @@ func init() {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: "Enable this setting to send the events via the device mode.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -101,6 +112,7 @@ func init() {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
