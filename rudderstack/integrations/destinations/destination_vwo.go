@@ -28,43 +28,52 @@ func init() {
 			"account_id": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description: "Enter your VWO account ID.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"is_spa": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enable this setting if the page is a single page application (SPA).",
 			},
 			"send_experiment_track": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enable this setting to send the experiment data as `track` events.",
 			},
 			"send_experiment_identify": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enable this setting to send the experiments viewed as `identify` traits.",
 			},
 			"library_tolerance": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description: "Enter the value for the library tolerance setting.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"settings_tolerance": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description: "Enter the value for the setting tolerance.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"use_existing_jquery": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enable this setting to use the existing jQuery.",
 			},
 			"event_filtering": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: "Specify which events should be blocked or allowed to flow through to VWO.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"whitelist": {
 							Type:         schema.TypeList,
 							Optional:     true,
+							Description: "Enter the event nams to be whitelisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -73,6 +82,7 @@ func init() {
 						"blacklist": {
 							Type:         schema.TypeList,
 							Optional:     true,
+							Description: "Enter the event names to be blacklisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -85,6 +95,7 @@ func init() {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: "Enable this setting to send the events via the device mode.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {

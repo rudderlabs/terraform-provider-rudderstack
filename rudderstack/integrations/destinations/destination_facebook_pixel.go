@@ -36,40 +36,48 @@ func init() {
 			"pixel_id": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description: "Enter your Facebook Pixel ID.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"access_token": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Sensitive:        true,
+				Description: "Enter your Facebook business access token required to send the events via the cloud mode.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,208})$"),
 			},
 			"standard_page_call": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "If this setting is enabled, RudderStack sets `pageview` as a standard event for all the `page` and `screen` calls.",
 			},
 			"value_field_identifier": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description: "You can set this field to `properties.price` or `properties.value`. RudderStack will then assign this to the value field of the Facebook payload.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(properties.value|properties.price)$"),
 			},
 			"advanced_mapping": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "With this setting, you can enable the advanced mapping feature.",
 			},
 			"test_destination": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Description: "Enable this setting if you are using this destination for testing purposes.",
 			},
 			"test_event_code": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description: "If the above setting is enabled, enter the relevant test event code.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"events_to_events": {
 				Type:       schema.TypeList,
 				MaxItems:   10,
 				Optional:   true,
+				Description: "You can map your events to standard Facebook events using this setting.",
 				ConfigMode: schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -89,6 +97,7 @@ func init() {
 			"event_custom_properties": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Description: "For the standard events, some predefined properties are taken by Facebook. If you want to send more properties for your events, mention those properties in this field.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -96,6 +105,7 @@ func init() {
 			"blacklist_pii_properties": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Description: "Enter the PII properties to be blacklisted.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -103,6 +113,7 @@ func init() {
 			"whitelist_pii_properties": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Description: "Enter the PII properties to be whitelisted.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -110,6 +121,7 @@ func init() {
 			"category_to_content": {
 				Type:       schema.TypeList,
 				Optional:   true,
+				Description: "This option lets you specify the category fields to specific Facebook content type.",
 				ConfigMode: schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -130,6 +142,7 @@ func init() {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: "With this setting, you can send specific events to a legacy conversion Pixel by specifying the event-Pixel ID mapping. Note that this option is available only when sending events via the device mode.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
@@ -149,6 +162,7 @@ func init() {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: "Enable this setting to send events from the web SDK to Facebook Pixel via the device mode.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -162,6 +176,7 @@ func init() {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: "This setting lets you determine which events are blocked or allowed to flowed through to Facebook Pixel.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"whitelist": {
@@ -187,6 +202,7 @@ func init() {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
