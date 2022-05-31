@@ -46,6 +46,7 @@ func init() {
 			"tracking_id": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description:      "Enter your Google Analytics Tracking ID.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^(UA|YT|MO)-\\d+-\\d{0,100}$)"),
 			},
 			"double_click": {
@@ -53,12 +54,14 @@ func init() {
 				Optional: true,
 			},
 			"enhanced_link_attribution": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable this setting to activate the Google Analytics enhanced link attribution feature.",
 			},
 			"include_search": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable this setting to include the querystring in `page` views.",
 			},
 			"server_side_identify": {
 				Type:     schema.TypeList,
@@ -69,45 +72,54 @@ func init() {
 						"event_category": {
 							Type:             schema.TypeString,
 							Required:         true,
+							Description:      "Enter the server-side `identify` event category.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^(.{0,100})$)"),
 						},
 						"event_action": {
 							Type:             schema.TypeString,
 							Required:         true,
+							Description:      "Enter the server-side `identify` event action.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^(.{0,100})$)"),
 						},
 					},
 				},
 			},
 			"disable_md5": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable this setting to disable client ID MD5 encryption.",
 			},
 			"anonymize_ip": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enabling this setting anonymizes your IP address information.",
 			},
 			"enhanced_ecommerce": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable this setting to activate the enhanced e-commerce feature.",
 			},
 			"non_interaction": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable this setting to add the non-interaction flag to all the events.",
 			},
 			"send_user_id": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable this setting to send the `userId` to Google Analytics.",
 			},
 			"event_filtering": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "This setting allows you to specify which events should be blocked or allowed to flow through to Google Analytics.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"whitelist": {
 							Type:         schema.TypeList,
 							Optional:     true,
+							Description:  "Enter the event names to be whitelisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -116,6 +128,7 @@ func init() {
 						"blacklist": {
 							Type:         schema.TypeList,
 							Optional:     true,
+							Description:  "Enter the event names to be blacklisted..",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -125,9 +138,10 @@ func init() {
 				},
 			},
 			"use_native_sdk": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Enable this setting to send the events via the web device mode.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -138,9 +152,10 @@ func init() {
 				},
 			},
 			"track_categorized_pages": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Enable this setting to track categorized pages.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -151,9 +166,10 @@ func init() {
 				},
 			},
 			"track_named_pages": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Enable this setting to track named pages.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -164,9 +180,10 @@ func init() {
 				},
 			},
 			"sample_rate": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Enter the sample rate.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -178,9 +195,10 @@ func init() {
 				},
 			},
 			"site_speed_sample_rate": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Enter the site speed sample rate.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -192,9 +210,10 @@ func init() {
 				},
 			},
 			"reset_custom_dimensions_on_page": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Use this field to reset the dimensions for the `page` calls.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -208,9 +227,10 @@ func init() {
 				},
 			},
 			"set_all_mapped_props": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Use this field to set all the mapped properties.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -221,9 +241,10 @@ func init() {
 				},
 			},
 			"domain": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Enter your cookie domain name.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -235,9 +256,10 @@ func init() {
 				},
 			},
 			"optimize": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Enter your Google Optimize Container ID.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -249,9 +271,10 @@ func init() {
 				},
 			},
 			"use_google_amp_client_id": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Enable this setting to use the Google AMP Client ID",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -262,9 +285,10 @@ func init() {
 				},
 			},
 			"named_tracker": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Enable this setting to send events with the `track` name `rudderGATracker`.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -275,9 +299,10 @@ func init() {
 				},
 			},
 			"onetrust_cookie_categories": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {

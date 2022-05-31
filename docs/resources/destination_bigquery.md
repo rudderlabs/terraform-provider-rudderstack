@@ -58,26 +58,26 @@ resource "rudderstack_destination_bigquery" "example" {
 
 Required:
 
-- `bucket_name` (String)
-- `credentials` (String, Sensitive)
-- `project` (String)
-- `sync` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--config--sync))
+- `bucket_name` (String) Enter the name of your staging storage bucket.
+- `credentials` (String, Sensitive) Enter your GCP service account credentials JSON.
+- `project` (String) Enter your GCP project ID where the BigQuery database is located.
+- `sync` (Block List, Min: 1, Max: 1) Enter the sync settings for the following fields: (see [below for nested schema](#nestedblock--config--sync))
 
 Optional:
 
-- `location` (String)
-- `namespace` (String)
-- `prefix` (String)
+- `location` (String) Enter the GCP region of your project dataset.
+- `namespace` (String) Enter the schema name where RudderStack will create all the tables. If not specified, RudderStack will set this to the source name by default.
+- `prefix` (String) If specified, RudderStack creates a folder in the bucket with this prefix and loads all the data in it.
 
 <a id="nestedblock--config--sync"></a>
 ### Nested Schema for `config.sync`
 
 Required:
 
-- `frequency` (String)
+- `frequency` (String) Specify how often RudderStack should sync the data to your BigQuery dataset.
 
 Optional:
 
-- `exclude_window_end_time` (String)
-- `exclude_window_start_time` (String)
-- `start_at` (String)
+- `exclude_window_end_time` (String) Specify the end time for the exclusion window.
+- `exclude_window_start_time` (String) Set a time window when RudderStack will not sync the data to your database.
+- `start_at` (String) Specify the particular time of the day (in UTC) when you want RudderStack to sync the data to BigQuery.

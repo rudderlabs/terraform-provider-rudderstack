@@ -24,26 +24,31 @@ func init() {
 			"project": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description:      "Enter your GCP project ID where the BigQuery database is located.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 			},
 			"location": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description:      "Enter the GCP region of your project dataset.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 			},
 			"bucket_name": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description:      "Enter the name of your staging storage bucket.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 			},
 			"prefix": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description:      "If specified, RudderStack creates a folder in the bucket with this prefix and loads all the data in it.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 			},
 			"namespace": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter the schema name where RudderStack will create all the tables. If not specified, RudderStack will set this to the source name by default.",
 				ValidateDiagFunc: c.ValidateAll(
 					c.StringMatchesRegexp("(^env[.].*)|^(.{0,64})$"),
 					c.StringNotMatchesRegexp("^(pg_|PG_|pG_|Pg_)"),
@@ -53,32 +58,38 @@ func init() {
 				Type:             schema.TypeString,
 				Required:         true,
 				Sensitive:        true,
+				Description:      "Enter your GCP service account credentials JSON.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
 			},
 			"sync": {
 				Type:     schema.TypeList,
 				MinItems: 1, MaxItems: 1,
-				Required: true,
+				Required:    true,
+				Description: "Enter the sync settings for the following fields:",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"frequency": {
 							Type:             schema.TypeString,
 							Required:         true,
+							Description:      "Specify how often RudderStack should sync the data to your BigQuery dataset.",
 							ValidateDiagFunc: c.StringMatchesRegexp("^(30|60|180|360|720|1440)$"),
 						},
 						"start_at": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							Description:      "Specify the particular time of the day (in UTC) when you want RudderStack to sync the data to BigQuery.",
 							ValidateDiagFunc: c.StringMatchesRegexp("^([01][0-9]|2[0-3]):[0-5][0-9]$"),
 						},
 						"exclude_window_start_time": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							Description:      "Set a time window when RudderStack will not sync the data to your database.",
 							ValidateDiagFunc: c.StringMatchesRegexp("^([01][0-9]|2[0-3]):[0-5][0-9]$"),
 						},
 						"exclude_window_end_time": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							Description:      "Specify the end time for the exclusion window.",
 							ValidateDiagFunc: c.StringMatchesRegexp("^([01][0-9]|2[0-3]):[0-5][0-9]$"),
 						},
 					},

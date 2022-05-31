@@ -68,18 +68,18 @@ resource "rudderstack_destination_redshift" "example" {
 
 Required:
 
-- `database` (String)
-- `host` (String)
-- `namespace` (String)
-- `password` (String, Sensitive)
-- `port` (String)
-- `sync` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--config--sync))
-- `use_rudder_storage` (Boolean)
-- `user` (String)
+- `database` (String) The database name in your Redshift instance where the data will be sent.
+- `host` (String) The host name of your Redshift service.
+- `namespace` (String) Enter the schema name where RudderStack will create all the tables. If you don't specify any namespace, RudderStack will set this to the source name, by default.
+- `password` (String, Sensitive) The password for the above user.
+- `port` (String) The port number associated with the Redshift database instance.
+- `sync` (Block List, Min: 1, Max: 1) Specify your sync settings. (see [below for nested schema](#nestedblock--config--sync))
+- `use_rudder_storage` (Boolean) Enable this setting to use the RudderStack-hosted object storage.
+- `user` (String) The name of the user with the required read/write access to the above database.
 
 Optional:
 
-- `enable_sse` (Boolean)
+- `enable_sse` (Boolean) This setting enables server-side encryption.
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
 
 <a id="nestedblock--config--sync"></a>
@@ -87,13 +87,13 @@ Optional:
 
 Required:
 
-- `frequency` (String)
+- `frequency` (String) Specify how often RudderStack should sync the data to your PostgreSQL database.
 
 Optional:
 
-- `exclude_window_end_time` (String)
-- `exclude_window_start_time` (String)
-- `start_at` (String)
+- `exclude_window_end_time` (String) Set the end time of the exclusion window.
+- `exclude_window_start_time` (String) This optional setting lets you set a time window when RudderStack will not sync the data to your database.
+- `start_at` (String) Specify the particular time of the day (in UTC) when you want RudderStack to sync the data to the warehouse.
 
 
 <a id="nestedblock--config--s3"></a>
@@ -101,9 +101,9 @@ Optional:
 
 Required:
 
-- `bucket_name` (String)
+- `bucket_name` (String) Enter the name of your S3 bucket.
 
 Optional:
 
-- `access_key` (String, Sensitive)
-- `access_key_id` (String)
+- `access_key` (String, Sensitive) Enter your AWS secret access key.
+- `access_key_id` (String) Enter your AWS access key ID.

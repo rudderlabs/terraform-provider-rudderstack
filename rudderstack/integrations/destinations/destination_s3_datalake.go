@@ -24,11 +24,13 @@ func init() {
 			"bucket_name": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description:      "The name of the S3 bucket that will be used to store the data before loading it into the S3 data lake.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"namespace": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "If specified, all the data for the destination will be pushed to `s3://<bucketName>/<prefix>/rudder-datalake/<namespace>`. ",
 				ValidateDiagFunc: c.ValidateAll(
 					c.StringMatchesRegexp("(^env[.].*)|^(.{0,64})$"),
 					c.StringNotMatchesRegexp("^(pg_|PG_|pG_|Pg_)"),
@@ -37,46 +39,55 @@ func init() {
 			"prefix": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description:      "If specified, RudderStack creates a folder in the bucket with this prefix and push all the data within that folder.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"access_key_id": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description:      "Enter your AWS access key ID.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"access_key": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Sensitive:        true,
+				Description:      "Enter your AWS secret access key.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"enable_sse": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "This setting enables server-side encryption.",
 			},
 			"use_glue": {
-				Type:     schema.TypeBool,
-				Required: true,
+				Type:        schema.TypeBool,
+				Required:    true,
+				Description: "This setting enables AWS Glue.",
 			},
 			"region": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Description:      "Enter your AWS Glue region. For example, for N.Virginia, it would be `us-east-1`.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
 			},
 			"sync": {
 				Type:     schema.TypeList,
 				MinItems: 1, MaxItems: 1,
-				Required: true,
+				Required:    true,
+				Description: "Specify your data sync settings.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"frequency": {
 							Type:             schema.TypeString,
 							Required:         true,
+							Description:      "Specify how often RudderStack should sync the data to your PostgreSQL database.",
 							ValidateDiagFunc: c.StringMatchesRegexp("^(30|60|180|360|720|1440)$"),
 						},
 						"start_at": {
 							Type:             schema.TypeString,
 							Optional:         true,
+							Description:      "This optional setting lets you specify the particular time of the day (in UTC) when you want RudderStack to sync the data to the warehouse.",
 							ValidateDiagFunc: c.StringMatchesRegexp("^([01][0-9]|2[0-3]):[0-5][0-9]$"),
 						},
 					},

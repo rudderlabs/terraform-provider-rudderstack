@@ -92,25 +92,25 @@ resource "rudderstack_destination_facebook_pixel" "example" {
 
 Required:
 
-- `pixel_id` (String)
+- `pixel_id` (String) Enter your Facebook Pixel ID.
 
 Optional:
 
-- `access_token` (String, Sensitive)
-- `advanced_mapping` (Boolean)
-- `blacklist_pii_properties` (List of String)
-- `category_to_content` (List of Object) (see [below for nested schema](#nestedatt--config--category_to_content))
-- `event_custom_properties` (List of String)
-- `event_filtering` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--event_filtering))
-- `events_to_events` (List of Object) (see [below for nested schema](#nestedatt--config--events_to_events))
-- `legacy_conversion_pixel_id` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--legacy_conversion_pixel_id))
-- `onetrust_cookie_categories` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
-- `standard_page_call` (Boolean)
-- `test_destination` (Boolean)
-- `test_event_code` (String)
-- `use_native_sdk` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--use_native_sdk))
-- `value_field_identifier` (String)
-- `whitelist_pii_properties` (List of String)
+- `access_token` (String, Sensitive) Enter your Facebook business access token required to send the events via the cloud mode.
+- `advanced_mapping` (Boolean) With this setting, you can enable the advanced mapping feature.
+- `blacklist_pii_properties` (List of String) Enter the PII properties to be blacklisted.
+- `category_to_content` (List of Object) This option lets you specify the category fields to specific Facebook content type. (see [below for nested schema](#nestedatt--config--category_to_content))
+- `event_custom_properties` (List of String) For the standard events, some predefined properties are taken by Facebook. If you want to send more properties for your events, mention those properties in this field.
+- `event_filtering` (Block List, Max: 1) This setting lets you determine which events are blocked or allowed to flowed through to Facebook Pixel. (see [below for nested schema](#nestedblock--config--event_filtering))
+- `events_to_events` (List of Object) You can map your events to standard Facebook events using this setting. (see [below for nested schema](#nestedatt--config--events_to_events))
+- `legacy_conversion_pixel_id` (Block List, Max: 1) With this setting, you can send specific events to a legacy conversion Pixel by specifying the event-Pixel ID mapping. Note that this option is available only when sending events via the device mode. (see [below for nested schema](#nestedblock--config--legacy_conversion_pixel_id))
+- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+- `standard_page_call` (Boolean) If this setting is enabled, RudderStack sets `pageview` as a standard event for all the `page` and `screen` calls.
+- `test_destination` (Boolean) Enable this setting if you are using this destination for testing purposes.
+- `test_event_code` (String) If the above setting is enabled, enter the relevant test event code.
+- `use_native_sdk` (Block List, Max: 1) Enable this setting to send events from the web SDK to Facebook Pixel via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+- `value_field_identifier` (String) You can set this field to `properties.price` or `properties.value`. RudderStack will then assign this to the value field of the Facebook payload.
+- `whitelist_pii_properties` (List of String) Enter the PII properties to be whitelisted.
 
 <a id="nestedatt--config--category_to_content"></a>
 ### Nested Schema for `config.category_to_content`

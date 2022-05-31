@@ -1,15 +1,15 @@
 ---
-page_title: "Rudderstack Terraform Provider"
+page_title: "RudderStack Provider"
 subcategory: ""
-description: "Lets you programmatically access the RudderStack control plane via Terraform to manage your source-destination configurations."
+description: "Access the RudderStack control plane via Terraform to manage your source-destination configurations."
   
 ---
 
-# RudderStack Terraform Provider
+# RudderStack Provider
 
 The RudderStack Terraform Provider allows you to access your RudderStack control plane via Terraform and manage your source-destination configurations programmatically.
 
-## Example usage
+## Example Usage
 
 ```terraform
 terraform {
@@ -33,5 +33,5 @@ provider "rudderstack" {
 
 ### Optional
 
-- `access_token` (String) The Rudderstack personal access token (https://www.rudderstack.com/docs/rudderstack-api/personal-access-tokens/) used to authenticate you Rudderstack account. If not provided, the Terraform provider will look for it in the `RUDDERSTACK_ACCESS_TOKEN` environment variable. In case the variable is missing or has an invalid value, the provider will then give an error.
-- `api_url` (String) The base URL of Rudderstack API. If not specified explicitly, the provider will look for it in the `RUDDERSTACK_API_URL` environment variable, and finally default to `https://api.rudderstack.com/v2` if that is missing.
+- `access_token` (String) The Rudderstack API access token used to authenticate you Rudderstack account. If not set, the provider will look for that value in the `RUDDERSTACK_ACCESS_TOKEN` environmental value, and fail with an error if that is missing.
+- `api_url` (String) The base URL of Rudderstack API. If not set, the provider will first look for a value in the `RUDDERSTACK_API_URL` environmental value, and finally default to `https://api.rudderstack.com/v2` if that is missing.

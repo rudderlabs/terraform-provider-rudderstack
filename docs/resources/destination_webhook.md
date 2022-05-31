@@ -57,12 +57,12 @@ resource "rudderstack_destination_webhook" "example" {
 
 Required:
 
-- `webhook_url` (String)
+- `webhook_url` (String) Enter the endpoint where RudderStack will send the events.
 
 Optional:
 
-- `headers` (List of Object, Sensitive) (see [below for nested schema](#nestedatt--config--headers))
-- `webhook_method` (String)
+- `headers` (List of Object, Sensitive) Add custom headers for your events via this option. These headers will be added to the request made from RudderStack to your webhook. (see [below for nested schema](#nestedatt--config--headers))
+- `webhook_method` (String) This is the HTTP method of the request sent to the configured endpoint. By default, `POST` is used.
 
 <a id="nestedatt--config--headers"></a>
 ### Nested Schema for `config.headers`

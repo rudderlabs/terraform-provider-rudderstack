@@ -90,22 +90,22 @@ resource "rudderstack_destination_postgres" "example" {
 
 Required:
 
-- `database` (String)
-- `host` (String)
-- `namespace` (String)
-- `password` (String, Sensitive)
-- `port` (String)
-- `ssl_mode` (String)
-- `user` (String)
+- `database` (String) Enter your PostgreSQL database name where RudderStack will load the data.
+- `host` (String) Enter the host name of your PostgreSQL service.
+- `namespace` (String) Enter the schema name where RudderStack will create all the tables. Defaults to the source name.
+- `password` (String, Sensitive) Enter the password you set for the above user.
+- `port` (String) Enter the port number associated with your PostgreSQL instance.
+- `ssl_mode` (String) Choose the SSL mode through which RudderStack will connect to your PostgreSQL instance. RudderStack provides three options - disable, require, and verify-ca.
+- `user` (String) Enter the name of the PostgreSQL user with the required permissions to the PostgreSQL database.
 
 Optional:
 
-- `azure_blob` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--azure_blob))
-- `gcs` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--gcs))
-- `minio` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--minio))
-- `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
-- `sync` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--sync))
-- `use_rudder_storage` (Boolean)
+- `azure_blob` (Block List, Max: 1) Enter your Azure blob storage bucket details. (see [below for nested schema](#nestedblock--config--azure_blob))
+- `gcs` (Block List, Max: 1) Enter your GCS object storage bucket details. (see [below for nested schema](#nestedblock--config--gcs))
+- `minio` (Block List, Max: 1) Enter your Minio bucket details (see [below for nested schema](#nestedblock--config--minio))
+- `s3` (Block List, Max: 1) Enter your S3 object storage bucket details. (see [below for nested schema](#nestedblock--config--s3))
+- `sync` (Block List, Max: 1) Specify your sync settings. (see [below for nested schema](#nestedblock--config--sync))
+- `use_rudder_storage` (Boolean) Enable this setting to enable RudderStack-hosted object storage.
 - `verify_ca` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--verify_ca))
 
 <a id="nestedblock--config--azure_blob"></a>
@@ -113,9 +113,9 @@ Optional:
 
 Required:
 
-- `account_key` (String, Sensitive)
-- `account_name` (String)
-- `container_name` (String)
+- `account_key` (String, Sensitive) Enter the account key associated with the Azure container.
+- `account_name` (String) Enter the account name associated with the Azure Blob Storage container.
+- `container_name` (String) Enter the name of your Azure container.
 
 
 <a id="nestedblock--config--gcs"></a>
@@ -123,8 +123,8 @@ Required:
 
 Required:
 
-- `bucket_name` (String)
-- `credentials` (String, Sensitive)
+- `bucket_name` (String) Enter the name of your GCS bucket.
+- `credentials` (String, Sensitive) Enter your GCS connection credentials JSON details.
 
 
 <a id="nestedblock--config--minio"></a>
@@ -132,14 +132,14 @@ Required:
 
 Required:
 
-- `access_key_id` (String)
-- `bucket_name` (String)
-- `endpoint` (String)
-- `secret_access_key` (String, Sensitive)
+- `access_key_id` (String) Enter the access key ID associated with your Minio account.
+- `bucket_name` (String) Enter the name of your Minio bucket.
+- `endpoint` (String) Enter the endpoint associated with your Minio bucket.
+- `secret_access_key` (String, Sensitive) Enter the secret access key associated with your Minio account.
 
 Optional:
 
-- `use_ssl` (Boolean)
+- `use_ssl` (Boolean) Enable this setting to use SSL for your Minio bucket.
 
 
 <a id="nestedblock--config--s3"></a>
@@ -147,9 +147,9 @@ Optional:
 
 Required:
 
-- `access_key` (String, Sensitive)
-- `access_key_id` (String)
-- `bucket_name` (String)
+- `access_key` (String, Sensitive) Enter the access key name associated with the S3 bucket.
+- `access_key_id` (String) Enter the acces key ID associated with the S3 bucket.
+- `bucket_name` (String) Enter the name of your S3 bucket.
 
 
 <a id="nestedblock--config--sync"></a>
@@ -157,13 +157,13 @@ Required:
 
 Required:
 
-- `frequency` (String)
+- `frequency` (String) Specify how often RudderStack should sync the data to your PostgreSQL database.
 
 Optional:
 
-- `exclude_window_end_time` (String)
-- `exclude_window_start_time` (String)
-- `start_at` (String)
+- `exclude_window_end_time` (String) Set the end time of the exclusion window.
+- `exclude_window_start_time` (String) This optional setting lets you set a time window when RudderStack will not sync the data to your database.
+- `start_at` (String) This optional setting lets you specify the particular time of the day (in UTC) when you want RudderStack to sync the data to the warehouse.
 
 
 <a id="nestedblock--config--verify_ca"></a>
@@ -171,6 +171,6 @@ Optional:
 
 Required:
 
-- `client_cert` (String, Sensitive)
-- `client_key` (String, Sensitive)
-- `server_ca` (String, Sensitive)
+- `client_cert` (String, Sensitive) Enter the Client Cert Pem File details.
+- `client_key` (String, Sensitive) Enter the Client Key Pem File details.
+- `server_ca` (String, Sensitive) Enter the Server CA Pem File details.
