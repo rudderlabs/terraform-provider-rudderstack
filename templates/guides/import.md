@@ -1,34 +1,45 @@
 ---
-page_title: "Import existing resources"
+page_title: "Import Existing Resources"
 ---
 
 # Import existing resources
 
-This provider repo supports a tool that can help users with already configured pipelines in RudderStack to bootstrap their
-Terraform scripts and import the state.
+The Terraform Provider lets you bootstrap your Terraform scripts and import the state of your already-configured pipelines in RudderStack.
 
--> In order to generate a Terraform script from existing resources, golang 1.16 or later is required.
+> To generate a Terraform script from the existing resources, Golang 1.16 or later is required.
 
-## Clone the provider repo
+## Step 1: Clone the provider repository
 
-Generating Terraform scripts is possible using a tool provided in the provider's GitHub repo. Clone the repo and change to the new directory:
+Generating the Terraform scripts is possible using a tool provided in the provider's [GitHub repository](https://github.com/rudderlabs/terraform-provider-rudderstack). Clone this repo and navigate to the new directory using the following commands:
 
 ```sh
 git clone https://github.com/rudderlabs/terraform-provider-rudderstack
 cd terraform-provider-rudderstack
 ```
 
-## Configure access token
+## Step 2: Generate your personal access token
 
-Running the tool requires a RudderStack access token to be set in the `RUDDERSTACK_ACCESS_TOKEN` environmental variable. For more information about creating an access token, please check the relevant [RudderStack Documentation](https://www.rudderstack.com/docs/transformations/api-access-token/) page. Once this is set, you can generate the script using `go run ./cmd/generatetf`. The following example sets the access token and outputs the script to the `ruddestack.tf` file:
+Running the tool requires a RudderStack personal access token to be set in the `RUDDERSTACK_ACCESS_TOKEN` environemnt variable. For more information about generating this token, refer to the [RudderStack Documentation](https://www.rudderstack.com/docs/rudderstack-api/personal-access-tokens/).
+
+Once you set this token, you can generate the script using the following command:
 
 ```sh
-RUDDERSTACK_ACCESS_TOKEN=my_rudderstack_access_token go run ./cmd/generatetf > rudderstack.tf
+go run ./scripts/bootstrap-terraform.sh
 ```
 
-## Generate Terraform script
+The following example sets the personal access token and outputs the script to the `rudderstack.tf` file:
 
-The generated Terraform script will include any resources that are supported by this provider, named after each resource's unique ID. However, the rudderstack provider block needs to be configured independently. You can either add the provider block at the top of the generated script, or in another tf file, depending on your preferred structure. For more information about setting a provider block, please check the [Provider](https://registry.terraform.io/providers/rudderlabs/rudderstack/latest/docs) documentation. An example of a rudderstack provider block is:
+```sh
+RUDDERSTACK_ACCESS_TOKEN=my_rudderstack_access_token ./scripts/bootstrap-terraform.sh > rudderstack.tf
+```
+
+## Step 3: Generate the Terraform script
+
+The generated Terraform script will include any resources supported by this provider, named after each resource's unique ID. However, the RudderStack provider block needs to be configured independently. You can either add the provider block at the top of the generated script or in another `tf` file, depending on your preferred structure. 
+
+For more information about setting a provider block, refer to the [Provider](https://registry.terraform.io/providers/rudderlabs/rudderstack/latest/docs) documentation. 
+
+An example of a RudderStack provider block is shown below:
 
 ```terraform
 terraform {
@@ -46,23 +57,24 @@ provider "rudderstack" {
 }
 ```
 
-Note that, in this example, the access token is not set directly. In this case the provider will read it from the  `RUDDERSTACK_ACCESS_TOKEN` environmental variable.
+> Note that in the above example, the access token is not set directly. In this case, the provider will read it from the  `RUDDERSTACK_ACCESS_TOKEN` environment variable.
 
-## Import Terraform state
+## Step 4: Import Terraform state
 
-Once the scripts are setup, Terraform needs to import the state of your resource in order to be able to manage them.
-This can happen by running the terraform import commands. As an example, for a postgres destination named `dst_some_id` with ID `some_id`, the terraform import command looks like:
+Once the scripts are setup, Terraform needs to import the state of your resource to be able to manage them. This can be done by running the Terraform import commands.
 
-```sh
-terraform import rudderstack_destination_postgres.dst_some_id some_id
-```
-
-Since your generated script might contain many resources, of which you have to know their IDs, running the terraform commands by hand is tedious. You can use the same tool used for generating the Terraform script to list all the terraform commands for any imported resource:
+For example, for a PostgreSQL destination named `dest_dev` with the destination ID `id`, the Terraform import command will be as follows:
 
 ```sh
-RUDDERSTACK_ACCESS_TOKEN=my_rudderstack_access_token go run ./cmd/generatetf -import
+terraform import rudderstack_destination_postgres.dest_dev id
 ```
 
-## Add any sensitive configuration fields
+Since your generated script might contain many resources, remembering the IDs of all of them and running the Terraform commands manually can be very tedious. To avoid this, you can use the same tool used to generate the Terraform script that lists all the Terraform commands for any imported resource:
 
-RudderStack API is not exposing any sensitive credentials in resource configurations. Because of this, the generated terraform script will not include them and they need to be added manually to each resource. Please, refer to each resource's documentation for all available sensitive resource configuration fields.
+```sh
+RUDDERSTACK_ACCESS_TOKEN=my_rudderstack_access_token ./scripts/bootstrap-terraform-import.sh
+```
+
+## Step 5: Add any sensitive configuration fields
+
+The RudderStack API does not expose any sensitive credentials in the resource configurations. Because of this, the generated Terraform script will not include these credentials and they need to be added manually to each resource. Therefore, refer to each resource's documentation for all the relevant sensitive resource configuration fields.
