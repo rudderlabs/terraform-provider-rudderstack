@@ -62,95 +62,95 @@ func init() {
 			"api_key": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description: "Enter your Amplitude API key.",
+				Description:      "Enter your Amplitude API key.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"api_secret": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Sensitive:        true,
-				Description: "Enter the Amplitude API Secret key required for user deletion.",
+				Description:      "Enter the Amplitude API Secret key required for user deletion.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"group_type_trait": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description: "RudderStack will use this value as `groupType` in the `group` calls.",
+				Description:      "RudderStack will use this value as `groupType` in the `group` calls.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"group_value_trait": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description: ""RudderStack will use this value as `groupValue` in the `group` calls."",
+				Description:      "RudderStack will use this value as `groupValue` in the `group` calls.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"track_all_pages": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
 				Description: "If this setting is enabled, RudderStack sends an event named `Loaded a page` / `Loaded a Screen` to Amplitude.",
 			},
 			"track_categorized_pages": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
 				Description: "If this setting is enabled and if `category` is present in a `page` / `screen` call, then an event named `Viewed {category} page` / `Viewed {category} Screen` will be sent to Amplitude.",
 			},
 			"track_named_pages": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
 				Description: "If this setting is enabled and `name` is present in a `page` call, then an event named `Viewed {name} page` will be sent to Amplitude.",
 			},
 			"track_products_once": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
 				Description: "If this setting is enabled and if the event payload contains an array of products, then the event is tracked with the original event name and all the products as its property. Otherwise, each product is tracked with event as `Product purchased`.",
 			},
 			"track_revenue_per_product": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
 				Description: "If this setting is enabled and if the event payload contains multiple products, each product's revenue is tracked individually.",
 			},
 			"version_name": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description: "The value of this field is set as the `versionName` of the Amplitude SDK.",
+				Description:      "The value of this field is set as the `versionName` of the Amplitude SDK.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"traits_to_increment": {
-				Type:     schema.TypeList,
-				Optional: true,
+				Type:        schema.TypeList,
+				Optional:    true,
 				Description: "If this setting is enabled, the value of the corresponding trait will be incremented at Amplitude, with the value provided against the trait in an `identify` call.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			"traits_to_set_once": {
-				Type:     schema.TypeList,
-				Optional: true,
+				Type:        schema.TypeList,
+				Optional:    true,
 				Description: "If this setting is enabled, the value of the corresponding trait will be set once at Amplitude with the value provided against the trait in an `identify` call.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			"traits_to_append": {
-				Type:     schema.TypeList,
-				Optional: true,
+				Type:        schema.TypeList,
+				Optional:    true,
 				Description: "If this setting is enabled, the value of the corresponding trait will be appended to the corresponding trait array at Amplitude.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			"traits_to_prepend": {
-				Type:     schema.TypeList,
-				Optional: true,
+				Type:        schema.TypeList,
+				Optional:    true,
 				Description: "If this setting is enabled, the value of the corresponding trait will be prepended to the corresponding trait array at Amplitude.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			"use_native_sdk": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "Enable this setting to send events to Amplitude via the device mode.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -174,9 +174,9 @@ func init() {
 				},
 			},
 			"prefer_anonymous_id_for_device_id": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If this setting is enabled, the device ID will be set as the `anonymousId` generated by RudderStack SDK or by the `anonymousId` set via RudderStack's `setAnonymousId()` method.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -188,9 +188,9 @@ func init() {
 				},
 			},
 			"device_id_from_url_param": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If this setting is enabled, the Amplitude SDK will parse the URL parameter and set the device ID from `amp_device_id`.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -202,9 +202,9 @@ func init() {
 				},
 			},
 			"force_https": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If this setting is enabled, the events will always be uploaded by the Amplitude SDK to the HTTPS endpoint, otherwise it will use the embedding site's protocol.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -216,9 +216,9 @@ func init() {
 				},
 			},
 			"track_gclid": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If this setting is enabled, the Amplitude SDK will capture the `gclid` URL parameters along with the user's `initial_gclid` parameters.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -230,9 +230,9 @@ func init() {
 				},
 			},
 			"track_referrer": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If this setting is enabled, the Amplitude SDK will capture the `referrer` and `referring_domain` for each session along with the user's `initial_referrer` and `initial_referring_domain`.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -244,9 +244,9 @@ func init() {
 				},
 			},
 			"save_params_referrer_once_per_session": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If this setting is enabled, the corresponding tracking of `gclid`, referrer, UTM parameters will be done once per session.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -258,9 +258,9 @@ func init() {
 				},
 			},
 			"track_utm_properties": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If this setting is enabled, the Amplitude SDK parses the UTM parameters in the query string or `_utmz` cookie and includes them as user properties in all uploaded events.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -272,9 +272,9 @@ func init() {
 				},
 			},
 			"unset_params_referrer_on_new_session": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If this setting is disabled, the existing `referrer` and `utm_parameter` values will be passed to each new session. If enabled, `referrer` and `utm_parameter` properties will be set to `null` upon instantiating a new session.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -286,9 +286,9 @@ func init() {
 				},
 			},
 			"batch_events": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If this setting is enabled, the events are batched together and uploaded by the Amplitude SDK.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -300,16 +300,16 @@ func init() {
 				},
 			},
 			"event_filtering": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "This option allows you filter the events you want to send to Amplitude.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"whitelist": {
 							Type:         schema.TypeList,
 							Optional:     true,
-							Description: "Enter the event names to be whitelisted.",
+							Description:  "Enter the event names to be whitelisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -318,7 +318,7 @@ func init() {
 						"blacklist": {
 							Type:         schema.TypeList,
 							Optional:     true,
-							Description: "Enter the event names to be blacklisted.",
+							Description:  "Enter the event names to be blacklisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -328,9 +328,9 @@ func init() {
 				},
 			},
 			"event_upload_period_millis": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If the batch events settings is enabled, this is the amount of time that the SDK waits to upload the events.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -354,9 +354,9 @@ func init() {
 				},
 			},
 			"event_upload_threshold": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "If the batch events settings is enabled, this is the minimum number of events to batch together by the Amplitude SDK.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -380,14 +380,14 @@ func init() {
 				},
 			},
 			"map_device_brand": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
 				Description: "Enable this setting for RudderStack to send the device brand information (`context.device.brand`) to Amplitude.",
 			},
 			"enable_location_listening": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "Enable this setting to activate location listening.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -403,9 +403,9 @@ func init() {
 				},
 			},
 			"track_session_events": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "Enable this setting to track the session events.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -425,9 +425,9 @@ func init() {
 				},
 			},
 			"use_advertising_id_for_device_id": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "Enable this setting to set the advertising ID as the device ID.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -443,9 +443,9 @@ func init() {
 				},
 			},
 			"use_idfa_as_device_id": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "Enable this setting to set the IDFA as the device ID.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -461,9 +461,9 @@ func init() {
 				},
 			},
 			"onetrust_cookie_categories": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
 				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

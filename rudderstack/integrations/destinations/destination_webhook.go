@@ -17,21 +17,21 @@ func init() {
 			"webhook_url": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description: "Enter the endpoint where RudderStack will send the events.",
+				Description:      "Enter the endpoint where RudderStack will send the events.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"),
 			},
 			"webhook_method": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description: "This is the HTTP method of the request sent to the configured endpoint. By default, `POST` is used.",
+				Description:      "This is the HTTP method of the request sent to the configured endpoint. By default, `POST` is used.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|(^(POST|PUT|GET)$)"),
 			},
 			"headers": {
-				Type:       schema.TypeList,
-				Optional:   true,
-				Sensitive:  true,
+				Type:        schema.TypeList,
+				Optional:    true,
+				Sensitive:   true,
 				Description: "Add custom headers for your events via this option. These headers will be added to the request made from RudderStack to your webhook.",
-				ConfigMode: schema.SchemaConfigModeAttr,
+				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
