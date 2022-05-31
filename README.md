@@ -3,80 +3,98 @@
 <p align="center"><b>Customer Platform for Developers</b></p>
 <br/>
 
+<p align="center">
+  <b>
+    <a href="https://rudderstack.com">Website</a>
+    ·
+    <a href="https://rudderstack.com/docs/stream-sources/rudderstack-sdk-integration-guides/rudderstack-javascript-sdk/">Documentation</a>
+    ·
+    <a href="https://rudderstack.com/join-rudderstack-slack-community">Community Slack</a>
+  </b>
+</p>
 
-# Terraform Provider RudderStack 
 
-# Description
+# RudderStack Terraform Provider
 
-This repo implements RudderStack terraform provider. Use it to access RudderStack control plane API from within Terraform.  
+This repository implements the RudderStack Terraform provider. You can use this provider to programmatically access the [RudderStack control plane](https://www.rudderstack.com/docs/get-started/rudderstack-architecture/#control-plane) via Terraform and seamlessly manage your source-destination configurations.
 
-Questions? Please join our [Slack channel](https://resources.rudderstack.com/join-rudderstack-slack) or read about us on [Product Hunt](https://www.producthunt.com/posts/rudderstack).
+Questions? Join our [Slack community](https://resources.rudderstack.com/join-rudderstack-slack) for quick support.
 
-# Getting Started
-1. If you are not familiar with Terraform platform, then a good place to start is [here](https://www.terraform.io/intro/index.html).
-2. If you are interested in developing enhancements to RudderStack's Terraform provider, the best place to start is by creating a local build and test environment using an example configuration [here](#example).
-3. If you are a user interested in managing your production RudderStack resources via Terraform, you can get detailed documentation for our Terraform Provider [here](docs/index.md). 
+# Getting started
 
-## Terraform Scripting Flowchart for RudderStack
-To create and maintain RudderStack's resources in Terraform, you can follow the flowchart below. 
-![Flowchart for building and managing RudderStack's Terraform config](docs/TerraformScriptingForRudderStackFlowchart.png)
+- If you new to the Terraform platform, then their [docs](https://www.terraform.io/intro) are a good place to start.
+- If you are interested in enhancing the RudderStack Terraform provider, create a local build and test your environment using an example configuration listed [here](#example).
+- To manage your production RudderStack resources via Terraform, get detailed documentation for the Terraform Provider [here](docs/index.md).
 
 <a id="example"></a>
-# Setup dev and build env 
+# Setting up the development and build environment
 
-## PreRequisites 
-Make sure that following are installed.
-1. bash (On Windows, consider using WSL2 Ubuntu) 
-2. go
-3. make
+Before you get started, make sure that following dependencies are installed:
 
-## Build provider
+- Bash (On Windows, consider using WSL2 Ubuntu) 
+- Go
+- Make
 
-Run the following command to build and install the provider
+## Building the Terraform provider
+
+1. Run the following command to build and install the provider:
 
 ```shell
 $ make
 $ make install
 ```
 
-Next, make sure that your ~/.terraformrc has the following lines. 
+2. Next, make sure that your `/.terraformrc` file has the following lines: 
+
 ```
 provider_installation {
   dev_overrides {
-    "rudderlabs/rudderstack" = "~/.terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.12/linux_amd64/"
+    "rudderlabs/rudderstack" = /users/abc/terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.12/linux_amd64/"
   }
 }
 ```
-The above ensures that that locally built terraform provider binary is used instead of the one available at registry.terraform.io
 
-## Test sample configuration
-Navigate to the `examples` directory. 
+The above snippet ensures that you use the locally built Terraform provider binary instead of the one available at the [Terraform Registry](https://registry.terraform.io).
+
+A few things to note here:
+
+- Use the full path, that is, `/users/xyz/.terraform.d/....` depending on your home directory.
+- The `linux_amd64` part depends on your system's architecture. For example, on Macs it is `darwin_amd64`. This is essentially the path that is reported after the `make install` command runs.
+
+## Testing the sample configuration
+
+1. Navigate to the `examples` directory: 
 
 ```shell
 $ cd examples
 ```
 
-Run the following command to initialize the workspace and apply the sample configuration.
+2. Run the following command to initialize the workspace and apply the sample configuration:
 
 ```shell
 $ terraform init && terraform apply
 ```
-## Make new release
-### Create a new tag with properly named version number.
+
+## Making a new release
+
+### Create a new tag with properly named version number
+
 ``` shell
 git tag vX.Y.Z
 git push
 ```
 
-### Create new release.
+### Create new release
 
 ``` shell
 goreleaser release --rm-dist
 ``` 
 
-# Related 
-   1) https://github.com/rudderlabs/cp-client-go : This repo implements REST API client for RudderStack Control Plain in Golang.
-   1) https://github.com/rudderlabs/rscp_pyclient : This repo implements REST API client for RudderStack Control Plain in Python. Few additional RudderStack related helpful methods also available.
+# Related
+
+- Learn more about the [RudderStack architecture](https://www.rudderstack.com/docs/get-started/rudderstack-architecture/) to understand the difference between RudderStack control plane and data plane.
+- https://github.com/rudderlabs/cp-client-go: This repository implements the REST API client for the RudderStack control plane in Golang.
+- https://github.com/rudderlabs/rscp_pyclient: This repository implements the REST API client for the RudderStack control plane in Python. A few additional RudderStack-related methods are also available.
 
 <!--
    1) https://github.com/rudderlabs/segment-migrator : Source code for segment migrator web app. Helps migrate from
@@ -85,13 +103,13 @@ goreleaser release --rm-dist
 -->
 # License
 
-RudderStack Terraform Provider is released under the [MIT License][mit_license].
+The RudderStack Terraform Provider is released under the [MIT License][mit_license].
 
 # Contribute
 
 We would love to see you contribute to RudderStack. Get more information on how to contribute [here](CONTRIBUTING.md).
 
-# Follow Us
+# Follow us
 
 - [RudderStack Blog][rudderstack-blog]
 - [Slack][slack]
@@ -120,4 +138,3 @@ We would love to see you contribute to RudderStack. Get more information on how 
 [config-generator]: https://github.com/rudderlabs/config-generator
 [config-generator-section]: https://github.com/rudderlabs/rudder-server/blob/master/README.md#rudderstack-config-generator
 [rudder-logo]: https://repository-images.githubusercontent.com/197743848/b352c900-dbc8-11e9-9d45-4deb9274101f
-
