@@ -107,32 +107,32 @@ resource "rudderstack_destination_google_analytics" "example" {
 
 Required:
 
-- `tracking_id` (String)
+- `tracking_id` (String) Enter your Google Analytics Tracking ID.
 
 Optional:
 
-- `anonymize_ip` (Boolean)
-- `disable_md5` (Boolean)
-- `domain` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--domain))
+- `anonymize_ip` (Boolean) Enabling this setting anonymizes your IP address information.
+- `disable_md5` (Boolean) Enable this setting to disable client ID MD5 encryption.
+- `domain` (Block List, Max: 1) Enter your cookie domain name. (see [below for nested schema](#nestedblock--config--domain))
 - `double_click` (Boolean)
-- `enhanced_ecommerce` (Boolean)
-- `enhanced_link_attribution` (Boolean)
-- `event_filtering` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--event_filtering))
-- `include_search` (Boolean)
-- `named_tracker` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--named_tracker))
-- `non_interaction` (Boolean)
-- `onetrust_cookie_categories` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
-- `optimize` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--optimize))
-- `reset_custom_dimensions_on_page` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--reset_custom_dimensions_on_page))
-- `sample_rate` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--sample_rate))
-- `send_user_id` (Boolean)
+- `enhanced_ecommerce` (Boolean) Enable this setting to activate the enhanced e-commerce feature.
+- `enhanced_link_attribution` (Boolean) Enable this setting to activate the Google Analytics enhanced link attribution feature.
+- `event_filtering` (Block List, Max: 1) This setting allows you to specify which events should be blocked or allowed to flow through to Google Analytics. (see [below for nested schema](#nestedblock--config--event_filtering))
+- `include_search` (Boolean) Enable this setting to include the querystring in `page` views.
+- `named_tracker` (Block List, Max: 1) Enable this setting to send events with the `track` name `rudderGATracker`. (see [below for nested schema](#nestedblock--config--named_tracker))
+- `non_interaction` (Boolean) Enable this setting to add the non-interaction flag to all the events.
+- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+- `optimize` (Block List, Max: 1) Enter your Google Optimize Container ID. (see [below for nested schema](#nestedblock--config--optimize))
+- `reset_custom_dimensions_on_page` (Block List, Max: 1) Use this field to reset the dimensions for the `page` calls. (see [below for nested schema](#nestedblock--config--reset_custom_dimensions_on_page))
+- `sample_rate` (Block List, Max: 1) Enter the sample rate. (see [below for nested schema](#nestedblock--config--sample_rate))
+- `send_user_id` (Boolean) Enable this setting to send the `userId` to Google Analytics.
 - `server_side_identify` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--server_side_identify))
-- `set_all_mapped_props` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--set_all_mapped_props))
-- `site_speed_sample_rate` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--site_speed_sample_rate))
-- `track_categorized_pages` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--track_categorized_pages))
-- `track_named_pages` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--track_named_pages))
-- `use_google_amp_client_id` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--use_google_amp_client_id))
-- `use_native_sdk` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--use_native_sdk))
+- `set_all_mapped_props` (Block List, Max: 1) Use this field to set all the mapped properties. (see [below for nested schema](#nestedblock--config--set_all_mapped_props))
+- `site_speed_sample_rate` (Block List, Max: 1) Enter the site speed sample rate. (see [below for nested schema](#nestedblock--config--site_speed_sample_rate))
+- `track_categorized_pages` (Block List, Max: 1) Enable this setting to track categorized pages. (see [below for nested schema](#nestedblock--config--track_categorized_pages))
+- `track_named_pages` (Block List, Max: 1) Enable this setting to track named pages. (see [below for nested schema](#nestedblock--config--track_named_pages))
+- `use_google_amp_client_id` (Block List, Max: 1) Enable this setting to use the Google AMP Client ID (see [below for nested schema](#nestedblock--config--use_google_amp_client_id))
+- `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the web device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 
 <a id="nestedblock--config--domain"></a>
 ### Nested Schema for `config.domain`
@@ -147,8 +147,8 @@ Required:
 
 Optional:
 
-- `blacklist` (List of String)
-- `whitelist` (List of String)
+- `blacklist` (List of String) Enter the event names to be blacklisted..
+- `whitelist` (List of String) Enter the event names to be whitelisted.
 
 
 <a id="nestedblock--config--named_tracker"></a>
@@ -196,8 +196,8 @@ Required:
 
 Required:
 
-- `event_action` (String)
-- `event_category` (String)
+- `event_action` (String) Enter the server-side `identify` event action.
+- `event_category` (String) Enter the server-side `identify` event category.
 
 
 <a id="nestedblock--config--set_all_mapped_props"></a>

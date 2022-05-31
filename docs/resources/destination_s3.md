@@ -51,11 +51,11 @@ resource "rudderstack_destination_s3" "example" {
 
 Required:
 
-- `bucket_name` (String)
+- `bucket_name` (String) Enter the name of your S3 bucket.
 
 Optional:
 
-- `access_key` (String, Sensitive)
-- `access_key_id` (String)
-- `enable_sse` (Boolean)
-- `prefix` (String)
+- `access_key` (String, Sensitive) Enter your AWS secret access key.
+- `access_key_id` (String) Enter your AWS access key ID.
+- `enable_sse` (Boolean) This setting enables server-side encryption.
+- `prefix` (String) Enter a prefix which RudderStack associates as the path prefix to all the files stored in your S3 bucket.

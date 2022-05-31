@@ -1,13 +1,13 @@
 ---
-page_title: "rudderstack Provider"
+page_title: "RudderStack Provider"
 subcategory: ""
-description: |-
+description: "Access the RudderStack control plane via Terraform to manage your source-destination configurations."
   
 ---
 
-# rudderstack Provider
+# RudderStack Provider
 
-TBD
+The RudderStack Terraform Provider allows you to access your RudderStack control plane via Terraform and manage your source-destination configurations programmatically.
 
 ## Example Usage
 

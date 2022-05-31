@@ -19,6 +19,7 @@ resource "rudderstack_destination_s3_datalake" "example" {
   config {
     bucket_name = "bucket"
 
+    # namespace     = "..."
     # prefix        = "prefix"
     # access_key_id = "..."
     # access_key    = "..."
@@ -58,25 +59,26 @@ resource "rudderstack_destination_s3_datalake" "example" {
 
 Required:
 
-- `bucket_name` (String)
-- `sync` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--config--sync))
-- `use_glue` (Boolean)
+- `bucket_name` (String) The name of the S3 bucket that will be used to store the data before loading it into the S3 data lake.
+- `sync` (Block List, Min: 1, Max: 1) Specify your data sync settings. (see [below for nested schema](#nestedblock--config--sync))
+- `use_glue` (Boolean) This setting enables AWS Glue.
 
 Optional:
 
-- `access_key` (String, Sensitive)
-- `access_key_id` (String)
-- `enable_sse` (Boolean)
-- `prefix` (String)
-- `region` (String)
+- `access_key` (String, Sensitive) Enter your AWS secret access key.
+- `access_key_id` (String) Enter your AWS access key ID.
+- `enable_sse` (Boolean) This setting enables server-side encryption.
+- `namespace` (String) If specified, all the data for the destination will be pushed to `s3://<bucketName>/<prefix>/rudder-datalake/<namespace>`.
+- `prefix` (String) If specified, RudderStack creates a folder in the bucket with this prefix and push all the data within that folder.
+- `region` (String) Enter your AWS Glue region. For example, for N.Virginia, it would be `us-east-1`.
 
 <a id="nestedblock--config--sync"></a>
 ### Nested Schema for `config.sync`
 
 Required:
 
-- `frequency` (String)
+- `frequency` (String) Specify how often RudderStack should sync the data to your PostgreSQL database.
 
 Optional:
 
-- `start_at` (String)
+- `start_at` (String) This optional setting lets you specify the particular time of the day (in UTC) when you want RudderStack to sync the data to the warehouse.

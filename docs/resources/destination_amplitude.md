@@ -151,42 +151,42 @@ resource "rudderstack_destination_amplitude" "example" {
 
 Required:
 
-- `api_key` (String)
+- `api_key` (String) Enter your Amplitude API key.
 
 Optional:
 
-- `api_secret` (String, Sensitive)
-- `batch_events` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--batch_events))
-- `device_id_from_url_param` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--device_id_from_url_param))
-- `enable_location_listening` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--enable_location_listening))
-- `event_filtering` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--event_filtering))
-- `event_upload_period_millis` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--event_upload_period_millis))
-- `event_upload_threshold` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--event_upload_threshold))
-- `force_https` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--force_https))
-- `group_type_trait` (String)
-- `group_value_trait` (String)
-- `map_device_brand` (Boolean)
-- `onetrust_cookie_categories` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
-- `prefer_anonymous_id_for_device_id` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--prefer_anonymous_id_for_device_id))
-- `save_params_referrer_once_per_session` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--save_params_referrer_once_per_session))
-- `track_all_pages` (Boolean)
-- `track_categorized_pages` (Boolean)
-- `track_gclid` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--track_gclid))
-- `track_named_pages` (Boolean)
-- `track_products_once` (Boolean)
-- `track_referrer` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--track_referrer))
-- `track_revenue_per_product` (Boolean)
-- `track_session_events` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--track_session_events))
-- `track_utm_properties` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--track_utm_properties))
-- `traits_to_append` (List of String)
-- `traits_to_increment` (List of String)
-- `traits_to_prepend` (List of String)
-- `traits_to_set_once` (List of String)
-- `unset_params_referrer_on_new_session` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--unset_params_referrer_on_new_session))
-- `use_advertising_id_for_device_id` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--use_advertising_id_for_device_id))
-- `use_idfa_as_device_id` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--use_idfa_as_device_id))
-- `use_native_sdk` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--use_native_sdk))
-- `version_name` (String)
+- `api_secret` (String, Sensitive) Enter the Amplitude API Secret key required for user deletion.
+- `batch_events` (Block List, Max: 1) If this setting is enabled, the events are batched together and uploaded by the Amplitude SDK. (see [below for nested schema](#nestedblock--config--batch_events))
+- `device_id_from_url_param` (Block List, Max: 1) If this setting is enabled, the Amplitude SDK will parse the URL parameter and set the device ID from `amp_device_id`. (see [below for nested schema](#nestedblock--config--device_id_from_url_param))
+- `enable_location_listening` (Block List, Max: 1) Enable this setting to activate location listening. (see [below for nested schema](#nestedblock--config--enable_location_listening))
+- `event_filtering` (Block List, Max: 1) This option allows you filter the events you want to send to Amplitude. (see [below for nested schema](#nestedblock--config--event_filtering))
+- `event_upload_period_millis` (Block List, Max: 1) If the batch events settings is enabled, this is the amount of time that the SDK waits to upload the events. (see [below for nested schema](#nestedblock--config--event_upload_period_millis))
+- `event_upload_threshold` (Block List, Max: 1) If the batch events settings is enabled, this is the minimum number of events to batch together by the Amplitude SDK. (see [below for nested schema](#nestedblock--config--event_upload_threshold))
+- `force_https` (Block List, Max: 1) If this setting is enabled, the events will always be uploaded by the Amplitude SDK to the HTTPS endpoint, otherwise it will use the embedding site's protocol. (see [below for nested schema](#nestedblock--config--force_https))
+- `group_type_trait` (String) RudderStack will use this value as `groupType` in the `group` calls.
+- `group_value_trait` (String) RudderStack will use this value as `groupValue` in the `group` calls.
+- `map_device_brand` (Boolean) Enable this setting for RudderStack to send the device brand information (`context.device.brand`) to Amplitude.
+- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+- `prefer_anonymous_id_for_device_id` (Block List, Max: 1) If this setting is enabled, the device ID will be set as the `anonymousId` generated by RudderStack SDK or by the `anonymousId` set via RudderStack's `setAnonymousId()` method. (see [below for nested schema](#nestedblock--config--prefer_anonymous_id_for_device_id))
+- `save_params_referrer_once_per_session` (Block List, Max: 1) If this setting is enabled, the corresponding tracking of `gclid`, referrer, UTM parameters will be done once per session. (see [below for nested schema](#nestedblock--config--save_params_referrer_once_per_session))
+- `track_all_pages` (Boolean) If this setting is enabled, RudderStack sends an event named `Loaded a page` / `Loaded a Screen` to Amplitude.
+- `track_categorized_pages` (Boolean) If this setting is enabled and if `category` is present in a `page` / `screen` call, then an event named `Viewed {category} page` / `Viewed {category} Screen` will be sent to Amplitude.
+- `track_gclid` (Block List, Max: 1) If this setting is enabled, the Amplitude SDK will capture the `gclid` URL parameters along with the user's `initial_gclid` parameters. (see [below for nested schema](#nestedblock--config--track_gclid))
+- `track_named_pages` (Boolean) If this setting is enabled and `name` is present in a `page` call, then an event named `Viewed {name} page` will be sent to Amplitude.
+- `track_products_once` (Boolean) If this setting is enabled and if the event payload contains an array of products, then the event is tracked with the original event name and all the products as its property. Otherwise, each product is tracked with event as `Product purchased`.
+- `track_referrer` (Block List, Max: 1) If this setting is enabled, the Amplitude SDK will capture the `referrer` and `referring_domain` for each session along with the user's `initial_referrer` and `initial_referring_domain`. (see [below for nested schema](#nestedblock--config--track_referrer))
+- `track_revenue_per_product` (Boolean) If this setting is enabled and if the event payload contains multiple products, each product's revenue is tracked individually.
+- `track_session_events` (Block List, Max: 1) Enable this setting to track the session events. (see [below for nested schema](#nestedblock--config--track_session_events))
+- `track_utm_properties` (Block List, Max: 1) If this setting is enabled, the Amplitude SDK parses the UTM parameters in the query string or `_utmz` cookie and includes them as user properties in all uploaded events. (see [below for nested schema](#nestedblock--config--track_utm_properties))
+- `traits_to_append` (List of String) If this setting is enabled, the value of the corresponding trait will be appended to the corresponding trait array at Amplitude.
+- `traits_to_increment` (List of String) If this setting is enabled, the value of the corresponding trait will be incremented at Amplitude, with the value provided against the trait in an `identify` call.
+- `traits_to_prepend` (List of String) If this setting is enabled, the value of the corresponding trait will be prepended to the corresponding trait array at Amplitude.
+- `traits_to_set_once` (List of String) If this setting is enabled, the value of the corresponding trait will be set once at Amplitude with the value provided against the trait in an `identify` call.
+- `unset_params_referrer_on_new_session` (Block List, Max: 1) If this setting is disabled, the existing `referrer` and `utm_parameter` values will be passed to each new session. If enabled, `referrer` and `utm_parameter` properties will be set to `null` upon instantiating a new session. (see [below for nested schema](#nestedblock--config--unset_params_referrer_on_new_session))
+- `use_advertising_id_for_device_id` (Block List, Max: 1) Enable this setting to set the advertising ID as the device ID. (see [below for nested schema](#nestedblock--config--use_advertising_id_for_device_id))
+- `use_idfa_as_device_id` (Block List, Max: 1) Enable this setting to set the IDFA as the device ID. (see [below for nested schema](#nestedblock--config--use_idfa_as_device_id))
+- `use_native_sdk` (Block List, Max: 1) Enable this setting to send events to Amplitude via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+- `version_name` (String) The value of this field is set as the `versionName` of the Amplitude SDK.
 
 <a id="nestedblock--config--batch_events"></a>
 ### Nested Schema for `config.batch_events`
@@ -218,8 +218,8 @@ Optional:
 
 Optional:
 
-- `blacklist` (List of String)
-- `whitelist` (List of String)
+- `blacklist` (List of String) Enter the event names to be blacklisted.
+- `whitelist` (List of String) Enter the event names to be whitelisted.
 
 
 <a id="nestedblock--config--event_upload_period_millis"></a>
