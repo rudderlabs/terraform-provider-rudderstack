@@ -35,12 +35,12 @@ description: |-
 
 Required:
 
+- `api_key` (String, Sensitive) Enter your ActiveCampaign API key.
 - `api_url` (String) Enter your ActiveCampaign API URL. You can find it in your account in the Settings page under the Developer tab.
 
 Optional:
 
 - `actid` (String) Enter your ActID here. To obtain the ActID unique to your ActiveCampaign account, go to Settings > Tracking > Event Tracking API.
-- `api_key` (String, Sensitive) Enter your ActiveCampaign API key.
 - `event_key` (String) Enter the event key unique to your ActiveCampaign account. To obtain the event key, go to your ActiveCampaign account > Settings > Tracking > Event Tracking.
 
 

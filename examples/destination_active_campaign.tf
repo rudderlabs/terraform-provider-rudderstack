@@ -3,8 +3,8 @@ resource "rudderstack_destination_active_campaign" "example" {
 
   config {
     api_url = "https://example.api-us1.com"
+    api_key = "..."
 
-    # api_key   = "..."
     # actid     = "..."
     # event_key = "..."
   }
