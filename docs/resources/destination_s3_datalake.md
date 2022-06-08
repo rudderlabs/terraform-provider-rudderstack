@@ -27,6 +27,7 @@ resource "rudderstack_destination_s3_datalake" "example" {
     # enable_sse    = true
 
     use_glue = true
+    region   = "us-east-2"
 
     sync {
       frequency = "30"

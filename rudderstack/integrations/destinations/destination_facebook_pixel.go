@@ -18,8 +18,13 @@ func init() {
 			c.Simple("testEventCode", "test_event_code", c.SkipZeroValue),
 			c.Simple("eventsToEvents", "events_to_events", c.SkipZeroValue),
 			c.ArrayWithStrings("eventCustomProperties", "eventCustomProperties", "event_custom_properties"),
-			c.ArrayWithStrings("blacklistPiiProperties", "blacklistPiiProperties", "blacklist_pii_properties"),
-			c.ArrayWithStrings("whitelistPiiProperties", "whitelistPiiProperties", "whitelist_pii_properties"),
+			c.ArrayWithObjects("blacklistPiiProperties", "blacklist_pii_properties", map[string]string{
+				"blacklistPiiProperties": "property",
+				"blacklistPiiHash":       "hash",
+			}),
+			c.ArrayWithObjects("whitelistPiiProperties", "whitelist_pii_properties", map[string]string{
+				"whitelistPiiProperties": "property",
+			}),
 			c.Simple("categoryToContent", "category_to_content", c.SkipZeroValue),
 			c.Simple("legacyConversionPixelId.from", "legacy_conversion_pixel_id.0.from"),
 			c.Simple("legacyConversionPixelId.to", "legacy_conversion_pixel_id.0.to"),
@@ -106,16 +111,34 @@ func init() {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Enter the PII properties to be blacklisted.",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				ConfigMode:  schema.SchemaConfigModeAttr,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"property": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+						},
+						"hash": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+					},
 				},
 			},
 			"whitelist_pii_properties": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Enter the PII properties to be whitelisted.",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				ConfigMode:  schema.SchemaConfigModeAttr,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"property": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+						},
+					},
 				},
 			},
 			"category_to_content": {

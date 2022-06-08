@@ -37,13 +37,25 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 			
 				event_custom_properties = ["one", "two", "three"]
 			
-				# blacklist_pii_properties {
-				# 
-				# }
-			
-				# whitelist_pii_properties {
-				# 
-				# }
+				blacklist_pii_properties = [
+					{ 
+						property = "one"
+						hash     = false
+					},
+					{ 
+						property = "two"
+						hash     = true
+					}
+				]
+
+				whitelist_pii_properties = [
+					{ 
+						property = "one"
+					},
+					{ 
+						property = "two"
+					}
+				]
 			
 				category_to_content = [{
 				  from = "from"
@@ -80,9 +92,17 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 				  { "from": "a2", "to": "b2" }
 				],
 				"eventCustomProperties": [
-				  { "eventCustomProperties": "one" },
-				  { "eventCustomProperties": "two" },
-				  { "eventCustomProperties": "three" }
+					{ "eventCustomProperties": "one" },
+					{ "eventCustomProperties": "two" },
+					{ "eventCustomProperties": "three" }
+				],
+				"blacklistPiiProperties": [
+				  { "blacklistPiiProperties": "one", "blacklistPiiHash": false },
+				  { "blacklistPiiProperties": "two", "blacklistPiiHash": true }
+				],
+				"whitelistPiiProperties": [
+				  { "whitelistPiiProperties": "one" },
+				  { "whitelistPiiProperties": "two" }
 				],
 				"categoryToContent": [{ "from": "from", "to": "to" }],
 				"legacyConversionPixelId": { "from": "from", "to": "to" },
