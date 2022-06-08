@@ -5,9 +5,9 @@ go 1.16
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
+	github.com/hashicorp/hc-install v0.3.2 // indirect
 	github.com/hashicorp/hcl/v2 v2.3.0
-	github.com/hashicorp/terraform-exec v0.16.0 // indirect
-	github.com/hashicorp/terraform-plugin-docs v0.7.0 // indirect
+	github.com/hashicorp/terraform-plugin-docs v0.9.0 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.1
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/rudderlabs/rudder-api-go v0.0.0-20220414103425-da0abcae77eb
@@ -15,12 +15,8 @@ require (
 	github.com/tidwall/gjson v1.12.1
 	github.com/tidwall/sjson v1.2.4
 	github.com/zclconf/go-cty v1.10.0
-	golang.org/x/net v0.0.0-20210929193557-e81a3d93ecf6 // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
 // replace github.com/rudderlabs/rudder-api-go v0.0.1 => ../rudder-api-go

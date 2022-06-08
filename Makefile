@@ -34,7 +34,7 @@ install: build
 
 .PHONY: test
 test:
-	go test -timeout 30s ./...
+	go test -timeout 60s ./...
 
 .PHONY: testacc
 testacc:
