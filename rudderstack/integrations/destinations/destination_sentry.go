@@ -23,6 +23,7 @@ func init() {
 			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
 			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
+			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"dsn": {
@@ -133,6 +134,23 @@ func init() {
 							Optional:     true,
 							Description:  "Enter the event names to be blacklisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"web": {
+							Type:     schema.TypeList,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},

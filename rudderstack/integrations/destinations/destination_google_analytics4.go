@@ -41,7 +41,7 @@ func init() {
 			},
 			"measurement_id": {
 				Type:             schema.TypeString,
-				Optional:         true,
+				Required:         true,
 				Description:      "Enter the Measurement Id which is the identifier for a data stream.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(G-.{1,100})$|^$"),
 			},

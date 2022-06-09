@@ -38,6 +38,10 @@ func init() {
 			c.Simple("batchEvents.web", "batch_events.0.web"),
 			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
+			c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
+				"event_filtering.0.whitelist": "whitelistedEvents",
+				"event_filtering.0.blacklist": "blacklistedEvents",
+			}),
 			c.Simple("eventUploadPeriodMillis.web", "event_upload_period_millis.0.web"),
 			c.Simple("eventUploadPeriodMillis.android", "event_upload_period_millis.0.android"),
 			c.Simple("eventUploadPeriodMillis.ios", "event_upload_period_millis.0.ios"),
