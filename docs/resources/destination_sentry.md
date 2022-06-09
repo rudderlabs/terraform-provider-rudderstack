@@ -48,6 +48,7 @@ Optional:
 - `ignore_errors` (List of String) This option refers to a list of error messages that you do not want Sentry to notify you.
 - `include_paths` (List of String) This field should contain the regex patterns of URLs that are part of the app in the stack trace.
 - `logger` (String) Set the name you want Sentry to use as logger.
+- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `release` (String) This field is used for tracking your application's version in Sentry.
 - `server_name` (String) This option is used to track the host on which the client is running.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
@@ -59,6 +60,14 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be blacklisted.
 - `whitelist` (List of String) Enter the event names to be whitelisted.
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `web` (List of String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>
