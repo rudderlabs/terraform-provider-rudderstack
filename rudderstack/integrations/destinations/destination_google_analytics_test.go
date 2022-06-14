@@ -79,6 +79,16 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 			    onetrust_cookie_categories {
 			      web = ["one", "two", "three"]
 			    }
+
+				content_groupings = [{
+				  from = "from"
+				  to   = "to"
+				}]
+			
+				dimensions = [{
+				  from = "from"
+				  to   = "to"
+				}]
 			`,
 			APIUpdate: `{
 				"trackingID": "UA-00-0000",
@@ -114,7 +124,9 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 					{ "oneTrustCookieCategory": "two" },
 					{ "oneTrustCookieCategory": "three" }
 				  ]
-				}
+				},
+				"contentGroupings": [{ "from": "from", "to": "to" }],
+				"dimensions": [{ "from": "from", "to": "to" }]
 			}`,
 		},
 	})
