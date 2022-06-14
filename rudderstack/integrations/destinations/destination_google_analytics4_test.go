@@ -11,10 +11,12 @@ func TestDestinationResourceGoogleAnalytics4(t *testing.T) {
 	cmt.AssertDestination(t, "google_analytics4", []c.TestConfig{
 		{
 			TerraformCreate: `
-				api_secret = "..."
+				api_secret      = "..."
+				measurement_id  = "G-000000"
 			`,
 			APICreate: `{
-				"apiSecret": "..."
+				"apiSecret": "...",
+				"measurementId": "G-000000"
 			}`,
 			TerraformUpdate: `
 				api_secret = "..."
