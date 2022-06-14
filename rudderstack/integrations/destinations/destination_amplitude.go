@@ -61,6 +61,7 @@ func init() {
 			c.Simple("useIdfaAsDeviceId.ios", "use_idfa_as_device_id.0.ios"),
 			c.Simple("useIdfaAsDeviceId.reactnative", "use_idfa_as_device_id.0.react_native"),
 			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.Simple("residencyServer", "residency_server", c.SkipZeroValue),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"api_key": {
@@ -87,6 +88,11 @@ func init() {
 				Optional:         true,
 				Description:      "RudderStack will use this value as `groupValue` in the `group` calls.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			},
+			"residency_server": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(standard|EU)$"),
 			},
 			"track_all_pages": {
 				Type:        schema.TypeBool,
