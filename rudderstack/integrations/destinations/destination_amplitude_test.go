@@ -125,6 +125,8 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 				onetrust_cookie_categories {
 				  web = ["one", "two", "three"]
 				}
+
+				residency_server = "EU"
 			`,
 			APIUpdate: `{
 				"apiKey": "123abc",
@@ -172,6 +174,7 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 				"trackUtmProperties": { "web": true },
 				"unsetParamsReferrerOnNewSession": { "web": true },
 				"batchEvents": { "web": true },
+				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [
 				  { "eventName": "one" },
 				  { "eventName": "two" },
@@ -200,7 +203,8 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 					{ "oneTrustCookieCategory": "two" },
 					{ "oneTrustCookieCategory": "three" }
 				  ]
-				}
+				},
+				"residencyServer": "EU"
 			}`,
 		},
 	})

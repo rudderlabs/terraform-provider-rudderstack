@@ -33,6 +33,10 @@ description: |-
 <a id="nestedblock--config"></a>
 ### Nested Schema for `config`
 
+Required:
+
+- `measurement_id` (String) Enter the Measurement Id which is the identifier for a data stream.
+
 Optional:
 
 - `api_secret` (String, Sensitive) This field is required only for the cloud mode setup where you can enter the API Secret generated through the Google Analytics dashboard.
@@ -40,7 +44,6 @@ Optional:
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Google Analytics 4. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `extend_page_view_params` (Boolean) Enable this setting to send `url` and `search` along with any other custom property to the `page` call of the RudderStack SDK. This setting is applicable only for device mode.
 - `firebase_app_id` (String) Enter the Firebase App ID which is the identifier for Firebase app.
-- `measurement_id` (String) Enter the Measurement Id which is the identifier for a data stream.
 - `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `send_user_id` (Boolean) If enabled, the user ID is set to the identified visitors and sent to Google Analytics 4.
 - `types_of_client` (String) Select the client type as gtag or Firebase.

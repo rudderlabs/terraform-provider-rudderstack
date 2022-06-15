@@ -19,12 +19,20 @@ resource "rudderstack_destination_facebook_pixel" "example" {
 
     # event_custom_properties = ["one", "two", "three"]
 
-    # blacklist_pii_properties {
-    # }
+		# blacklist_pii_properties = [{ 
+		# 	property = "one"
+		# 	hash     = false
+		# }, { 
+		# 	property = "two"
+		# 	hash     = true
+		# }]
 
-    # whitelist_pii_properties {
-    # }
-
+		# whitelist_pii_properties = [{ 
+		# 	property = "one"
+		# }, { 
+		# 	property = "two"
+		# }]
+    
     # category_to_content = [{
     #   from = "from"
     #   to   = "to"

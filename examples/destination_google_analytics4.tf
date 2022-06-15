@@ -2,11 +2,13 @@ resource "rudderstack_destination_google_analytics4" "example" {
   name = "my-google-analytics4"
 
   config {
+    measurement_id  = "..."
+
+    # firebase_app_id = "..."
+
     # api_secret = "..."
 
     # types_of_client = "gtag"
-    # measurement_id  = "..."
-    # firebase_app_id = "..."
 
     # block_page_view_event   = false
     # extend_page_view_params = false

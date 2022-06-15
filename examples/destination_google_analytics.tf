@@ -65,5 +65,15 @@ resource "rudderstack_destination_google_analytics" "example" {
     # onetrust_cookie_categories {
     #   web = ["one", "two", "three"]
     # }
+
+    # content_groupings = [{
+    #   from = "from"
+    #   to   = "to"
+    # }]
+
+    # dimensions = [{
+    #   from = "from"
+    #   to   = "to"
+    # }]
   }
 }

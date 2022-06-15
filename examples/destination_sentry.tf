@@ -24,5 +24,9 @@ resource "rudderstack_destination_sentry" "example" {
     #   whitelist = ["one", "two", "three"]
     #   blacklist = ["one", "two", "three"]
     # }
+
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    # }
   }
 }

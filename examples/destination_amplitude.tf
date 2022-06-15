@@ -109,5 +109,7 @@ resource "rudderstack_destination_amplitude" "example" {
     # onetrust_cookie_categories {
     #   web = ["one", "two", "three"]
     # }
+
+    # residency_server = "EU"
   }
 }

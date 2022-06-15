@@ -41,6 +41,8 @@ func init() {
 			c.Simple("useGoogleAmpClientId.web", "use_google_amp_client_id.0.web"),
 			c.Simple("namedTracker.web", "named_tracker.0.web"),
 			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.Simple("dimensions", "dimensions", c.SkipZeroValue),
+			c.Simple("contentGroupings", "content_groupings", c.SkipZeroValue),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"tracking_id": {
@@ -311,6 +313,46 @@ func init() {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
+						},
+					},
+				},
+			},
+			"content_groupings": {
+				Type:       schema.TypeList,
+				MaxItems:   10,
+				Optional:   true,
+				ConfigMode: schema.SchemaConfigModeAttr,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"from": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+						},
+						"to": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+						},
+					},
+				},
+			},
+			"dimensions": {
+				Type:       schema.TypeList,
+				MaxItems:   10,
+				Optional:   true,
+				ConfigMode: schema.SchemaConfigModeAttr,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"from": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+						},
+						"to": {
+							Type:             schema.TypeString,
+							Required:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
 				},

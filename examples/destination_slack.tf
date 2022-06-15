@@ -9,7 +9,7 @@ resource "rudderstack_destination_slack" "example" {
     # event_channel_settings = [
     #   {
     #     name     = "..."
-    #     template = "..."
+    #     channel  = "..."
     #     regex    = true
     #   }
     # ]

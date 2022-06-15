@@ -80,6 +80,16 @@ resource "rudderstack_destination_google_analytics" "example" {
     # onetrust_cookie_categories {
     #   web = ["one", "two", "three"]
     # }
+
+    # content_groupings = [{
+    #   from = "from"
+    #   to   = "to"
+    # }]
+
+    # dimensions = [{
+    #   from = "from"
+    #   to   = "to"
+    # }]
   }
 }
 ```
@@ -112,6 +122,8 @@ Required:
 Optional:
 
 - `anonymize_ip` (Boolean) Enabling this setting anonymizes your IP address information.
+- `content_groupings` (List of Object) (see [below for nested schema](#nestedatt--config--content_groupings))
+- `dimensions` (List of Object) (see [below for nested schema](#nestedatt--config--dimensions))
 - `disable_md5` (Boolean) Enable this setting to disable client ID MD5 encryption.
 - `domain` (Block List, Max: 1) Enter your cookie domain name. (see [below for nested schema](#nestedblock--config--domain))
 - `double_click` (Boolean)
@@ -133,6 +145,24 @@ Optional:
 - `track_named_pages` (Block List, Max: 1) Enable this setting to track named pages. (see [below for nested schema](#nestedblock--config--track_named_pages))
 - `use_google_amp_client_id` (Block List, Max: 1) Enable this setting to use the Google AMP Client ID (see [below for nested schema](#nestedblock--config--use_google_amp_client_id))
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the web device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+
+<a id="nestedatt--config--content_groupings"></a>
+### Nested Schema for `config.content_groupings`
+
+Optional:
+
+- `from` (String)
+- `to` (String)
+
+
+<a id="nestedatt--config--dimensions"></a>
+### Nested Schema for `config.dimensions`
+
+Optional:
+
+- `from` (String)
+- `to` (String)
+
 
 <a id="nestedblock--config--domain"></a>
 ### Nested Schema for `config.domain`

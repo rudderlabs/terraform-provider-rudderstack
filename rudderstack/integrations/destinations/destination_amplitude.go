@@ -38,6 +38,10 @@ func init() {
 			c.Simple("batchEvents.web", "batch_events.0.web"),
 			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
+			c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
+				"event_filtering.0.whitelist": "whitelistedEvents",
+				"event_filtering.0.blacklist": "blacklistedEvents",
+			}),
 			c.Simple("eventUploadPeriodMillis.web", "event_upload_period_millis.0.web"),
 			c.Simple("eventUploadPeriodMillis.android", "event_upload_period_millis.0.android"),
 			c.Simple("eventUploadPeriodMillis.ios", "event_upload_period_millis.0.ios"),
@@ -57,6 +61,7 @@ func init() {
 			c.Simple("useIdfaAsDeviceId.ios", "use_idfa_as_device_id.0.ios"),
 			c.Simple("useIdfaAsDeviceId.reactnative", "use_idfa_as_device_id.0.react_native"),
 			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.Simple("residencyServer", "residency_server", c.SkipZeroValue),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"api_key": {
@@ -83,6 +88,11 @@ func init() {
 				Optional:         true,
 				Description:      "RudderStack will use this value as `groupValue` in the `group` calls.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			},
+			"residency_server": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(standard|EU)$"),
 			},
 			"track_all_pages": {
 				Type:        schema.TypeBool,
