@@ -33,22 +33,18 @@ func TestGeneratorTerraform(t *testing.T) {
 
 	destinations := []client.Destination{
 		{
-			ID:   "id-postgres",
-			Name: "name-postgres",
-			Type: "POSTGRES",
+			ID:   "id-redshift",
+			Name: "name-redshift",
+			Type: "RS",
 			Config: json.RawMessage(`{
 				"host": "example.com",
-				"port": "5432",
+				"port": "5439",
 				"user": "example-user",
 				"password": "example-password",
 				"database": "example-database",
 				"namespace": "example-namespace",
-				"sslMode": "disable",
-				"useRudderStorage": true,
-				"bucketProvider": "S3",
-				"bucketName": "some-bucket-name",
-				"accessKeyID": "some-access-key-id",
-				"accessKey": "some-access-key"
+				"enableSSE": true,
+				"useRudderStorage": false
 				"unknown": "unknown value"
 			}`),
 		},
@@ -103,7 +99,7 @@ func TestGeneratorTerraform(t *testing.T) {
 		{
 			ID:            "id-connection-1",
 			SourceID:      "id-javascript",
-			DestinationID: "id-postgres",
+			DestinationID: "id-redshift",
 		},
 		{
 			ID:            "id-connection-2",
@@ -121,21 +117,16 @@ resource "rudderstack_source_http" "src_id-http" {
   name = "source-2"
 }
 
-resource "rudderstack_destination_postgres" "dst_id-postgres" {
-  name = "name-postgres"
+resource "rudderstack_destination_redshift" "dst_id-redshift" {
+  name = "name-redshift"
   config {
-    database  = "example-database"
-    host      = "example.com"
-    namespace = "example-namespace"
-    password  = "example-password"
-    port      = "5432"
-    s3 {
-      access_key    = "some-access-key"
-      access_key_id = "some-access-key-id"
-      bucket_name   = "some-bucket-name"
-    }
-    ssl_mode           = "disable"
-    use_rudder_storage = true
+    database           = "example-database"
+    enable_sse         = true
+    host               = "example.com"
+    namespace          = "example-namespace"
+    password           = "example-password"
+    port               = "5439"
+    use_rudder_storage = false
     user               = "example-user"
   }
 }
@@ -171,7 +162,7 @@ resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
 
 resource "rudderstack_connection" "cnxn_id-connection-1" {
   source_id      = rudderstack_source_javascript.src_id-javascript.id
-  destination_id = rudderstack_destination_postgres.dst_id-postgres.id
+  destination_id = rudderstack_destination_redshift.dst_id-redshift.id
 }
 
 resource "rudderstack_connection" "cnxn_id-connection-2" {
@@ -210,8 +201,8 @@ func TestGeneratorImportScript(t *testing.T) {
 	destinations := []client.Destination{
 		{
 			ID:   "id-destination-1",
-			Name: "name-postgres",
-			Type: "POSTGRES",
+			Name: "name-redshift",
+			Type: "RS",
 		},
 		{
 			ID:   "id-destination-2",
@@ -251,7 +242,7 @@ func TestGeneratorImportScript(t *testing.T) {
 	var expected = `
 terraform import "rudderstack_source_javascript.src_id-source-1" "id-source-1"
 terraform import "rudderstack_source_http.src_id-source-2" "id-source-2"
-terraform import "rudderstack_destination_postgres.dst_id-destination-1" "id-destination-1"
+terraform import "rudderstack_destination_redshift.dst_id-destination-1" "id-destination-1"
 terraform import "rudderstack_destination_facebook_pixel.dst_id-destination-2" "id-destination-2"
 terraform import "rudderstack_connection.cnxn_id-connection-1" "id-connection-1"
 terraform import "rudderstack_connection.cnxn_id-connection-2" "id-connection-2"
