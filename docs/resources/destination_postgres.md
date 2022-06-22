@@ -95,7 +95,7 @@ Required:
 - `namespace` (String) Enter the schema name where RudderStack will create all the tables. Defaults to the source name.
 - `password` (String, Sensitive) Enter the password you set for the above user.
 - `port` (String) Enter the port number associated with your PostgreSQL instance.
-- `ssl_mode` (String) Choose the SSL mode through which RudderStack will connect to your PostgreSQL instance. RudderStack provides three options - disable, require, and verify-ca.
+- `ssl_mode` (String) Choose the SSL mode through which RudderStack will connect to your PostgreSQL instance. RudderStack provides three options - `disable`, `require`, and `verify-ca`.
 - `user` (String) Enter the name of the PostgreSQL user with the required permissions to the PostgreSQL database.
 
 Optional:

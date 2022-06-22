@@ -88,8 +88,8 @@ func init() {
 			"ssl_mode": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Choose the SSL mode through which RudderStack will connect to your PostgreSQL instance. RudderStack provides three options - disable, require, and verify-ca.",
-				ValidateDiagFunc: c.StringMatchesRegexp("^(disable|require)$"),
+				Description:      "Choose the SSL mode through which RudderStack will connect to your PostgreSQL instance. RudderStack provides three options - `disable`, `require`, and `verify-ca`.",
+				ValidateDiagFunc: c.StringMatchesRegexp("^(disable|require|verify-ca)$"),
 			},
 			"use_rudder_storage": {
 				Type:        schema.TypeBool,
