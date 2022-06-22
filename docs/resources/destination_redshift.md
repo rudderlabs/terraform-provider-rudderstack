@@ -20,8 +20,8 @@ resource "rudderstack_destination_redshift" "example" {
     host     = "localhost"
     port     = "5432"
     database = "example"
-    user     = "postgres"
-    password = "postgres"
+    user     = "redshift"
+    password = "redshift"
 
     namespace          = "example"
     enable_sse         = true
@@ -87,7 +87,7 @@ Optional:
 
 Required:
 
-- `frequency` (String) Specify how often RudderStack should sync the data to your PostgreSQL database.
+- `frequency` (String) Specify how often RudderStack should sync the data to your Redshift database.
 
 Optional:
 
