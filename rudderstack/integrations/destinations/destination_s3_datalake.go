@@ -81,7 +81,7 @@ func init() {
 						"frequency": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      "Specify how often RudderStack should sync the data to your PostgreSQL database.",
+							Description:      "Specify how often RudderStack should sync the data to your S3 Datalake.",
 							ValidateDiagFunc: c.StringMatchesRegexp("^(30|60|180|360|720|1440)$"),
 						},
 						"start_at": {
