@@ -44,10 +44,7 @@ resource "rudderstack_destination_facebook_pixel" "example" {
     # }
 
     # use_native_sdk {
-    #   web          = true
-    #   ios          = true
-    #   android      = true
-    #   react_native = true
+    #   web = true
     # }
 
     # event_filtering {
