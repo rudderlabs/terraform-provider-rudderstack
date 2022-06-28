@@ -43,3 +43,5 @@ examples/.terraform.lock.hcl
 .env
 dist
 __debug_bin
+
+terraform-provider-rudderstack
