@@ -222,8 +222,8 @@ func init() {
 							Type:     schema.TypeList,
 							Required: true,
 							Elem: &schema.Schema{
-								Type:             schema.TypeString,
-								ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^(.{0,100})$)")},
+								Type: schema.TypeString,
+							},
 						},
 					},
 				},
