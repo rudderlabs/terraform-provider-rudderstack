@@ -78,7 +78,7 @@ Optional:
 
 Required:
 
-- `frequency` (String) Specify how often RudderStack should sync the data to your PostgreSQL database.
+- `frequency` (String) Specify how often RudderStack should sync the data to your S3 Datalake.
 
 Optional:
 

@@ -80,6 +80,10 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 			      web = ["one", "two", "three"]
 			    }
 
+				reset_custom_dimensions_on_page {
+				   web = ["one", "two", "three"]
+				}				
+
 				content_groupings = [{
 				  from = "from"
 				  to   = "to"
@@ -118,6 +122,13 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 				"optimize": { "web": "..." },
 				"useGoogleAmpClientId": { "web": true },
 				"namedTracker": { "web": true },
+				"resetCustomDimensionsOnPage": {
+					"web": [
+						{ "resetCustomDimensionsOnPage": "one" },
+						{ "resetCustomDimensionsOnPage": "two" },
+						{ "resetCustomDimensionsOnPage": "three" }
+					]
+				},
 				"oneTrustCookieCategories": {
 				  "web": [
 					{ "oneTrustCookieCategory": "one" },

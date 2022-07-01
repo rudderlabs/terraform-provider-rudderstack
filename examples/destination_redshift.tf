@@ -5,8 +5,8 @@ resource "rudderstack_destination_redshift" "example" {
     host     = "localhost"
     port     = "5432"
     database = "example"
-    user     = "postgres"
-    password = "postgres"
+    user     = "redshift"
+    password = "redshift"
 
     namespace          = "example"
     enable_sse         = true

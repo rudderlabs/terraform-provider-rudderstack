@@ -63,10 +63,10 @@ provider "rudderstack" {
 
 Once the scripts are setup, Terraform needs to import the state of your resource to be able to manage them. This can be done by running the Terraform import commands.
 
-For example, for a PostgreSQL destination named `dest_dev` with the destination ID `id`, the Terraform import command will be as follows:
+For example, for a Redshift destination named `dest_dev` with the destination ID `id`, the Terraform import command will be as follows:
 
 ```sh
-terraform import rudderstack_destination_postgres.dest_dev id
+terraform import rudderstack_destination_redshift.dest_dev id
 ```
 
 Since your generated script might contain many resources, remembering the IDs of all of them and running the Terraform commands manually can be very tedious. To avoid this, you can use the same tool used to generate the Terraform script that lists all the Terraform commands for any imported resource:

@@ -7,7 +7,7 @@ description: |-
 
 # rudderstack_source_javascript (Resource)
 
-This resource represents an Javascript Event Stream source. For more information check https://www.rudderstack.com/docs/stream-sources/rudderstack-sdk-integration-guides/rudderstack-javascript-sdk/
+This resource represents a Javascript Event Stream source. For more information check https://www.rudderstack.com/docs/stream-sources/rudderstack-sdk-integration-guides/rudderstack-javascript-sdk/
 
 ## Example Usage
 

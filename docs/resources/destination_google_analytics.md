@@ -77,6 +77,10 @@ resource "rudderstack_destination_google_analytics" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
+    # reset_custom_dimensions_on_page {
+    #   web = ["one", "two", "three"]
+    # }
+
     # onetrust_cookie_categories {
     #   web = ["one", "two", "three"]
     # }
