@@ -19,7 +19,7 @@ terraform {
       version = "~> 0.3.0"
     }
   }
-  required_version = "~> 1.2.4"
+  required_version = "~> 1.1.0"
 }
 
 provider "rudderstack" {
