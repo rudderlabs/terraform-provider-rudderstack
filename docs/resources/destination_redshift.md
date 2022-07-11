@@ -28,11 +28,11 @@ resource "rudderstack_destination_redshift" "example" {
     use_rudder_storage = false
 
 
-    s3 {
-      bucket_name   = "test-bucket"
-      access_key_id = "id"
-      access_key    = "key"
-    }
+    # s3 {
+    #   bucket_name   = ""
+    #   access_key_id = ""
+    #   access_key    = ""
+    # }
 
     sync {
       frequency = "30"

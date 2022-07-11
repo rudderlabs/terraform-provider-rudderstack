@@ -23,8 +23,8 @@ terraform {
 }
 
 provider "rudderstack" {
-  api_url      = "https://api.dev.rudderlabs.com/v2"
-  access_token = "2Bml0ptY3xYev45f8htMgQpZHxC"
+  # api_url      = "https://api.rudderstack.com/v2"
+  # access_token = ""
 }
 ```
 
