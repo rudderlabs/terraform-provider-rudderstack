@@ -27,7 +27,7 @@ resource "rudderstack_destination_google_tag_manager" "example" {
 
     event_filtering {
       whitelist = ["one", "two", "three"]
-      blacklist = ["one", "two", "three"]
+      # blacklist = ["one", "two", "three"]
     }
 
     onetrust_cookie_categories {

@@ -19,12 +19,12 @@ terraform {
       version = "~> 0.3.0"
     }
   }
-  required_version = "~> 1.1.0"
+  required_version = "~> 1.2.4"
 }
 
 provider "rudderstack" {
-  # api_url      = "https://api.rudderstack.com/v2"
-  # access_token = ""
+  api_url      = "https://api.dev.rudderlabs.com/v2"
+  access_token = "2Bml0ptY3xYev45f8htMgQpZHxC"
 }
 ```
 

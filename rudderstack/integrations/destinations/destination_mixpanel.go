@@ -48,11 +48,13 @@ func init() {
 				Type: schema.TypeString,
 				Required: true,
 				Description: "Mixpanel API Token",
+				Sensitive: true,
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"api_secret": {
 				Type: schema.TypeString,
 				Optional: true,
+				Sensitive: true,
 				Description: " Mixpanel API secret",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
