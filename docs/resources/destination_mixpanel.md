@@ -8,7 +8,7 @@ description: |-
 # rudderstack_destination_mixpanel (Resource)
 
 This resource represents a MixPanel destination. For more information check 
-https://www.rudderstack.com/docs/destinations/error-reporting/mixpanel
+https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/
 
 ## Example Usage
 
@@ -83,7 +83,7 @@ Optional:
 - `api_secret` (String, Sensitive) Mixpanel API secret
 - `consolidated_page_calls` (Boolean) This will track Loaded a Page events to Mixpanel for all page method calls. We enable this by default as it's how Mixpanel suggests sending these calls.
 - `cross_subdomain_cookie` (Boolean) This will allow the Mixpanel cookie to persist between different pages of your application.
-- `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Sentry. (see [below for nested schema](#nestedblock--config--event_filtering))
+- `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Mixpanel. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `event_increments` (List of String) Events to increment in People
 - `group_key_settings` (List of String) Group Key
 - `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
