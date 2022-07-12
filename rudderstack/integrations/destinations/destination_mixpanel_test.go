@@ -16,11 +16,14 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				persistence = "none"
 			`,
 			APICreate: `{
-				"token": "..."
-				"dataResidency": "us"
+				"token": "...",
+				"dataResidency": "us",
 				"persistence": "none"
 			}`,
 			TerraformUpdate: `
+				token = "..."
+				data_residency = "eu"
+				persistence = "localStorage"
 				api_secret = "..."
 				people = true
 				set_all_traits_by_default = true
@@ -42,7 +45,6 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 		
 				event_filtering {
 					whitelist = ["one", "two", "three"]
-					blacklist = ["one","two","three"]
 				}
 		
 				onetrust_cookie_categories {
@@ -51,13 +53,16 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 			`,
 			APIUpdate: `
 			{
+				"token": "...",
+				"dataResidency": "eu",
+				"persistence": "localStorage",
 				"apiSecret": "...",
 				"people": true,
 				"setAllTraitsByDefault": true,
 				"consolidatedPageCalls": true,
 				"trackCategorizedPages": true,
 				"trackNamedPages": true,
-				"sourceName": true,
+				"sourceName": "my-mixpanel",
 				"crossSubdomainCookie": true,
 				"secureCookie": true,
 				"superProperties": [{
@@ -111,7 +116,7 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 					}
 				],
 				"useNativeSDK": {
-					"web": "true"
+					"web": true
 				},
 				"whitelistedEvents": [{
 						"eventName": "one"
