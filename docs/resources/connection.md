@@ -12,19 +12,9 @@ This resource represents a connection between a Rudderstack Source and Destinati
 ## Example Usage
 
 ```terraform
-terraform {
-  required_providers {
-    rudderstack = {
-      source  = "rudderlabs/rudderstack"
-      version = "~> 0.3.0"
-    }
-  }
-  required_version = "~> 1.1.0"
-}
-
-provider "rudderstack" {
-  # api_url      = "https://api.rudderstack.com/v2"
-  # access_token = ""
+resource "rudderstack_connection" "example" {
+  source_id      = rudderstack_source_javascript.example.id
+  destination_id = rudderstack_destination_redshift.example.id
 }
 ```
 
