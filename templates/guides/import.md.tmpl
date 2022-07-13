@@ -41,21 +41,7 @@ For more information about setting a provider block, refer to the [Provider](htt
 
 An example of a RudderStack provider block is shown below:
 
-```terraform
-terraform {
-  required_providers {
-    rudderstack = {
-      source  = "rudderlabs/rudderstack"
-      version = "~> 0.3.0"
-    }
-  }
-  required_version = "~> 1.1.0"
-}
-
-provider "rudderstack" {
-  # access_token = ""
-}
-```
+{{tffile "examples/main.tf"}}
 
 > Note that in the above example, the access token is not set directly. In this case, the provider will read it from the  `RUDDERSTACK_ACCESS_TOKEN` environment variable.
 

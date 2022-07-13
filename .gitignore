@@ -45,3 +45,6 @@ dist
 __debug_bin
 
 terraform-provider-rudderstack
+
+#Ignore vscode files
+.vscode/
