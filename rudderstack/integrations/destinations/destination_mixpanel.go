@@ -14,7 +14,7 @@ func init() {
 			c.Simple("dataResidency", "data_residency"),
 			c.Simple("people", "people", c.SkipZeroValue),
 			c.Simple("setAllTraitsByDefault", "set_all_traits_by_default", c.SkipZeroValue),
-			c.Simple("consolidatedPageCalls", "consolidated_page_calls", c.SkipZeroValue),
+			c.Simple("consolidatedPageCalls", "consolidated_page_calls"),
 			c.Simple("trackCategorizedPages", "track_categorized_pages", c.SkipZeroValue),
 			c.Simple("trackNamedPages", "track_named_pages", c.SkipZeroValue),
 			c.Simple("sourceName", "source_name", c.SkipZeroValue),
@@ -65,6 +65,7 @@ func init() {
 			"consolidated_page_calls": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default:     true,
 				Description: "This will track Loaded a Page events to Mixpanel for all page method calls. We enable this by default as it's how Mixpanel suggests sending these calls.",
 			},
 			"track_categorized_pages": {
