@@ -14,10 +14,12 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				token = "..."
 				data_residency = "us"
 				persistence = "none"
+				consolidated_page_calls = false
 			`,
 			APICreate: `{
 				"token": "...",
 				"dataResidency": "us",
+				"consolidatedPageCalls": false,
 				"persistence": "none"
 			}`,
 			TerraformUpdate: `
