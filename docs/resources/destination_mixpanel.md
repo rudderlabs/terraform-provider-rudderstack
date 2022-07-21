@@ -47,6 +47,7 @@ resource "rudderstack_destination_mixpanel" example{
     # onetrust_cookie_categories {
     #   web = ["one", "two", "three"]
     # }
+    # use_new_mapping = true
   }
 }
 ```
@@ -97,6 +98,7 @@ Optional:
 - `track_categorized_pages` (Boolean) This will track events to Mixpanel for page method calls that have a category associated with them. For example page('Docs', 'Index') would translate to Viewed Docs Index Page.
 - `track_named_pages` (Boolean) This will track events to Mixpanel for page method calls that have a name associated with them. For example page('Signup') would translate to Viewed Signup Page.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+- `use_new_mapping` (Boolean) Use New Mapping
 
 <a id="nestedblock--config--event_filtering"></a>
 ### Nested Schema for `config.event_filtering`

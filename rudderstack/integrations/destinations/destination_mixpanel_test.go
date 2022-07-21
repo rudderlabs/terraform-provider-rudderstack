@@ -52,6 +52,7 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				onetrust_cookie_categories {
 					web = ["one", "two", "three"]
 				}
+				use_new_mapping = true
 			`,
 			APIUpdate: `
 			{
@@ -120,6 +121,7 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				"useNativeSDK": {
 					"web": true
 				},
+				"eventFilteringOption": "whitelistedEvents",
 				"whitelistedEvents": [{
 						"eventName": "one"
 					},
@@ -141,7 +143,8 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 							"oneTrustCookieCategory": "three"
 						}
 					]
-				}
+				},
+				"useNewMapping": true
 			}			
 			`,
 		},
