@@ -53,6 +53,7 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 					access_key = "..."
 					enable_sse = true
 				}
+				prefix = "..."
 			`,
 			APIUpdate: `{
 				"account": "...",
@@ -74,7 +75,8 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				"bucketName": "...",
 				"accessKeyID": "...",
 				"accessKey": "...",
-				"enableSSE": true
+				"enableSSE": true,
+				"prefix": "..."
 		}`,
 		},
 	})

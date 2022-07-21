@@ -50,6 +50,7 @@ resource "rudderstack_destination_snowflake" example{
     #   account_key = "..."
     #   storage_integration = "..."
     # }
+    # prefix = "..."
   }
 }
 ```
@@ -92,6 +93,7 @@ Optional:
 - `gcp` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--gcp))
 - `json_paths` (String) Specify required json properties in dot notation separated by commas.
 - `namespace` (String) Schema name for the warehouse where the tables are created by Rudderstack.
+- `prefix` (String) Prefix
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
 - `use_rudder_storage` (Boolean) Enable this setting to use RudderStack-managed buckets for object storage.
 

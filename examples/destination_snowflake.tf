@@ -36,5 +36,6 @@ resource "rudderstack_destination_snowflake" example{
     #   account_key = "..."
     #   storage_integration = "..."
     # }
+    # prefix = "..."
   }
 }

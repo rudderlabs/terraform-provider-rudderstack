@@ -34,6 +34,7 @@ func init() {
 			c.Simple("accountName", "azure.0.account_name", c.SkipZeroValue),
 			c.Simple("accountKey", "azure.0.account_key", c.SkipZeroValue),
 			c.Simple("storageIntegration", "azure.0.storage_integration", c.SkipZeroValue),
+			c.Simple("prefix", "prefix", c.SkipZeroValue),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"account": {
@@ -229,6 +230,12 @@ func init() {
 						},
 					},
 				},
+			},
+			"prefix": {
+				Type: schema.TypeString,
+				Optional: true,
+				Description: "Prefix",
+				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(.{0,100})$"),
 			},
 		},
 	})
