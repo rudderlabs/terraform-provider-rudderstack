@@ -22,7 +22,6 @@ resource "rudderstack_destination_snowflake" example{
     warehouse = "..."
     user = "..."
     password = "..."
-    namespace = "..."
     sync {
       frequency = "60"
       # start_at                  = "10:00"
@@ -31,7 +30,8 @@ resource "rudderstack_destination_snowflake" example{
     }
     # json_paths = "..."
     use_rudder_storage = true
-    # cloud_provider = "AWS"
+    # namespace = "..."
+    # prefix = "..."
     # additional_properties = true
     # s3 {
     #   bucket_name = "..."
@@ -50,7 +50,6 @@ resource "rudderstack_destination_snowflake" example{
     #   account_key = "..."
     #   storage_integration = "..."
     # }
-    # prefix = "..."
   }
 }
 ```
@@ -89,7 +88,6 @@ Optional:
 
 - `additional_properties` (Boolean)
 - `azure` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--azure))
-- `cloud_provider` (String) Cloud provider for the Snowflake instance.
 - `gcp` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--gcp))
 - `json_paths` (String) Specify required json properties in dot notation separated by commas.
 - `namespace` (String) Schema name for the warehouse where the tables are created by Rudderstack.

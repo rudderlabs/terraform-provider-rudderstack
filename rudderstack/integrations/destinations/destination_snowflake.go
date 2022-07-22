@@ -21,19 +21,23 @@ func init() {
 			c.Simple("excludeWindow.excludeWindowEndTime", "sync.0.exclude_window_end_time", c.SkipZeroValue),
 			c.Simple("jsonPaths", "json_paths", c.SkipZeroValue),
 			c.Simple("useRudderStorage", "use_rudder_storage"),
-			c.Simple("cloudProvider", "cloud_provider", c.SkipZeroValue),
+			c.Discriminator("cloudProvider", c.DiscriminatorValues{
+				"s3":    "AWS",
+				"gcp":   "GCP",
+				"azure": "AZURE",
+			}),
 			c.Simple("additionalProperties", "additional_properties"),
-			c.Simple("bucketName", "s3.0.bucket_name", c.SkipZeroValue),
+			c.Conditional("bucketName", "s3.0.bucket_name", c.Equals("cloudProvider", "AWS")),
 			c.Simple("accessKeyID", "s3.0.access_key_id", c.SkipZeroValue),
 			c.Simple("accessKey", "s3.0.access_key", c.SkipZeroValue),
 			c.Simple("enableSSE", "s3.0.enable_sse", c.SkipZeroValue),
-			c.Simple("bucketName", "gcp.0.bucket_name", c.SkipZeroValue),
+			c.Conditional("bucketName", "gcp.0.bucket_name", c.Equals("cloudProvider", "GCP")),
 			c.Simple("credentials", "gcp.0.credentials", c.SkipZeroValue),
-			c.Simple("storageIntegration", "gcp.0.storage_integration", c.SkipZeroValue),
+			c.Conditional("storageIntegration", "gcp.0.storage_integration", c.Equals("cloudProvider", "GCP")),
 			c.Simple("containerName", "azure.0.container_name", c.SkipZeroValue),
 			c.Simple("accountName", "azure.0.account_name", c.SkipZeroValue),
 			c.Simple("accountKey", "azure.0.account_key", c.SkipZeroValue),
-			c.Simple("storageIntegration", "azure.0.storage_integration", c.SkipZeroValue),
+			c.Conditional("storageIntegration", "azure.0.storage_integration", c.Equals("cloudProvider", "AZURE")),
 			c.Simple("prefix", "prefix", c.SkipZeroValue),
 		},
 		ConfigSchema: map[string]*schema.Schema{
@@ -64,7 +68,7 @@ func init() {
 			"password": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Sensitive: true,
+				Sensitive:        true,
 				Description:      "Password for the user.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
 			},
@@ -123,22 +127,17 @@ func init() {
 				Description: "Enable this setting to use RudderStack-managed buckets for object storage.",
 				Default:     false,
 			},
-			"cloud_provider": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "Cloud provider for the Snowflake instance.",
-				ValidateDiagFunc: c.StringMatchesRegexp("(AWS|GCP|AZURE)$"),
-			},
 			"additional_properties": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
 			"s3": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "",
+				Type:          schema.TypeList,
+				MaxItems:      1,
+				Optional:      true,
+				Description:   "",
+				ConflictsWith: []string{"config.0.gcp", "config.0.azure"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"bucket_name": {
@@ -150,7 +149,7 @@ func init() {
 						"access_key_id": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Sensitive: true,
+							Sensitive:        true,
 							Description:      "Enter your AWS access key ID.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
@@ -170,10 +169,11 @@ func init() {
 				},
 			},
 			"gcp": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "",
+				Type:          schema.TypeList,
+				MaxItems:      1,
+				Optional:      true,
+				Description:   "",
+				ConflictsWith: []string{"config.0.s3", "config.0.azure"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"bucket_name": {
@@ -198,10 +198,11 @@ func init() {
 				},
 			},
 			"azure": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "",
+				Type:          schema.TypeList,
+				MaxItems:      1,
+				Optional:      true,
+				Description:   "",
+				ConflictsWith: []string{"config.0.s3", "config.0.gcp"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"container_name": {
@@ -232,9 +233,9 @@ func init() {
 				},
 			},
 			"prefix": {
-				Type: schema.TypeString,
-				Optional: true,
-				Description: "Prefix",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Prefix",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(.{0,100})$"),
 			},
 		},

@@ -8,7 +8,6 @@ resource "rudderstack_destination_snowflake" example{
     warehouse = "..."
     user = "..."
     password = "..."
-    namespace = "..."
     sync {
       frequency = "60"
       # start_at                  = "10:00"
@@ -17,7 +16,8 @@ resource "rudderstack_destination_snowflake" example{
     }
     # json_paths = "..."
     use_rudder_storage = true
-    # cloud_provider = "AWS"
+    # namespace = "..."
+    # prefix = "..."
     # additional_properties = true
     # s3 {
     #   bucket_name = "..."
@@ -36,6 +36,5 @@ resource "rudderstack_destination_snowflake" example{
     #   account_key = "..."
     #   storage_integration = "..."
     # }
-    # prefix = "..."
   }
 }
