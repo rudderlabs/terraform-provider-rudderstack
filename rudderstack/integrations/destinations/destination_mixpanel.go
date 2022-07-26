@@ -27,9 +27,14 @@ func init() {
 			c.ArrayWithStrings("propIncrements", "property", "prop_increments"),
 			c.ArrayWithStrings("groupKeySettings", "groupKey", "group_key_settings"),
 			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
+			c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
+				"event_filtering.0.whitelist": "whitelistedEvents",
+				"event_filtering.0.blacklist": "blacklistedEvents",
+			}),
 			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.Simple("useNewMapping", "use_new_mapping", c.SkipZeroValue),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"token": {
@@ -198,6 +203,11 @@ func init() {
 						},
 					},
 				},
+			},
+			"use_new_mapping": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "It is recomended to set this to on as we are deprecating support for the old mapping soon.",
 			},
 		},
 	})
