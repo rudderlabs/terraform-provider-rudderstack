@@ -32,27 +32,27 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				"additionalProperties": true
 			}`,
 			TerraformUpdate: `
-			account = "example-account"
-			database = "example-database"
-			warehouse = "example-warehouse"
-			user = "example-user"
-			password = "example-password"
-			use_rudder_storage = false
-			sync {
-				frequency = "60"
-				start_at                  = "10:00"
-				exclude_window_start_time = "11:00"
-				exclude_window_end_time   = "12:00"
-			}
-			namespace = "example-namespace"
-			json_paths = "./example-paths"
-			prefix = "example-prefix"
-      s3 {
-				 bucket_name = "example-bucket-name"
-				 access_key_id = "example-access-key-id"
-				 access_key = "example-access-key"
-				 enable_sse = true
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = false
+				sync {
+					frequency = "60"
+					start_at                  = "10:00"
+					exclude_window_start_time = "11:00"
+					exclude_window_end_time   = "12:00"
 				}
+				namespace = "example-namespace"
+				json_paths = "./example-paths"
+				prefix = "example-prefix"
+				s3 {
+					bucket_name = "example-bucket-name"
+					access_key_id = "example-access-key-id"
+					access_key = "example-access-key"
+					enable_sse = true
+					}
 			`,
 			APIUpdate: `{
 				"account": "example-account",
@@ -106,26 +106,26 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"additionalProperties": true
 			}`,
 			TerraformUpdate: `
-			account = "example-account"
-			database = "example-database"
-			warehouse = "example-warehouse"
-			user = "example-user"
-			password = "example-password"
-			use_rudder_storage = false
-			sync {
-				frequency = "60"
-				start_at                  = "10:00"
-				exclude_window_start_time = "11:00"
-				exclude_window_end_time   = "12:00"
-			}
-			namespace = "example-namespace"
-			json_paths = "./example-paths"
-			prefix = "example-prefix"
-			gcp {
-        bucket_name = "example-bucket-name"
-        credentials = "example-credentials"
-        storage_integration = "example-storage"      
-    	}
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = false
+				sync {
+					frequency = "60"
+					start_at                  = "10:00"
+					exclude_window_start_time = "11:00"
+					exclude_window_end_time   = "12:00"
+				}
+				namespace = "example-namespace"
+				json_paths = "./example-paths"
+				prefix = "example-prefix"
+				gcp {
+					bucket_name = "example-bucket-name"
+					credentials = "example-credentials"
+					storage_integration = "example-storage"      
+				}
 			`,
 			APIUpdate: `{
 				"account": "example-account",
@@ -178,27 +178,27 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"additionalProperties": true
 			}`,
 			TerraformUpdate: `
-			account = "example-account"
-			database = "example-database"
-			warehouse = "example-warehouse"
-			user = "example-user"
-			password = "example-password"
-			use_rudder_storage = false
-			sync {
-				frequency = "60"
-				start_at                  = "10:00"
-				exclude_window_start_time = "11:00"
-				exclude_window_end_time   = "12:00"
-			}
-			namespace = "example-namespace"
-			json_paths = "./example-paths"
-			prefix = "example-prefix"
-			azure {
-        container_name = "example-container-name"
-        account_name = "example-account-name"
-        account_key = "example-account-key"
-        storage_integration = "example-storage" 
-    	}
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = false
+				sync {
+					frequency = "60"
+					start_at                  = "10:00"
+					exclude_window_start_time = "11:00"
+					exclude_window_end_time   = "12:00"
+				}
+				namespace = "example-namespace"
+				json_paths = "./example-paths"
+				prefix = "example-prefix"
+				azure {
+					container_name = "example-container-name"
+					account_name = "example-account-name"
+					account_key = "example-account-key"
+					storage_integration = "example-storage" 
+				}
 			`,
 			APIUpdate: `{
 				"account": "example-account",
