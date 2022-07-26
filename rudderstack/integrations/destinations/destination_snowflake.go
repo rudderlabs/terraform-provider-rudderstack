@@ -44,7 +44,7 @@ func init() {
 			"account": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Account ID of your Snowflake warehouse. This account ID is part of the Snowflake URL.",
+				Description:      "Account ID of your Snowflake warehouse. This account ID is part of the Snowflake URL. Example : https://www.rudderstack.com/docs/destinations/warehouse-destinations/faq/#while-configuring-the-snowflake-destination-what-should-i-enter-in-the-account-field",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 			},
 			"database": {

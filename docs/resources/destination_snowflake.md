@@ -77,7 +77,7 @@ resource "rudderstack_destination_snowflake" example{
 
 Required:
 
-- `account` (String) Account ID of your Snowflake warehouse. This account ID is part of the Snowflake URL.
+- `account` (String) Account ID of your Snowflake warehouse. This account ID is part of the Snowflake URL. Example : https://www.rudderstack.com/docs/destinations/warehouse-destinations/faq/#while-configuring-the-snowflake-destination-what-should-i-enter-in-the-account-field
 - `database` (String) Name of the database.
 - `password` (String, Sensitive) Password for the user.
 - `sync` (Block List, Min: 1, Max: 1) Specify your sync settings. (see [below for nested schema](#nestedblock--config--sync))
