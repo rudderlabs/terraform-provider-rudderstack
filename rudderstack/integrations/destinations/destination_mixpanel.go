@@ -205,9 +205,9 @@ func init() {
 				},
 			},
 			"use_new_mapping": {
-				Type: schema.TypeBool,
-				Optional: true,
-				Description: "Use New Mapping",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "It is recomended to set this to on as we are deprecating support for the old mapping soon.",
 			},
 		},
 	})
