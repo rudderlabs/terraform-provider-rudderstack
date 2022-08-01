@@ -1,3 +1,11 @@
+## Description of the change
+
+> Description here
+
+## Notion Link
+
+> Notion Link
+
 **Fixes** # (*issue*)
 
 ## Type of change
