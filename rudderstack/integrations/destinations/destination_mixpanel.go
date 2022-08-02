@@ -103,12 +103,12 @@ func init() {
 			"secure_cookie": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "This will mark the Mixpanel cookie as secure, meaning it will only be transmitted over https",
+				Description: "This will mark the Mixpanel cookie as secure, meaning it will only be transmitted over https.",
 			},
 			"super_properties": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Property to send as super Properties",
+				Description: "Property to send as super Properties.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -116,7 +116,7 @@ func init() {
 			"people_properties": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Traits to set as People Properties",
+				Description: "Traits to set as People Properties.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -124,7 +124,7 @@ func init() {
 			"event_increments": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Events to increment in People",
+				Description: "Events to increment in People.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -206,8 +206,9 @@ func init() {
 			},
 			"use_new_mapping": {
 				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "It is recomended to set this to on as we are deprecating support for the old mapping soon.",
+				Optional: true,
+				Default:     true,
+				Description: "This value is true by default and when this flag is enabled, camel case fields are mapped to snake case fields while sending to Mixpanel. Please refer to https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/#connection-settings for more details.",
 			},
 		},
 	})
