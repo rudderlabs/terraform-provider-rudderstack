@@ -91,7 +91,7 @@ Optional:
 - `gcp` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--gcp))
 - `json_paths` (String) Specify required json properties in dot notation separated by commas.
 - `namespace` (String) Schema name for the warehouse where the tables are created by Rudderstack.
-- `prefix` (String) Prefix
+- `prefix` (String) If specified, RudderStack will create a folder in the bucket with this prefix and push all the data within that folder.
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
 - `use_rudder_storage` (Boolean) Enable this setting to use RudderStack-managed buckets for object storage.
 
@@ -114,10 +114,10 @@ Optional:
 
 Required:
 
-- `account_key` (String) Azure Blob Storage Account Key
-- `account_name` (String) Azure Blob Storage Account Name
-- `container_name` (String) Staging Azure Blob Storage Container Name
-- `storage_integration` (String) Storage Integration
+- `account_key` (String) Enter the account key for your Azure container.
+- `account_name` (String) Enter the account name for the Azure container.
+- `container_name` (String) Specify the name of your Azure container where RudderStack will store the data before loading it into Snowflake.
+- `storage_integration` (String) Create the cloud storage integration in Snowflake and enter the name of integration. Please refer to this for more details -> https://www.rudderstack.com/docs/destinations/warehouse-destinations/snowflake/#configuring-cloud-storage-integration-with-snowflake
 
 
 <a id="nestedblock--config--gcp"></a>
@@ -125,9 +125,9 @@ Required:
 
 Required:
 
-- `bucket_name` (String) Staging GCS Object Storage Bucket Name
-- `credentials` (String) GCP Service Account credentials JSON for RudderStack to use in loading data into your Google Cloud Storage
-- `storage_integration` (String) Storage Integration
+- `bucket_name` (String) Specify the name of your GCS bucket where RudderStack will store the data before loading it into Snowflake.
+- `credentials` (String) GCP Service Account credentials JSON for RudderStack to use in loading data into your Google Cloud Storage.
+- `storage_integration` (String) Create the cloud storage integration in Snowflake and enter the name of integration.Please refer to this for more details -> https://www.rudderstack.com/docs/destinations/warehouse-destinations/snowflake/#configuring-cloud-storage-integration-with-snowflake
 
 
 <a id="nestedblock--config--s3"></a>
@@ -135,10 +135,10 @@ Required:
 
 Required:
 
-- `bucket_name` (String) Enter the name of your S3 bucket.
+- `bucket_name` (String) Specify the name of your S3 bucket where RudderStack will store the data before loading it into Snowflake.
 
 Optional:
 
 - `access_key` (String, Sensitive) Enter your AWS secret access key.
-- `access_key_id` (String, Sensitive) Enter your AWS access key ID.
-- `enable_sse` (Boolean) This setting enables server-side encryption.
+- `access_key_id` (String, Sensitive) Enter your AWS access key ID obtained from the AWS console.
+- `enable_sse` (Boolean) Toggle on this setting to enable server-side encryption for your S3 bucket.

@@ -143,14 +143,14 @@ func init() {
 						"bucket_name": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      "Enter the name of your S3 bucket.",
+							Description:      "Specify the name of your S3 bucket where RudderStack will store the data before loading it into Snowflake.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
 						"access_key_id": {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Sensitive:        true,
-							Description:      "Enter your AWS access key ID.",
+							Description:      "Enter your AWS access key ID obtained from the AWS console.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
 						"access_key": {
@@ -163,7 +163,7 @@ func init() {
 						"enable_sse": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "This setting enables server-side encryption.",
+							Description: "Toggle on this setting to enable server-side encryption for your S3 bucket.",
 						},
 					},
 				},
@@ -179,19 +179,19 @@ func init() {
 						"bucket_name": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      "Staging GCS Object Storage Bucket Name",
+							Description:      "Specify the name of your GCS bucket where RudderStack will store the data before loading it into Snowflake.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
 						"credentials": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      "GCP Service Account credentials JSON for RudderStack to use in loading data into your Google Cloud Storage",
+							Description:      "GCP Service Account credentials JSON for RudderStack to use in loading data into your Google Cloud Storage.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
 						},
 						"storage_integration": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      "Storage Integration",
+							Description:      "Create the cloud storage integration in Snowflake and enter the name of integration.Please refer to this for more details -> https://www.rudderstack.com/docs/destinations/warehouse-destinations/snowflake/#configuring-cloud-storage-integration-with-snowflake",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
 					},
@@ -208,25 +208,25 @@ func init() {
 						"container_name": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      "Staging Azure Blob Storage Container Name",
+							Description:      "Specify the name of your Azure container where RudderStack will store the data before loading it into Snowflake.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
 						"account_name": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      "Azure Blob Storage Account Name",
+							Description:      "Enter the account name for the Azure container.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
 						"account_key": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      "Azure Blob Storage Account Key",
+							Description:      "Enter the account key for your Azure container.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
 						"storage_integration": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      "Storage Integration",
+							Description:      "Create the cloud storage integration in Snowflake and enter the name of integration. Please refer to this for more details -> https://www.rudderstack.com/docs/destinations/warehouse-destinations/snowflake/#configuring-cloud-storage-integration-with-snowflake",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
 					},
@@ -235,7 +235,7 @@ func init() {
 			"prefix": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "Prefix",
+				Description:      "If specified, RudderStack will create a folder in the bucket with this prefix and push all the data within that folder.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(.{0,100})$"),
 			},
 		},
