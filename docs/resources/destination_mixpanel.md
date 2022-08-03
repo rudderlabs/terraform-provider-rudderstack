@@ -85,20 +85,20 @@ Optional:
 - `consolidated_page_calls` (Boolean) This will track Loaded a Page events to Mixpanel for all page method calls. We enable this by default as it's how Mixpanel suggests sending these calls.
 - `cross_subdomain_cookie` (Boolean) This will allow the Mixpanel cookie to persist between different pages of your application.
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Mixpanel. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `event_increments` (List of String) Events to increment in People.
+- `event_increments` (List of String) Events to increment in People
 - `group_key_settings` (List of String) Group Key
 - `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `people` (Boolean) Boolean flag to send all of your identify calls to Mixpanel's People feature
-- `people_properties` (List of String) Traits to set as People Properties.
+- `people_properties` (List of String) Traits to set as People Properties
 - `prop_increments` (List of String) Properties to increment in People
-- `secure_cookie` (Boolean) This will mark the Mixpanel cookie as secure, meaning it will only be transmitted over https.
+- `secure_cookie` (Boolean) This will mark the Mixpanel cookie as secure, meaning it will only be transmitted over https
 - `set_all_traits_by_default` (Boolean) While this is checked, our integration automatically sets all traits on identify calls as super properties and people properties if Mixpanel People is checked as well.
 - `source_name` (String) This value, if it's not blank, will be sent as rudderstack_source_name to Mixpanel for every event/page/screen call.
-- `super_properties` (List of String) Property to send as super Properties.
+- `super_properties` (List of String) Property to send as super Properties
 - `track_categorized_pages` (Boolean) This will track events to Mixpanel for page method calls that have a category associated with them. For example page('Docs', 'Index') would translate to Viewed Docs Index Page.
 - `track_named_pages` (Boolean) This will track events to Mixpanel for page method calls that have a name associated with them. For example page('Signup') would translate to Viewed Signup Page.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
-- `use_new_mapping` (Boolean) When this flag is enabled, camel case fields are mapped to snake case fields while sending to Mixpanel. Please refer to https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/#connection-settings for more details.
+- `use_new_mapping` (Boolean) It is recomended to set this to on as we are deprecating support for the old mapping soon.
 
 <a id="nestedblock--config--event_filtering"></a>
 ### Nested Schema for `config.event_filtering`
