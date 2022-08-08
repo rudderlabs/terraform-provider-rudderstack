@@ -14,7 +14,7 @@ func init() {
 			c.Simple("dataResidency", "data_residency"),
 			c.Simple("people", "people", c.SkipZeroValue),
 			c.Simple("setAllTraitsByDefault", "set_all_traits_by_default", c.SkipZeroValue),
-			c.Simple("consolidatedPageCalls", "consolidated_page_calls", c.SkipZeroValue),
+			c.Simple("consolidatedPageCalls", "consolidated_page_calls"),
 			c.Simple("trackCategorizedPages", "track_categorized_pages", c.SkipZeroValue),
 			c.Simple("trackNamedPages", "track_named_pages", c.SkipZeroValue),
 			c.Simple("sourceName", "source_name", c.SkipZeroValue),
@@ -27,9 +27,14 @@ func init() {
 			c.ArrayWithStrings("propIncrements", "property", "prop_increments"),
 			c.ArrayWithStrings("groupKeySettings", "groupKey", "group_key_settings"),
 			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
+			c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
+				"event_filtering.0.whitelist": "whitelistedEvents",
+				"event_filtering.0.blacklist": "blacklistedEvents",
+			}),
 			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.Simple("useNewMapping", "use_new_mapping", c.SkipZeroValue),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"token": {
@@ -65,6 +70,7 @@ func init() {
 			"consolidated_page_calls": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default:     true,
 				Description: "This will track Loaded a Page events to Mixpanel for all page method calls. We enable this by default as it's how Mixpanel suggests sending these calls.",
 			},
 			"track_categorized_pages": {
@@ -97,12 +103,12 @@ func init() {
 			"secure_cookie": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "This will mark the Mixpanel cookie as secure, meaning it will only be transmitted over https",
+				Description: "This will mark the Mixpanel cookie as secure, meaning it will only be transmitted over https.",
 			},
 			"super_properties": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Property to send as super Properties",
+				Description: "Property to send as super Properties.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -110,7 +116,7 @@ func init() {
 			"people_properties": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Traits to set as People Properties",
+				Description: "Traits to set as People Properties.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -118,7 +124,7 @@ func init() {
 			"event_increments": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Events to increment in People",
+				Description: "Events to increment in People.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -197,6 +203,12 @@ func init() {
 						},
 					},
 				},
+			},
+			"use_new_mapping": {
+				Type:        schema.TypeBool,
+				Optional: true,
+				Default:     true,
+				Description: "This value is true by default and when this flag is enabled, camel case fields are mapped to snake case fields while sending to Mixpanel. Please refer to https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/#connection-settings for more details.",
 			},
 		},
 	})

@@ -32,5 +32,6 @@ resource "rudderstack_destination_mixpanel" example{
     # onetrust_cookie_categories {
     #   web = ["one", "two", "three"]
     # }
+    # use_new_mapping = true
   }
 }
