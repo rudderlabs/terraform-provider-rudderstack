@@ -5,8 +5,8 @@ import (
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func init()  {
-	c.Destinations.Register("adobe analytics", c.ConfigMeta{
+func init() {
+	c.Destinations.Register("adobe_analytics", c.ConfigMeta{
 		APIType: "ADOBE_ANALYTICS",
 		Properties: []c.ConfigProperty{
 			c.Simple("trackingServerUrl", "tracking_server_url", c.SkipZeroValue),
@@ -24,7 +24,7 @@ func init()  {
 			}),
 			c.Simple("marketingCloudOrgId", "marketing_cloud_org_id", c.SkipZeroValue),
 			c.Simple("dropVisitorId", "drop_visitor_id", c.SkipZeroValue),
-			c.Simple("timestampOption", "timestamp_option"),
+			c.Simple("timestampOption", "timestamp_option", c.SkipZeroValue),
 			c.Simple("timestampOptionalReporting", "timestamp_optional_reporting", c.SkipZeroValue),
 			c.Simple("noFallbackVisitorId", "no_fallback_visitor_id", c.SkipZeroValue),
 			c.Simple("preferVisitorId", "prefer_visitor_id", c.SkipZeroValue),
@@ -86,7 +86,7 @@ func init()  {
 				"from": "label",
 				"to":   "name",
 			}),
-			c.Simple("productIdentifier", "product_identifier"),
+			c.Simple("productIdentifier", "product_identifier", c.SkipZeroValue),
 			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
 			c.Simple("useNativeSDK.ios", "use_native_sdk.0.ios"),
 			c.Simple("useNativeSDK.android", "use_native_sdk.0.android"),
@@ -101,51 +101,51 @@ func init()  {
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"tracking_server_url": {
-				Type:			schema.TypeString,
-				Optional:       true,
-				Description: 	"Enter your Tracking Server URL",
-			},      
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter your Tracking Server URL",
+			},
 			"tracking_server_secure_url": {
-				Type:			schema.TypeString,
-				Optional:       true,
-				Description: 	"Enter your Tracking Server Secure URL",
-			},      
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter your Tracking Server Secure URL",
+			},
 			"report_suite_ids": {
-				Type:			schema.TypeString,
-				Required: 		true,
-				Description: 	"Enter your Report Suite ID(s). You can add multiple report suite ids by separated by commas.",
-			},      
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Enter your Report Suite ID(s). You can add multiple report suite ids by separated by commas.",
+			},
 			"ssl_heartbeat": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Check for Heartbeat calls to be made over https",
-			}, 
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Check for Heartbeat calls to be made over https",
+			},
 			"heartbeat_tracking_server_url": {
-				Type:			schema.TypeString,
-				Optional:    	true,
-				Description: 	"Enter your Heartbeat Tracking Server URL",
-			},  
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter your Heartbeat Tracking Server URL",
+			},
 			"use_utf8_charset": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Use UTF-8 charset",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Use UTF-8 charset",
 			},
 			"use_secure_server_side": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Use Secure URL for Server-side",
-			},     
-			"proxy_normal_url": {
-				Type:			schema.TypeString,
-				Optional:    	true,
-				Description: 	"Enter your Adobe Analytics Javascript SDK URL",
-			},      
-			"proxy_heartbeat_url": {
-				Type:			schema.TypeString,
-				Required: 		false,
-				Description: 	"Enter your Adobe Analytics Hearbeat SDK URL",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Use Secure URL for Server-side",
 			},
-			
+			"proxy_normal_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter your Adobe Analytics Javascript SDK URL",
+			},
+			"proxy_heartbeat_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter your Adobe Analytics Hearbeat SDK URL",
+			},
+
 			"events_to_types": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -154,47 +154,47 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Provide the Video Event Name.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Provide the Video Event Name.",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Type of Video Event",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Type of Video Event",
 						},
 					},
 				},
 			},
 			"marketing_cloud_org_id": {
-				Type:			schema.TypeString,
-				Optional:    	true,
-				Description: 	"Enter your Marketing Cloud Organization Id.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter your Marketing Cloud Organization Id.",
 			},
 			"drop_visitor_id": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Check to Drop Visitor Id.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Check to Drop Visitor Id.",
 			},
 			"timestamp_option": {
-				Type:        	schema.TypeString,
-				Optional:    	true,
-				Description: 	"Enter your Timestamp Option.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter your Timestamp Option.",
 			},
 			"timestamp_optional_reporting": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Check to send both Timestamp and VisitorID for Timestamp Optional Reporting Suites",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Check to send both Timestamp and VisitorID for Timestamp Optional Reporting Suites",
 			},
 			"no_fallback_visitor_id": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Check to enable no Fallbacks for Visitor ID",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Check to enable no Fallbacks for Visitor ID",
 			},
 			"prefer_visitor_id": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Check to prefer Visitor Id",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Check to prefer Visitor Id",
 			},
 			"rudder_events_to_adobe_events": {
 				Type:        schema.TypeList,
@@ -204,22 +204,22 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Event Name",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Event Name",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Adobe Custom Event",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Adobe Custom Event",
 						},
 					},
 				},
 			},
 			"track_page_name": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Check to enable pageName for Track Events",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Check to enable pageName for Track Events",
 			},
 			"context_data_mapping": {
 				Type:        schema.TypeList,
@@ -229,32 +229,32 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Context Data path.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Context Data path.",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Adobe Context Data property name",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Adobe Context Data property name",
 						},
 					},
 				},
 			},
 			"context_data_prefix": {
-				Type:        	schema.TypeString,
-				Optional:    	true,
-				Description: 	"Enter your prefix to add before all contextData property.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter your prefix to add before all contextData property.",
 			},
 			"use_legacy_link_name": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Check to use Legacy LinkName",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Check to use Legacy LinkName",
 			},
 			"page_name_fallback_tostring": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Check to allow Page Name Fallback to Screen",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Check to allow Page Name Fallback to Screen",
 			},
 			"mobile_event_mapping": {
 				Type:        schema.TypeList,
@@ -264,22 +264,22 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Context Data path.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Context Data path.",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Adobe Context Data property name",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Adobe Context Data property name",
 						},
 					},
 				},
 			},
 			"send_false_values": {
-				Type:        	schema.TypeBool,
-				Optional:    	true,
-				Description: 	"Check to allow sending false value from properties",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Check to allow sending false value from properties",
 			},
 			"e_var_mapping": {
 				Type:        schema.TypeList,
@@ -289,14 +289,14 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Rudder Property",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Rudder Property",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the eVar Index",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the eVar Index",
 						},
 					},
 				},
@@ -309,14 +309,14 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Rudder Property",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Rudder Property",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the eVar Index",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the eVar Index",
 						},
 					},
 				},
@@ -329,14 +329,14 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Rudder Property as an array/string seperated by commas",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Rudder Property as an array/string seperated by commas",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the eVar Index",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the eVar Index",
 						},
 					},
 				},
@@ -349,14 +349,14 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Rudder Property.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Rudder Property.",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the List Delimiter.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the List Delimiter.",
 						},
 					},
 				},
@@ -369,14 +369,14 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Rudder Property.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Rudder Property.",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the prop Index.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the prop Index.",
 						},
 					},
 				},
@@ -389,14 +389,14 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Rudder Property.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Rudder Property.",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the List Delimiter.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the List Delimiter.",
 						},
 					},
 				},
@@ -409,14 +409,14 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Rudder Event.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Rudder Event.",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Adobe Event.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Adobe Event.",
 						},
 					},
 				},
@@ -437,14 +437,14 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Rudder Event.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Rudder Event.",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Adobe Event.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Adobe Event.",
 						},
 					},
 				},
@@ -465,22 +465,22 @@ func init()  {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"label": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the Rudder Event.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the Rudder Event.",
 						},
 						"name": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Enter the eVar Index.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the eVar Index.",
 						},
 					},
 				},
 			},
 			"product_identifier": {
-				Type:			schema.TypeString,
-				Optional:       true,
-				Description: 	"Enter your Product Identifier",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enter your Product Identifier",
 			},
 			"use_native_sdk": {
 				Type:        schema.TypeList,
@@ -552,7 +552,7 @@ func init()  {
 						},
 					},
 				},
-			},   
+			},
 		},
 	})
 }

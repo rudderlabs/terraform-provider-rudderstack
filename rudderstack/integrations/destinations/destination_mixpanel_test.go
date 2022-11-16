@@ -20,7 +20,8 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				"token": "...",
 				"dataResidency": "us",
 				"consolidatedPageCalls": false,
-				"persistence": "none"
+				"persistence": "none",
+				"useNewMapping": true
 			}`,
 			TerraformUpdate: `
 				token = "..."
