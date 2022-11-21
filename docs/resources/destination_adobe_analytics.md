@@ -7,7 +7,7 @@ description: |-
 
 # rudderstack_destination_adobe_analytics (Resource)
 
-This resource represents a Adobe Analytics destination. For more information check 
+This resource represents the Adobe Analytics destination. For more information check 
 https://www.rudderstack.com/docs/destinations/streaming-destinations/adobe-analytics/
 
 ## Example Usage
@@ -30,7 +30,7 @@ resource "rudderstack_destination_adobe_analytics" "example" {
 ### Required
 
 - `config` (Block List, Min: 1, Max: 1) Destination specific configuration. Check the nested block documenation for more information. (see [below for nested schema](#nestedblock--config))
-- `name` (String) Human readable name of the destination. The value has to be unique across all destinations.
+- `name` (String) Human readable name of the destination. The value has to be unique across all the destinations.
 
 ### Optional
 
@@ -47,34 +47,34 @@ resource "rudderstack_destination_adobe_analytics" "example" {
 
 Required:
 
-- `report_suite_ids` (String) Enter your Report Suite ID(s). You can add multiple report suite ids by separated by commas.
+- `report_suite_ids` (String) Enter your Report Suite ID(s). You can add multiple report suite ID's separated by commas.
 
 Optional:
 
 - `context_data_mapping` (List of Object) You can map Rudder Context data to Adobe Context Data (see [below for nested schema](#nestedatt--config--context_data_mapping))
 - `context_data_prefix` (String) Enter your prefix to add before all contextData property.
-- `custom_props_mapping` (List of Object) You can map Rudder Properties to Adobe Custom properties (see [below for nested schema](#nestedatt--config--custom_props_mapping))
+- `custom_props_mapping` (List of Object) You can map Rudder properties to Adobe Custom properties (see [below for nested schema](#nestedatt--config--custom_props_mapping))
 - `drop_visitor_id` (Boolean) Check to Drop Visitor Id.
-- `e_var_mapping` (List of Object) You can map Rudder Properties to Adobe eVars (see [below for nested schema](#nestedatt--config--e_var_mapping))
-- `event_filtering` (Block List, Max: 1) This option allows you filter the events you want to send to Adobe Analytics. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `event_merch_event_to_adobe_event` (List of Object) You can map Rudder Events to Adobe Merchandise events. (see [below for nested schema](#nestedatt--config--event_merch_event_to_adobe_event))
+- `e_var_mapping` (List of Object) You can map Rudder properties to Adobe eVars (see [below for nested schema](#nestedatt--config--e_var_mapping))
+- `event_filtering` (Block List, Max: 1) This option allows you to filter the events you want to send to Adobe Analytics. (see [below for nested schema](#nestedblock--config--event_filtering))
+- `event_merch_event_to_adobe_event` (List of Object) You can map Rudder events to Adobe merchandise events. (see [below for nested schema](#nestedatt--config--event_merch_event_to_adobe_event))
 - `event_merch_properties` (List of String) Currency/Incremental properties to add to merchandise events at event level
 - `events_to_types` (List of Object) You can map your Rudder video events with types of Video Events (see [below for nested schema](#nestedatt--config--events_to_types))
 - `heartbeat_tracking_server_url` (String) Enter your Heartbeat Tracking Server URL
-- `hier_mapping` (List of Object) You can map Rudder Properties to Adobe Hierarchy properties (see [below for nested schema](#nestedatt--config--hier_mapping))
-- `list_delimiter` (List of Object) You can map your Rudder Property with Delimiters for list properties (see [below for nested schema](#nestedatt--config--list_delimiter))
-- `list_mapping` (List of Object) You can map Rudder Properties to Adobe list properties (see [below for nested schema](#nestedatt--config--list_mapping))
+- `hier_mapping` (List of Object) You can map Rudder properties to Adobe hierarchy properties (see [below for nested schema](#nestedatt--config--hier_mapping))
+- `list_delimiter` (List of Object) You can map your Rudder Property with delimiters for list properties (see [below for nested schema](#nestedatt--config--list_delimiter))
+- `list_mapping` (List of Object) You can map Rudder properties to Adobe list properties (see [below for nested schema](#nestedatt--config--list_mapping))
 - `marketing_cloud_org_id` (String) Enter your Marketing Cloud Organization Id.
-- `mobile_event_mapping` (List of Object) You can map Rudder Mobile events. (see [below for nested schema](#nestedatt--config--mobile_event_mapping))
-- `no_fallback_visitor_id` (Boolean) Check to enable no Fallbacks for Visitor ID
+- `mobile_event_mapping` (List of Object) You can map Rudder mobile events. (see [below for nested schema](#nestedatt--config--mobile_event_mapping))
+- `no_fallback_visitor_id` (Boolean) Check to enable no fallbacks for Visitor ID
 - `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `page_name_fallback_tostring` (Boolean) Check to allow Page Name Fallback to Screen
 - `prefer_visitor_id` (Boolean) Check to prefer Visitor Id
 - `product_identifier` (String) Enter your Product Identifier
-- `product_merch_evars_map` (List of Object) You can map Rudder Properties to eVars at product level (see [below for nested schema](#nestedatt--config--product_merch_evars_map))
-- `product_merch_event_to_adobe_event` (List of Object) You can map Rudder Events to Adobe Merchandise events (see [below for nested schema](#nestedatt--config--product_merch_event_to_adobe_event))
+- `product_merch_evars_map` (List of Object) You can map Rudder properties to eVars at product level (see [below for nested schema](#nestedatt--config--product_merch_evars_map))
+- `product_merch_event_to_adobe_event` (List of Object) You can map Rudder events to Adobe merchandise events (see [below for nested schema](#nestedatt--config--product_merch_event_to_adobe_event))
 - `product_merch_properties` (List of String) Currency/Incremental properties to add to merchandise events at product level
-- `props_delimiter` (List of Object) You can map your Rudder Property with Delimiters for Adobe Custom properties (see [below for nested schema](#nestedatt--config--props_delimiter))
+- `props_delimiter` (List of Object) You can map your Rudder property with delimiters for Adobe custom properties (see [below for nested schema](#nestedatt--config--props_delimiter))
 - `proxy_heartbeat_url` (String) Enter your Adobe Analytics Hearbeat SDK URL
 - `proxy_normal_url` (String) Enter your Adobe Analytics Javascript SDK URL
 - `rudder_events_to_adobe_events` (List of Object) You can map Rudder Events to Adobe Custom Events. (see [below for nested schema](#nestedatt--config--rudder_events_to_adobe_events))
