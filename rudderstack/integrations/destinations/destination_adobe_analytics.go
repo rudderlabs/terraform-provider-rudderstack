@@ -19,8 +19,8 @@ func init() {
 			c.Simple("proxyNormalUrl", "proxy_normal_url", c.SkipZeroValue),
 			c.Simple("proxyHeartbeatUrl", "proxy_heartbeat_url", c.SkipZeroValue),
 			c.ArrayWithObjects("eventsToTypes", "events_to_types", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "from",
 			}),
 			c.Simple("marketingCloudOrgId", "marketing_cloud_org_id", c.SkipZeroValue),
 			c.Simple("dropVisitorId", "drop_visitor_id", c.SkipZeroValue),
@@ -29,62 +29,66 @@ func init() {
 			c.Simple("noFallbackVisitorId", "no_fallback_visitor_id", c.SkipZeroValue),
 			c.Simple("preferVisitorId", "prefer_visitor_id", c.SkipZeroValue),
 			c.ArrayWithObjects("rudderEventsToAdobeEvents", "rudder_events_to_adobe_events", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.Simple("trackPageName", "track_page_name", c.SkipZeroValue),
 			c.ArrayWithObjects("contextDataMapping", "context_data_mapping", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.Simple("contextDataPrefix", "context_data_prefix", c.SkipZeroValue),
 			c.Simple("useLegacyLinkName", "use_legacy_link_name", c.SkipZeroValue),
 			c.Simple("pageNameFallbackTostring", "page_name_fallback_tostring", c.SkipZeroValue),
 			c.ArrayWithObjects("mobileEventMapping", "mobile_event_mapping", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.Simple("sendFalseValues", "send_false_values", c.SkipZeroValue),
 			c.ArrayWithObjects("eVarMapping", "e_var_mapping", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.ArrayWithObjects("hierMapping", "hier_mapping", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.ArrayWithObjects("listMapping", "list_mapping", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.ArrayWithObjects("listDelimiter", "list_delimiter", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 
 			c.ArrayWithObjects("customPropsMapping", "custom_props_mapping", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.ArrayWithObjects("propsDelimiter", "props_delimiter", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.ArrayWithObjects("eventMerchEventToAdobeEvent", "event_merch_event_to_adobe_event", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
-			c.ArrayWithStrings("eventMerchProperties", "event_merch_properties", "event_merch_properties"),
+			c.ArrayWithObjects("eventMerchProperties", "event_merch_properties", map[string]string{
+				"event_merch_properties": "event_merch_properties",
+			}),
 
 			c.ArrayWithObjects("productMerchEventToAdobeEvent", "product_merch_event_to_adobe_event", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
-			c.ArrayWithStrings("productMerchProperties", "product_merch_properties", "product_merch_properties"),
+			c.ArrayWithObjects("productMerchProperties", "product_merch_properties", map[string]string{
+				"product_merch_properties": "product_merch_properties",
+			}),
 
 			c.ArrayWithObjects("productMerchEvarsMap", "product_merch_evars_map", map[string]string{
-				"from": "label",
-				"to":   "name",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.Simple("productIdentifier", "product_identifier", c.SkipZeroValue),
 			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
@@ -153,12 +157,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Provide the Video Event Name.",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Type of Video Event",
@@ -203,12 +207,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Event Name",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Adobe Custom Event",
@@ -228,12 +232,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Context Data path.",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Adobe Context Data property name",
@@ -263,12 +267,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Context Data path.",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Adobe Context Data property name",
@@ -288,12 +292,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Rudder Property",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the eVar Index",
@@ -308,12 +312,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Rudder Property",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the eVar Index",
@@ -328,12 +332,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Rudder Property as an array/string seperated by commas",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the eVar Index",
@@ -348,12 +352,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Rudder Property.",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the List Delimiter.",
@@ -368,12 +372,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Rudder Property.",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the prop Index.",
@@ -388,12 +392,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Rudder Property.",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the List Delimiter.",
@@ -404,16 +408,16 @@ func init() {
 			"event_merch_event_to_adobe_event": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Events to Adobe Merchandise events.",
+				Description: "You can map Rudder Events to Adobe Event Merchandise events.",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Rudder Event.",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Adobe Event.",
@@ -425,23 +429,30 @@ func init() {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Currency/Incremental properties to add to merchandise events at event level",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				ConfigMode:  schema.SchemaConfigModeAttr,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"event_merch_properties": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the property.",
+						},
+					},
 				},
 			},
 			"product_merch_event_to_adobe_event": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Events to Adobe Merchandise events",
+				Description: "You can map Rudder Events to Adobe Product Merchandise events",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Rudder Event.",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Adobe Event.",
@@ -453,8 +464,15 @@ func init() {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Currency/Incremental properties to add to merchandise events at product level",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				ConfigMode:  schema.SchemaConfigModeAttr,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"product_merch_properties": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Enter the property.",
+						},
+					},
 				},
 			},
 			"product_merch_evars_map": {
@@ -464,12 +482,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"label": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the Rudder Event.",
 						},
-						"name": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the eVar Index.",
