@@ -6,64 +6,64 @@ resource "rudderstack_destination_adobe_analytics" "example" {
         report_suite_id = "id01, id02"
         # heartbeat_tracking_server_url = "http://sampleheartbeaturl.com"
         # events_to_types = [{
-		# 	from = "video start",
+		# 	from = "video start"
 		# 	to = "heartbeatPlaybackStarted"
 		# }]
 		# list_delimiter = [{
-		# 	from = "listPhone",
+		# 	from = "listPhone"
 		# 	to = ","
 		# }]
 		# props_delimiter = [{
-		# 	from = "customPhone",
+		# 	from = "customPhone"
 		# 	to = ","
 		# }]
 		# event_merch_properties = [{
-		# 	event_merch_properties = "currency"
+		# 	property = "currency"
 		# }]
 		# product_merch_properties = [{
-		# 	product_merch_properties = "currency"
+		# 	property = "currency"
 		# }]
 		# event_filtering{
 		# 	blacklist = ["one", "two", "three"]
 		# }
 		# rudder_events_to_adobe_events = [{
-		# 	from = "product searched",
+		# 	from = "product searched"
 		# 	to = "ps1,ps2"
 		# }]
 		# context_data_mapping = [{
-		# 	from = "page.name",
+		# 	from = "page.name"
 		# 	to = "pName"
 		# }]
 		# mobile_event_mapping = [{
-		# 	from = "page.name",
+		# 	from = "page.name"
 		# 	to = "pName"
 		# }]
 		# e_var_mapping = [{
-		# 	from = "phone",
+		# 	from = "phone"
 		# 	to = "1"
 		# }]
 		# hier_mapping = [{
-		# 	from = "phone",
+		# 	from = "phone"
 		# 	to = "1"
 		# }]
 		# list_mapping = [{
-		# 	from = "listPhone",
+		# 	from = "listPhone"
 		# 	to = "1"
 		# }]
 		# custom_props_mapping = [{
-		# 	from = "phone",
+		# 	from = "phone"
 		# 	to = "1"
 		# }]
 		# event_merch_event_to_adobe_event = [{
-		# 	from = "Order Completed",
+		# 	from = "Order Completed"
 		# 	to = "merchEvent1"
 		# }]
 		# product_merch_event_to_adobe_event = [{
-		# 	from = "Product Ordered",
+		# 	from = "Product Ordered"
 		# 	to = "MerchProduct1"
 		# }]
 		# product_merch_evars_map = [{
-		# 	from = "phone",
+		# 	from = "phone"
 		# 	to = "1"
 		# }]
     }

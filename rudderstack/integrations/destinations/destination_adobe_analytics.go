@@ -20,7 +20,7 @@ func init() {
 			c.Simple("proxyHeartbeatUrl", "proxy_heartbeat_url", c.SkipZeroValue),
 			c.ArrayWithObjects("eventsToTypes", "events_to_types", map[string]string{
 				"from": "from",
-				"to":   "from",
+				"to":   "to",
 			}),
 			c.Simple("marketingCloudOrgId", "marketing_cloud_org_id", c.SkipZeroValue),
 			c.Simple("dropVisitorId", "drop_visitor_id", c.SkipZeroValue),
@@ -75,7 +75,7 @@ func init() {
 				"to":   "to",
 			}),
 			c.ArrayWithObjects("eventMerchProperties", "event_merch_properties", map[string]string{
-				"event_merch_properties": "event_merch_properties",
+				"eventMerchProperties": "property",
 			}),
 
 			c.ArrayWithObjects("productMerchEventToAdobeEvent", "product_merch_event_to_adobe_event", map[string]string{
@@ -83,7 +83,7 @@ func init() {
 				"to":   "to",
 			}),
 			c.ArrayWithObjects("productMerchProperties", "product_merch_properties", map[string]string{
-				"product_merch_properties": "product_merch_properties",
+				"productMerchProperties": "property",
 			}),
 
 			c.ArrayWithObjects("productMerchEvarsMap", "product_merch_evars_map", map[string]string{
@@ -432,7 +432,7 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"event_merch_properties": {
+						"property": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the property.",
@@ -467,7 +467,7 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"product_merch_properties": {
+						"property": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the property.",
