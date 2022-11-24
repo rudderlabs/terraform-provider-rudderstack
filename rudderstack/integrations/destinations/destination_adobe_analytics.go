@@ -74,17 +74,13 @@ func init() {
 				"from": "from",
 				"to":   "to",
 			}),
-			c.ArrayWithObjects("eventMerchProperties", "event_merch_properties", map[string]string{
-				"eventMerchProperties": "property",
-			}),
+			c.ArrayWithStrings("eventMerchProperties", "eventMerchProperties", "event_merch_properties"),
 
 			c.ArrayWithObjects("productMerchEventToAdobeEvent", "product_merch_event_to_adobe_event", map[string]string{
 				"from": "from",
 				"to":   "to",
 			}),
-			c.ArrayWithObjects("productMerchProperties", "product_merch_properties", map[string]string{
-				"productMerchProperties": "property",
-			}),
+			c.ArrayWithStrings("productMerchProperties", "productMerchProperties", "product_merch_properties"),
 
 			c.ArrayWithObjects("productMerchEvarsMap", "product_merch_evars_map", map[string]string{
 				"from": "from",
@@ -460,16 +456,8 @@ func init() {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Currency/Incremental properties to add to merchandise events at event level",
-				ConfigMode:  schema.SchemaConfigModeAttr,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"property": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the property.",
-							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
-						},
-					},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 			"product_merch_event_to_adobe_event": {
@@ -498,16 +486,8 @@ func init() {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Currency/Incremental properties to add to merchandise events at product level",
-				ConfigMode:  schema.SchemaConfigModeAttr,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"property": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the property.",
-							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
-						},
-					},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 			"product_merch_evars_map": {

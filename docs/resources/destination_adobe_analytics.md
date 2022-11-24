@@ -19,7 +19,68 @@ resource "rudderstack_destination_adobe_analytics" "example" {
     config {
         tracking_server_url = "http://sampleurl.com"
         report_suite_id = "id01, id02"
-        heartbeat_tracking_server_url = "http://sampleheartbeaturl.com"
+        # heartbeat_tracking_server_url = "http://sampleheartbeaturl.com"
+        # events_to_types = [{
+		# 	from = "video start"
+		# 	to = "heartbeatPlaybackStarted"
+		# }]
+		# list_delimiter = [{
+		# 	from = "listPhone"
+		# 	to = ","
+		# }]
+		# props_delimiter = [{
+		# 	from = "customPhone"
+		# 	to = ","
+		# }]
+		# event_merch_properties = [
+		# 	"currency"
+		# ]
+		# product_merch_properties = [
+		# 	"currency"
+		# ]
+		# event_filtering{
+		# 	blacklist = ["one", "two", "three"]
+		# }
+		# rudder_events_to_adobe_events = [{
+		# 	from = "product searched"
+		# 	to = "ps1,ps2"
+		# }]
+		# context_data_mapping = [{
+		# 	from = "page.name"
+		# 	to = "pName"
+		# }]
+		# mobile_event_mapping = [{
+		# 	from = "page.name"
+		# 	to = "pName"
+		# }]
+		# e_var_mapping = [{
+		# 	from = "phone"
+		# 	to = "1"
+		# }]
+		# hier_mapping = [{
+		# 	from = "phone"
+		# 	to = "1"
+		# }]
+		# list_mapping = [{
+		# 	from = "listPhone"
+		# 	to = "1"
+		# }]
+		# custom_props_mapping = [{
+		# 	from = "phone"
+		# 	to = "1"
+		# }]
+		# event_merch_event_to_adobe_event = [{
+		# 	from = "Order Completed"
+		# 	to = "merchEvent1"
+		# }]
+		# product_merch_event_to_adobe_event = [{
+		# 	from = "Product Ordered"
+		# 	to = "MerchProduct1"
+		# }]
+		# product_merch_evars_map = [{
+		# 	from = "phone"
+		# 	to = "1"
+		# }]
     }
 }
 ```
@@ -95,8 +156,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--custom_props_mapping"></a>
@@ -104,8 +165,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--e_var_mapping"></a>
@@ -113,8 +174,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedblock--config--event_filtering"></a>
@@ -131,8 +192,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--events_to_types"></a>
@@ -140,8 +201,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--hier_mapping"></a>
@@ -149,8 +210,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--list_delimiter"></a>
@@ -158,8 +219,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--list_mapping"></a>
@@ -167,8 +228,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--mobile_event_mapping"></a>
@@ -176,8 +237,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedblock--config--onetrust_cookie_categories"></a>
@@ -193,8 +254,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--product_merch_event_to_adobe_event"></a>
@@ -202,8 +263,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--props_delimiter"></a>
@@ -211,8 +272,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedatt--config--rudder_events_to_adobe_events"></a>
@@ -220,8 +281,8 @@ Optional:
 
 Optional:
 
-- `label` (String)
-- `name` (String)
+- `from` (String)
+- `to` (String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

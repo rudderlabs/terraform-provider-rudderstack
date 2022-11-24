@@ -17,12 +17,12 @@ resource "rudderstack_destination_adobe_analytics" "example" {
 		# 	from = "customPhone"
 		# 	to = ","
 		# }]
-		# event_merch_properties = [{
-		# 	property = "currency"
-		# }]
-		# product_merch_properties = [{
-		# 	property = "currency"
-		# }]
+		# event_merch_properties = [
+		# 	"currency"
+		# ]
+		# product_merch_properties = [
+		# 	"currency"
+		# ]
 		# event_filtering{
 		# 	blacklist = ["one", "two", "three"]
 		# }
