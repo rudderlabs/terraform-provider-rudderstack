@@ -14,7 +14,18 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 				report_suite_ids = "id001, id002"
 			`,
 			APICreate: `{
-				"reportSuiteIds": "id001, id002"
+				"reportSuiteIds": "id001, id002",
+  				"sslHeartbeat": true,
+  				"useUtf8Charset": true,
+  				"useSecureServerSide": true,
+  				"dropVisitorId": true,
+  				"timestampOptionalReporting": false,
+  				"noFallbackVisitorId": false,
+  				"preferVisitorId": false,
+  				"trackPageName": true,
+  				"useLegacyLinkName": true,
+  				"pageNameFallbackTostring": true,
+  				"sendFalseValues": true
 			}`,
 			TerraformUpdate: `
 				report_suite_ids = "id003, id004"
@@ -82,28 +93,104 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 			  `,
 			APIUpdate: `{
 				"reportSuiteIds": "id003, id004",
-				"eventsToTypes": [{
+				"sslHeartbeat": true,
+				"useUtf8Charset": true,
+				"useSecureServerSide": true,
+				"eventsToTypes": [
+				  {
 					"from": "video start",
 					"to": "heartbeatPlaybackStarted"
-					}
+				  }
 				],
-				"listDelimiter": [{
+				"dropVisitorId": true,
+				"timestampOptionalReporting": false,
+				"noFallbackVisitorId": false,
+				"preferVisitorId": false,
+				"rudderEventsToAdobeEvents": [
+				  {
+					"from": "product searched",
+					"to": "ps1,ps2"
+				  }
+				],
+				"trackPageName": true,
+				"contextDataMapping": [
+				  {
+					"from": "page.name",
+					"to": "pName"
+				  }
+				],
+				"useLegacyLinkName": true,
+				"pageNameFallbackTostring": true,
+				"mobileEventMapping": [
+				  {
+					"from": "page.name",
+					"to": "pName"
+				  }
+				],
+				"sendFalseValues": true,
+				"eVarMapping": [
+				  {
+					"from": "phone",
+					"to": "1"
+				  }
+				],
+				"hierMapping": [
+				  {
+					"from": "phone",
+					"to": "1"
+				  }
+				],
+				"listMapping": [
+				  {
+					"from": "listPhone",
+					"to": "1"
+				  }
+				],
+				"listDelimiter": [
+				  {
 					"from": "listPhone",
 					"to": ","
-					}
+				  }
 				],
-				"propsDelimiter": [{
+				"customPropsMapping": [
+				  {
+					"from": "phone",
+					"to": "1"
+				  }
+				],
+				"propsDelimiter": [
+				  {
 					"from": "customPhone",
 					"to": ","
-					}
+				  }
 				],
-				"eventMerchProperties": [{
+				"eventMerchEventToAdobeEvent": [
+				  {
+					"from": "Order Completed",
+					"to": "merchEvent1"
+				  }
+				],
+				"eventMerchProperties": [
+				  {
 					"eventMerchProperties": "currency"
-					}
+				  }
 				],
-				"productMerchProperties": [{
+				"productMerchEventToAdobeEvent": [
+				  {
+					"from": "Product Ordered",
+					"to": "MerchProduct1"
+				  }
+				],
+				"productMerchProperties": [
+				  {
 					"productMerchProperties": "currency"
-					}
+				  }
+				],
+				"productMerchEvarsMap": [
+				  {
+					"from": "phone",
+					"to": "1"
+				  }
 				],
 				"blacklistedEvents": [
 				  {
@@ -116,58 +203,8 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 					"eventName": "three"
 				  }
 				],
-				"eventFilteringOption": "blacklistedEvents",
-				"rudderEventsToAdobeEvents": [{
-					"from": "product searched",
-					"to": "ps1,ps2"
-					}
-				],
-				"contextDataMapping": [{
-					"from": "page.name",
-					"to": "pName"
-					}
-				],
-				"mobileEventMapping": [{
-					"from": "page.name",
-					"to": "pName"
-					}
-				],
-				"eVarMapping": [{
-					"from": "phone",
-					"to": "1"
-					}
-				],
-				"hierMapping": [{
-					"from": "phone",
-					"to": "1"
-					}
-				],
-				"listMapping": [{
-					"from": "listPhone",
-					"to": "1"
-					}
-				],
-				"customPropsMapping": [{
-					"from": "phone",
-					"to": "1"
-					}
-				],
-				"eventMerchEventToAdobeEvent": [{
-					"from": "Order Completed",
-					"to": "merchEvent1"
-					}
-				],
-				"productMerchEventToAdobeEvent": [{
-					"from": "Product Ordered",
-					"to": "MerchProduct1"
-					}
-				],
-				"productMerchEvarsMap": [{
-					"from": "phone",
-					"to": "1"
-					}
-				]
-			}`,
+				"eventFilteringOption": "blacklistedEvents"
+			  }`,
 		},
 	})
 }
