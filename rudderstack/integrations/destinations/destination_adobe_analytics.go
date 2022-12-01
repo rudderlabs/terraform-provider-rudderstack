@@ -12,10 +12,10 @@ func init() {
 			c.Simple("trackingServerUrl", "tracking_server_url", c.SkipZeroValue),
 			c.Simple("trackingServerSecureUrl", "tracking_server_secure_url", c.SkipZeroValue),
 			c.Simple("reportSuiteIds", "report_suite_ids"),
-			c.Simple("sslHeartbeat", "ssl_heartbeat", c.SkipZeroValue),
+			c.Simple("sslHeartbeat", "ssl_heartbeat"),
 			c.Simple("heartbeatTrackingServerUrl", "heartbeat_tracking_server_url", c.SkipZeroValue),
-			c.Simple("useUtf8Charset", "use_utf8_charset", c.SkipZeroValue),
-			c.Simple("useSecureServerSide", "use_secure_server_side", c.SkipZeroValue),
+			c.Simple("useUtf8Charset", "use_utf8_charset"),
+			c.Simple("useSecureServerSide", "use_secure_server_side"),
 			c.Simple("proxyNormalUrl", "proxy_normal_url", c.SkipZeroValue),
 			c.Simple("proxyHeartbeatUrl", "proxy_heartbeat_url", c.SkipZeroValue),
 			c.ArrayWithObjects("eventsToTypes", "events_to_types", map[string]string{
@@ -23,28 +23,28 @@ func init() {
 				"to":   "to",
 			}),
 			c.Simple("marketingCloudOrgId", "marketing_cloud_org_id", c.SkipZeroValue),
-			c.Simple("dropVisitorId", "drop_visitor_id", c.SkipZeroValue),
+			c.Simple("dropVisitorId", "drop_visitor_id"),
 			c.Simple("timestampOption", "timestamp_option", c.SkipZeroValue),
-			c.Simple("timestampOptionalReporting", "timestamp_optional_reporting", c.SkipZeroValue),
-			c.Simple("noFallbackVisitorId", "no_fallback_visitor_id", c.SkipZeroValue),
-			c.Simple("preferVisitorId", "prefer_visitor_id", c.SkipZeroValue),
+			c.Simple("timestampOptionalReporting", "timestamp_optional_reporting"),
+			c.Simple("noFallbackVisitorId", "no_fallback_visitor_id"),
+			c.Simple("preferVisitorId", "prefer_visitor_id"),
 			c.ArrayWithObjects("rudderEventsToAdobeEvents", "rudder_events_to_adobe_events", map[string]string{
 				"from": "from",
 				"to":   "to",
 			}),
-			c.Simple("trackPageName", "track_page_name", c.SkipZeroValue),
+			c.Simple("trackPageName", "track_page_name"),
 			c.ArrayWithObjects("contextDataMapping", "context_data_mapping", map[string]string{
 				"from": "from",
 				"to":   "to",
 			}),
 			c.Simple("contextDataPrefix", "context_data_prefix", c.SkipZeroValue),
-			c.Simple("useLegacyLinkName", "use_legacy_link_name", c.SkipZeroValue),
-			c.Simple("pageNameFallbackTostring", "page_name_fallback_tostring", c.SkipZeroValue),
+			c.Simple("useLegacyLinkName", "use_legacy_link_name"),
+			c.Simple("pageNameFallbackTostring", "page_name_fallback_tostring"),
 			c.ArrayWithObjects("mobileEventMapping", "mobile_event_mapping", map[string]string{
 				"from": "from",
 				"to":   "to",
 			}),
-			c.Simple("sendFalseValues", "send_false_values", c.SkipZeroValue),
+			c.Simple("sendFalseValues", "send_false_values"),
 			c.ArrayWithObjects("eVarMapping", "e_var_mapping", map[string]string{
 				"from": "from",
 				"to":   "to",
@@ -121,6 +121,7 @@ func init() {
 			"ssl_heartbeat": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default: 	 true,
 				Description: "Check for Heartbeat calls to be made over https",
 			},
 			"heartbeat_tracking_server_url": {
@@ -132,11 +133,13 @@ func init() {
 			"use_utf8_charset": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default: 	 true,
 				Description: "Use UTF-8 charset",
 			},
 			"use_secure_server_side": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default: 	 true,
 				Description: "Use Secure URL for Server-side",
 			},
 			"proxy_normal_url": {
@@ -183,6 +186,7 @@ func init() {
 			"drop_visitor_id": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default: 	 true,
 				Description: "Check to Drop Visitor Id.",
 			},
 			"timestamp_option": {
@@ -231,6 +235,7 @@ func init() {
 			"track_page_name": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default: 	 true,
 				Description: "Check to enable pageName for Track Events",
 			},
 			"context_data_mapping": {
@@ -264,11 +269,13 @@ func init() {
 			"use_legacy_link_name": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default: 	 true,
 				Description: "Check to use Legacy LinkName",
 			},
 			"page_name_fallback_tostring": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default: 	 true,
 				Description: "Check to allow Page Name Fallback to Screen",
 			},
 			"mobile_event_mapping": {
@@ -296,6 +303,7 @@ func init() {
 			"send_false_values": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default: 	 true,
 				Description: "Check to allow sending false value from properties",
 			},
 			"e_var_mapping": {
