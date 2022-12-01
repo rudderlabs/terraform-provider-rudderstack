@@ -121,7 +121,7 @@ func init() {
 			"ssl_heartbeat": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default: 	 true,
+				Default:     true,
 				Description: "Check for Heartbeat calls to be made over https",
 			},
 			"heartbeat_tracking_server_url": {
@@ -133,13 +133,13 @@ func init() {
 			"use_utf8_charset": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default: 	 true,
+				Default:     true,
 				Description: "Use UTF-8 charset",
 			},
 			"use_secure_server_side": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default: 	 true,
+				Default:     true,
 				Description: "Use Secure URL for Server-side",
 			},
 			"proxy_normal_url": {
@@ -172,7 +172,7 @@ func init() {
 							Type:             schema.TypeString,
 							Required:         true,
 							Description:      "Enter the Type of Video Event",
-							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(initHeartbeat|heartbeatPlaybackStarted|heartbeatPlaybackPaused|heartbeatPlaybackResumed|heartbeatPlaybackCompleted|heartbeatPlaybackInterrupted|heartbeatContentStarted|heartbeatContentComplete|heartbeatAdBreakStarted|heartbeatAdBreakCompleted|heartbeatAdStarted|heartbeatAdCompleted|heartbeatAdSkipped|heartbeatSeekStarted|heartbeatSeekCompleted|heartbeatBufferStarted|heartbeatBufferCompleted|heartbeatQualityUpdated|heartbeatUpdatePlayhead)$"),
 						},
 					},
 				},
@@ -186,7 +186,7 @@ func init() {
 			"drop_visitor_id": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default: 	 true,
+				Default:     true,
 				Description: "Check to Drop Visitor Id.",
 			},
 			"timestamp_option": {
@@ -218,15 +218,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Event Name",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Event Name",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Adobe Custom Event",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Adobe Custom Event",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
@@ -235,7 +235,7 @@ func init() {
 			"track_page_name": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default: 	 true,
+				Default:     true,
 				Description: "Check to enable pageName for Track Events",
 			},
 			"context_data_mapping": {
@@ -246,36 +246,36 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Context Data path.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Context Data path.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Adobe Context Data property name",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Adobe Context Data property name",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
 				},
 			},
 			"context_data_prefix": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Enter your prefix to add before all contextData property.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Enter your prefix to add before all contextData property.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"use_legacy_link_name": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default: 	 true,
+				Default:     true,
 				Description: "Check to use Legacy LinkName",
 			},
 			"page_name_fallback_tostring": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default: 	 true,
+				Default:     true,
 				Description: "Check to allow Page Name Fallback to Screen",
 			},
 			"mobile_event_mapping": {
@@ -286,15 +286,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Context Data path.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Context Data path.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Adobe Context Data property name",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Adobe Context Data property name",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
@@ -303,7 +303,7 @@ func init() {
 			"send_false_values": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default: 	 true,
+				Default:     true,
 				Description: "Check to allow sending false value from properties",
 			},
 			"e_var_mapping": {
@@ -314,15 +314,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Rudder Property",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Rudder Property",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the eVar Index",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the eVar Index",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
@@ -336,15 +336,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Rudder Property",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Rudder Property",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the eVar Index",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the eVar Index",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
@@ -358,15 +358,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Rudder Property as an array/string seperated by commas",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Rudder Property as an array/string seperated by commas",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the eVar Index",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the eVar Index",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
@@ -380,15 +380,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Rudder Property.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Rudder Property.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the List Delimiter.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the List Delimiter.",
 							ValidateDiagFunc: c.StringMatchesRegexp("^$|(^env[.].+)|^(\\||:|,|;|\\/)$"),
 						},
 					},
@@ -402,15 +402,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Rudder Property.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Rudder Property.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the prop Index.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the prop Index.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
@@ -424,15 +424,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Rudder Property.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Rudder Property.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the List Delimiter.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the List Delimiter.",
 							ValidateDiagFunc: c.StringMatchesRegexp("^$|(^env[.].+)|^(\\||:|,|;|\\/)$"),
 						},
 					},
@@ -446,15 +446,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Rudder Event.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Rudder Event.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Adobe Event.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Adobe Event.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
@@ -476,15 +476,15 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Rudder Event.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Rudder Event.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Adobe Event.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Adobe Event.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
@@ -506,24 +506,24 @@ func init() {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the Rudder Event.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the Rudder Event.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 						"to": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Enter the eVar Index.",
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Enter the eVar Index.",
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 						},
 					},
 				},
 			},
 			"product_identifier": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Enter your Product Identifier",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Enter your Product Identifier",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(name|id|sku)$"),
 			},
 			"use_native_sdk": {
