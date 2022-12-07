@@ -28,7 +28,7 @@ resource "rudderstack_destination_adobe_analytics" "example" {
     # proxy_heartbeat_url = "http://heartbeatproxy.com"
     # marketing_cloud_org_id = "test_234"
     # drop_visitor_id = false
-    # timestamp_optional_reporting = "true"
+    # timestamp_optional_reporting = true
     # no_fallback_visitor_id = false
     # prefer_visitor_id = false
     # track_page_name = false
