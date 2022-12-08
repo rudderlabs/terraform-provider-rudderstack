@@ -34,7 +34,7 @@ func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema 
 		"name": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: "Human readable name of the destination. The value has to be unique across all destinations.",
+			Description: "Human readable name of the destination. The value has to be unique across all the destinations.",
 		},
 		"enabled": {
 			Type:        schema.TypeBool,

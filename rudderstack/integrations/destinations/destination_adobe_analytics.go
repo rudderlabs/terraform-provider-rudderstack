@@ -115,7 +115,7 @@ func init() {
 			"report_suite_ids": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Enter your Report Suite ID(s). You can add multiple report suite ids by separated by commas.",
+				Description:      "Enter your Report Suite ID(s). You can add multiple report suite ID's separated by commas.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,300})$"),
 			},
 			"ssl_heartbeat": {
@@ -203,7 +203,7 @@ func init() {
 			"no_fallback_visitor_id": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Check to enable no Fallbacks for Visitor ID",
+				Description: "Check to enable no fallbacks for Visitor ID",
 			},
 			"prefer_visitor_id": {
 				Type:        schema.TypeBool,
@@ -281,7 +281,7 @@ func init() {
 			"mobile_event_mapping": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Mobile events.",
+				Description: "You can map Rudder mobile events.",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -309,7 +309,7 @@ func init() {
 			"e_var_mapping": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Properties to Adobe eVars",
+				Description: "You can map Rudder properties to Adobe eVars",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -331,7 +331,7 @@ func init() {
 			"hier_mapping": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Properties to Adobe Hierarchy properties",
+				Description: "You can map Rudder properties to Adobe hierarchy properties",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -353,7 +353,7 @@ func init() {
 			"list_mapping": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Properties to Adobe list properties",
+				Description: "You can map Rudder properties to Adobe list properties",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -375,7 +375,7 @@ func init() {
 			"list_delimiter": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map your Rudder Property with Delimiters for list properties",
+				Description: "You can map your Rudder Property with delimiters for list properties",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -397,7 +397,7 @@ func init() {
 			"custom_props_mapping": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Properties to Adobe Custom properties",
+				Description: "You can map Rudder properties to Adobe Custom properties",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -419,7 +419,7 @@ func init() {
 			"props_delimiter": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map your Rudder Property with Delimiters for Adobe Custom properties",
+				Description: "You can map your Rudder property with delimiters for Adobe custom properties",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -441,7 +441,7 @@ func init() {
 			"event_merch_event_to_adobe_event": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Events to Adobe Event Merchandise events.",
+				Description: "You can map Rudder events to Adobe merchandise events.",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -471,7 +471,7 @@ func init() {
 			"product_merch_event_to_adobe_event": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Events to Adobe Product Merchandise events",
+				Description: "You can map Rudder events to Adobe merchandise events",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -501,7 +501,7 @@ func init() {
 			"product_merch_evars_map": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "You can map Rudder Properties to eVars at product level",
+				Description: "You can map Rudder properties to eVars at product level",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -556,7 +556,7 @@ func init() {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
-				Description: "This option allows you filter the events you want to send to Adobe Analytics.",
+				Description: "This option allows you to filter the events you want to send to Adobe Analytics.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"whitelist": {
