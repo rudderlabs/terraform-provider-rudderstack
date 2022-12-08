@@ -43,7 +43,7 @@ resource "rudderstack_destination_s3_datalake" "example" {
 ### Required
 
 - `config` (Block List, Min: 1, Max: 1) Destination specific configuration. Check the nested block documenation for more information. (see [below for nested schema](#nestedblock--config))
-- `name` (String) Human readable name of the destination. The value has to be unique across all destinations.
+- `name` (String) Human readable name of the destination. The value has to be unique across all the destinations.
 
 ### Optional
 
