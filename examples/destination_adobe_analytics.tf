@@ -89,8 +89,6 @@ resource "rudderstack_destination_adobe_analytics" "example" {
     #   android      = false
     #   react_native = true
     #  }
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

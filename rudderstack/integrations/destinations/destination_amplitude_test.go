@@ -122,9 +122,7 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 				  blacklist = ["one", "two", "three"]
 				}
 			
-				onetrust_cookie_categories {
-				  web = ["one", "two", "three"]
-				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 
 				residency_server = "EU"
 			`,
@@ -197,13 +195,11 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 				"trackSessionEvents": { "android": true, "ios": true, "reactnative": true },
 				"useAdvertisingIdForDeviceId": { "android": true, "reactnative": true },
 				"useIdfaAsDeviceId": { "ios": true, "reactnative": true },
-				"oneTrustCookieCategories": {
-				  "web": [
+				"oneTrustCookieCategories": [
 					{ "oneTrustCookieCategory": "one" },
 					{ "oneTrustCookieCategory": "two" },
 					{ "oneTrustCookieCategory": "three" }
-				  ]
-				},
+				  ],
 				"residencyServer": "EU"
 			}`,
 		},
