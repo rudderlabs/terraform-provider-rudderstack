@@ -199,7 +199,7 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 					{ "oneTrustCookieCategory": "one" },
 					{ "oneTrustCookieCategory": "two" },
 					{ "oneTrustCookieCategory": "three" }
-				  ],
+				],
 				"residencyServer": "EU"
 			}`,
 		},

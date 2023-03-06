@@ -52,7 +52,8 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 					access_key_id = "example-access-key-id"
 					access_key = "example-access-key"
 					enable_sse = true
-					}
+				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"account": "example-account",
@@ -72,10 +73,15 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				"jsonPaths": "./example-paths",
 				"cloudProvider": "AWS",
 				"prefix": "example-prefix",
-        "bucketName": "example-bucket-name",
-        "accessKeyID": "example-access-key-id",
-        "accessKey": "example-access-key",
-        "enableSSE": true
+        		"bucketName": "example-bucket-name",
+        		"accessKeyID": "example-access-key-id",
+        		"accessKey": "example-access-key",
+        		"enableSSE": true,
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

@@ -90,6 +90,7 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 					from = "phone"
 					to = "1"
 					}]
+				onetrust_cookie_categories = ["one", "two", "three"]
 			  `,
 			APIUpdate: `{
 				"reportSuiteIds": "id003, id004",
@@ -202,6 +203,11 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 				  {
 					"eventName": "three"
 				  }
+				],
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
 				],
 				"eventFilteringOption": "blacklistedEvents"
 			  }`,
