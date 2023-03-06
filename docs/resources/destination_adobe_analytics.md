@@ -104,9 +104,7 @@ resource "rudderstack_destination_adobe_analytics" "example" {
     #   android      = false
     #   react_native = true
     #  }
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -154,7 +152,7 @@ Optional:
 - `marketing_cloud_org_id` (String) Enter your Marketing Cloud Organization Id.
 - `mobile_event_mapping` (List of Object) You can map Rudder mobile events. (see [below for nested schema](#nestedatt--config--mobile_event_mapping))
 - `no_fallback_visitor_id` (Boolean) Check to enable no fallbacks for Visitor ID
-- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+- `onetrust_cookie_categories` (List of Strings) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `page_name_fallback_tostring` (Boolean) Check to allow Page Name Fallback to Screen
 - `prefer_visitor_id` (Boolean) Check to prefer Visitor Id
 - `product_identifier` (String) Enter your Product Identifier
@@ -265,14 +263,6 @@ Optional:
 
 - `from` (String)
 - `to` (String)
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `web` (List of String)
 
 
 <a id="nestedatt--config--product_merch_evars_map"></a>

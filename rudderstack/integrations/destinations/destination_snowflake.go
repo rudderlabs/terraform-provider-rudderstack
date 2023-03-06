@@ -38,6 +38,7 @@ func init() {
 			c.Simple("accountName", "azure.0.account_name", c.SkipZeroValue),
 			c.Simple("accountKey", "azure.0.account_key", c.SkipZeroValue),
 			c.Conditional("storageIntegration", "azure.0.storage_integration", c.Equals("cloudProvider", "AZURE")),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 			c.Simple("prefix", "prefix", c.SkipZeroValue),
 		},
 		ConfigSchema: map[string]*schema.Schema{
@@ -237,6 +238,14 @@ func init() {
 				Optional:         true,
 				Description:      "If specified, RudderStack will create a folder in the bucket with this prefix and push all the data within that folder.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(.{0,100})$"),
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	})
