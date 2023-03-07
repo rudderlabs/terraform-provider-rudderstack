@@ -152,7 +152,7 @@ Optional:
 - `marketing_cloud_org_id` (String) Enter your Marketing Cloud Organization Id.
 - `mobile_event_mapping` (List of Object) You can map Rudder mobile events. (see [below for nested schema](#nestedatt--config--mobile_event_mapping))
 - `no_fallback_visitor_id` (Boolean) Check to enable no fallbacks for Visitor ID
-- `onetrust_cookie_categories` (List of Strings) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `page_name_fallback_tostring` (Boolean) Check to allow Page Name Fallback to Screen
 - `prefer_visitor_id` (Boolean) Check to prefer Visitor Id
 - `product_identifier` (String) Enter your Product Identifier
