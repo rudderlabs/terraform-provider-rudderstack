@@ -50,7 +50,6 @@ resource "rudderstack_destination_snowflake" example{
     #   account_key = "..."
     #   storage_integration = "..."
     # }
-    
     # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
@@ -93,10 +92,10 @@ Optional:
 - `gcp` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--gcp))
 - `json_paths` (String) Specify required json properties in dot notation separated by commas.
 - `namespace` (String) Schema name for the warehouse where the tables are created by Rudderstack.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `prefix` (String) If specified, RudderStack will create a folder in the bucket with this prefix and push all the data within that folder.
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
 - `use_rudder_storage` (Boolean) Enable this setting to use RudderStack-managed buckets for object storage.
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 
 <a id="nestedblock--config--sync"></a>
 ### Nested Schema for `config.sync`
