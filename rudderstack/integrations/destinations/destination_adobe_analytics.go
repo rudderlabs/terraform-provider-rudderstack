@@ -97,7 +97,7 @@ func init() {
 				"event_filtering.0.whitelist": "whitelistedEvents",
 				"event_filtering.0.blacklist": "blacklistedEvents",
 			}),
-			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"tracking_server_url": {
@@ -582,19 +582,10 @@ func init() {
 			},
 			"onetrust_cookie_categories": {
 				Type:        schema.TypeList,
-				MaxItems:    1,
 				Optional:    true,
 				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"web": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-					},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 		},
