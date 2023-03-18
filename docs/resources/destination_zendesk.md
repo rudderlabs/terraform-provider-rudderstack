@@ -24,6 +24,7 @@ resource "rudderstack_destination_zendesk" "example" {
     create_users_as_verified         = false
     send_group_calls_without_user_id = false
     remove_users_from_organization   = false
+    search_by_external_id = false
   }
 }
 ```
@@ -59,4 +60,5 @@ Optional:
 
 - `create_users_as_verified` (Boolean) Enabling this setting creates verified users in Zendesk, that is, the email verification is skipped.
 - `remove_users_from_organization` (Boolean) Enable this setting to remove users from an organization.
+- `search_by_external_id` (Boolean) Update user's primary email.
 - `send_group_calls_without_user_id` (Boolean) Enable this setting if you don't want to associate the user with a group.
