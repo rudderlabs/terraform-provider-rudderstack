@@ -32,9 +32,7 @@ resource "rudderstack_destination_customerio" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories {
-    #     web = [ "one", "two", "three" ]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -70,7 +68,7 @@ Optional:
 - `datacenter_eu` (Boolean) Enable this option in case your account is based in the EU region.
 - `device_token_event_name` (String) Enter the name of the event that is fired immediately after setting the device token.
 - `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native JavaScript SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 
 <a id="nestedblock--config--event_filtering"></a>
@@ -80,14 +78,6 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be blacklisted.
 - `whitelist` (List of String) Enter the event names to be whitelisted.
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `web` (List of String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

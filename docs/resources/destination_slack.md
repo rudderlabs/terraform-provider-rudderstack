@@ -38,6 +38,8 @@ resource "rudderstack_destination_slack" "example" {
     # ]
 
     # whitelisted_trait_settings = ["one", "two", "three"]
+
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -72,6 +74,7 @@ Optional:
 - `event_channel_settings` (List of Object) Specify your event channel settings. (see [below for nested schema](#nestedatt--config--event_channel_settings))
 - `event_template_settings` (List of Object) Specify your event template settings. (see [below for nested schema](#nestedatt--config--event_template_settings))
 - `identify_template` (String) Specify the template that you want the `identify` event to be transformed to before it is sent to Slack.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `whitelisted_trait_settings` (List of String) Only the traits listed in this section are considered to be a part of the identify template. The rest are sent to Slack.
 
 <a id="nestedatt--config--event_channel_settings"></a>

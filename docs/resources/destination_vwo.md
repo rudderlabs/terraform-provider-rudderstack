@@ -36,6 +36,8 @@ resource "rudderstack_destination_vwo" "example" {
     #   whitelist = ["one", "two", "three"]
     #   blacklist = ["one", "two", "three"]
     # }
+
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -70,6 +72,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) Specify which events should be blocked or allowed to flow through to VWO. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `is_spa` (Boolean) Enable this setting if the page is a single page application (SPA).
 - `library_tolerance` (String) Enter the value for the library tolerance setting.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `send_experiment_identify` (Boolean) Enable this setting to send the experiments viewed as `identify` traits.
 - `send_experiment_track` (Boolean) Enable this setting to send the experiment data as `track` events.
 - `settings_tolerance` (String) Enter the value for the setting tolerance.

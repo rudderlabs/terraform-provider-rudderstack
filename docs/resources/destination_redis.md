@@ -26,6 +26,7 @@ resource "rudderstack_destination_redis" "example" {
     # database      = "..."
     # ca_certificate = "..."
     # skip_verify   = false
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -60,6 +61,7 @@ Optional:
 - `ca_certificate` (String) Enter the certificate which needs to be verified while establishing a secure connection. Skip setting this if Root CA of your server can be verified with any client, e.g. AWS Elasticache.
 - `cluster_mode` (Boolean) Use this setting to enable the Redis cluster mode.
 - `database` (String) RudderStack stores the user traits in the default database of the Redis instance. A different database inside the Redis instance can be configured using this setting.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `password` (String, Sensitive) Enter the password associated with your Redis user.
 - `prefix` (String) By default, RudderStack stores user traits with the key user:<user_id>. An extra prefix can be added in the destination configuration to distinguish all RudderStack-stored keys with a prefix.
 - `secure` (Boolean) Enable this setting if you want to send the data to Redis via SSL.

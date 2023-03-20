@@ -30,6 +30,8 @@ resource "rudderstack_destination_webhook" "example" {
         to   = "value-2"
       }
     ]
+
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -62,6 +64,7 @@ Required:
 Optional:
 
 - `headers` (List of Object, Sensitive) Add custom headers for your events via this option. These headers will be added to the request made from RudderStack to your webhook. (see [below for nested schema](#nestedatt--config--headers))
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `webhook_method` (String) This is the HTTP method of the request sent to the configured endpoint. By default, `POST` is used.
 
 <a id="nestedatt--config--headers"></a>
