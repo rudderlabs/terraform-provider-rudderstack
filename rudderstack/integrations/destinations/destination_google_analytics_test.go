@@ -76,9 +76,7 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 			      blacklist = ["one", "two", "three"]
 			    }
 		
-			    onetrust_cookie_categories {
-			      web = ["one", "two", "three"]
-			    }
+			    onetrust_cookie_categories = ["one", "two", "three"]
 
 				reset_custom_dimensions_on_page {
 				   web = ["one", "two", "three"]
@@ -129,13 +127,11 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 						{ "resetCustomDimensionsOnPage": "three" }
 					]
 				},
-				"oneTrustCookieCategories": {
-				  "web": [
+				"oneTrustCookieCategories": [
 					{ "oneTrustCookieCategory": "one" },
 					{ "oneTrustCookieCategory": "two" },
 					{ "oneTrustCookieCategory": "three" }
-				  ]
-				},
+				],
 				"contentGroupings": [{ "from": "from", "to": "to" }],
 				"dimensions": [{ "from": "from", "to": "to" }]
 			}`,

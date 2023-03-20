@@ -37,8 +37,6 @@ resource "rudderstack_destination_google_ads" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

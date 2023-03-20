@@ -14,6 +14,7 @@ func init() {
 			c.Simple("accessKeyID", "access_key_id", c.SkipZeroValue),
 			c.Simple("accessKey", "access_key", c.SkipZeroValue),
 			c.Simple("enableSSE", "enable_sse", c.SkipZeroValue),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"bucket_name": {
@@ -45,6 +46,14 @@ func init() {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "This setting enables server-side encryption.",
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	})

@@ -50,9 +50,7 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 					whitelist = ["one", "two", "three"]
 				}
 		
-				onetrust_cookie_categories {
-					web = ["one", "two", "three"]
-				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 				use_new_mapping = true
 			`,
 			APIUpdate: `
@@ -133,18 +131,11 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 						"eventName": "three"
 					}
 				],
-				"oneTrustCookieCategories": {
-					"web": [{
-							"oneTrustCookieCategory": "one"
-						},
-						{
-							"oneTrustCookieCategory": "two"
-						},
-						{
-							"oneTrustCookieCategory": "three"
-						}
-					]
-				},
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				],
 				"useNewMapping": true
 			}			
 			`,

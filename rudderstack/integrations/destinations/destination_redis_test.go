@@ -28,7 +28,8 @@ func TestDestinationResourceRedis(t *testing.T) {
 				prefix        = "..."
 				database      = "..."
 				ca_certificate = "..."
-				skip_verify   = true		
+				skip_verify   = true
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"address": "1.2.3.4",
@@ -38,7 +39,12 @@ func TestDestinationResourceRedis(t *testing.T) {
 				"prefix": "...",
 				"database": "...",
 				"caCertificate": "...",
-				"skipVerify": true
+				"skipVerify": true,
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

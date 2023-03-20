@@ -40,7 +40,7 @@ func init() {
 			c.Simple("optimize.web", "optimize.0.web"),
 			c.Simple("useGoogleAmpClientId.web", "use_google_amp_client_id.0.web"),
 			c.Simple("namedTracker.web", "named_tracker.0.web"),
-			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 			c.Simple("dimensions", "dimensions", c.SkipZeroValue),
 			c.Simple("contentGroupings", "content_groupings", c.SkipZeroValue),
 		},
@@ -302,19 +302,10 @@ func init() {
 			},
 			"onetrust_cookie_categories": {
 				Type:        schema.TypeList,
-				MaxItems:    1,
 				Optional:    true,
 				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"web": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-					},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 			"content_groupings": {

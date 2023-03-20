@@ -75,9 +75,7 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 				  blacklist = ["one", "two", "three"]
 				}
 			
-				onetrust_cookie_categories {
-				  web = ["one", "two", "three"]
-				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"pixelId": "facebook pixel id",
@@ -107,13 +105,11 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 				"categoryToContent": [{ "from": "from", "to": "to" }],
 				"legacyConversionPixelId": { "from": "from", "to": "to" },
 				"useNativeSDK": { "web": true },
-				"oneTrustCookieCategories": {
-				  "web": [
+				"oneTrustCookieCategories": [
 					{ "oneTrustCookieCategory": "one" },
 					{ "oneTrustCookieCategory": "two" },
 					{ "oneTrustCookieCategory": "three" }
-				  ]
-				},
+				],
 				"blacklistedEvents": [
 				  { "eventName": "one" },
 				  { "eventName": "two" },

@@ -19,6 +19,8 @@ resource "rudderstack_destination_redshift" "example" {
     #   access_key    = ""
     # }
 
+    # onetrust_cookie_categories = ["one", "two", "three"]
+
     sync {
       frequency = "30"
 

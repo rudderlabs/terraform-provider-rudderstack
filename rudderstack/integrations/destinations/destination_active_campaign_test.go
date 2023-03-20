@@ -23,12 +23,18 @@ func TestDestinationResourceActiveCampaign(t *testing.T) {
 				api_key   = "api-key"
 				actid     = "actid"
 				event_key = "event-key"
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"apiUrl": "https://some-url",
 				"apiKey": "api-key",
 				"actid": "actid",
-				"eventKey": "event-key"
+				"eventKey": "event-key",
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

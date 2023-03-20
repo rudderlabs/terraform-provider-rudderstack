@@ -40,6 +40,7 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 					exclude_window_start_time = "11:00"
 					exclude_window_end_time   = "12:00"
 				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"project": "project",
@@ -53,7 +54,12 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				"excludeWindow": {
 					"excludeWindowStartTime": "11:00",
 					"excludeWindowEndTime": "12:00"
-				}
+				},
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

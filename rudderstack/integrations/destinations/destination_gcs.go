@@ -12,6 +12,7 @@ func init() {
 			c.Simple("bucketName", "bucket_name"),
 			c.Simple("prefix", "prefix", c.SkipZeroValue),
 			c.Simple("credentials", "credentials", c.SkipZeroValue),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"bucket_name": {
@@ -32,6 +33,14 @@ func init() {
 				Sensitive:   true,
 				Description: "Enter the contents of your Google Cloud connection credentials JSON.",
 				// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	})

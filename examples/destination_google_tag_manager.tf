@@ -15,8 +15,6 @@ resource "rudderstack_destination_google_tag_manager" "example" {
       blacklist = ["one", "two", "three"]
     }
 
-    onetrust_cookie_categories {
-      web = ["one", "two", "three"]
-    }
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

@@ -15,5 +15,7 @@ resource "rudderstack_destination_webhook" "example" {
         to   = "value-2"
       }
     ]
+
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

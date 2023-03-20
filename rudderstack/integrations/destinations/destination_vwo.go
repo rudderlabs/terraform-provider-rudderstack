@@ -23,6 +23,7 @@ func init() {
 				"event_filtering.0.blacklist": "blacklistedEvents",
 			}),
 			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"account_id": {
@@ -103,6 +104,14 @@ func init() {
 							Optional: true,
 						},
 					},
+				},
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 		},

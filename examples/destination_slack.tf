@@ -23,5 +23,7 @@ resource "rudderstack_destination_slack" "example" {
     # ]
 
     # whitelisted_trait_settings = ["one", "two", "three"]
+
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
