@@ -12,6 +12,7 @@ func init() {
 			c.Simple("webhookUrl", "webhook_url"),
 			c.Simple("webhookMethod", "webhook_method", c.SkipZeroValue),
 			c.Simple("headers", "headers", c.SkipZeroValue),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"webhook_url": {
@@ -45,6 +46,14 @@ func init() {
 							ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,500})$"),
 						},
 					},
+				},
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 		},

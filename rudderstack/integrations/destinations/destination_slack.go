@@ -22,6 +22,7 @@ func init() {
 				"eventRegex":    "regex",
 			}),
 			c.ArrayWithStrings("whitelistedTraitsSettings", "trait", "whitelisted_trait_settings"),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"webhook_url": {
@@ -90,6 +91,14 @@ func init() {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Only the traits listed in this section are considered to be a part of the identify template. The rest are sent to Slack.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},

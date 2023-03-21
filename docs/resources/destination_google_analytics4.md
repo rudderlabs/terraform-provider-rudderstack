@@ -38,9 +38,7 @@ resource "rudderstack_destination_google_analytics4" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -77,7 +75,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Google Analytics 4. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `extend_page_view_params` (Boolean) Enable this setting to send `url` and `search` along with any other custom property to the `page` call of the RudderStack SDK. This setting is applicable only for device mode.
 - `firebase_app_id` (String) Enter the Firebase App ID which is the identifier for Firebase app.
-- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `send_user_id` (Boolean) If enabled, the user ID is set to the identified visitors and sent to Google Analytics 4.
 - `types_of_client` (String) Select the client type as gtag or Firebase.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
@@ -89,14 +87,6 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be blacklisted.
 - `whitelist` (List of String) Enter the event names to be whitelisted.
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `web` (List of String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

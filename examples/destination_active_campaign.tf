@@ -7,5 +7,6 @@ resource "rudderstack_destination_active_campaign" "example" {
 
     # actid     = "..."
     # event_key = "..."
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

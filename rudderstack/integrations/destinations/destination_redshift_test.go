@@ -55,6 +55,7 @@ func TestDestinationResourceRedshift(t *testing.T) {
 					access_key_id = "some-access-key-id"
 					access_key = "some-access-key"
 				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 				`,
 			APIUpdate: `{
 				"host": "example.com",
@@ -73,7 +74,12 @@ func TestDestinationResourceRedshift(t *testing.T) {
 				"excludeWindow": {
 					"excludeWindowStartTime": "11:00",
 					"excludeWindowEndTime": "12:00"	
-				}
+				},
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

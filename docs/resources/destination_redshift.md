@@ -34,6 +34,8 @@ resource "rudderstack_destination_redshift" "example" {
     #   access_key    = ""
     # }
 
+    # onetrust_cookie_categories = ["one", "two", "three"]
+
     sync {
       frequency = "30"
 
@@ -80,6 +82,7 @@ Required:
 Optional:
 
 - `enable_sse` (Boolean) This setting enables server-side encryption.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
 
 <a id="nestedblock--config--sync"></a>

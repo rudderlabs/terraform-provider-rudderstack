@@ -16,6 +16,7 @@ func init() {
 			c.Simple("sendGroupCallsWithoutUserId", "send_group_calls_without_user_id", c.SkipZeroValue),
 			c.Simple("removeUsersFromOrganization", "remove_users_from_organization", c.SkipZeroValue),
 			c.Simple("searchByExternalId", "search_by_external_id", c.SkipZeroValue),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"email": {
@@ -56,6 +57,14 @@ func init() {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Update user's primary email.",
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	})

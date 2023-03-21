@@ -24,6 +24,7 @@ resource "rudderstack_destination_s3" "example" {
     # access_key    = "..."
 
     # enable_sse    = true
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -58,4 +59,5 @@ Optional:
 - `access_key` (String, Sensitive) Enter your AWS secret access key.
 - `access_key_id` (String) Enter your AWS access key ID.
 - `enable_sse` (Boolean) This setting enables server-side encryption.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `prefix` (String) Enter a prefix which RudderStack associates as the path prefix to all the files stored in your S3 bucket.

@@ -37,9 +37,7 @@ func TestDestinationResourceGoogleAnalytics4(t *testing.T) {
 					blacklist = ["one", "two", "three"]
 				}
 			
-				onetrust_cookie_categories {
-					web = ["one", "two", "three"]
-				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"apiSecret": "...",
@@ -64,19 +62,11 @@ func TestDestinationResourceGoogleAnalytics4(t *testing.T) {
 				"useNativeSDK": {
 				  "web": true
 				},
-				"oneTrustCookieCategories": {
-				  "web": [
-					{
-					  "oneTrustCookieCategory": "one"
-					},
-					{
-					  "oneTrustCookieCategory": "two"
-					},
-					{
-					  "oneTrustCookieCategory": "three"
-					}
-				  ]
-				}
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

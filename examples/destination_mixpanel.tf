@@ -29,9 +29,7 @@ resource "rudderstack_destination_mixpanel" example{
     #   blacklist = ["one","two","three"]
     # }
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
     # use_new_mapping = true
   }
 }

@@ -81,9 +81,7 @@ resource "rudderstack_destination_google_analytics" "example" {
     #   web = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
 
     # content_groupings = [{
     #   from = "from"
@@ -137,7 +135,7 @@ Optional:
 - `include_search` (Boolean) Enable this setting to include the querystring in `page` views.
 - `named_tracker` (Block List, Max: 1) Enable this setting to send events with the `track` name `rudderGATracker`. (see [below for nested schema](#nestedblock--config--named_tracker))
 - `non_interaction` (Boolean) Enable this setting to add the non-interaction flag to all the events.
-- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `optimize` (Block List, Max: 1) Enter your Google Optimize Container ID. (see [below for nested schema](#nestedblock--config--optimize))
 - `reset_custom_dimensions_on_page` (Block List, Max: 1) Use this field to reset the dimensions for the `page` calls. (see [below for nested schema](#nestedblock--config--reset_custom_dimensions_on_page))
 - `sample_rate` (Block List, Max: 1) Enter the sample rate. (see [below for nested schema](#nestedblock--config--sample_rate))
@@ -191,14 +189,6 @@ Optional:
 Required:
 
 - `web` (Boolean)
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `web` (List of String)
 
 
 <a id="nestedblock--config--optimize"></a>

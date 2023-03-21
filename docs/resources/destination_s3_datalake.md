@@ -26,6 +26,8 @@ resource "rudderstack_destination_s3_datalake" "example" {
 
     # enable_sse    = true
 
+    # onetrust_cookie_categories = ["one", "two", "three"]
+
     use_glue = true
     region   = "us-east-2"
 
@@ -70,6 +72,7 @@ Optional:
 - `access_key_id` (String) Enter your AWS access key ID.
 - `enable_sse` (Boolean) This setting enables server-side encryption.
 - `namespace` (String) If specified, all the data for the destination will be pushed to `s3://<bucketName>/<prefix>/rudder-datalake/<namespace>`.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `prefix` (String) If specified, RudderStack creates a folder in the bucket with this prefix and push all the data within that folder.
 - `region` (String) Enter your AWS Glue region. For example, for N.Virginia, it would be `us-east-1`.
 

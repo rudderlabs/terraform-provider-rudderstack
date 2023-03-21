@@ -39,9 +39,7 @@ func TestDestinationResourceSentry(t *testing.T) {
 				  whitelist = ["one", "two", "three"]
 				}
 
-				onetrust_cookie_categories {
-				  web = ["one", "two", "three"]
-				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"dsn": "https://some-url",
@@ -79,13 +77,11 @@ func TestDestinationResourceSentry(t *testing.T) {
 					{ "eventName": "two" },
 					{ "eventName": "three" }
 				],
-				"oneTrustCookieCategories": {
-					"web": [
-						{ "oneTrustCookieCategory": "one" },
-						{ "oneTrustCookieCategory": "two" },
-						{ "oneTrustCookieCategory": "three" }
-					]
-				}
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

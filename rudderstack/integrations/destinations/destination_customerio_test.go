@@ -19,9 +19,8 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 					web = true
 				}
 
-				onetrust_cookie_categories {
-					web = [ "one", "two", "three" ]
-				}
+				
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APICreate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
@@ -30,15 +29,11 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 				"useNativeSDK": {
 					"web": true
 				},
-				"oneTrustCookieCategories": {
-					"web": [{
-						"oneTrustCookieCategory": "one"
-					}, {
-						"oneTrustCookieCategory": "two"
-					}, {
-						"oneTrustCookieCategory": "three"
-					}]
-				}
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 			TerraformUpdate: `
 				site_id = "cd820c1b31d8f2696f3b"

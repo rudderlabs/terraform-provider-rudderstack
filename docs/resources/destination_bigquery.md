@@ -24,6 +24,7 @@ resource "rudderstack_destination_bigquery" "example" {
     # location  = "us-east1"
     # prefix    = ""
     # namespace = ""
+    # onetrust_cookie_categories = ["one", "two", "three"]
 
     sync {
       frequency = "30"
@@ -67,6 +68,7 @@ Optional:
 
 - `location` (String) Enter the GCP region of your project dataset.
 - `namespace` (String) Enter the schema name where RudderStack will create all the tables. If not specified, RudderStack will set this to the source name by default.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `prefix` (String) If specified, RudderStack creates a folder in the bucket with this prefix and loads all the data in it.
 
 <a id="nestedblock--config--sync"></a>

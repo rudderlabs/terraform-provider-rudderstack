@@ -37,6 +37,7 @@ func TestDestinationResourceSlack(t *testing.T) {
 				]
 			  
 				whitelisted_trait_settings = ["one", "two", "three"]
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"webhookUrl": "https://some-url",
@@ -59,6 +60,11 @@ func TestDestinationResourceSlack(t *testing.T) {
 					{ "trait": "one" },
 					{ "trait": "two" },
 					{ "trait": "three" }
+				],
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
 				]
 			}`,
 		},
