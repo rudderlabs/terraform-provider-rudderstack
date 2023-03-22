@@ -39,6 +39,7 @@ func TestDestinationResourceS3Datalake(t *testing.T) {
 					frequency = "30"
 					start_at  = "10:00"
 				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"bucketName": "bucket",
@@ -50,7 +51,12 @@ func TestDestinationResourceS3Datalake(t *testing.T) {
 				"useGlue": true,
 				"region": "region",
 				"syncFrequency": "30",
-				"syncStartAt": "10:00"
+				"syncStartAt": "10:00",
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

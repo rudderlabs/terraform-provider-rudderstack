@@ -13,6 +13,7 @@ func init() {
 			c.Simple("apiKey", "api_key", c.SkipZeroValue),
 			c.Simple("actid", "actid", c.SkipZeroValue),
 			c.Simple("eventKey", "event_key", c.SkipZeroValue),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"api_url": {
@@ -39,6 +40,14 @@ func init() {
 				Optional:    true,
 				Description: "Enter the event key unique to your ActiveCampaign account. To obtain the event key, go to your ActiveCampaign account > Settings > Tracking > Event Tracking.",
 				// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	})

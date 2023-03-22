@@ -31,6 +31,7 @@ func TestDestinationResourceWebhook(t *testing.T) {
 						to   = "b2"
 					}
 				]
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"webhookUrl": "https://example.com/some/path?query=a",
@@ -44,6 +45,11 @@ func TestDestinationResourceWebhook(t *testing.T) {
 						"from": "a2",
 						"to": "b2"
 					}
+				],
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
 				]
 			}`,
 		},

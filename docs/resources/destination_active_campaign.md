@@ -22,6 +22,7 @@ resource "rudderstack_destination_active_campaign" "example" {
 
     # actid     = "..."
     # event_key = "..."
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -56,3 +57,4 @@ Optional:
 
 - `actid` (String) Enter your ActID here. To obtain the ActID unique to your ActiveCampaign account, go to Settings > Tracking > Event Tracking API.
 - `event_key` (String) Enter the event key unique to your ActiveCampaign account. To obtain the event key, go to your ActiveCampaign account > Settings > Tracking > Event Tracking.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.

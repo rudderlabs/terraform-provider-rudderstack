@@ -24,6 +24,7 @@ func init() {
 			c.Simple("bucketName", "s3.0.bucket_name"),
 			c.Simple("accessKeyID", "s3.0.access_key_id"),
 			c.Simple("accessKey", "s3.0.access_key"),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"host": {
@@ -137,6 +138,14 @@ func init() {
 							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						},
 					},
+				},
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 		},

@@ -20,11 +20,17 @@ func TestDestinationResourceGCS(t *testing.T) {
 				bucket_name = "bucket"
 				prefix        = "prefix"
 				credentials   = "..."
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"bucketName": "bucket",
 				"prefix": "prefix",
-				"credentials": "..."
+				"credentials": "...",
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

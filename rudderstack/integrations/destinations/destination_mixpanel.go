@@ -33,7 +33,7 @@ func init() {
 			}),
 			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
-			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 			c.Simple("useNewMapping", "use_new_mapping", c.SkipZeroValue),
 		},
 		ConfigSchema: map[string]*schema.Schema{
@@ -189,24 +189,15 @@ func init() {
 			},
 			"onetrust_cookie_categories": {
 				Type:        schema.TypeList,
-				MaxItems:    1,
 				Optional:    true,
 				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"web": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-					},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 			"use_new_mapping": {
 				Type:        schema.TypeBool,
-				Optional: true,
+				Optional:    true,
 				Default:     true,
 				Description: "This value is true by default and when this flag is enabled, camel case fields are mapped to snake case fields while sending to Mixpanel. Please refer to https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/#connection-settings for more details.",
 			},

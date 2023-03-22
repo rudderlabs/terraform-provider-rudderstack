@@ -11,6 +11,8 @@ resource "rudderstack_destination_s3_datalake" "example" {
 
     # enable_sse    = true
 
+    # onetrust_cookie_categories = ["one", "two", "three"]
+
     use_glue = true
     region   = "us-east-2"
 

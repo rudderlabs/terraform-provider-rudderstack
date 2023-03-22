@@ -17,6 +17,7 @@ func init() {
 			c.Simple("database", "database", c.SkipZeroValue),
 			c.Simple("caCertificate", "ca_certificate", c.SkipZeroValue),
 			c.Simple("skipVerify", "skip_verify"),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"address": {
@@ -64,6 +65,14 @@ func init() {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Enable this setting to skip the client's verification of the server's certificate chain and host name.",
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	})

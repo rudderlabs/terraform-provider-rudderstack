@@ -9,5 +9,6 @@ resource "rudderstack_destination_s3" "example" {
     # access_key    = "..."
 
     # enable_sse    = true
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

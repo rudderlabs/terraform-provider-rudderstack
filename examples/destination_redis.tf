@@ -11,5 +11,6 @@ resource "rudderstack_destination_redis" "example" {
     # database      = "..."
     # ca_certificate = "..."
     # skip_verify   = false
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

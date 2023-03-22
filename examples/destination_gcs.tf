@@ -6,5 +6,6 @@ resource "rudderstack_destination_gcs" "example" {
 
     # prefix        = "prefix"
     # credentials   = "..."
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

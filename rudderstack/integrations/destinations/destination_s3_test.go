@@ -24,13 +24,19 @@ func TestDestinationResourceS3(t *testing.T) {
 				access_key    = "..."
 			
 				enable_sse    = true
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"bucketName": "bucket",
 				"prefix": "prefix",
 				"accessKeyID": "...",
 				"accessKey": "...",
-				"enableSSE": true
+				"enableSSE": true,
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

@@ -24,6 +24,8 @@ resource "rudderstack_destination_zendesk" "example" {
     create_users_as_verified         = false
     send_group_calls_without_user_id = false
     remove_users_from_organization   = false
+    search_by_external_id = false
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -58,5 +60,7 @@ Required:
 Optional:
 
 - `create_users_as_verified` (Boolean) Enabling this setting creates verified users in Zendesk, that is, the email verification is skipped.
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `remove_users_from_organization` (Boolean) Enable this setting to remove users from an organization.
+- `search_by_external_id` (Boolean) Update user's primary email.
 - `send_group_calls_without_user_id` (Boolean) Enable this setting if you don't want to associate the user with a group.

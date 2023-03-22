@@ -9,6 +9,7 @@ resource "rudderstack_destination_bigquery" "example" {
     # location  = "us-east1"
     # prefix    = ""
     # namespace = ""
+    # onetrust_cookie_categories = ["one", "two", "three"]
 
     sync {
       frequency = "30"

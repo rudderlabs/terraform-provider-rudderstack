@@ -67,9 +67,7 @@ resource "rudderstack_destination_facebook_pixel" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }
 ```
@@ -109,7 +107,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) This setting lets you determine which events are blocked or allowed to flowed through to Facebook Pixel. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `events_to_events` (List of Object) You can map your events to standard Facebook events using this setting. (see [below for nested schema](#nestedatt--config--events_to_events))
 - `legacy_conversion_pixel_id` (Block List, Max: 1) With this setting, you can send specific events to a legacy conversion Pixel by specifying the event-Pixel ID mapping. Note that this option is available only when sending events via the device mode. (see [below for nested schema](#nestedblock--config--legacy_conversion_pixel_id))
-- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `standard_page_call` (Boolean) If this setting is enabled, RudderStack sets `pageview` as a standard event for all the `page` and `screen` calls.
 - `test_destination` (Boolean) Enable this setting if you are using this destination for testing purposes.
 - `test_event_code` (String) If the above setting is enabled, enter the relevant test event code.
@@ -160,14 +158,6 @@ Required:
 
 - `from` (String)
 - `to` (String)
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `web` (List of String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

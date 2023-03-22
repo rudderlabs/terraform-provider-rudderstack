@@ -52,8 +52,6 @@ resource "rudderstack_destination_facebook_pixel" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

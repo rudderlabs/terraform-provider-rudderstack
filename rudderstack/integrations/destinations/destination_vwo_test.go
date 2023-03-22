@@ -35,6 +35,7 @@ func TestDestinationResourceVWO(t *testing.T) {
 				event_filtering {
 					whitelist = ["one", "two", "three"]
 				}
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				"accountId": "...",
@@ -57,7 +58,12 @@ func TestDestinationResourceVWO(t *testing.T) {
 				"eventFilteringOption": "whitelistedEvents",
 				"useNativeSDK": {
 				  "web": true
-				}
+				},
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})

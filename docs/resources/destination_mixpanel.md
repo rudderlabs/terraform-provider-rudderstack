@@ -44,9 +44,7 @@ resource "rudderstack_destination_mixpanel" example{
     #   blacklist = ["one","two","three"]
     # }
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    # }
+    # onetrust_cookie_categories = ["one", "two", "three"]
     # use_new_mapping = true
   }
 }
@@ -87,7 +85,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Mixpanel. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `event_increments` (List of String) Events to increment in People.
 - `group_key_settings` (List of String) Group Key
-- `onetrust_cookie_categories` (Block List, Max: 1) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `people` (Boolean) Boolean flag to send all of your identify calls to Mixpanel's People feature
 - `people_properties` (List of String) Traits to set as People Properties.
 - `prop_increments` (List of String) Properties to increment in People
@@ -107,14 +105,6 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be blacklisted.
 - `whitelist` (List of String) Enter the event names to be whitelisted.
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `web` (List of String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

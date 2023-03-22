@@ -19,6 +19,7 @@ func init() {
 			c.Simple("region", "region", c.SkipZeroValue),
 			c.Simple("syncFrequency", "sync.0.frequency"),
 			c.Simple("syncStartAt", "sync.0.start_at", c.SkipZeroValue),
+			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"bucket_name": {
@@ -91,6 +92,14 @@ func init() {
 							ValidateDiagFunc: c.StringMatchesRegexp("^([01][0-9]|2[0-3]):[0-5][0-9]$"),
 						},
 					},
+				},
+			},
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 		},
