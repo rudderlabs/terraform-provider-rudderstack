@@ -2,8 +2,12 @@ resource "rudderstack_destination_amplitude" "example" {
   name = "my-kinesis-tf"
 
   config {
-    region = "usa-east"
-    stream = "test"
+    api_key = "usa-east"
+#    stream = "test"
+
+#    role_based_authentication {
+#      i_am_role_arn = "arn-exp"
+#    }
 
     # access_key_id = ""
     # access_key    = ""

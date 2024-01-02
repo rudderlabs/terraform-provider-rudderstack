@@ -13,29 +13,30 @@ func TestDestinationResourceKinesis(t *testing.T) {
 			TerraformCreate: `
 				region = "usa-east"
 				stream = "test"
+				role_based_authentication {
+                  i_am_role_arn = "arn"
+				}
 			`,
 			APICreate: `{
-				"region": "usa-east",
-				"stream": "test"
+				"region":"usa-east",
+				"stream":"test",
+				"roleBasedAuth":true,
+				"iamRoleARN":"arn"
 			}`,
 			TerraformUpdate: `
 				region = "usa-east"
 				stream = "test"
-				access_key_id = ""
-				access_key    = ""
-				i_am_role_arn = "arn"
-				role_based_auth = true
+				role_based_authentication {
+			     i_am_role_arn = "arn"
+				}
 				use_message_id = false
 				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
-				"region": "usa-east"
-				"stream": "test"
-				"accessKeyID": "",
-				"accessKey": "",
+				"region": "usa-east",
+				"stream": "test",
 				"roleBasedAuth": true,
 				"iamRoleARN": "arn",
-				"useMessageId": false,
 				"oneTrustCookieCategories": [
 					{ "oneTrustCookieCategory": "one" },
 					{ "oneTrustCookieCategory": "two" },
