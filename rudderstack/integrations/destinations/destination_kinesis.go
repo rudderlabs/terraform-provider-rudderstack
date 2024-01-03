@@ -25,13 +25,13 @@ func init() {
 			"region": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Region",
+				Description:      "Enter the region.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"stream": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Stream Name",
+				Description:      "Enter the stream name.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"use_message_id": {
@@ -41,10 +41,11 @@ func init() {
 				Description: "Use MessageId as Partition Key",
 			},
 			"role_based_authentication": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "This option allows you filter the events you want to send to Amplitude.",
+				Type:         schema.TypeList,
+				MaxItems:     1,
+				Optional:     true,
+				Description:  "This option allows you select the arn based authentication.",
+				ExactlyOneOf: []string{"config.0.role_based_authentication", "config.0.key_based_authentication"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"i_am_role_arn": {
@@ -57,21 +58,24 @@ func init() {
 				},
 			},
 			"key_based_authentication": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "This option allows you filter the events you want to send to Amplitude.",
+				Type:         schema.TypeList,
+				MaxItems:     1,
+				Optional:     true,
+				Description:  "This option allows you select the key based authentication.",
+				ExactlyOneOf: []string{"config.0.role_based_authentication", "config.0.key_based_authentication"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"access_key_id": {
 							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Enter the event names to be blacklisted.",
+							Required:    true,
+							Sensitive:   true,
+							Description: "Enter the AWS Access Key ID.",
 						},
 						"access_key": {
 							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Enter the event names to be blacklisted.",
+							Required:    true,
+							Sensitive:   true,
+							Description: "Enter the AWS Secret Access Key.",
 						},
 					},
 				},
