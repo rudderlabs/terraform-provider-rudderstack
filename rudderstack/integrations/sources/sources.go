@@ -18,6 +18,11 @@ func init() {
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
+	c.Sources.Register("android", c.ConfigMeta{
+		APIType:    "Android",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
 	c.Sources.Register("ios", c.ConfigMeta{
 		APIType:    "iOS",
 		Properties: []c.ConfigProperty{},
