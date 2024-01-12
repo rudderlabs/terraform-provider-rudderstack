@@ -13,7 +13,17 @@ func init() {
 			c.Simple("apiKey", "api_key", c.SkipZeroValue),
 			c.Simple("actid", "actid", c.SkipZeroValue),
 			c.Simple("eventKey", "event_key", c.SkipZeroValue),
-			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
+			c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
+			c.ArrayWithStrings("oneTrustCookieCategories.android", "oneTrustCookieCategory", "onetrust_cookie_categories.0.android"),
+			c.ArrayWithStrings("oneTrustCookieCategories.ios", "oneTrustCookieCategory", "onetrust_cookie_categories.0.ios"),
+			c.ArrayWithStrings("oneTrustCookieCategories.unity", "oneTrustCookieCategory", "onetrust_cookie_categories.0.unity"),
+			c.ArrayWithStrings("oneTrustCookieCategories.reactnative", "oneTrustCookieCategory", "onetrust_cookie_categories.0.reactnative"),
+			c.ArrayWithStrings("oneTrustCookieCategories.flutter", "oneTrustCookieCategory", "onetrust_cookie_categories.0.flutter"),
+			c.ArrayWithStrings("oneTrustCookieCategories.cordova", "oneTrustCookieCategory", "onetrust_cookie_categories.0.cordova"),
+			c.ArrayWithStrings("oneTrustCookieCategories.amp", "oneTrustCookieCategory", "onetrust_cookie_categories.0.amp"),
+			c.ArrayWithStrings("oneTrustCookieCategories.cloud", "oneTrustCookieCategory", "onetrust_cookie_categories.0.cloud"),
+			c.ArrayWithStrings("oneTrustCookieCategories.warehouse", "oneTrustCookieCategory", "onetrust_cookie_categories.0.warehouse"),
+			c.ArrayWithStrings("oneTrustCookieCategories.shopify", "oneTrustCookieCategory", "onetrust_cookie_categories.0.shopify"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"api_url": {
@@ -44,9 +54,88 @@ func init() {
 			"onetrust_cookie_categories": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
+				MaxItems:    1,
+				Description: "Specify OneTrust category IDs.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"web": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"android": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"ios": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"unity": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"reactnative": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"flutter": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"cordova": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"amp": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"cloud": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"warehouse": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"shopify": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
 				},
 			},
 		},
