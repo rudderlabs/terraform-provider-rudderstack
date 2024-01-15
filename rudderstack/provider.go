@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/accounts"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -54,17 +55,27 @@ func resourcesMap() map[string]*schema.Resource {
 		"rudderstack_connection": resourceConnection(),
 	}
 
-	// append sources and destinations from integration registries
+	// append resources from integration registries
 	for k, v := range configs.Sources.Entries() {
 		key := fmt.Sprintf("rudderstack_source_%s", k)
 		resource := resourceSource(v)
 		resources[key] = resource
 	}
+
+	for category, entries := range accounts.Accounts.Entries() {
+		for k, v := range entries {
+			key := fmt.Sprintf("rudderstack_account_%s_%s", category, k)
+			resource := resourceAccount(v)
+			resources[key] = resource
+		}
+	}
+
 	for k, v := range configs.Destinations.Entries() {
 		key := fmt.Sprintf("rudderstack_destination_%s", k)
 		resource := resourceDestination(v)
 		resources[key] = resource
 	}
+
 	return resources
 }
 

@@ -42,5 +42,3 @@ Optional:
 - `credentials` (String, Sensitive) Enter the contents of your Google Cloud connection credentials JSON.
 - `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `prefix` (String) Enter your prefix which RudderStack associates with your GCS bucket before loading all the data into it.
-
-
