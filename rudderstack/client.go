@@ -10,6 +10,7 @@ type Client struct {
 	Sources      SourcesService
 	Destinations DestinationsService
 	Connections  ConnectionsService
+	Accounts     AccountsService
 }
 
 type SourcesService interface {
@@ -33,6 +34,13 @@ type ConnectionsService interface {
 	Delete(ctx context.Context, id string) error
 }
 
+type AccountsService interface {
+	Create(ctx context.Context, account *client.AccountWithSecret) (*client.Account, error)
+	Get(ctx context.Context, id string) (*client.Account, error)
+	Update(ctx context.Context, account *client.AccountWithSecret) (*client.Account, error)
+	Delete(ctx context.Context, id string) error
+}
+
 func NewAPIClient(accessToken string, options ...client.Option) (*Client, error) {
 	api, err := client.New(accessToken, options...)
 	if err != nil {
@@ -43,5 +51,6 @@ func NewAPIClient(accessToken string, options ...client.Option) (*Client, error)
 		Sources:      api.Sources,
 		Destinations: api.Destinations,
 		Connections:  api.Connections,
+		Accounts:     api.Accounts,
 	}, nil
 }
