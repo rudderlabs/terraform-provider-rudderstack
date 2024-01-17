@@ -7,6 +7,9 @@ resource "rudderstack_destination_marketo" "example" {
     client_secret          = "cs"
     track_anonymous_events = true
     create_if_not_exist    = false
+    connection_mode {
+      web = "cloud"
+    }
     lead_trait_mapping = [
       {
         from = "property1",
@@ -26,6 +29,6 @@ resource "rudderstack_destination_marketo" "example" {
         to   = "value1"
       }
     ]
-    onetrust_cookie_categories = ["C001", "C002", "C003"]
+    # onetrust_cookie_categories = ["C001", "C002", "C003"]
   }
 }
