@@ -1,4 +1,4 @@
-resource "rudderstack_destination_kinesis" "example" {
+resource "rudderstack_destination_marketo" "example" {
   name = "my-marketo-tf"
 
   config {
@@ -7,25 +7,25 @@ resource "rudderstack_destination_kinesis" "example" {
     client_secret          = "cs"
     track_anonymous_events = true
     create_if_not_exist    = false
-    # lead_trait_mapping = [
-    #   {
-    #     from = "property0"
-    #     to   = "value0"
-    #   }
-    # ]
-    # rudder_events_mapping = [
-    #   {
-    #     event             = "event0"
-    #     marketoPrimarykey = "marketoPrimarykey0"
-    #     marketoActivityId = "marketoActivityId0"
-    #   }
-    # ]
-    # custom_activity_property_map = [
-    #   {
-    #     from = "property1"
-    #     to   = "value1"
-    #   }
-    # ]
-    # oneTrustCookieCategories = ["one", "two", "three"]
+    lead_trait_mapping = [
+      {
+        from = "property1",
+        to   = "value1",
+      }
+    ]
+    rudder_events_mapping = [
+      {
+        event             = "event0",
+        marketo_primarykey = "marketoPrimarykey0",
+        marketo_activity_id = "marketoActivityId0",
+      }
+    ]
+    custom_activity_property_map = [
+      {
+        from = "property1"
+        to   = "value1"
+      }
+    ]
+    onetrust_cookie_categories = ["one", "two", "three"]
   }
 }

@@ -40,8 +40,8 @@ func TestDestinationResourceMarketo(t *testing.T) {
 				rudder_events_mapping = [
 					{
 						event = "event0"
-						marketoPrimarykey = "marketoPrimarykey0"
-						marketoActivityId = "marketoActivityId0"
+						marketo_primarykey = "marketoPrimarykey0"
+						marketo_activity_id = "marketoActivityId0"
 					}
 				]
 				custom_activity_property_map = [
@@ -50,7 +50,7 @@ func TestDestinationResourceMarketo(t *testing.T) {
 						to = "value1"
 					}
 				]
-				oneTrustCookieCategories = ["one", "two", "three"]
+				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
 				accountId": "...",

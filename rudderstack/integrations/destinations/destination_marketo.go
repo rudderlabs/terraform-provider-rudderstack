@@ -17,16 +17,16 @@ func init() {
 			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 			c.ArrayWithObjects("rudderEventsMapping", "rudder_events_mapping", map[string]string{
 				"event": "event",
-				"marketoPrimarykey":   "marketoPrimarykey",
-				"marketoActivityId":   "marketoActivityId",
+				"marketoPrimarykey":   "marketo_primarykey",
+				"marketoActivityId":   "marketo_activity_id",
 			}),
 			c.ArrayWithObjects("leadTraitMapping", "lead_trait_mapping", map[string]string{
 				"from": "from",
-				"to":   "to"
+				"to":   "to",
 			}),
 			c.ArrayWithObjects("customActivityPropertyMap", "custom_activity_property_map", map[string]string{
 				"from": "from",
-				"to":   "to"
+				"to":   "to",
 			}),
 		},
 		ConfigSchema: map[string]*schema.Schema{
@@ -63,6 +63,7 @@ func init() {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Lead Trait Mapping",
+				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
@@ -80,17 +81,18 @@ func init() {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Rudder Events Mapping",
+				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"event": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"marketoPrimarykey": {
+						"marketo_primarykey": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"marketoActivityId": {
+						"marketo_activity_id": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
@@ -101,6 +103,7 @@ func init() {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Custom Activity Property Map",
+				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
