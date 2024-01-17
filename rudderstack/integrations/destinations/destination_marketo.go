@@ -14,6 +14,17 @@ func init() {
 			c.Simple("clientSecret", "client_secret"),
 			c.Simple("trackAnonymousEvents", "track_anonymous_events"),
 			c.Simple("createIfNotExist", "create_if_not_exist"),
+			c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
+			c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
+			c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
+			c.Simple("connectionMode.reactnative", "connection_mode.0.react_native", c.SkipZeroValue),
+			c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
+			c.Simple("connectionMode.amp", "connection_mode.0.amp", c.SkipZeroValue),
+			c.Simple("connectionMode.flutter", "connection_mode.0.flutter", c.SkipZeroValue),
+			c.Simple("connectionMode.cordova", "connection_mode.0.cordova", c.SkipZeroValue),
+			c.Simple("connectionMode.shopify", "connection_mode.0.shopify", c.SkipZeroValue),
+			c.Simple("connectionMode.cloud", "connection_mode.0.cloud", c.SkipZeroValue),
+			c.Simple("connectionMode.warehouse", "connection_mode.0.warehouse", c.SkipZeroValue),
 			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 			c.ArrayWithObjects("rudderEventsMapping", "rudder_events_mapping", map[string]string{
 				"event": "event",
@@ -113,6 +124,71 @@ func init() {
 						"to": {
 							Type:     schema.TypeString,
 							Required: true,
+						},
+					},
+				},
+			},
+			"connection_mode": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Required:    true,
+				Description: "Use this setting to set how you want to route events from your source to destination..",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"web": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"ios": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"android": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"react_native": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"unity": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"amp": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"flutter": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"cordova": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"shopify": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"cloud": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+						},
+						"warehouse": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
 						},
 					},
 				},

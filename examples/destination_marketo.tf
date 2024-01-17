@@ -26,6 +26,6 @@ resource "rudderstack_destination_marketo" "example" {
         to   = "value1"
       }
     ]
-    onetrust_cookie_categories = ["one", "two", "three"]
+    onetrust_cookie_categories = ["C001", "C002", "C003"]
   }
 }
