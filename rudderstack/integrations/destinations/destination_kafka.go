@@ -40,19 +40,16 @@ func init() {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "The host name of your Kafka service.",
-				ValidateDiagFunc: c.StringMatchesRegexp("(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.[A-Za-z0-9-]{1,63})*(,\\s*(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.[A-Za-z0-9-]{1,63})*)*$"),
 			},
 			"port": {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "The port number associated with the Kafka service.",
-				ValidateDiagFunc: c.StringMatchesRegexp("^([1-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"),
 			},
 			"topic": {
 				Type:             schema.TypeString,
 				Required:         true,
 				Description:      "The topic name in your Kafka service where the data will be sent.",
-				ValidateDiagFunc: c.StringMatchesRegexp("^[a-zA-Z0-9_\\-]{1,249}$"),
 			},
 			"ssl_enabled": {
 				Type:             schema.TypeBool,
@@ -86,7 +83,7 @@ func init() {
 			"password": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Secret:		      true,
+				Sensitive:		  true,
 				Description:      "The password for the Kafka service.",
 
 			},
@@ -100,6 +97,7 @@ func init() {
 				Type:             schema.TypeList,
 				Optional:         true,
 				Description:      "The Avro schema for the Kafka service.",
+				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"schema_id": {
@@ -131,6 +129,7 @@ func init() {
 				Type:             schema.TypeList,
 				Optional:         true,
 				Description:      "The event type to topic map for the Kafka service.",
+				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
@@ -150,6 +149,7 @@ func init() {
 				Type:             schema.TypeList,
 				Optional:         true,
 				Description:      "The event to topic map for the Kafka service.",
+				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
@@ -165,14 +165,14 @@ func init() {
 					},
 				},
 			},
-			onetrust_cookie_categories : {
+			"onetrust_cookie_categories" : {
 				Type:             schema.TypeList,
 				Optional:         true,
 				Description:      "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
-			}
-			}
-		}
+			},
+			},
+		},
 	})
 }
