@@ -116,5 +116,5 @@ func init() {
 				Default:          false,
 				Description:      "Enable this setting to use RudderStack's data warehouse to store the data from your PostgreSQL database.",
 			}
-	))
+		}})
 }
