@@ -10,11 +10,12 @@ import (
 func GetConfigMetaForOneTrustConsents(supportedSourceTypes []string) ([]c.ConfigProperty, map[string]*schema.Schema) {
 	onetrust_terraform_key := "onetrust_cookie_categories"
 
-	oneTrustConsentFieldProperties := []c.ConfigProperty{}
+	oneTrustConsentsProperties := []c.ConfigProperty{}
 	onetrust_elements_schema := make(map[string]*schema.Schema)
 
+	// Create property and schema for each source type
 	for _, sourceType := range supportedSourceTypes {
-		oneTrustConsentFieldProperties = append(oneTrustConsentFieldProperties, c.ArrayWithStrings(fmt.Sprintf("oneTrustCookieCategories.%s", sourceType), "oneTrustCookieCategory", fmt.Sprintf("%s.0.%s", onetrust_terraform_key, sourceType)))
+		oneTrustConsentsProperties = append(oneTrustConsentsProperties, c.ArrayWithStrings(fmt.Sprintf("oneTrustCookieCategories.%s", sourceType), "oneTrustCookieCategory", fmt.Sprintf("%s.0.%s", onetrust_terraform_key, sourceType)))
 
 		onetrust_elements_schema[sourceType] = &schema.Schema{
 			Type:        schema.TypeList,
@@ -25,7 +26,7 @@ func GetConfigMetaForOneTrustConsents(supportedSourceTypes []string) ([]c.Config
 		}
 	}
 
-	oneTrustConsentFieldSchema := map[string]*schema.Schema{
+	oneTrustConsentsSchema := map[string]*schema.Schema{
 		onetrust_terraform_key: {
 			Type:        schema.TypeList,
 			Optional:    true,
@@ -37,7 +38,7 @@ func GetConfigMetaForOneTrustConsents(supportedSourceTypes []string) ([]c.Config
 		},
 	}
 
-	return oneTrustConsentFieldProperties, oneTrustConsentFieldSchema
+	return oneTrustConsentsProperties, oneTrustConsentsSchema
 }
 
 func GetCommonConfigMeta(supportedSourceTypes []string) ([]c.ConfigProperty, map[string]*schema.Schema) {
