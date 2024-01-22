@@ -8,26 +8,27 @@ import (
 )
 
 func GetConfigMetaForOneTrustConsents(supportedSourceTypes []string) ([]c.ConfigProperty, map[string]*schema.Schema) {
-	onetrust_terraform_key := "onetrust_cookie_categories"
-
 	oneTrustConsentsProperties := []c.ConfigProperty{}
-	onetrust_elements_schema := make(map[string]*schema.Schema)
+	oneTrustConsentsSchema := map[string]*schema.Schema{}
 
-	// Create property and schema for each source type
-	for _, sourceType := range supportedSourceTypes {
-		oneTrustConsentsProperties = append(oneTrustConsentsProperties, c.ArrayWithStrings(fmt.Sprintf("oneTrustCookieCategories.%s", sourceType), "oneTrustCookieCategory", fmt.Sprintf("%s.0.%s", onetrust_terraform_key, sourceType)))
+	if len(supportedSourceTypes) != 0 && supportedSourceTypes != nil {
+		onetrust_terraform_key := "onetrust_cookie_categories"
+		onetrust_elements_schema := make(map[string]*schema.Schema)
 
-		onetrust_elements_schema[sourceType] = &schema.Schema{
-			Type:        schema.TypeList,
-			Optional:    true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
+		// Create property and schema for each source type
+		for _, sourceType := range supportedSourceTypes {
+			oneTrustConsentsProperties = append(oneTrustConsentsProperties, c.ArrayWithStrings(fmt.Sprintf("oneTrustCookieCategories.%s", sourceType), "oneTrustCookieCategory", fmt.Sprintf("%s.0.%s", onetrust_terraform_key, sourceType)))
+
+			onetrust_elements_schema[sourceType] = &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			}
 		}
-	}
 
-	oneTrustConsentsSchema := map[string]*schema.Schema{
-		onetrust_terraform_key: {
+		oneTrustConsentsSchema[onetrust_terraform_key] = &schema.Schema{
 			Type:        schema.TypeList,
 			Optional:    true,
 			MaxItems:    1,
@@ -35,7 +36,7 @@ func GetConfigMetaForOneTrustConsents(supportedSourceTypes []string) ([]c.Config
 			Elem: &schema.Resource{
 				Schema: onetrust_elements_schema,
 			},
-		},
+		};
 	}
 
 	return oneTrustConsentsProperties, oneTrustConsentsSchema
