@@ -16,8 +16,7 @@ func TestDestinationResourceActiveCampaign(t *testing.T) {
 			`,
 			APICreate: `{
 				"apiUrl": "https://some-url",
-				"apiKey": "api-key",
-				}
+				"apiKey": "api-key"
 			}`,
 			TerraformUpdate: `
 				api_url   = "https://some-url"
