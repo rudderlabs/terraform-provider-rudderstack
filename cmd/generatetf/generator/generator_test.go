@@ -72,11 +72,13 @@ func TestGeneratorTerraform(t *testing.T) {
 				"categoryToContent": [{ "from": "from", "to": "to" }],
 				"legacyConversionPixelId": { "from": "from", "to": "to" },
 				"useNativeSDK": { "web": true },
-				"oneTrustCookieCategories": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				],
+				"oneTrustCookieCategories": {
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
+				},
 				"blacklistedEvents": [
 				  { "eventName": "one" },
 				  { "eventName": "two" },
@@ -144,11 +146,13 @@ resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
       from = "from"
       to   = "to"
     }
-    onetrust_cookie_categories = ["one", "two", "three"]
-    pixel_id                   = "facebook pixel id"
-    standard_page_call         = true
-    test_destination           = true
-    test_event_code            = "..."
+    onetrust_cookie_categories {
+      web = ["one", "two", "three"]
+    }
+    pixel_id           = "facebook pixel id"
+    standard_page_call = true
+    test_destination   = true
+    test_event_code    = "..."
     use_native_sdk {
       web = true
     }

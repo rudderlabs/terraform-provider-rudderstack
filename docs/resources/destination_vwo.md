@@ -37,7 +37,9 @@ resource "rudderstack_destination_vwo" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories = ["one", "two", "three"]
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    # }
   }
 }
 ```

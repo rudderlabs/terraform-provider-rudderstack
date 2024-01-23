@@ -76,7 +76,19 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 			      blacklist = ["one", "two", "three"]
 			    }
 		
-			    onetrust_cookie_categories = ["one", "two", "three"]
+			    onetrust_cookie_categories {
+					web = ["one", "two", "three"]
+					android = ["one", "two", "three"]
+					ios = ["one", "two", "three"]
+					unity = ["one", "two", "three"]
+					reactnative = ["one", "two", "three"]
+					flutter = ["one", "two", "three"]
+					cordova = ["one", "two", "three"]
+					amp = ["one", "two", "three"]
+					cloud = ["one", "two", "three"]
+					warehouse = ["one", "two", "three"]
+					shopify = ["one", "two", "three"]
+				}
 
 				reset_custom_dimensions_on_page {
 				   web = ["one", "two", "three"]
@@ -127,11 +139,63 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 						{ "resetCustomDimensionsOnPage": "three" }
 					]
 				},
-				"oneTrustCookieCategories": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				],
+				"oneTrustCookieCategories": {
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"android": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"ios": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"unity": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"reactnative": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"flutter": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"cordova": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"amp": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"cloud": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"warehouse": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"shopify": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
+				},
 				"contentGroupings": [{ "from": "from", "to": "to" }],
 				"dimensions": [{ "from": "from", "to": "to" }]
 			}`,
