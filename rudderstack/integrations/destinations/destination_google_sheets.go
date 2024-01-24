@@ -12,7 +12,10 @@ func init() {
 			c.Simple("sheetName", "sheet_name"),
 			c.Simple("sheetId", "sheet_id"),
 			c.Simple("credentials", "credentials"),
-			c.Simple("eventKeyMap", "event_key_map", c.SkipZeroValue),
+			c.ArrayWithObjects("eventKeyMap", "event_key_map", map[string]string{
+				"from": "from",
+				"to":   "to",
+			}),
 			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
 		},
 		ConfigSchema: map[string]*schema.Schema{
