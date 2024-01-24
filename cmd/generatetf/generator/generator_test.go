@@ -73,11 +73,11 @@ func TestGeneratorTerraform(t *testing.T) {
 				"legacyConversionPixelId": { "from": "from", "to": "to" },
 				"useNativeSDK": { "web": true },
 				"oneTrustCookieCategories": {
-				  "web": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				  ]
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
 				},
 				"blacklistedEvents": [
 				  { "eventName": "one" },

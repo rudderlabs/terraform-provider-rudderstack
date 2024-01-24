@@ -11,9 +11,9 @@ func TestDestinationResourceZendesk(t *testing.T) {
 	cmt.AssertDestination(t, "zendesk", []c.TestConfig{
 		{
 			TerraformCreate: `
-				email     = "test@example.com"
+				email = "test@example.com"
 				api_token = "..."
-				domain    = "..."
+				domain = "..."
 			`,
 			APICreate: `{
 				"email": "test@example.com",
@@ -21,15 +21,25 @@ func TestDestinationResourceZendesk(t *testing.T) {
 				"domain": "..."
 			}`,
 			TerraformUpdate: `
-				email     = "test@example.com"
+				email = "test@example.com"
 				api_token = "..."
-				domain    = "..."
-			
-				create_users_as_verified         = true
+				domain = "..."
+				create_users_as_verified = true
 				send_group_calls_without_user_id = true
-				remove_users_from_organization   = true
-				search_by_external_id = false
-				onetrust_cookie_categories = ["one", "two", "three"]
+				remove_users_from_organization = true
+				onetrust_cookie_categories {
+					web = ["one", "two", "three"]
+					android = ["one", "two", "three"]
+					ios = ["one", "two", "three"]
+					unity = ["one", "two", "three"]
+					reactnative = ["one", "two", "three"]
+					flutter = ["one", "two", "three"]
+					cordova = ["one", "two", "three"]
+					amp = ["one", "two", "three"]
+					cloud = ["one", "two", "three"]
+					warehouse = ["one", "two", "three"]
+					shopify = ["one", "two", "three"]
+				}
 			`,
 			APIUpdate: `{
 				"email": "test@example.com",
@@ -38,12 +48,63 @@ func TestDestinationResourceZendesk(t *testing.T) {
 				"createUsersAsVerified": true,
 				"sendGroupCallsWithoutUserId": true,
 				"removeUsersFromOrganization": true,
-				"searchByExternalId": false,
-				"oneTrustCookieCategories": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				]
+				"oneTrustCookieCategories": {
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"android": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"ios": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"unity": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"reactnative": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"flutter": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"cordova": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"amp": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"cloud": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"warehouse": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"shopify": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
+				}
 			}`,
 		},
 	})

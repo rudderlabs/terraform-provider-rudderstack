@@ -29,7 +29,9 @@ func TestDestinationResourceGoogleTagManager(t *testing.T) {
 					blacklist = ["one", "two", "three"]
 				}
 			
-				onetrust_cookie_categories = ["one", "two", "three"]
+				onetrust_cookie_categories {
+					web = ["one", "two", "three"]
+				}
 			`,
 			APIUpdate: `{
 				"containerID": "GTM-000000",
@@ -49,11 +51,13 @@ func TestDestinationResourceGoogleTagManager(t *testing.T) {
 				"useNativeSDK": {
 				  "web": true
 				},
-				"oneTrustCookieCategories": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				]
+				"oneTrustCookieCategories": {
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
+				}
 			}`,
 		},
 	})
