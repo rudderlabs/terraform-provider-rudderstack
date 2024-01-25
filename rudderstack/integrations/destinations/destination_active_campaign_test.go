@@ -36,6 +36,18 @@ func TestDestinationResourceActiveCampaign(t *testing.T) {
 					warehouse = ["one", "two", "three"]
 					shopify = ["one", "two", "three"]
 				}
+				consent_management {
+					web {
+						provider = "provider"
+						resolution_strategy = "resolution_strategy"
+						consents = ["one", "two", "three"]
+					}
+					android {
+						provider = "provider"
+						resolution_strategy = "resolution_strategy"
+						consents = ["one", "two", "three"]
+					}
+				}
 			`,
 			APIUpdate: `{
 				"apiUrl": "https://some-url",
@@ -97,6 +109,42 @@ func TestDestinationResourceActiveCampaign(t *testing.T) {
 						{ "oneTrustCookieCategory": "one" },
 						{ "oneTrustCookieCategory": "two" },
 						{ "oneTrustCookieCategory": "three" }
+					]
+				},
+				"consentManagement": {
+					"web": [
+						{
+							"provider": "provider",
+							"resolutionStrategy": "resolution_strategy",
+							"consents": [
+								{
+									"consent": "one"
+								},
+								{
+									"consent": "two"
+								},
+								{
+									"consent": "three"
+								}
+							]
+						}
+					],
+					"android": [
+						{
+							"provider": "provider",
+							"resolutionStrategy": "resolution_strategy",
+							"consents": [
+								{
+									"consent": "one"
+								},
+								{
+									"consent": "two"
+								},
+								{
+									"consent": "three"
+								}
+							]
+						}
 					]
 				}
 			}`,

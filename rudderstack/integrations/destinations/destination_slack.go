@@ -12,12 +12,12 @@ func init() {
 	properties := []c.ConfigProperty{
 		c.Simple("webhookUrl", "webhook_url"),
 		c.Simple("identifyTemplate", "identify_template", c.SkipZeroValue),
-		c.ArrayWithObjects("eventChannelSettings", "event_channel_settings", map[string]string{
+		c.ArrayWithObjects("eventChannelSettings", "event_channel_settings", map[string]interface{}{
 			"eventName":    "name",
 			"eventChannel": "channel",
 			"eventRegex":   "regex",
 		}),
-		c.ArrayWithObjects("eventTemplateSettings", "event_template_settings", map[string]string{
+		c.ArrayWithObjects("eventTemplateSettings", "event_template_settings", map[string]interface{}{
 			"eventName":     "name",
 			"eventTemplate": "template",
 			"eventRegex":    "regex",

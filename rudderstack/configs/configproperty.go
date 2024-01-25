@@ -36,6 +36,16 @@ func Simple(apiKey, terraformKey string, filters ...ValueFilter) ConfigProperty 
 
 type ValueFilter func(a interface{}) bool
 
+type APINestedObject struct {
+	TerraformKey string
+	NestedKey    string
+}
+
+type TerraformNestedObject struct {
+	APIKey    string
+	NestedKey string
+}
+
 // SkipZeroValue is a ValueFilter that returns true if the value is golang's zero value or an empty slice.
 func SkipZeroValue(a interface{}) bool {
 	switch v := a.(type) {
@@ -135,12 +145,24 @@ func ArrayWithStrings(rootAPIKey string, nestedAPIField string, terraformKey str
 	}
 }
 
-func ArrayWithObjects(rootAPIKey string, terraformKey string, fields map[string]string) ConfigProperty {
-	// we also need the inverse field map to convert terraform keys to api keys
-	inverseFields := map[string]string{}
+func GetInverseFields(fields map[string]interface{}) map[string]interface{} {
+	inverseFields := map[string]interface{}{}
 	for a, t := range fields {
-		inverseFields[t] = a
+		switch fieldVal := t.(type) {
+		case string:
+			inverseFields[fieldVal] = a
+		case APINestedObject:
+			tfKey := fieldVal.TerraformKey
+			nestedKey := fieldVal.NestedKey
+			inverseFields[tfKey] = TerraformNestedObject{APIKey: a, NestedKey: nestedKey}
+		}
 	}
+	return inverseFields
+}
+
+func ArrayWithObjects(rootAPIKey string, terraformKey string, fields map[string]interface{}) ConfigProperty {
+	// we also need the inverse field map to convert terraform keys to api keys
+	inverseFields := GetInverseFields(fields)
 
 	return ConfigProperty{
 		FromStateFunc: func(config, state string) (string, error) {
@@ -150,25 +172,7 @@ func ArrayWithObjects(rootAPIKey string, terraformKey string, fields map[string]
 				switch a := v.Value().(type) {
 				case []interface{}:
 
-					contents := []interface{}{}
-					for _, i := range a {
-						av := map[string]interface{}{} // api value
-
-						// iterate terraform values
-						if tv, ok := i.(map[string]interface{}); ok {
-							// iterate api value fields
-							for tf, v := range tv {
-								if af, ok := inverseFields[tf]; ok {
-									av[af] = v
-								}
-							}
-
-							if len(av) > 0 {
-								contents = append(contents, av)
-							}
-						}
-					}
-
+					contents := GetConfigValue(a, inverseFields)
 					if len(contents) > 0 {
 						r, err := sjson.Set(result, rootAPIKey, contents)
 						if err != nil {
@@ -188,24 +192,7 @@ func ArrayWithObjects(rootAPIKey string, terraformKey string, fields map[string]
 
 			r := gjson.Get(config, rootAPIKey)
 			if r.Exists() && r.IsArray() {
-				contents := []interface{}{}
-				for _, i := range r.Value().([]interface{}) {
-					tv := map[string]interface{}{} // terraform value
-
-					// iterate api values
-					if av, ok := i.(map[string]interface{}); ok {
-						// iterate terraform value fields
-						for af, v := range av {
-							if tf, ok := fields[af]; ok {
-								tv[tf] = v
-							}
-						}
-
-						if len(tv) > 0 {
-							contents = append(contents, tv)
-						}
-					}
-				}
+				contents := GetTerraformValue(r.Value().([]interface{}), fields)
 				s, err := sjson.Set(result, terraformKey, contents)
 				if err != nil {
 					return result, err
@@ -216,6 +203,77 @@ func ArrayWithObjects(rootAPIKey string, terraformKey string, fields map[string]
 			return result, nil
 		},
 	}
+}
+
+func GetTerraformValue(configValue []interface{}, fields map[string]interface{}) []interface{} {
+	contents := []interface{}{}
+	for _, i := range configValue {
+		tv := map[string]interface{}{} // terraform value
+
+		// iterate api values
+		if av, ok := i.(map[string]interface{}); ok {
+			// iterate terraform value fields
+			for af, v := range av {
+				if tf, ok := fields[af]; ok {
+					switch fieldVal := tf.(type) {
+					case string:
+						tv[fieldVal] = v
+					case APINestedObject:
+						tfValues := []interface{}{}
+						tfKey := fieldVal.TerraformKey
+						nestedKey := fieldVal.NestedKey
+
+						// iterate nested api values
+						for _, nestedObj := range v.([]interface{}) {
+							tfValues = append(tfValues, nestedObj.(map[string]interface{})[nestedKey])
+						}
+						tv[tfKey] = tfValues
+					}
+				}
+			}
+		}
+
+		if len(tv) > 0 {
+			contents = append(contents, tv)
+		}
+	}
+	return contents
+}
+
+func GetConfigValue(stateValue []interface{}, fields map[string]interface{}) []interface{} {
+	contents := []interface{}{}
+	for _, i := range stateValue {
+		av := map[string]interface{}{} // api value
+		
+		// iterate terraform values
+		if tv, ok := i.(map[string]interface{}); ok {
+			// iterate api value fields
+			for tf, tfValue := range tv {
+				switch fieldVal := fields[tf].(type) {
+				case string:
+					av[fieldVal] = tfValue
+				case TerraformNestedObject:
+					tfValues := []interface{}{}
+					af := fieldVal.APIKey
+					nestedKey := fieldVal.NestedKey
+
+					// iterate terraform values and convert to nested api values
+					for _, nestedVal := range tfValue.([]interface{}) {
+						nestedObj := map[string]interface{}{
+							nestedKey: nestedVal,
+						}
+						tfValues = append(tfValues, nestedObj)
+					}
+					av[af] = tfValues
+				}
+			}
+		}
+
+		if len(av) > 0 {
+			contents = append(contents, av)
+		}
+	}
+	return contents
 }
 
 func applyFilters(a interface{}, filters []ValueFilter) bool {
