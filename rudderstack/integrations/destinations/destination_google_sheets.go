@@ -22,18 +22,18 @@ func init() {
 			"sheet_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Enter the spread-sheet to which you want to send data.",
+				Description: "Specify the name of the Google spreadsheet to which you want to send the data.",
 			},
 			"sheet_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Enter your google sheet Id.",
+				Description: "Enter your Google sheet ID. You can find it in the spreadsheet URL.",
 			},
 			"credentials": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				Description: "Enter the credentials JSON is used by the client library to access the Google Sheets API.",
+				Description: "Enter the credentials JSON used by the client library to access the Google Sheets API.",
 			},
 			"event_key_map": {
 				Type:        schema.TypeList,

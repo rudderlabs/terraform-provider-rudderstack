@@ -28,14 +28,14 @@ func init() {
 				Type:             schema.TypeString,
 				Required:         true,
 				Sensitive:        true,
-				Description:      "Enter the Secret Key.",
+				Description:      "Enter your Statsig secret key.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,200})$"),
 			},
 			"connection_mode": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Required:    true,
-				Description: "Use this setting to set how you want to route events from your source to destination..",
+				Description: "Use this setting to specify how you want to route events from your source to destination.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {

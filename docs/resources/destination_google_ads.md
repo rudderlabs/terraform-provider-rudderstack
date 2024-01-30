@@ -117,8 +117,8 @@ Optional:
 
 Optional:
 
-- `blacklist` (List of String) Enter the event names to be blacklisted.
-- `whitelist` (List of String) Enter the event names to be whitelisted.
+- `blacklist` (List of String) Enter the event names to be denylisted.
+- `whitelist` (List of String) Enter the event names to be allowlisted.
 
 
 <a id="nestedatt--config--page_load_conversions"></a>
