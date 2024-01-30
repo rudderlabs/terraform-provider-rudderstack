@@ -11,111 +11,36 @@ func TestDestinationResourceLinkedinInsightTag(t *testing.T) {
 	cmt.AssertDestination(t, "LINKEDIN_INSIGHT_TAG", []c.TestConfig{
 		{
 			TerraformCreate: `
-				token = "..."
-				data_residency = "us"
-				persistence = "none"
-				consolidated_page_calls = false
+				partner_id = "p-id"
 			`,
 			APICreate: `{
-				"token": "...",
-				"dataResidency": "us",
-				"consolidatedPageCalls": false,
-				"persistence": "none",
-				"useNewMapping": true
+				"partnerId": "p-id"
 			}`,
 			TerraformUpdate: `
-				token = "..."
-				data_residency = "eu"
-				persistence = "localStorage"
-				api_secret = "..."
-				people = true
-				set_all_traits_by_default = true
-				consolidated_page_calls = true
-				track_categorized_pages = true
-				track_named_pages = true
-				source_name = "my-mixpanel"
-				cross_subdomain_cookie = true
-				secure_cookie = true
-				super_properties = ["one","two","three"]
-				people_properties = ["one","two","three"]
-				event_increments = ["one","two","three"]
-				prop_increments = ["one","two","three"]
-				group_key_settings = ["one","two","three"]
-				
+				partner_id = "p-id"
+				event_to_conversion_id_map = [
+				{
+					from = "a1"
+					to   = "b1"
+				}, 
+				{
+					from = "a2"
+					to   = "b2"
+				}]
 				use_native_sdk {
 					web = true
 				}
-		
 				event_filtering {
 					whitelist = ["one", "two", "three"]
 				}
-		
 				onetrust_cookie_categories = ["one", "two", "three"]
-				use_new_mapping = true
 			`,
 			APIUpdate: `
 			{
-				"token": "...",
-				"dataResidency": "eu",
-				"persistence": "localStorage",
-				"apiSecret": "...",
-				"people": true,
-				"setAllTraitsByDefault": true,
-				"consolidatedPageCalls": true,
-				"trackCategorizedPages": true,
-				"trackNamedPages": true,
-				"sourceName": "my-mixpanel",
-				"crossSubdomainCookie": true,
-				"secureCookie": true,
-				"superProperties": [{
-						"property": "one"
-					},
-					{
-						"property": "two"
-					},
-					{
-						"property": "three"
-					}
-				],
-				"peopleProperties": [{
-						"property": "one"
-					},
-					{
-						"property": "two"
-					},
-					{
-						"property": "three"
-					}
-				],
-				"eventIncrements": [{
-						"property": "one"
-					},
-					{
-						"property": "two"
-					},
-					{
-						"property": "three"
-					}
-				],
-				"propIncrements": [{
-						"property": "one"
-					},
-					{
-						"property": "two"
-					},
-					{
-						"property": "three"
-					}
-				],
-				"groupKeySettings": [{
-						"groupKey": "one"
-					},
-					{
-						"groupKey": "two"
-					},
-					{
-						"groupKey": "three"
-					}
+				"partnerId": "p-id",
+				"eventToConversionIdMap": [
+				  { "from": "a1", "to": "b1" },
+				  { "from": "a2", "to": "b2" }
 				],
 				"useNativeSDK": {
 					"web": true
@@ -135,8 +60,7 @@ func TestDestinationResourceLinkedinInsightTag(t *testing.T) {
 					{ "oneTrustCookieCategory": "one" },
 					{ "oneTrustCookieCategory": "two" },
 					{ "oneTrustCookieCategory": "three" }
-				],
-				"useNewMapping": true
+				]
 			}			
 			`,
 		},

@@ -17,8 +17,8 @@ func init() {
 				"event_filtering.0.blacklist": "blacklistedEvents",
 			}),
 			c.ArrayWithObjects("eventToConversionIdMap", "event_to_conversion_id_map", map[string]string{
-				"from": "event_name",
-				"to":   "conversion_id",
+				"from": "from",
+				"to":   "to",
 			}),
 			c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
 			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
@@ -36,12 +36,12 @@ func init() {
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"event_name": {
+						"from": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Provide the event name.",
 						},
-						"conversion_id": {
+						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Enter the conversion id.",
