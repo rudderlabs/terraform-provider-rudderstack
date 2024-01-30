@@ -28,7 +28,7 @@ func init() {
 				Type:             schema.TypeString,
 				Required:         true,
 				Sensitive:        true,
-				Description:      "Enter the Secret Key.",
+				Description:      "Enter your Statsig secret key.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,200})$"),
 			},
 			"connection_mode": {
