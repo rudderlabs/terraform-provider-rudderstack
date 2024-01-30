@@ -35,7 +35,7 @@ func init() {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Required:    true,
-				Description: "Use this setting to set how you want to route events from your source to destination..",
+				Description: "Use this setting to specify how you want to route events from your source to destination.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {

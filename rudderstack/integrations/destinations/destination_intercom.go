@@ -31,48 +31,48 @@ func init() {
 			"api_key": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Enter Access Token.",
+				Description:      "Enter your Intercom access token.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"app_id": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Enter App Id.",
+				Description:      "Enter your app ID.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"mobile_api_key_android": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "Enter Android API Key.",
+				Description:      "Enter the Android API Key.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"mobile_api_key_ios": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "Enable iOS API Key.",
+				Description:      "Enter the iOS API Key.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"collect_context": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "This setting enables including Context with Identify Calls.",
+				Description: "Enable this setting to include the user context along with your identify calls.",
 			},
 			"send_anonymous_id": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "This setting enables sending AnonymousId as Secondary UserId.",
+				Description: "Enable this setting to send anonymousId as the secondary userId.",
 			},
 			"update_last_request_at": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
-				Description: "This setting enables the last seen with the current time.",
+				Description: "Enable this setting to send the last seen information with the current time.",
 			},
 			"use_native_sdk": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
-				Description: "Enable this setting to send the events through SDK.",
+				Description: "Enable this setting to send the events through device mode, that is, using the native SDK.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"web": {
@@ -94,13 +94,13 @@ func init() {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
-				Description: "RudderStack lets you determine which events should be allowed to flow through or blocked.",
+				Description: "Use this setting to determine which events should be blocked or allowed to flow through.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"whitelist": {
 							Type:         schema.TypeList,
 							Optional:     true,
-							Description:  "Enter the event names to be whitelisted.",
+							Description:  "Enter the event names to be allowlisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -109,7 +109,7 @@ func init() {
 						"blacklist": {
 							Type:         schema.TypeList,
 							Optional:     true,
-							Description:  "Enter the event names to be blacklisted.",
+							Description:  "Enter the event names to be denylisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
