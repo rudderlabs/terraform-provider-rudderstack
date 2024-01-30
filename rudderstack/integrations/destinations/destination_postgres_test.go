@@ -16,8 +16,8 @@ func TestDestinationResourcePostgres(t *testing.T) {
 				user = "test-user"
 				password = "test-password"
 				port = "test-port"
-				ssl_mode = "test-ssl_mode"
-				sync_frequency = "test-sync_frequency"
+				ssl_mode = "disable"
+				sync_frequency = "30"
 				use_rudder_storage = true
 			`,
 			APICreate: `{
@@ -26,8 +26,8 @@ func TestDestinationResourcePostgres(t *testing.T) {
 				"user": "test-user",
 				"password": "test-password",
 				"port": "test-port",
-				"sslMode": "test-ssl_mode",
-				"syncFrequency": "test-sync_frequency",
+				"sslMode": "disable",
+				"syncFrequency": "30",
 				"useRudderStorage": true
 			}`,
 			TerraformUpdate: `
