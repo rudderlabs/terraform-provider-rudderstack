@@ -27,7 +27,7 @@ func init() {
 			"partner_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Enter your Partner ID.",
+				Description: "Enter your LinkedIn Partner ID.",
 			},
 			"event_to_conversion_id_map": {
 				Type:        schema.TypeList,
