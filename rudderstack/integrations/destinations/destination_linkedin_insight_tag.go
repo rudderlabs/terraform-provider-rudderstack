@@ -27,7 +27,7 @@ func init() {
 			"partner_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Enter your Partner ID.",
+				Description: "Enter your LinkedIn Partner ID.",
 			},
 			"event_to_conversion_id_map": {
 				Type:        schema.TypeList,
@@ -44,7 +44,7 @@ func init() {
 						"to": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "Enter the conversion id.",
+							Description: "Enter the conversion ID.",
 						},
 					},
 				},
@@ -53,13 +53,13 @@ func init() {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
-				Description: "With this option, you can determine which events are blocked or allowed to flow through to Google Ads.",
+				Description: "With this option, you can determine which events are blocked or allowed to flow through to LinkedIn.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"whitelist": {
 							Type:         schema.TypeList,
 							Optional:     true,
-							Description:  "Enter the event names to be whitelisted.",
+							Description:  "Enter the event names to be allowlisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -68,7 +68,7 @@ func init() {
 						"blacklist": {
 							Type:         schema.TypeList,
 							Optional:     true,
-							Description:  "Enter the event names to be blacklisted.",
+							Description:  "Enter the event names to be denylisted.",
 							ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
