@@ -29,6 +29,7 @@ func GetConfigMetaForGenericConsentManagement(supportedSourceTypes []string) ([]
 			consent_management_elements_schema[sourceType] = &schema.Schema{
 				Type:        schema.TypeList,
 				Optional:    true,
+				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"provider": {

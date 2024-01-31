@@ -230,7 +230,7 @@ func generateBlock(name string, data map[string]interface{}, configSchema map[st
 	block := hclwrite.NewBlock(name, []string{})
 	body := block.Body()
 
-	// go does not garantee the order of range in maps, we sort the keys so that the output is predictable
+	// go does not guarantee the order of range in maps, we sort the keys so that the output is predictable
 	var keys []string
 	for k := range data {
 		keys = append(keys, k)

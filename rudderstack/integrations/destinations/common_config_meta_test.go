@@ -76,6 +76,7 @@ func TestGetCommonConfigMeta(t *testing.T) {
 							"web": {
 								Type:        schema.TypeList,
 								Optional:    true,
+								ConfigMode:  schema.SchemaConfigModeAttr,
 								Elem:        &schema.Resource{ 
 									Schema: map[string]*schema.Schema{
 										"provider": {
@@ -102,6 +103,7 @@ func TestGetCommonConfigMeta(t *testing.T) {
 							"android": {
 								Type:        schema.TypeList,
 								Optional:    true,
+								ConfigMode:  schema.SchemaConfigModeAttr,
 								Elem:        &schema.Resource{ 
 									Schema: map[string]*schema.Schema{
 										"provider": {
@@ -128,6 +130,7 @@ func TestGetCommonConfigMeta(t *testing.T) {
 							"ios": {
 								Type:        schema.TypeList,
 								Optional:    true,
+								ConfigMode:  schema.SchemaConfigModeAttr,
 								Elem:        &schema.Resource{ 
 									Schema: map[string]*schema.Schema{
 										"provider": {
@@ -205,6 +208,7 @@ func TestGetCommonConfigMeta(t *testing.T) {
 							"web": {
 								Type:        schema.TypeList,
 								Optional:    true,
+								ConfigMode:  schema.SchemaConfigModeAttr,
 								Elem:        &schema.Resource{ 
 									Schema: map[string]*schema.Schema{
 										"provider": {
