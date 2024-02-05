@@ -41,7 +41,7 @@ type APINestedObject struct {
 	NestedKey    string
 }
 
-type TerraformNestedObject struct {
+type terraformNestedObject struct {
 	APIKey    string
 	NestedKey string
 }
@@ -154,7 +154,7 @@ func GetInverseFields(fields map[string]interface{}) map[string]interface{} {
 		case APINestedObject:
 			tfKey := fieldVal.TerraformKey
 			nestedKey := fieldVal.NestedKey
-			inverseFields[tfKey] = TerraformNestedObject{APIKey: a, NestedKey: nestedKey}
+			inverseFields[tfKey] = terraformNestedObject{APIKey: a, NestedKey: nestedKey}
 		}
 	}
 	return inverseFields
@@ -252,7 +252,7 @@ func GetConfigValue(stateValue []interface{}, fields map[string]interface{}) []i
 				switch fieldVal := fields[tf].(type) {
 				case string:
 					av[fieldVal] = tfValue
-				case TerraformNestedObject:
+				case terraformNestedObject:
 					tfValues := []interface{}{}
 					af := fieldVal.APIKey
 					nestedKey := fieldVal.NestedKey
