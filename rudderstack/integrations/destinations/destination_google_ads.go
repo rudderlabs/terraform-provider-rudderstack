@@ -11,11 +11,11 @@ func init() {
 
 	properties := []c.ConfigProperty{
 		c.Simple("conversionID", "conversion_id"),
-		c.ArrayWithObjects("pageLoadConversions", "page_load_conversions", map[string]string{
+		c.ArrayWithObjects("pageLoadConversions", "page_load_conversions", map[string]interface{}{
 			"conversionLabel": "label",
 			"name":            "name",
 		}),
-		c.ArrayWithObjects("clickEventConversions", "click_event_conversions", map[string]string{
+		c.ArrayWithObjects("clickEventConversions", "click_event_conversions", map[string]interface{}{
 			"conversionLabel": "label",
 			"name":            "name",
 		}),
