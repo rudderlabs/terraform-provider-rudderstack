@@ -54,3 +54,7 @@ func TestSourceResourceWebhook(t *testing.T) {
 func TestSourceResourceWebhookShopify(t *testing.T) {
 	cmt.AssertSource(t, "webhook_shopify", []configs.TestConfig{configs.EmptyTestConfig})
 }
+
+func TestSourceResourcePython(t *testing.T) {
+	cmt.AssertSource(t, "python", []configs.TestConfig{configs.EmptyTestConfig})
+}

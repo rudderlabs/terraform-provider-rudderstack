@@ -63,4 +63,9 @@ func init() {
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
+	c.Sources.Register("python", c.ConfigMeta{
+		APIType:    "Python",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
 }
