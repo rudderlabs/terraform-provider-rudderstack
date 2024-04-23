@@ -18,6 +18,11 @@ func init() {
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
+	c.Sources.Register("android", c.ConfigMeta{
+		APIType:    "Android",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
 	c.Sources.Register("ios", c.ConfigMeta{
 		APIType:    "iOS",
 		Properties: []c.ConfigProperty{},
@@ -55,6 +60,11 @@ func init() {
 	})
 	c.Sources.Register("webhook_shopify", c.ConfigMeta{
 		APIType:    "Shopify",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
+	c.Sources.Register("python", c.ConfigMeta{
+		APIType:    "Python",
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
