@@ -35,19 +35,19 @@ description: |-
 
 Required:
 
-- `api_key` (String) Enter Access Token.
-- `app_id` (String) Enter App Id.
+- `api_key` (String) Enter your Intercom access token.
+- `app_id` (String) Enter your app ID.
 
 Optional:
 
-- `collect_context` (Boolean) This setting enables including Context with Identify Calls.
-- `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `mobile_api_key_android` (String) Enter Android API Key.
-- `mobile_api_key_ios` (String) Enable iOS API Key.
+- `collect_context` (Boolean) Enable this setting to include the user context along with your identify calls.
+- `event_filtering` (Block List, Max: 1) Use this setting to determine which events should be blocked or allowed to flow through. (see [below for nested schema](#nestedblock--config--event_filtering))
+- `mobile_api_key_android` (String) Enter the Android API Key.
+- `mobile_api_key_ios` (String) Enter the iOS API Key.
 - `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
-- `send_anonymous_id` (Boolean) This setting enables sending AnonymousId as Secondary UserId.
-- `update_last_request_at` (Boolean) This setting enables the last seen with the current time.
-- `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+- `send_anonymous_id` (Boolean) Enable this setting to send anonymousId as the secondary userId.
+- `update_last_request_at` (Boolean) Enable this setting to send the last seen information with the current time.
+- `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through device mode, that is, using the native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 
 <a id="nestedblock--config--event_filtering"></a>
 ### Nested Schema for `config.event_filtering`

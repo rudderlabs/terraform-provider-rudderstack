@@ -35,11 +35,11 @@ description: |-
 
 Required:
 
-- `partner_id` (String) Enter your Partner ID.
+- `partner_id` (String) Enter your LinkedIn Partner ID.
 
 Optional:
 
-- `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Google Ads. (see [below for nested schema](#nestedblock--config--event_filtering))
+- `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to LinkedIn. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `event_to_conversion_id_map` (List of Object) Event Conversion IDs. (see [below for nested schema](#nestedatt--config--event_to_conversion_id_map))
 - `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
 - `use_native_sdk` (Block List, Max: 1) As this is a device mode destination, this setting will always be enabled. (see [below for nested schema](#nestedblock--config--use_native_sdk))
@@ -49,8 +49,8 @@ Optional:
 
 Optional:
 
-- `blacklist` (List of String) Enter the event names to be blacklisted.
-- `whitelist` (List of String) Enter the event names to be whitelisted.
+- `blacklist` (List of String) Enter the event names to be denylisted.
+- `whitelist` (List of String) Enter the event names to be allowlisted.
 
 
 <a id="nestedatt--config--event_to_conversion_id_map"></a>
