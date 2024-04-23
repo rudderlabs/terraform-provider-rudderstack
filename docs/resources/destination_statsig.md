@@ -35,8 +35,8 @@ description: |-
 
 Required:
 
-- `connection_mode` (Block List, Min: 1, Max: 1) Use this setting to set how you want to route events from your source to destination.. (see [below for nested schema](#nestedblock--config--connection_mode))
-- `secret_key` (String, Sensitive) Enter the Secret Key.
+- `connection_mode` (Block List, Min: 1, Max: 1) Use this setting to specify how you want to route events from your source to destination. (see [below for nested schema](#nestedblock--config--connection_mode))
+- `secret_key` (String, Sensitive) Enter your Statsig secret key.
 
 Optional:
 

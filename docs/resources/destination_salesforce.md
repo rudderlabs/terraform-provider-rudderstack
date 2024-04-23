@@ -35,15 +35,15 @@ description: |-
 
 Required:
 
-- `initial_access_token` (String, Sensitive) Enter Security Token.
-- `password` (String, Sensitive) Enter Password.
-- `user_name` (String) Enter the User Name.
+- `initial_access_token` (String, Sensitive) Enter your Salesforce security token.
+- `password` (String, Sensitive) Enter the password for the above user.
+- `user_name` (String) Enter the Salesforce username.
 
 Optional:
 
-- `map_properties` (Boolean) This setting enables map Rudder Properties to Salesforce Properties.
+- `map_properties` (Boolean) Use this setting to map RudderStack event properties to specific Salesforce fields.
 - `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
-- `sandbox` (Boolean) This setting enables sandbox mode.
-- `use_contact_id` (Boolean) This setting enables Using contactId for converted leads.
+- `sandbox` (Boolean) Use this setting to enable Salesforce sandbox mode.
+- `use_contact_id` (Boolean) When enabled, RudderStack uses contactId for the converted leads.
 
 

@@ -35,9 +35,9 @@ description: |-
 
 Required:
 
-- `credentials` (String, Sensitive) Enter the credentials JSON is used by the client library to access the Google Sheets API.
-- `sheet_id` (String) Enter your google sheet Id.
-- `sheet_name` (String) Enter the spread-sheet to which you want to send data.
+- `credentials` (String, Sensitive) Enter the credentials JSON used by the client library to access the Google Sheets API.
+- `sheet_id` (String) Enter your Google sheet ID. You can find it in the spreadsheet URL.
+- `sheet_name` (String) Specify the name of the Google spreadsheet to which you want to send the data.
 
 Optional:
 
