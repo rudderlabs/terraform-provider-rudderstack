@@ -19,6 +19,10 @@ func TestSourceResourceHTTP(t *testing.T) {
 	cmt.AssertSource(t, "http", []configs.TestConfig{configs.EmptyTestConfig})
 }
 
+func TestSourceResourceAndroid(t *testing.T) {
+	cmt.AssertSource(t, "android", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
 func TestSourceResourceIOS(t *testing.T) {
 	cmt.AssertSource(t, "ios", []configs.TestConfig{configs.EmptyTestConfig})
 }
@@ -49,4 +53,8 @@ func TestSourceResourceWebhook(t *testing.T) {
 
 func TestSourceResourceWebhookShopify(t *testing.T) {
 	cmt.AssertSource(t, "webhook_shopify", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourcePython(t *testing.T) {
+	cmt.AssertSource(t, "python", []configs.TestConfig{configs.EmptyTestConfig})
 }

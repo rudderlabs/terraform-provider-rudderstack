@@ -101,7 +101,7 @@ Optional:
 
 - `access_token` (String, Sensitive) Enter your Facebook business access token required to send the events via the cloud mode.
 - `advanced_mapping` (Boolean) With this setting, you can enable the advanced mapping feature.
-- `blacklist_pii_properties` (List of Object) Enter the PII properties to be blacklisted. (see [below for nested schema](#nestedatt--config--blacklist_pii_properties))
+- `blacklist_pii_properties` (List of Object) Enter the PII properties to be denylisted. (see [below for nested schema](#nestedatt--config--blacklist_pii_properties))
 - `category_to_content` (List of Object) This option lets you specify the category fields to specific Facebook content type. (see [below for nested schema](#nestedatt--config--category_to_content))
 - `event_custom_properties` (List of String) For the standard events, some predefined properties are taken by Facebook. If you want to send more properties for your events, mention those properties in this field.
 - `event_filtering` (Block List, Max: 1) This setting lets you determine which events are blocked or allowed to flowed through to Facebook Pixel. (see [below for nested schema](#nestedblock--config--event_filtering))
@@ -113,7 +113,7 @@ Optional:
 - `test_event_code` (String) If the above setting is enabled, enter the relevant test event code.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send events from the web SDK to Facebook Pixel via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 - `value_field_identifier` (String) You can set this field to `properties.price` or `properties.value`. RudderStack will then assign this to the value field of the Facebook payload.
-- `whitelist_pii_properties` (List of Object) Enter the PII properties to be whitelisted. (see [below for nested schema](#nestedatt--config--whitelist_pii_properties))
+- `whitelist_pii_properties` (List of Object) Enter the PII properties to be allowlisted. (see [below for nested schema](#nestedatt--config--whitelist_pii_properties))
 
 <a id="nestedatt--config--blacklist_pii_properties"></a>
 ### Nested Schema for `config.blacklist_pii_properties`

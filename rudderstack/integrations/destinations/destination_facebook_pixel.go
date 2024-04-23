@@ -110,7 +110,7 @@ func init() {
 			"blacklist_pii_properties": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Enter the PII properties to be blacklisted.",
+				Description: "Enter the PII properties to be denylisted.",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -129,7 +129,7 @@ func init() {
 			"whitelist_pii_properties": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Enter the PII properties to be whitelisted.",
+				Description: "Enter the PII properties to be allowlisted.",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

@@ -207,8 +207,8 @@ Optional:
 
 Optional:
 
-- `blacklist` (List of String) Enter the event names to be blacklisted.
-- `whitelist` (List of String) Enter the event names to be whitelisted.
+- `blacklist` (List of String) Enter the event names to be denylisted.
+- `whitelist` (List of String) Enter the event names to be allowlisted.
 
 
 <a id="nestedatt--config--event_merch_event_to_adobe_event"></a>
