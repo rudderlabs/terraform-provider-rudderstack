@@ -37,7 +37,7 @@ Required:
 
 Optional:
 
-- `rest_api_key` (String, Sensitive) Enter your Braze Rest Api Key.Required for cloud mode.
+- `rest_api_key` (String, Sensitive) Enter your Braze Rest Api Key. Required for cloud mode.
 - `app_key` (String, Sensitive) Enter your Braze App Key. Required for device mode.
 - `enable_subscription_group_in_group_call` (Boolean) Use this setting to Enable subscription groups in group call.
 - `enable_nested_array_operations` (Boolean) Use this setting to use Custom Attributes Operation.

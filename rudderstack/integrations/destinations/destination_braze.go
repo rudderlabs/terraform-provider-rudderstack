@@ -42,18 +42,16 @@ func init() {
 		ConfigSchema: map[string]*schema.Schema{
 			"rest_api_key": {
 				Type:             schema.TypeString,
-				Optional:         false,
+				Optional:         true,
 				Sensitive:        true,
-				ExactlyOneOf:     []string{"app_key"},
-				Description:      "Enter your Braze Rest Api Key.Required for cloud mode.",
+				Description:      "Enter your Braze Rest Api Key. Required for cloud mode.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"app_key": {
 				Type:             schema.TypeString,
-				Optional:         false,
+				Optional:         true,
 				Sensitive:        true,
-				ExactlyOneOf:     []string{"rest_api_key"},
-				Description:      "Enter your Braze APP Key.Required for Device mode.",
+				Description:      "Enter your Braze APP Key. Required for Device mode.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 			},
 			"data_center": {
