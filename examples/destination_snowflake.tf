@@ -16,6 +16,7 @@ resource "rudderstack_destination_snowflake" example{
     }
     # json_paths = "..."
     use_rudder_storage = true
+    # role = "..."
     # namespace = "..."
     # prefix = "..."
     # additional_properties = true

@@ -37,6 +37,7 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				warehouse = "example-warehouse"
 				user = "example-user"
 				password = "example-password"
+				role = "example-role"
 				use_rudder_storage = false
 				sync {
 					frequency = "60"
@@ -61,6 +62,7 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				"warehouse": "example-warehouse",
 				"user": "example-user",
 				"password": "example-password",
+				"role": "example-role",
 				"namespace": "example-namespace",
 				"syncFrequency": "60",
 				"syncStartAt": "10:00",
