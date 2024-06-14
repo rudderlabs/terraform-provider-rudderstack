@@ -14,6 +14,7 @@ func init() {
 			c.Simple("warehouse", "warehouse"),
 			c.Simple("user", "user"),
 			c.Simple("password", "password"),
+			c.Simple("role", "role", c.SkipZeroValue),
 			c.Simple("namespace", "namespace", c.SkipZeroValue),
 			c.Simple("syncFrequency", "sync.0.frequency"),
 			c.Simple("syncStartAt", "sync.0.start_at", c.SkipZeroValue),
@@ -72,6 +73,12 @@ func init() {
 				Sensitive:        true,
 				Description:      "Password for the user.",
 				ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
+			},
+			"role": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Role for the user. If not specified, the default role is used",
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"namespace": {
 				Type:        schema.TypeString,
