@@ -1,5 +1,5 @@
 ---
-page_title: "rudderstack_source_go Resource - terraform-provider-rudderstack"
+page_title: "rudderstack_source_braze Resource - terraform-provider-rudderstack"
 subcategory: ""
 description: |-
   
@@ -8,7 +8,7 @@ description: |-
 # rudderstack_source_braze (Resource)
 
 This resource represents an Braze event stream source. For more information check
-https://www.rudderstack.com/docs/sources/event-streams/sdks/rudderstack-android-sdk/
+https://www.rudderstack.com/docs/sources/event-streams/cloud-apps/braze-currents/
 
 ## Example Usage
 
