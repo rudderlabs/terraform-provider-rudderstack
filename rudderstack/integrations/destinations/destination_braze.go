@@ -17,9 +17,9 @@ func init() {
 			c.Simple("sendPurchaseEventWithExtraProperties", "send_purchase_event_with_extra_properties", c.SkipZeroValue),
 			c.Simple("trackAnonymousUser", "track_anonymous_user", c.SkipZeroValue),
 			c.Simple("supportDedup", "support_dedup", c.SkipZeroValue),
-			c.Simple("enableBrazeLogging", "enable_braze_logging", c.SkipZeroValue),
-			c.Simple("enablePushNotification", "enable_push_notification", c.SkipZeroValue),
-			c.Simple("allowUserSuppliedJavascript", "allow_user_supplied_javascript", c.SkipZeroValue),
+			c.Simple("enableBrazeLogging.web", "enable_braze_logging.0.web"),
+			c.Simple("enablePushNotification.web", "enable_push_notification.0.web"),
+			c.Simple("allowUserSuppliedJavascript.web", "allow_user_supplied_javascript.0.web"),
 			c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 			c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 			c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
@@ -45,14 +45,14 @@ func init() {
 				Optional:         true,
 				Sensitive:        true,
 				Description:      "Enter your Braze Rest Api Key. Required for cloud mode.",
-				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"app_key": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Sensitive:        true,
 				Description:      "Enter your Braze APP Key. Required for Device mode.",
-				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 			"data_center": {
 				Type:        schema.TypeString,
@@ -90,22 +90,49 @@ func init() {
 				Description: "Use this setting to enable Deduplicate Traits on identify and track.",
 			},
 			"enable_braze_logging": {
-				Type:        schema.TypeBool,
+				Type:        schema.TypeList,
+				MaxItems:    1,
 				Optional:    true,
-				Default:     false,
 				Description: "Use this setting to show braze logs to customer.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"web": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+					},
+				},
 			},
 			"enable_push_notification": {
-				Type:        schema.TypeBool,
+				Type:        schema.TypeList,
+				MaxItems:    1,
 				Optional:    true,
-				Default:     false,
 				Description: "Use this setting to use push notification. It requires service worker setup by client.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"web": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+					},
+				},
 			},
 			"allow_user_supplied_javascript": {
-				Type:        schema.TypeBool,
+				Type:        schema.TypeList,
+				MaxItems:    1,
 				Optional:    true,
-				Default:     false,
 				Description: "Use this setting to enable HTML in-app messages.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"web": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+					},
+				},
 			},
 			"event_filtering": {
 				Type:        schema.TypeList,
