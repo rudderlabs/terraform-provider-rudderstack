@@ -7,6 +7,10 @@ import (
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
+func TestSourceResourceBraze(t *testing.T) {
+	cmt.AssertSource(t, "braze", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
 func TestSourceResourceCordova(t *testing.T) {
 	cmt.AssertSource(t, "cordova", []configs.TestConfig{configs.EmptyTestConfig})
 }

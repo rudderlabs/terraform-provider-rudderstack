@@ -3,6 +3,11 @@ package sources
 import c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 
 func init() {
+	c.Sources.Register("braze", c.ConfigMeta{
+		APIType:    "Braze",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
 	c.Sources.Register("cordova", c.ConfigMeta{
 		APIType:    "Cordova",
 		Properties: []c.ConfigProperty{},
