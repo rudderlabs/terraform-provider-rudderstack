@@ -36,14 +36,9 @@ func TestDestinationResourcePostgres(t *testing.T) {
 				user = "test-user"
 				password = "test-password"
 				port = "test-port"
-				ssl_mode = "test-ssl_mode"
-				sync_frequency = "test-sync_frequency"
+				ssl_mode = "verify-ca"
+				sync_frequency = "60"
 				use_rudder_storage = true
-				exclude_window {
-					exclude_window_start_time = "test-exclude_window_start_time"
-					exclude_window_end_time = "test-exclude_window_end_time"
-				}
-				onetrust_cookie_categories = ["c001"]
 			`,
 			APIUpdate: `{
 				"host": "test-host",
@@ -51,14 +46,9 @@ func TestDestinationResourcePostgres(t *testing.T) {
 				"user": "test-user",
 				"password": "test-password",
 				"port": "test-port",
-				"sslMode": "test-ssl_mode",
-				"syncFrequency": "test-sync_frequency",
-				"useRudderStorage": true,
-				"excludeWindow": {
-					"excludeWindowStartTime": "test-exclude_window_start_time",
-					"excludeWindowEndTime": "test-exclude_window_end_time"
-				},
-				"oneTrustCookieCategories": ["c001"]
+				"sslMode": "verify-ca",
+				"syncFrequency": "60",
+				"useRudderStorage": true
 			}`,
 		},
 	})

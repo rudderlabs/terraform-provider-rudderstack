@@ -28,7 +28,7 @@ func TestDestinationResourceZendesk(t *testing.T) {
 				create_users_as_verified         = true
 				send_group_calls_without_user_id = true
 				remove_users_from_organization   = true
-				search_by_external_id = false
+				search_by_external_id = true
 				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
@@ -38,7 +38,7 @@ func TestDestinationResourceZendesk(t *testing.T) {
 				"createUsersAsVerified": true,
 				"sendGroupCallsWithoutUserId": true,
 				"removeUsersFromOrganization": true,
-				"searchByExternalId": false,
+				"searchByExternalId": true,
 				"oneTrustCookieCategories": [
 					{ "oneTrustCookieCategory": "one" },
 					{ "oneTrustCookieCategory": "two" },
