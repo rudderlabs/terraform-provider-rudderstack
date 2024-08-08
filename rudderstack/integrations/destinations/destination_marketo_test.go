@@ -8,7 +8,7 @@ import (
 )
 
 func TestDestinationResourceMarketo(t *testing.T) {
-	cmt.AssertDestination(t, "merketo", []c.TestConfig{
+	cmt.AssertDestination(t, "marketo", []c.TestConfig{
 		{
 			TerraformCreate: `
 				account_id = "..."
@@ -16,14 +16,21 @@ func TestDestinationResourceMarketo(t *testing.T) {
 				client_secret = "cs"
 				track_anonymous_events = true
 				create_if_not_exist = true
-
+				connection_mode {
+					web = "cloud"
+					ios = "cloud"
+				}
 			`,
 			APICreate: `{
 				"accountId": "...",
 				"clientId": "cid",
 				"clientSecret": "cs",
 				"trackAnonymousEvents": true,
-				"createIfNotExist": true
+				"createIfNotExist": true,
+				"connectionMode": {
+					"web": "cloud",
+					"ios": "cloud"
+				}
 			}`,
 			TerraformUpdate: `
 				account_id = "..."
@@ -50,10 +57,14 @@ func TestDestinationResourceMarketo(t *testing.T) {
 						to = "value1"
 					}
 				]
+				connection_mode {
+					web = "cloud"
+					ios = "cloud"
+				}
 				onetrust_cookie_categories = ["one", "two", "three"]
 			`,
 			APIUpdate: `{
-				accountId": "...",
+				"accountId": "...",
 				"clientId": "cid2",
 				"clientSecret": "cs",
 				"trackAnonymousEvents": true,
@@ -77,7 +88,15 @@ func TestDestinationResourceMarketo(t *testing.T) {
 						"to": "value1"
 					}
 				],
-				"oneTrustCookieCategories": ["one", "two", "three"]
+				"connectionMode": {
+					"web": "cloud",
+					"ios": "cloud"
+				},
+				"oneTrustCookieCategories": [
+					{ "oneTrustCookieCategory": "one" },
+					{ "oneTrustCookieCategory": "two" },
+					{ "oneTrustCookieCategory": "three" }
+				]
 			}`,
 		},
 	})
