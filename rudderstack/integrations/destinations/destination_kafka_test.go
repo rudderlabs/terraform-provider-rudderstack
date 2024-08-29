@@ -16,9 +16,10 @@ func TestDestinationResourceKafka(t *testing.T) {
 				topic = "example-topic"
 			`,
 			APICreate: `{
-				hostName = "example.com"
-				port = "9092"
-				topic = "example-topic"
+				"hostName": "example.com",
+				"port": "9092",
+				"topic": "example-topic",
+				"sslEnabled": true
 			}`,
 			TerraformUpdate: `
 				host_name = "example-updated.com"
@@ -26,13 +27,13 @@ func TestDestinationResourceKafka(t *testing.T) {
 				topic = "example-topic"
 				ssl_enabled = true
 				ca_certificate = "example-ca-certificate"
-				`,
+			`,
 			APIUpdate: `{
-				hostName = "example-updated.com"
-				port = "9092"
-				topic = "example-topic"
-				sslEnabled = true
-				caCertificate = "example-ca-certificate"
+				"hostName": "example-updated.com",
+				"port": "9092",
+				"topic": "example-topic",
+				"sslEnabled": true,
+				"caCertificate": "example-ca-certificate"
 			}`,
 		},
 	})

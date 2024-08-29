@@ -9,8 +9,8 @@ func init() {
 	c.Destinations.Register("braze", c.ConfigMeta{
 		APIType: "BRAZE",
 		Properties: []c.ConfigProperty{
-			c.Simple("restApiKey", "rest_api_key"),
-			c.Simple("appKey", "app_key"),
+			c.Simple("restApiKey", "rest_api_key", c.SkipZeroValue),
+			c.Simple("appKey", "app_key", c.SkipZeroValue),
 			c.Simple("dataCenter", "data_center"),
 			c.Simple("enableSubscriptionGroupInGroupCall", "enable_subscription_group_in_group_call", c.SkipZeroValue),
 			c.Simple("enableNestedArrayOperations", "enable_nested_array_operations", c.SkipZeroValue),
