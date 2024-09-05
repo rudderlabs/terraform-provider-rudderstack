@@ -62,7 +62,7 @@ resource "rudderstack_destination_mixpanel" example{
 }
 ```
 
-> **⚠️ Breaking Change**
+> **:warning: Breaking Change**
 > 
 > Note that from the provider versions 1.0.0 and above, the schema of `onetrust_cookie_categories` property has been changed. Please refer to the example above.
 

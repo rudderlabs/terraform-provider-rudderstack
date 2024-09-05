@@ -47,7 +47,7 @@ resource "rudderstack_destination_sentry" "example" {
 }
 ```
 
-> **⚠️ Breaking Change**
+> **:warning: Breaking Change**
 > 
 > Note that from the provider versions 2.0.0 and above, the schema of `onetrust_cookie_categories` property has been changed. Please refer to the example above.
 
