@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/rudderlabs/rudder-api-go/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -73,7 +74,7 @@ func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag
 	accessToken := d.Get("access_token").(string)
 	client, err := NewAPIClient(accessToken,
 		client.WithBaseURL(apiUrl),
-		client.WithUserAgent("terraform-provider-rudderstack/1.0.0"))
+		client.WithUserAgent("terraform-provider-rudderstack/2.0.0"))
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}

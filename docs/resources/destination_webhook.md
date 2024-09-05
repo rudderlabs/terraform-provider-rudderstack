@@ -31,7 +31,19 @@ resource "rudderstack_destination_webhook" "example" {
       }
     ]
 
-    # onetrust_cookie_categories = ["one", "two", "three"]
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    #   android = ["one", "two", "three"]
+    #   ios = ["one", "two", "three"]
+    #   unity = ["one", "two", "three"]
+    #   reactnative = ["one", "two", "three"]
+    #   flutter = ["one", "two", "three"]
+    #   cordova = ["one", "two", "three"]
+    #   amp = ["one", "two", "three"]
+    #   cloud = ["one", "two", "three"]
+    #   warehouse = ["one", "two", "three"]
+    #   shopify = ["one", "two", "three"]
+    # }
   }
 }
 ```
@@ -64,7 +76,7 @@ Required:
 Optional:
 
 - `headers` (List of Object, Sensitive) Add custom headers for your events via this option. These headers will be added to the request made from RudderStack to your webhook. (see [below for nested schema](#nestedatt--config--headers))
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `webhook_method` (String) This is the HTTP method of the request sent to the configured endpoint. By default, `POST` is used.
 
 <a id="nestedatt--config--headers"></a>
@@ -74,3 +86,21 @@ Optional:
 
 - `from` (String)
 - `to` (String)
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `warehouse` (List of String)
+- `web` (List of String)

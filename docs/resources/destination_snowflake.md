@@ -30,7 +30,6 @@ resource "rudderstack_destination_snowflake" example{
     }
     # json_paths = "..."
     use_rudder_storage = true
-    # role = "..."
     # namespace = "..."
     # prefix = "..."
     # additional_properties = true
@@ -51,7 +50,19 @@ resource "rudderstack_destination_snowflake" example{
     #   account_key = "..."
     #   storage_integration = "..."
     # }
-    # onetrust_cookie_categories = ["one", "two", "three"]
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    #   android = ["one", "two", "three"]
+    #   ios = ["one", "two", "three"]
+    #   unity = ["one", "two", "three"]
+    #   reactnative = ["one", "two", "three"]
+    #   flutter = ["one", "two", "three"]
+    #   cordova = ["one", "two", "three"]
+    #   amp = ["one", "two", "three"]
+    #   cloud = ["one", "two", "three"]
+    #   cloud_source = ["one", "two", "three"]
+    #   shopify = ["one", "two", "three"]
+    # }
   }
 }
 ```
@@ -93,7 +104,7 @@ Optional:
 - `gcp` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--gcp))
 - `json_paths` (String) Specify required json properties in dot notation separated by commas.
 - `namespace` (String) Schema name for the warehouse where the tables are created by Rudderstack.
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `prefix` (String) If specified, RudderStack will create a folder in the bucket with this prefix and push all the data within that folder.
 - `role` (String) Role for the user. If not specified, the default role is used
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
@@ -132,6 +143,24 @@ Required:
 - `bucket_name` (String) Specify the name of your GCS bucket where RudderStack will store the data before loading it into Snowflake.
 - `credentials` (String) GCP Service Account credentials JSON for RudderStack to use in loading data into your Google Cloud Storage.
 - `storage_integration` (String) Create the cloud storage integration in Snowflake and enter the name of integration.Please refer to this for more details -> https://www.rudderstack.com/docs/destinations/warehouse-destinations/snowflake/#configuring-cloud-storage-integration-with-snowflake
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cloud_source` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `web` (List of String)
 
 
 <a id="nestedblock--config--s3"></a>

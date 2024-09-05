@@ -34,7 +34,19 @@ resource "rudderstack_destination_redshift" "example" {
     #   access_key    = ""
     # }
 
-    # onetrust_cookie_categories = ["one", "two", "three"]
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    #   android = ["one", "two", "three"]
+    #   ios = ["one", "two", "three"]
+    #   unity = ["one", "two", "three"]
+    #   reactnative = ["one", "two", "three"]
+    #   flutter = ["one", "two", "three"]
+    #   cordova = ["one", "two", "three"]
+    #   amp = ["one", "two", "three"]
+    #   cloud = ["one", "two", "three"]
+    #   cloud_source = ["one", "two", "three"]
+    #   shopify = ["one", "two", "three"]
+    # }
 
     sync {
       frequency = "30"
@@ -82,7 +94,7 @@ Required:
 Optional:
 
 - `enable_sse` (Boolean) This setting enables server-side encryption.
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
 
 <a id="nestedblock--config--sync"></a>
@@ -97,6 +109,24 @@ Optional:
 - `exclude_window_end_time` (String) Set the end time of the exclusion window.
 - `exclude_window_start_time` (String) This optional setting lets you set a time window when RudderStack will not sync the data to your database.
 - `start_at` (String) Specify the particular time of the day (in UTC) when you want RudderStack to sync the data to the warehouse.
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cloud_source` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `web` (List of String)
 
 
 <a id="nestedblock--config--s3"></a>

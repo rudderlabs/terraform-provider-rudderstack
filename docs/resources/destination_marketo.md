@@ -44,7 +44,19 @@ resource "rudderstack_destination_marketo" "example" {
         to   = "value1"
       }
     ]
-    # onetrust_cookie_categories = ["C001", "C002", "C003"]
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    #   android = ["one", "two", "three"]
+    #   ios = ["one", "two", "three"]
+    #   unity = ["one", "two", "three"]
+    #   reactnative = ["one", "two", "three"]
+    #   flutter = ["one", "two", "three"]
+    #   cordova = ["one", "two", "three"]
+    #   amp = ["one", "two", "three"]
+    #   cloud = ["one", "two", "three"]
+    #   warehouse = ["one", "two", "three"]
+    #   shopify = ["one", "two", "three"]
+    # }
   }
 }
 ```
@@ -82,7 +94,7 @@ Optional:
 - `create_if_not_exist` (Boolean) Boolean flag to create lead if not exist
 - `custom_activity_property_map` (List of Object) Custom Activity Property Map (see [below for nested schema](#nestedatt--config--custom_activity_property_map))
 - `lead_trait_mapping` (List of Object) Lead Trait Mapping (see [below for nested schema](#nestedatt--config--lead_trait_mapping))
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `rudder_events_mapping` (List of Object) Rudder Events Mapping (see [below for nested schema](#nestedatt--config--rudder_events_mapping))
 - `track_anonymous_events` (Boolean) Boolean flag to track anonymous events
 
@@ -120,6 +132,24 @@ Optional:
 
 - `from` (String)
 - `to` (String)
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `warehouse` (List of String)
+- `web` (List of String)
 
 
 <a id="nestedatt--config--rudder_events_mapping"></a>

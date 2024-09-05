@@ -22,7 +22,19 @@ resource "rudderstack_destination_active_campaign" "example" {
 
     # actid     = "..."
     # event_key = "..."
-    # onetrust_cookie_categories = ["one", "two", "three"]
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    #   android = ["one", "two", "three"]
+    #   ios = ["one", "two", "three"]
+    #   unity = ["one", "two", "three"]
+    #   reactnative = ["one", "two", "three"]
+    #   flutter = ["one", "two", "three"]
+    #   cordova = ["one", "two", "three"]
+    #   amp = ["one", "two", "three"]
+    #   cloud = ["one", "two", "three"]
+    #   warehouse = ["one", "two", "three"]
+    #   shopify = ["one", "two", "three"]
+    # }
   }
 }
 ```
@@ -57,4 +69,21 @@ Optional:
 
 - `actid` (String) Enter your ActID here. To obtain the ActID unique to your ActiveCampaign account, go to Settings > Tracking > Event Tracking API.
 - `event_key` (String) Enter the event key unique to your ActiveCampaign account. To obtain the event key, go to your ActiveCampaign account > Settings > Tracking > Event Tracking.
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `warehouse` (List of String)
+- `web` (List of String)

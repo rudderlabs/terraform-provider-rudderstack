@@ -41,7 +41,7 @@ Required:
 Optional:
 
 - `key_based_authentication` (Block List, Max: 1) This option allows you select the key based authentication. (see [below for nested schema](#nestedblock--config--key_based_authentication))
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `role_based_authentication` (Block List, Max: 1) This option allows you select the arn based authentication. (see [below for nested schema](#nestedblock--config--role_based_authentication))
 - `use_message_id` (Boolean) Use MessageId as Partition Key
 
@@ -52,6 +52,24 @@ Required:
 
 - `access_key` (String, Sensitive) Enter the AWS Secret Access Key.
 - `access_key_id` (String, Sensitive) Enter the AWS Access Key ID.
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `warehouse` (List of String)
+- `web` (List of String)
 
 
 <a id="nestedblock--config--role_based_authentication"></a>

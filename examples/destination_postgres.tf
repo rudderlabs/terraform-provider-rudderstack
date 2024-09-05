@@ -1,12 +1,13 @@
-resource "rudderstack_destination_active_campaign" "example" {
-  name = "my-active_campaign"
+resource "rudderstack_destination_postgres" "example" {
+  name = "my-postgres-tf"
 
   config {
-    api_url = "https://example.api-us1.com"
-    api_key = "..."
-
-    # actid     = "..."
-    # event_key = "..."
+    host        = "host"
+    database    = "database"
+    user        = "user"
+    password    = "..."
+    port        = "1234"
+    use_rudder_storage = true
     # onetrust_cookie_categories {
     #   web = ["one", "two", "three"]
     #   android = ["one", "two", "three"]
@@ -17,7 +18,7 @@ resource "rudderstack_destination_active_campaign" "example" {
     #   cordova = ["one", "two", "three"]
     #   amp = ["one", "two", "three"]
     #   cloud = ["one", "two", "three"]
-    #   warehouse = ["one", "two", "three"]
+    #   cloud_source = ["one", "two", "three"]
     #   shopify = ["one", "two", "three"]
     # }
   }

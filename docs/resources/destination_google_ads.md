@@ -52,7 +52,9 @@ resource "rudderstack_destination_google_ads" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories = ["one", "two", "three"]
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    # }
   }
 }
 ```
@@ -90,7 +92,7 @@ Optional:
 - `disable_ad_personalization` (Boolean) Enable this setting to programmatically disable ad personalization.
 - `dynamic_remarketing` (Block List, Max: 1) Enabling this tracking mode allows RudderStack to leverage Google Ads' Dynamic Remarketing feature for event tracking. (see [below for nested schema](#nestedblock--config--dynamic_remarketing))
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Google Ads. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `page_load_conversions` (List of Object) You can configure the page load conversions for multiple instances. (see [below for nested schema](#nestedatt--config--page_load_conversions))
 - `send_page_view` (Boolean) Enabling this setting configures Google Ads to automatically send your `page` events.
 - `use_native_sdk` (Block List, Max: 1) As this is a device mode destination, this setting will always be enabled. (see [below for nested schema](#nestedblock--config--use_native_sdk))
@@ -119,6 +121,14 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be denylisted.
 - `whitelist` (List of String) Enter the event names to be allowlisted.
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `web` (List of String)
 
 
 <a id="nestedatt--config--page_load_conversions"></a>

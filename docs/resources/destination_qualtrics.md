@@ -42,7 +42,7 @@ Optional:
 
 - `enable_generic_page_title` (Boolean) This setting enables Generic Page Title.
 - `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through SDKs. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 
 <a id="nestedblock--config--event_filtering"></a>
@@ -52,6 +52,16 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be blacklisted.
 - `whitelist` (List of String) Enter the event names to be whitelisted.
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `android` (List of String)
+- `ios` (List of String)
+- `web` (List of String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

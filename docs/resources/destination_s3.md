@@ -24,7 +24,19 @@ resource "rudderstack_destination_s3" "example" {
     # access_key    = "..."
 
     # enable_sse    = true
-    # onetrust_cookie_categories = ["one", "two", "three"]
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    #   android = ["one", "two", "three"]
+    #   ios = ["one", "two", "three"]
+    #   unity = ["one", "two", "three"]
+    #   reactnative = ["one", "two", "three"]
+    #   flutter = ["one", "two", "three"]
+    #   cordova = ["one", "two", "three"]
+    #   amp = ["one", "two", "three"]
+    #   cloud = ["one", "two", "three"]
+    #   warehouse = ["one", "two", "three"]
+    #   shopify = ["one", "two", "three"]
+    # }
   }
 }
 ```
@@ -59,5 +71,22 @@ Optional:
 - `access_key` (String, Sensitive) Enter your AWS secret access key.
 - `access_key_id` (String) Enter your AWS access key ID.
 - `enable_sse` (Boolean) This setting enables server-side encryption.
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `prefix` (String) Enter a prefix which RudderStack associates as the path prefix to all the files stored in your S3 bucket.
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `warehouse` (List of String)
+- `web` (List of String)

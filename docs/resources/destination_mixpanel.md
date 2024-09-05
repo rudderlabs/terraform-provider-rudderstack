@@ -97,7 +97,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Mixpanel. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `event_increments` (List of String) Events to increment in People.
 - `group_key_settings` (List of String) Group Key
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `people` (Boolean) Boolean flag to send all of your identify calls to Mixpanel's People feature
 - `people_properties` (List of String) Traits to set as People Properties.
 - `prop_increments` (List of String) Properties to increment in People
@@ -117,6 +117,24 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be denylisted.
 - `whitelist` (List of String) Enter the event names to be allowlisted.
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `warehouse` (List of String)
+- `web` (List of String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

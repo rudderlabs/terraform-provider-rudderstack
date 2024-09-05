@@ -5,8 +5,9 @@ import (
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestStringMatchesRegexp(t *testing.T) {

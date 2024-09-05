@@ -2,6 +2,7 @@ package destinations
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -37,141 +38,138 @@ func init() {
 		},
 		ConfigSchema: map[string]*schema.Schema{
 			"host_name": {
-				Type:             schema.TypeString,
-				Required:         true,
-				Description:      "The host name of your Kafka service.",
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The host name of your Kafka service.",
 			},
 			"port": {
-				Type:             schema.TypeString,
-				Required:         true,
-				Description:      "The port number associated with the Kafka service.",
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The port number associated with the Kafka service.",
 			},
 			"topic": {
-				Type:             schema.TypeString,
-				Required:         true,
-				Description:      "The topic name in your Kafka service where the data will be sent.",
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The topic name in your Kafka service where the data will be sent.",
 			},
 			"ssl_enabled": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:		  true,
-				Description:      "Whether to enable SSL for the Kafka service.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "Whether to enable SSL for the Kafka service.",
 			},
 			"ca_certificate": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "The CA certificate for the Kafka service.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The CA certificate for the Kafka service.",
 			},
 			"use_sasl": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:		  false,
-				Description:      "Whether to use SASL for the Kafka service.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether to use SASL for the Kafka service.",
 			},
 			"sasl_type": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "The SASL type for the Kafka service.",
-
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The SASL type for the Kafka service.",
 			},
 			"username": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "The username for the Kafka service.",
-
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The username for the Kafka service.",
 			},
 			"password": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Sensitive:		  true,
-				Description:      "The password for the Kafka service.",
-
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "The password for the Kafka service.",
 			},
 			"convert_to_avro": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:		  false,
-				Description:      "Whether to convert the data to Avro format.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether to convert the data to Avro format.",
 			},
 			"avro_schema": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				Description:      "The Avro schema for the Kafka service.",
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The Avro schema for the Kafka service.",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"schema_id": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "The schema ID for the Avro schema.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The schema ID for the Avro schema.",
 						},
 						"schema": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "The schema for the Avro schema.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The schema for the Avro schema.",
 						},
 					},
 				},
 			},
 			"embed_avro_schema_id": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:		  false,
-				Description:      "Whether to embed the Avro schema ID.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether to embed the Avro schema ID.",
 			},
 			"enable_multi_topic": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:		  false,
-				Description:      "Whether to enable multi-topic.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether to enable multi-topic.",
 			},
 			"event_type_to_topic_map": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				Description:      "The event type to topic map for the Kafka service.",
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The event type to topic map for the Kafka service.",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "The event type to topic map from.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The event type to topic map from.",
 						},
 						"to": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "The event type to topic map to.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The event type to topic map to.",
 						},
 					},
 				},
 			},
 			"event_to_topic_map": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				Description:      "The event to topic map for the Kafka service.",
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The event to topic map for the Kafka service.",
 				ConfigMode:  schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"from": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "The event to topic map from.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The event to topic map from.",
 						},
 						"to": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "The event to topic map to.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The event to topic map to.",
 						},
 					},
 				},
 			},
-			"onetrust_cookie_categories" : {
-				Type:             schema.TypeList,
-				Optional:         true,
-				Description:      "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
+			"onetrust_cookie_categories": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
-			},
+				},
 			},
 		},
 	})

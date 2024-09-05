@@ -44,7 +44,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) Use this setting to determine which events should be blocked or allowed to flow through. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `mobile_api_key_android` (String) Enter the Android API Key.
 - `mobile_api_key_ios` (String) Enter the iOS API Key.
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `send_anonymous_id` (Boolean) Enable this setting to send anonymousId as the secondary userId.
 - `update_last_request_at` (Boolean) Enable this setting to send the last seen information with the current time.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through device mode, that is, using the native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
@@ -56,6 +56,24 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be denylisted.
 - `whitelist` (List of String) Enter the event names to be allowlisted.
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `warehouse` (List of String)
+- `web` (List of String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

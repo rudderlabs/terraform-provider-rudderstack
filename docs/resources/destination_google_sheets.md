@@ -42,7 +42,7 @@ Required:
 Optional:
 
 - `event_key_map` (List of Object) Add Event Properties to map to Google-Sheets Column. (see [below for nested schema](#nestedatt--config--event_key_map))
-- `onetrust_cookie_categories` (List of String) Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.
+- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 
 <a id="nestedatt--config--event_key_map"></a>
 ### Nested Schema for `config.event_key_map`
@@ -51,5 +51,23 @@ Optional:
 
 - `from` (String)
 - `to` (String)
+
+
+<a id="nestedblock--config--onetrust_cookie_categories"></a>
+### Nested Schema for `config.onetrust_cookie_categories`
+
+Optional:
+
+- `amp` (List of String)
+- `android` (List of String)
+- `cloud` (List of String)
+- `cordova` (List of String)
+- `flutter` (List of String)
+- `ios` (List of String)
+- `reactnative` (List of String)
+- `shopify` (List of String)
+- `unity` (List of String)
+- `warehouse` (List of String)
+- `web` (List of String)
 
 

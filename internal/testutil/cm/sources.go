@@ -10,11 +10,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/rudderlabs/rudder-api-go/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
-	"github.com/stretchr/testify/mock"
 )
 
 func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig) {

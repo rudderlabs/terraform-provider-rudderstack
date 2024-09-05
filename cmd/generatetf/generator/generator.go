@@ -11,15 +11,14 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zclconf/go-cty/cty"
+
 	"github.com/rudderlabs/rudder-api-go/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	_ "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations"
-	"github.com/zclconf/go-cty/cty"
 )
 
-var (
-	logger = log.New(os.Stderr, "", 0)
-)
+var logger = log.New(os.Stderr, "", 0)
 
 type sourceEntry struct {
 	terraformType string

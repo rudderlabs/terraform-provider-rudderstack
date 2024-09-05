@@ -54,7 +54,19 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 					access_key = "example-access-key"
 					enable_sse = true
 				}
-				onetrust_cookie_categories = ["one", "two", "three"]
+				onetrust_cookie_categories {
+					web = ["one", "two", "three"]
+					android = ["one", "two", "three"]
+					ios = ["one", "two", "three"]
+					unity = ["one", "two", "three"]
+					reactnative = ["one", "two", "three"]
+					flutter = ["one", "two", "three"]
+					cordova = ["one", "two", "three"]
+					amp = ["one", "two", "three"]
+					cloud = ["one", "two", "three"]
+					cloud_source = ["one", "two", "three"]
+					shopify = ["one", "two", "three"]
+				}
 			`,
 			APIUpdate: `{
 				"account": "example-account",
@@ -79,11 +91,63 @@ func TestDestinationResourceSnowflake(t *testing.T) {
         		"accessKeyID": "example-access-key-id",
         		"accessKey": "example-access-key",
         		"enableSSE": true,
-				"oneTrustCookieCategories": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				]
+				"oneTrustCookieCategories": {
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"android": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"ios": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"unity": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"reactnative": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"flutter": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"cordova": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"amp": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"cloud": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"cloud_source": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"shopify": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
+				}
 			}`,
 		},
 	})
