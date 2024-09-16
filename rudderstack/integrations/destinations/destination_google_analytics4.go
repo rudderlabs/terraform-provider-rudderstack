@@ -2,6 +2,7 @@ package destinations
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -79,7 +80,7 @@ func init() {
 					"whitelist": {
 						Type:         schema.TypeList,
 						Optional:     true,
-							Description:  "Enter the event names to be allowlisted.",
+						Description:  "Enter the event names to be allowlisted.",
 						ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 						Elem: &schema.Schema{
 							Type: schema.TypeString,
@@ -88,7 +89,7 @@ func init() {
 					"blacklist": {
 						Type:         schema.TypeList,
 						Optional:     true,
-							Description:  "Enter the event names to be denylisted.",
+						Description:  "Enter the event names to be denylisted.",
 						ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 						Elem: &schema.Schema{
 							Type: schema.TypeString,
@@ -118,8 +119,8 @@ func init() {
 	}
 
 	c.Destinations.Register("google_analytics4", c.ConfigMeta{
-		APIType: "GA4",
-		Properties: properties,
+		APIType:      "GA4",
+		Properties:   properties,
 		ConfigSchema: schema,
 	})
 }

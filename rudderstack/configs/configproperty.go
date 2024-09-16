@@ -17,12 +17,12 @@ type ConfigProperty struct {
 
 // FromStateFunc modifies am API config json object using terraform state information
 // provided by a ResourceData object. It returns the modified config and an optional error.
-type FromStateFunc func(config string, state string) (string, error)
+type FromStateFunc func(config, state string) (string, error)
 
 // ToStateFunc modifies a terraform state json object that represents a config object
 // by extracting data from a provided API config json object. It returns the modified
 // terraform state and an optional error.
-type ToStateFunc func(state string, config string) (string, error)
+type ToStateFunc func(state, config string) (string, error)
 
 // Simple returns a ConfigProperty that maps an API config key to a terraform config key
 // and vice versa. Additional ValueFilter filters can be applied to ignore a field in state
@@ -61,7 +61,7 @@ type ConfigConditionFunc func(config string) bool
 
 // equals returns a ConfigConditionFunc that is true if the API config contains
 // the specified key and it has the specified value.
-func Equals(key string, value string) ConfigConditionFunc {
+func Equals(key, value string) ConfigConditionFunc {
 	return func(config string) bool {
 		r := gjson.Get(config, key)
 		return r.Exists() && r.Value() == value
@@ -83,7 +83,7 @@ func Discriminator(apiKey string, values DiscriminatorValues) ConfigProperty {
 // to a terraform state key of a config.
 type DiscriminatorValues map[string]interface{}
 
-func ArrayWithStrings(rootAPIKey string, nestedAPIField string, terraformKey string) ConfigProperty {
+func ArrayWithStrings(rootAPIKey, nestedAPIField, terraformKey string) ConfigProperty {
 	return ConfigProperty{
 		FromStateFunc: func(config, state string) (string, error) {
 			result := config
@@ -106,7 +106,6 @@ func ArrayWithStrings(rootAPIKey string, nestedAPIField string, terraformKey str
 				default:
 					return result, fmt.Errorf("provided value was not an array")
 				}
-
 			}
 			return result, nil
 		},
@@ -135,7 +134,7 @@ func ArrayWithStrings(rootAPIKey string, nestedAPIField string, terraformKey str
 	}
 }
 
-func ArrayWithObjects(rootAPIKey string, terraformKey string, fields map[string]string) ConfigProperty {
+func ArrayWithObjects(rootAPIKey, terraformKey string, fields map[string]string) ConfigProperty {
 	// we also need the inverse field map to convert terraform keys to api keys
 	inverseFields := map[string]string{}
 	for a, t := range fields {
@@ -179,7 +178,6 @@ func ArrayWithObjects(rootAPIKey string, terraformKey string, fields map[string]
 				default:
 					return result, fmt.Errorf("provided value was not an array")
 				}
-
 			}
 			return result, nil
 		},
@@ -229,7 +227,7 @@ func applyFilters(a interface{}, filters []ValueFilter) bool {
 }
 
 func copyFromState(apiKey, terraformKey string, options ...ValueFilter) FromStateFunc {
-	return func(config string, state string) (string, error) {
+	return func(config, state string) (string, error) {
 		result := config
 		v := gjson.Get(state, terraformKey)
 		if v.Exists() && v.Value() != nil && applyFilters(v.Value(), options) {
@@ -245,7 +243,7 @@ func copyFromState(apiKey, terraformKey string, options ...ValueFilter) FromStat
 }
 
 func copyToState(apiKey, terraformKey string) ToStateFunc {
-	return func(state string, config string) (string, error) {
+	return func(state, config string) (string, error) {
 		r := gjson.Get(config, apiKey)
 		if r.Exists() {
 			s, err := sjson.Set(state, terraformKey, r.Value())
@@ -260,7 +258,7 @@ func copyToState(apiKey, terraformKey string) ToStateFunc {
 }
 
 func copyToStateConditional(apiKey, terraformKey string, condition ConfigConditionFunc) ToStateFunc {
-	return func(state string, config string) (string, error) {
+	return func(state, config string) (string, error) {
 		if !condition(config) {
 			return state, nil
 		}
@@ -270,7 +268,7 @@ func copyToStateConditional(apiKey, terraformKey string, condition ConfigConditi
 }
 
 func discriminatorValue(apiKey string, values DiscriminatorValues) FromStateFunc {
-	return func(config string, state string) (string, error) {
+	return func(config, state string) (string, error) {
 		for k, v := range values {
 			r := gjson.Get(state, k)
 

@@ -15,6 +15,10 @@ resource "rudderstack_destination_qualtrics" example{
     #   blacklist = ["one","two","three"]
     # }
 
-    # onetrust_cookie_categories = ["one", "two", "three"]
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    #   android = ["one", "two", "three"]
+    #   ios = ["one", "two", "three"]
+    # }
   }
 }

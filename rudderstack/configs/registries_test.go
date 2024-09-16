@@ -3,8 +3,9 @@ package configs_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestRegistries(t *testing.T) {

@@ -4,8 +4,25 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
+
+// A function to covert a string from camelCase to snake_case
+func camelToSnake(s string) string {
+	var res string
+	for i, v := range s {
+		if 'A' <= v && v <= 'Z' {
+			if i != 0 {
+				res += "_"
+			}
+			res += string(v + 32)
+		} else {
+			res += string(v)
+		}
+	}
+	return res
+}
 
 func GetConfigMetaForOneTrustConsents(supportedSourceTypes []string) ([]c.ConfigProperty, map[string]*schema.Schema) {
 	oneTrustConsentsProperties := []c.ConfigProperty{}
@@ -17,11 +34,12 @@ func GetConfigMetaForOneTrustConsents(supportedSourceTypes []string) ([]c.Config
 
 		// Create property and schema for each source type
 		for _, sourceType := range supportedSourceTypes {
-			oneTrustConsentsProperties = append(oneTrustConsentsProperties, c.ArrayWithStrings(fmt.Sprintf("oneTrustCookieCategories.%s", sourceType), "oneTrustCookieCategory", fmt.Sprintf("%s.0.%s", onetrust_terraform_key, sourceType)))
+			validSourceType := camelToSnake(sourceType)
+			oneTrustConsentsProperties = append(oneTrustConsentsProperties, c.ArrayWithStrings(fmt.Sprintf("oneTrustCookieCategories.%s", validSourceType), "oneTrustCookieCategory", fmt.Sprintf("%s.0.%s", onetrust_terraform_key, validSourceType)))
 
-			onetrust_elements_schema[sourceType] = &schema.Schema{
-				Type:        schema.TypeList,
-				Optional:    true,
+			onetrust_elements_schema[validSourceType] = &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -32,11 +50,11 @@ func GetConfigMetaForOneTrustConsents(supportedSourceTypes []string) ([]c.Config
 			Type:        schema.TypeList,
 			Optional:    true,
 			MaxItems:    1,
-			Description: "Specify OneTrust category IDs.",
+			Description: "Allows you to specify the OneTrust cookie categories for each source type.",
 			Elem: &schema.Resource{
 				Schema: onetrust_elements_schema,
 			},
-		};
+		}
 	}
 
 	return oneTrustConsentsProperties, oneTrustConsentsSchema

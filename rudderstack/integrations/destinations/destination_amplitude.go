@@ -2,6 +2,7 @@ package destinations
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -62,7 +63,7 @@ func init() {
 		c.Simple("useIdfaAsDeviceId.ios", "use_idfa_as_device_id.0.ios"),
 		c.Simple("useIdfaAsDeviceId.reactnative", "use_idfa_as_device_id.0.react_native"),
 		c.Simple("residencyServer", "residency_server", c.SkipZeroValue),
-	};
+	}
 
 	properties = append(properties, commonProperties...)
 
@@ -322,7 +323,7 @@ func init() {
 					"whitelist": {
 						Type:         schema.TypeList,
 						Optional:     true,
-							Description:  "Enter the event names to be allowlisted.",
+						Description:  "Enter the event names to be allowlisted.",
 						ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 						Elem: &schema.Schema{
 							Type: schema.TypeString,
@@ -331,7 +332,7 @@ func init() {
 					"blacklist": {
 						Type:         schema.TypeList,
 						Optional:     true,
-							Description:  "Enter the event names to be denylisted.",
+						Description:  "Enter the event names to be denylisted.",
 						ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 						Elem: &schema.Schema{
 							Type: schema.TypeString,
@@ -473,15 +474,15 @@ func init() {
 				},
 			},
 		},
-	};
+	}
 
 	for key, value := range commonSchema {
 		schema[key] = value
 	}
 
 	c.Destinations.Register("amplitude", c.ConfigMeta{
-		APIType: "AM",
-		Properties: properties,
+		APIType:      "AM",
+		Properties:   properties,
 		ConfigSchema: schema,
 	})
 }

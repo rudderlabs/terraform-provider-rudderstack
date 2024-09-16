@@ -12,7 +12,7 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 		{
 			TerraformCreate: `
 				report_suite_ids = "id001, id002"
-			`,
+							`,
 			APICreate: `{
 				"reportSuiteIds": "id001, id002",
   				"sslHeartbeat": true,
@@ -90,7 +90,19 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 					from = "phone"
 					to = "1"
 					}]
-				onetrust_cookie_categories = ["one", "two", "three"]
+				onetrust_cookie_categories {
+					web = ["one", "two", "three"]
+					android = ["one", "two", "three"]
+					ios = ["one", "two", "three"]
+					unity = ["one", "two", "three"]
+					reactnative = ["one", "two", "three"]
+					flutter = ["one", "two", "three"]
+					cordova = ["one", "two", "three"]
+					amp = ["one", "two", "three"]
+					cloud = ["one", "two", "three"]
+					warehouse = ["one", "two", "three"]
+					shopify = ["one", "two", "three"]
+				}
 			  `,
 			APIUpdate: `{
 				"reportSuiteIds": "id003, id004",
@@ -204,11 +216,63 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 					"eventName": "three"
 				  }
 				],
-				"oneTrustCookieCategories": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				],
+				"oneTrustCookieCategories": {
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"android": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"ios": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"unity": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"reactnative": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"flutter": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"cordova": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"amp": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"cloud": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"warehouse": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"shopify": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
+				},
 				"eventFilteringOption": "blacklistedEvents"
 			  }`,
 		},

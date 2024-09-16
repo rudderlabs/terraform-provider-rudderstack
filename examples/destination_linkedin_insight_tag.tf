@@ -18,8 +18,9 @@ resource "rudderstack_destination_linkedin_insight_tag" "example" {
 #    event_filtering {
 #      whitelist = ["one", "two", "three"]
 #    }
-#    onetrust_cookie_categories = ["one", "two", "three"]
-
+    # onetrust_cookie_categories {
+    #   web = ["one", "two", "three"]
+    # }
     }
   
 }

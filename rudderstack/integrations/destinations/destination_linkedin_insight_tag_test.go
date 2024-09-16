@@ -33,7 +33,9 @@ func TestDestinationResourceLinkedinInsightTag(t *testing.T) {
 				event_filtering {
 					whitelist = ["one", "two", "three"]
 				}
-				onetrust_cookie_categories = ["one", "two", "three"]
+				onetrust_cookie_categories {
+					web = ["one", "two", "three"]
+				}
 			`,
 			APIUpdate: `
 			{
@@ -56,11 +58,13 @@ func TestDestinationResourceLinkedinInsightTag(t *testing.T) {
 						"eventName": "three"
 					}
 				],
-				"oneTrustCookieCategories": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				]
+				"oneTrustCookieCategories": {
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
+				}
 			}			
 			`,
 		},

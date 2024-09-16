@@ -6,10 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rudderlabs/rudder-api-go/client"
-	"github.com/rudderlabs/terraform-provider-rudderstack/cmd/generatetf/generator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/terraform-provider-rudderstack/cmd/generatetf/generator"
 )
 
 func TestGeneratorTerraform(t *testing.T) {
@@ -72,11 +73,13 @@ func TestGeneratorTerraform(t *testing.T) {
 				"categoryToContent": [{ "from": "from", "to": "to" }],
 				"legacyConversionPixelId": { "from": "from", "to": "to" },
 				"useNativeSDK": { "web": true },
-				"oneTrustCookieCategories": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				],
+				"oneTrustCookieCategories": {
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
+				},
 				"blacklistedEvents": [
 				  { "eventName": "one" },
 				  { "eventName": "two" },
@@ -106,7 +109,7 @@ func TestGeneratorTerraform(t *testing.T) {
 		},
 	}
 
-	var expected = `
+	expected := `
 resource "rudderstack_source_javascript" "src_id-javascript" {
   name = "source-1"
 }
@@ -144,11 +147,13 @@ resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
       from = "from"
       to   = "to"
     }
-    onetrust_cookie_categories = ["one", "two", "three"]
-    pixel_id                   = "facebook pixel id"
-    standard_page_call         = true
-    test_destination           = true
-    test_event_code            = "..."
+    onetrust_cookie_categories {
+      web = ["one", "two", "three"]
+    }
+    pixel_id           = "facebook pixel id"
+    standard_page_call = true
+    test_destination   = true
+    test_event_code    = "..."
     use_native_sdk {
       web = true
     }
@@ -235,7 +240,7 @@ func TestGeneratorImportScript(t *testing.T) {
 		},
 	}
 
-	var expected = `
+	expected := `
 terraform import "rudderstack_source_javascript.src_id-source-1" "id-source-1"
 terraform import "rudderstack_source_http.src_id-source-2" "id-source-2"
 terraform import "rudderstack_destination_redshift.dst_id-destination-1" "id-destination-1"

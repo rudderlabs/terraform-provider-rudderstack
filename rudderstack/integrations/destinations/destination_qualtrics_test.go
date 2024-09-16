@@ -36,8 +36,11 @@ func TestDestinationResourceQualtrics(t *testing.T) {
 				event_filtering {
 					blacklist = [ "one", "two", "three" ]
 				}
-				onetrust_cookie_categories = ["one", "two", "three"]
-
+				onetrust_cookie_categories {
+					web = ["one", "two", "three"]
+					android = ["one", "two", "three"]
+					ios = ["one", "two", "three"]
+				}
 			`,
 			APIUpdate: `{
 				"projectId": "p-id",
@@ -49,11 +52,23 @@ func TestDestinationResourceQualtrics(t *testing.T) {
 					{"eventName": "three"}
 				],
 				"useNativeSDK":{"ios":true},
-				"oneTrustCookieCategories": [
-					{ "oneTrustCookieCategory": "one" },
-					{ "oneTrustCookieCategory": "two" },
-					{ "oneTrustCookieCategory": "three" }
-				],
+				"oneTrustCookieCategories": {
+					"web": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"android": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					],
+					"ios": [
+						{ "oneTrustCookieCategory": "one" },
+						{ "oneTrustCookieCategory": "two" },
+						{ "oneTrustCookieCategory": "three" }
+					]
+				},
 				"enableGenericPageTitle":{"web":true}
 			}`,
 		},

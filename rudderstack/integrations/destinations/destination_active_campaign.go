@@ -2,53 +2,58 @@ package destinations
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func init() {
+	supportedSourceTypes := []string{"web", "android", "ios", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
+	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
+
+	properties := []c.ConfigProperty{
+		c.Simple("apiUrl", "api_url"),
+		c.Simple("apiKey", "api_key", c.SkipZeroValue),
+		c.Simple("actid", "actid", c.SkipZeroValue),
+		c.Simple("eventKey", "event_key", c.SkipZeroValue),
+	}
+
+	properties = append(properties, commonProperties...)
+
+	schema := map[string]*schema.Schema{
+		"api_url": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Enter your ActiveCampaign API URL. You can find it in your account in the Settings page under the Developer tab.",
+			// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+		},
+		"api_key": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Sensitive:   true,
+			Description: "Enter your ActiveCampaign API key.",
+			// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+		},
+		"actid": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Enter your ActID here. To obtain the ActID unique to your ActiveCampaign account, go to Settings > Tracking > Event Tracking API.",
+			// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+		},
+		"event_key": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Enter the event key unique to your ActiveCampaign account. To obtain the event key, go to your ActiveCampaign account > Settings > Tracking > Event Tracking.",
+			// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+		},
+	}
+
+	for key, value := range commonSchema {
+		schema[key] = value
+	}
+
 	c.Destinations.Register("active_campaign", c.ConfigMeta{
-		APIType: "ACTIVE_CAMPAIGN",
-		Properties: []c.ConfigProperty{
-			c.Simple("apiUrl", "api_url"),
-			c.Simple("apiKey", "api_key", c.SkipZeroValue),
-			c.Simple("actid", "actid", c.SkipZeroValue),
-			c.Simple("eventKey", "event_key", c.SkipZeroValue),
-			c.ArrayWithStrings("oneTrustCookieCategories", "oneTrustCookieCategory", "onetrust_cookie_categories"),
-		},
-		ConfigSchema: map[string]*schema.Schema{
-			"api_url": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Enter your ActiveCampaign API URL. You can find it in your account in the Settings page under the Developer tab.",
-				// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
-			},
-			"api_key": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Sensitive:   true,
-				Description: "Enter your ActiveCampaign API key.",
-				// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
-			},
-			"actid": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Enter your ActID here. To obtain the ActID unique to your ActiveCampaign account, go to Settings > Tracking > Event Tracking API.",
-				// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
-			},
-			"event_key": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Enter the event key unique to your ActiveCampaign account. To obtain the event key, go to your ActiveCampaign account > Settings > Tracking > Event Tracking.",
-				// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
-			},
-			"onetrust_cookie_categories": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-		},
+		APIType:      "ACTIVE_CAMPAIGN",
+		Properties:   properties,
+		ConfigSchema: schema,
 	})
 }
