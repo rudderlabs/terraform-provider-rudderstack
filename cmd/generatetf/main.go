@@ -10,9 +10,7 @@ import (
 	"github.com/rudderlabs/terraform-provider-rudderstack/cmd/generatetf/generator"
 )
 
-var (
-	cl *client.Client
-)
+var cl *client.Client
 
 func main() {
 	importFlag := flag.Bool("import", false, "generate terraform import commands")

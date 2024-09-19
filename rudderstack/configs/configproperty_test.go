@@ -3,9 +3,10 @@ package configs_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestSimpleConfigProperty(t *testing.T) {
@@ -61,7 +62,6 @@ func TestConditionalFalse(t *testing.T) {
 	s, err := p.ToStateFunc(`{ "p": true }`, `{ "a": { "b": "123" } }`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{ "p": true }`, s)
-
 }
 
 func TestDiscriminator(t *testing.T) {
@@ -84,7 +84,6 @@ func TestDiscriminator(t *testing.T) {
 	s, err := p.ToStateFunc(`{ "p": true }`, `{ "f": "FOO" }`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{ "p": true }`, s)
-
 }
 
 func TestEquals(t *testing.T) {

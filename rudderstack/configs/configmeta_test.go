@@ -3,9 +3,10 @@ package configs_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestConfigMetaStateToAPI(t *testing.T) {

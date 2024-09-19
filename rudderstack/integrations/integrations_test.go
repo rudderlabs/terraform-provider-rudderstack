@@ -3,9 +3,10 @@ package integrations_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	_ "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestIntegrations(t *testing.T) {
