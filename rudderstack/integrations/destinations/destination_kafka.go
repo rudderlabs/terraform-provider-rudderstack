@@ -20,17 +20,17 @@ func init() {
 			c.Simple("username", "username", c.SkipZeroValue),
 			c.Simple("password", "password", c.SkipZeroValue),
 			c.Simple("convertToAvro", "convert_to_avro", c.SkipZeroValue),
-			c.ArrayWithObjects("avroSchema", "avro_schema", map[string]string{
+			c.ArrayWithObjects("avroSchema", "avro_schema", map[string]interface{}{
 				"schemaId": "schema_id",
 				"schema":   "schema",
 			}),
 			c.Simple("embedAvroSchemaID", "embed_avro_schema_id", c.SkipZeroValue),
 			c.Simple("enableMultiTopic", "enable_multi_topic", c.SkipZeroValue),
-			c.ArrayWithObjects("eventTypeToTopicMap", "event_type_to_topic_map", map[string]string{
+			c.ArrayWithObjects("eventTypeToTopicMap", "event_type_to_topic_map", map[string]interface{}{
 				"from": "from",
 				"to":   "to",
 			}),
-			c.ArrayWithObjects("eventToTopicMap", "event_to_topic_map", map[string]string{
+			c.ArrayWithObjects("eventToTopicMap", "event_to_topic_map", map[string]interface{}{
 				"from": "from",
 				"to":   "to",
 			}),

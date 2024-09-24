@@ -24,6 +24,70 @@ func camelToSnake(s string) string {
 	return res
 }
 
+func GetConfigMetaForGenericConsentManagement(supportedSourceTypes []string) ([]c.ConfigProperty, map[string]*schema.Schema) {
+	consentManagementProperties := []c.ConfigProperty{}
+	consentManagementSchema := map[string]*schema.Schema{}
+
+	if len(supportedSourceTypes) != 0 && supportedSourceTypes != nil {
+		consent_management_terraform_key := "consent_management"
+		consent_management_elements_schema := map[string]*schema.Schema{}
+
+		// Create property and schema for each source type
+		for _, sourceType := range supportedSourceTypes {
+			validSourceType := camelToSnake(sourceType)
+
+			consentManagementProperties = append(consentManagementProperties, c.ArrayWithObjects(fmt.Sprintf("consentManagement.%s", validSourceType), fmt.Sprintf("%s.0.%s", consent_management_terraform_key, validSourceType), map[string]interface{}{
+				"provider": "provider",
+				"resolutionStrategy": "resolution_strategy",
+				"consents": c.APINestedObject{
+					TerraformKey: "consents",
+					NestedKey: 	"consent",
+				},
+			}))
+
+			consent_management_elements_schema[validSourceType] = &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				ConfigMode:  schema.SchemaConfigModeAttr,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"provider": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The provider name.",
+						},
+						"resolution_strategy": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The resolution strategy for the provider.",
+						},
+						"consents": {
+							Type:        schema.TypeList,
+							Required:    true,
+							Description: "The list of consent IDs for the provider.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			}
+		}
+
+		consentManagementSchema[consent_management_terraform_key] = &schema.Schema{
+			Type:        schema.TypeList,
+			Optional:    true,
+			MaxItems:    1,
+			Description: "Specify consent IDs for each CMP.",
+			Elem: &schema.Resource{
+				Schema: consent_management_elements_schema,
+			},
+		};
+	}
+
+	return consentManagementProperties, consentManagementSchema
+}
+
 func GetConfigMetaForOneTrustConsents(supportedSourceTypes []string) ([]c.ConfigProperty, map[string]*schema.Schema) {
 	oneTrustConsentsProperties := []c.ConfigProperty{}
 	oneTrustConsentsSchema := map[string]*schema.Schema{}
@@ -69,6 +133,14 @@ func GetCommonConfigMeta(supportedSourceTypes []string) ([]c.ConfigProperty, map
 	commonProperties = append(commonProperties, oneTrustConsentFieldProperties...)
 
 	for key, value := range oneTrustConsentFieldSchema {
+		commonSchema[key] = value
+	}
+
+	gcmFieldProperties, gcmFieldSchema := GetConfigMetaForGenericConsentManagement(supportedSourceTypes)
+
+	commonProperties = append(commonProperties, gcmFieldProperties...)
+
+	for key, value := range gcmFieldSchema {
 		commonSchema[key] = value
 	}
 

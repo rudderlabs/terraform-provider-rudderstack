@@ -3,10 +3,9 @@ package configs_test
 import (
 	"testing"
 
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestSimpleConfigProperty(t *testing.T) {
@@ -62,6 +61,7 @@ func TestConditionalFalse(t *testing.T) {
 	s, err := p.ToStateFunc(`{ "p": true }`, `{ "a": { "b": "123" } }`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{ "p": true }`, s)
+
 }
 
 func TestDiscriminator(t *testing.T) {
@@ -84,6 +84,7 @@ func TestDiscriminator(t *testing.T) {
 	s, err := p.ToStateFunc(`{ "p": true }`, `{ "f": "FOO" }`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{ "p": true }`, s)
+
 }
 
 func TestEquals(t *testing.T) {
@@ -124,37 +125,41 @@ func TestArrayWithStrings(t *testing.T) {
 }
 
 func TestArrayWithObjects(t *testing.T) {
-	p := configs.ArrayWithObjects("eventChannelSettings", "event_channel_settings", map[string]string{
+	p := configs.ArrayWithObjects("eventChannelSettings", "event_channel_settings", map[string]interface{}{
 		"eventName":    "name",
 		"eventChannel": "channel",
 		"eventRegex":   "regex",
+		"eventNestedValues": configs.APINestedObject{
+			TerraformKey: "event_nested_values",
+			NestedKey: "nestedKey",
+		},
 	})
 
 	a, err := p.FromStateFunc(`{}`, `{
 		"event_channel_settings": [
-			{ "name": "n1", "channel": "c1", "regex": "r1" },
-			{ "name": "n2", "channel": "c2", "regex": "r2" }
+			{ "name": "n1", "channel": "c1", "regex": "r1", "event_nested_values": [ "val1", "val2" ] },
+			{ "name": "n2", "channel": "c2", "regex": "r2", "event_nested_values": [ "val3", "val4" ] }
 		]
 	}`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
 		"eventChannelSettings": [
-			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1" },
-			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2" }
+			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1", "eventNestedValues": [ { "nestedKey": "val1" }, { "nestedKey": "val2" } ] },
+			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2", "eventNestedValues": [ { "nestedKey": "val3" }, { "nestedKey": "val4" } ] }
 		]
 	}`, a)
 
 	s, err := p.ToStateFunc(`{}`, `{
 		"eventChannelSettings": [
-			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1", "extra": "e1" },
-			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2", "extra": "e2" }
+			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1", "extra": "e1", "eventNestedValues": [ { "nestedKey": "val1" }, { "nestedKey": "val2" } ] },
+			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2", "extra": "e2", "eventNestedValues": [ { "nestedKey": "val3" }, { "nestedKey": "val4" } ] }
 		]
 	}`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
 		"event_channel_settings": [
-			{ "name": "n1", "channel": "c1", "regex": "r1" },
-			{ "name": "n2", "channel": "c2", "regex": "r2" }
+			{ "name": "n1", "channel": "c1", "regex": "r1", "event_nested_values": [ "val1", "val2" ] },
+			{ "name": "n2", "channel": "c2", "regex": "r2", "event_nested_values": [ "val3", "val4" ] }
 		]
 	}`, s)
 }

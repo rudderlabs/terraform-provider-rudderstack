@@ -27,16 +27,16 @@ func init() {
 		c.Simple("connectionMode.shopify", "connection_mode.0.shopify", c.SkipZeroValue),
 		c.Simple("connectionMode.cloud", "connection_mode.0.cloud", c.SkipZeroValue),
 		c.Simple("connectionMode.warehouse", "connection_mode.0.warehouse", c.SkipZeroValue),
-		c.ArrayWithObjects("rudderEventsMapping", "rudder_events_mapping", map[string]string{
+		c.ArrayWithObjects("rudderEventsMapping", "rudder_events_mapping", map[string]interface{}{
 			"event":             "event",
 			"marketoPrimarykey": "marketo_primarykey",
 			"marketoActivityId": "marketo_activity_id",
 		}),
-		c.ArrayWithObjects("leadTraitMapping", "lead_trait_mapping", map[string]string{
+		c.ArrayWithObjects("leadTraitMapping", "lead_trait_mapping", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
-		c.ArrayWithObjects("customActivityPropertyMap", "custom_activity_property_map", map[string]string{
+		c.ArrayWithObjects("customActivityPropertyMap", "custom_activity_property_map", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),

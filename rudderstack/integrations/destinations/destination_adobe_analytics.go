@@ -20,7 +20,7 @@ func init() {
 		c.Simple("useSecureServerSide", "use_secure_server_side"),
 		c.Simple("proxyNormalUrl", "proxy_normal_url", c.SkipZeroValue),
 		c.Simple("proxyHeartbeatUrl", "proxy_heartbeat_url", c.SkipZeroValue),
-		c.ArrayWithObjects("eventsToTypes", "events_to_types", map[string]string{
+		c.ArrayWithObjects("eventsToTypes", "events_to_types", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
@@ -30,61 +30,61 @@ func init() {
 		c.Simple("timestampOptionalReporting", "timestamp_optional_reporting"),
 		c.Simple("noFallbackVisitorId", "no_fallback_visitor_id"),
 		c.Simple("preferVisitorId", "prefer_visitor_id"),
-		c.ArrayWithObjects("rudderEventsToAdobeEvents", "rudder_events_to_adobe_events", map[string]string{
+		c.ArrayWithObjects("rudderEventsToAdobeEvents", "rudder_events_to_adobe_events", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
 		c.Simple("trackPageName", "track_page_name"),
-		c.ArrayWithObjects("contextDataMapping", "context_data_mapping", map[string]string{
+		c.ArrayWithObjects("contextDataMapping", "context_data_mapping", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
 		c.Simple("contextDataPrefix", "context_data_prefix", c.SkipZeroValue),
 		c.Simple("useLegacyLinkName", "use_legacy_link_name"),
 		c.Simple("pageNameFallbackTostring", "page_name_fallback_tostring"),
-		c.ArrayWithObjects("mobileEventMapping", "mobile_event_mapping", map[string]string{
+		c.ArrayWithObjects("mobileEventMapping", "mobile_event_mapping", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
 		c.Simple("sendFalseValues", "send_false_values"),
-		c.ArrayWithObjects("eVarMapping", "e_var_mapping", map[string]string{
+		c.ArrayWithObjects("eVarMapping", "e_var_mapping", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
-		c.ArrayWithObjects("hierMapping", "hier_mapping", map[string]string{
+		c.ArrayWithObjects("hierMapping", "hier_mapping", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
-		c.ArrayWithObjects("listMapping", "list_mapping", map[string]string{
+		c.ArrayWithObjects("listMapping", "list_mapping", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
-		c.ArrayWithObjects("listDelimiter", "list_delimiter", map[string]string{
+		c.ArrayWithObjects("listDelimiter", "list_delimiter", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
 
-		c.ArrayWithObjects("customPropsMapping", "custom_props_mapping", map[string]string{
+		c.ArrayWithObjects("customPropsMapping", "custom_props_mapping", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
-		c.ArrayWithObjects("propsDelimiter", "props_delimiter", map[string]string{
+		c.ArrayWithObjects("propsDelimiter", "props_delimiter", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
-		c.ArrayWithObjects("eventMerchEventToAdobeEvent", "event_merch_event_to_adobe_event", map[string]string{
+		c.ArrayWithObjects("eventMerchEventToAdobeEvent", "event_merch_event_to_adobe_event", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
 		c.ArrayWithStrings("eventMerchProperties", "eventMerchProperties", "event_merch_properties"),
 
-		c.ArrayWithObjects("productMerchEventToAdobeEvent", "product_merch_event_to_adobe_event", map[string]string{
+		c.ArrayWithObjects("productMerchEventToAdobeEvent", "product_merch_event_to_adobe_event", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
 		c.ArrayWithStrings("productMerchProperties", "productMerchProperties", "product_merch_properties"),
 
-		c.ArrayWithObjects("productMerchEvarsMap", "product_merch_evars_map", map[string]string{
+		c.ArrayWithObjects("productMerchEvarsMap", "product_merch_evars_map", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
