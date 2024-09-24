@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -49,16 +50,27 @@ func GetConfigMetaForGenericConsentManagement(supportedSourceTypes []string) ([]
 				Type:        schema.TypeList,
 				Optional:    true,
 				ConfigMode:  schema.SchemaConfigModeAttr,
+				Description: "Allows you to specify consent configuration data for multiple providers.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"provider": {
 							Type:        schema.TypeString,
 							Required:    true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"oneTrust",
+								"ketch",
+								"custom",
+							}, false),
 							Description: "The provider name.",
 						},
 						"resolution_strategy": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"and",
+								"or",
+								"",
+							}, false),
 							Description: "The resolution strategy for the provider.",
 						},
 						"consents": {
@@ -78,7 +90,7 @@ func GetConfigMetaForGenericConsentManagement(supportedSourceTypes []string) ([]
 			Type:        schema.TypeList,
 			Optional:    true,
 			MaxItems:    1,
-			Description: "Specify consent IDs for each CMP.",
+			Description: "Allows you to specify consent configuration data for multiple providers for each source type.",
 			Elem: &schema.Resource{
 				Schema: consent_management_elements_schema,
 			},

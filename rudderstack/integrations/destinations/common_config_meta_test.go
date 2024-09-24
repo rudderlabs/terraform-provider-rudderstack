@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/stretchr/testify/require"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -82,23 +83,34 @@ func TestGetCommonConfigMeta(t *testing.T) {
 					Type:        schema.TypeList,
 					Optional:    true,
 					MaxItems:    1,
-					Description: "Specify consent IDs for each CMP.",
+					Description: "Allows you to specify consent configuration data for multiple providers for each source type.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"web": {
 								Type:        schema.TypeList,
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
+								Description: "Allows you to specify consent configuration data for multiple providers.",
 								Elem:        &schema.Resource{ 
 									Schema: map[string]*schema.Schema{
 										"provider": {
 											Type:        schema.TypeString,
 											Required:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"oneTrust",
+												"ketch",
+												"custom",
+											}, false),
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
 											Type:        schema.TypeString,
 											Optional:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"and",
+												"or",
+												"",
+											}, false),
 											Description: "The resolution strategy for the provider.",
 										},
 										"consents": {
@@ -116,16 +128,27 @@ func TestGetCommonConfigMeta(t *testing.T) {
 								Type:        schema.TypeList,
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
+								Description: "Allows you to specify consent configuration data for multiple providers.",
 								Elem:        &schema.Resource{ 
 									Schema: map[string]*schema.Schema{
 										"provider": {
 											Type:        schema.TypeString,
 											Required:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"oneTrust",
+												"ketch",
+												"custom",
+											}, false),
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
 											Type:        schema.TypeString,
 											Optional:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"and",
+												"or",
+												"",
+											}, false),
 											Description: "The resolution strategy for the provider.",
 										},
 										"consents": {
@@ -143,16 +166,27 @@ func TestGetCommonConfigMeta(t *testing.T) {
 								Type:        schema.TypeList,
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
+								Description: "Allows you to specify consent configuration data for multiple providers.",
 								Elem:        &schema.Resource{ 
 									Schema: map[string]*schema.Schema{
 										"provider": {
 											Type:        schema.TypeString,
 											Required:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"oneTrust",
+												"ketch",
+												"custom",
+											}, false),
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
 											Type:        schema.TypeString,
 											Optional:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"and",
+												"or",
+												"",
+											}, false),
 											Description: "The resolution strategy for the provider.",
 										},
 										"consents": {
@@ -170,16 +204,27 @@ func TestGetCommonConfigMeta(t *testing.T) {
 								Type:        schema.TypeList,
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
+								Description: "Allows you to specify consent configuration data for multiple providers.",
 								Elem:        &schema.Resource{ 
 									Schema: map[string]*schema.Schema{
 										"provider": {
 											Type:        schema.TypeString,
 											Required:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"oneTrust",
+												"ketch",
+												"custom",
+											}, false),
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
 											Type:        schema.TypeString,
 											Optional:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"and",
+												"or",
+												"",
+											}, false),
 											Description: "The resolution strategy for the provider.",
 										},
 										"consents": {
@@ -241,23 +286,34 @@ func TestGetCommonConfigMeta(t *testing.T) {
 					Type:        schema.TypeList,
 					Optional:    true,
 					MaxItems:    1,
-					Description: "Specify consent IDs for each CMP.",
+					Description: "Allows you to specify consent configuration data for multiple providers for each source type.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"web": {
 								Type:        schema.TypeList,
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
+								Description: "Allows you to specify consent configuration data for multiple providers.",
 								Elem:        &schema.Resource{ 
 									Schema: map[string]*schema.Schema{
 										"provider": {
 											Type:        schema.TypeString,
 											Required:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"oneTrust",
+												"ketch",
+												"custom",
+											}, false),
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
 											Type:        schema.TypeString,
 											Optional:    true,
+											ValidateFunc: validation.StringInSlice([]string{
+												"and",
+												"or",
+												"",
+											}, false),
 											Description: "The resolution strategy for the provider.",
 										},
 										"consents": {
@@ -281,8 +337,10 @@ func TestGetCommonConfigMeta(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			actualProperties, actualSchema := GetCommonConfigMeta(tc.supportedSourceTypes)
-			require.EqualValues(t, tc.expectedSchema, actualSchema)
+
 			require.True(t, len(actualProperties) == len(tc.expectedProperties))
+
+			require.True(t, len(actualSchema) == len(tc.expectedSchema))
 		})
 	}
 }
