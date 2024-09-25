@@ -18,7 +18,7 @@ func init() {
 			"event_filtering.0.whitelist": "whitelistedEvents",
 			"event_filtering.0.blacklist": "blacklistedEvents",
 		}),
-		c.ArrayWithObjects("eventToConversionIdMap", "event_to_conversion_id_map", map[string]string{
+		c.ArrayWithObjects("eventToConversionIdMap", "event_to_conversion_id_map", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),

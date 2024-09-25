@@ -41,22 +41,82 @@ resource "rudderstack_destination_braze" "example" {
        whitelist = ["one", "two", "three"]
        # blacklist = ["one", "two", "three"]
     }
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    #   android = ["one", "two", "three"]
-    #   ios = ["one", "two", "three"]
-    #   unity = ["one", "two", "three"]
-    #   reactnative = ["one", "two", "three"]
-    #   flutter = ["one", "two", "three"]
-    #   cordova = ["one", "two", "three"]
-    #   amp = ["one", "two", "three"]
-    #   cloud = ["one", "two", "three"]
-    #   warehouse = ["one", "two", "three"]
-    #   shopify = ["one", "two", "three"]
+    # consent_management {
+    # 	web = [
+    # 		{
+    # 			provider = "oneTrust"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "ketch"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "custom"
+    # 			resolution_strategy = "and"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 		}
+    # 	]
+    # 	android = [{
+    # 		provider = "ketch"
+    # 		consents = ["one_android", "two_android", "three_android"]
+    # 		resolution_strategy = ""
+    # 	}]
+    # 	ios = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_ios", "two_ios", "three_ios"]
+    # 	}]
+    # 	unity = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "or"
+    # 		consents = ["one_unity", "two_unity", "three_unity"]
+    # 	}]
+    # 	reactnative = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_reactnative", "two_reactnative", "three_reactnative"]
+    # 	}]
+    # 	flutter = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_flutter", "two_flutter", "three_flutter"]
+    # 	}]
+    # 	cordova = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_cordova", "two_cordova", "three_cordova"]
+    # 	}]
+    # 	amp = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_amp", "two_amp", "three_amp"]
+    # 	}]
+    # 	cloud = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_cloud", "two_cloud", "three_cloud"]
+    # 	}]
+    # 	warehouse = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_warehouse", "two_warehouse", "three_warehouse"]
+    # 	}]
+    # 	shopify = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_shopify", "two_shopify", "three_shopify"]
+    # 	}]
     # }
   }
 }
 ```
+
+> **:warning: Breaking Change**
+> 
+> Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
 > 
@@ -92,12 +152,12 @@ Optional:
 
 - `allow_user_supplied_javascript` (Block List, Max: 1) Use this setting to enable HTML in-app messages. (see [below for nested schema](#nestedblock--config--allow_user_supplied_javascript))
 - `app_key` (String, Sensitive) Enter your Braze APP Key. Required for Device mode.
+- `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `enable_braze_logging` (Block List, Max: 1) Use this setting to show braze logs to customer. (see [below for nested schema](#nestedblock--config--enable_braze_logging))
 - `enable_nested_array_operations` (Boolean) Use this setting to use Custom Attributes Operation.
 - `enable_push_notification` (Block List, Max: 1) Use this setting to use push notification. It requires service worker setup by client. (see [below for nested schema](#nestedblock--config--enable_push_notification))
 - `enable_subscription_group_in_group_call` (Boolean) Use this setting to Enable subscription groups in group call
 - `event_filtering` (Block List, Max: 1) This option allows you filter the events you want to send to Braze. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `rest_api_key` (String, Sensitive) Enter your Braze Rest Api Key. Required for cloud mode.
 - `send_purchase_event_with_extra_properties` (Boolean) Use this setting to Enable to send purchase events with custom properties.
 - `support_dedup` (Boolean) Use this setting to enable Deduplicate Traits on identify and track.
@@ -129,6 +189,134 @@ Optional:
 - `web` (Boolean)
 
 
+<a id="nestedblock--config--consent_management"></a>
+### Nested Schema for `config.consent_management`
+
+Optional:
+
+- `amp` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--amp))
+- `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `cloud` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud))
+- `cordova` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cordova))
+- `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
+- `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
+- `shopify` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--shopify))
+- `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
+- `warehouse` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--warehouse))
+- `web` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--web))
+
+<a id="nestedatt--config--consent_management--amp"></a>
+### Nested Schema for `config.consent_management.amp`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android"></a>
+### Nested Schema for `config.consent_management.android`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cloud"></a>
+### Nested Schema for `config.consent_management.cloud`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cordova"></a>
+### Nested Schema for `config.consent_management.cordova`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--flutter"></a>
+### Nested Schema for `config.consent_management.flutter`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios"></a>
+### Nested Schema for `config.consent_management.ios`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--reactnative"></a>
+### Nested Schema for `config.consent_management.reactnative`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--shopify"></a>
+### Nested Schema for `config.consent_management.shopify`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--unity"></a>
+### Nested Schema for `config.consent_management.unity`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--warehouse"></a>
+### Nested Schema for `config.consent_management.warehouse`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--web"></a>
+### Nested Schema for `config.consent_management.web`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+
 <a id="nestedblock--config--enable_braze_logging"></a>
 ### Nested Schema for `config.enable_braze_logging`
 
@@ -152,21 +340,3 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be denylisted.
 - `whitelist` (List of String) Enter the event names to be allowlisted.
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `amp` (List of String)
-- `android` (List of String)
-- `cloud` (List of String)
-- `cordova` (List of String)
-- `flutter` (List of String)
-- `ios` (List of String)
-- `reactnative` (List of String)
-- `shopify` (List of String)
-- `unity` (List of String)
-- `warehouse` (List of String)
-- `web` (List of String)

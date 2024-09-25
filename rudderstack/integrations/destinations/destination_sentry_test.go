@@ -39,8 +39,24 @@ func TestDestinationResourceSentry(t *testing.T) {
 				  whitelist = ["one", "two", "three"]
 				}
 
-				onetrust_cookie_categories {
-					web = ["one", "two", "three"]
+				consent_management {
+					web = [
+						{
+							provider = "oneTrust"
+							consents = ["one_web", "two_web", "three_web"]
+							resolution_strategy = ""
+						},
+						{
+							provider = "ketch"
+							consents = ["one_web", "two_web", "three_web"]
+							resolution_strategy = ""
+						},
+						{
+							provider = "custom"
+							resolution_strategy = "and"
+							consents = ["one_web", "two_web", "three_web"]
+						}
+					]
 				}
 			`,
 			APIUpdate: `{
@@ -79,11 +95,53 @@ func TestDestinationResourceSentry(t *testing.T) {
 					{ "eventName": "two" },
 					{ "eventName": "three" }
 				],
-				"oneTrustCookieCategories": {
+				"consentManagement": {
 					"web": [
-						{ "oneTrustCookieCategory": "one" },
-						{ "oneTrustCookieCategory": "two" },
-						{ "oneTrustCookieCategory": "three" }
+						{
+							"provider": "oneTrust",
+							"resolutionStrategy": "",
+							"consents": [
+								{
+									"consent": "one_web"
+								},
+								{
+									"consent": "two_web"
+								},
+								{
+									"consent": "three_web"
+								}
+							]
+						},
+						{
+							"provider": "ketch",
+							"resolutionStrategy": "",
+							"consents": [
+								{
+									"consent": "one_web"
+								},
+								{
+									"consent": "two_web"
+								},
+								{
+									"consent": "three_web"
+								}
+							]
+						},
+						{
+							"provider": "custom",
+							"resolutionStrategy": "and",
+							"consents": [
+								{
+									"consent": "one_web"
+								},
+								{
+									"consent": "two_web"
+								},
+								{
+									"consent": "three_web"
+								}
+							]
+						}
 					]
 				}
 			}`,

@@ -94,67 +94,71 @@ func TestEquals(t *testing.T) {
 }
 
 func TestArrayWithStrings(t *testing.T) {
-	p := configs.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web")
+	p := configs.ArrayWithStrings("getInAppEventMapping.web", "eventName", "get_in_app_event_mapping.0.web")
 
-	a, err := p.FromStateFunc(`{}`, `{ "onetrust_cookie_categories": [ { "web": [ "a", "b" ] } ]}`)
+	a, err := p.FromStateFunc(`{}`, `{ "get_in_app_event_mapping": [ { "web": [ "a", "b" ] } ]}`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
-		"oneTrustCookieCategories": {
+		"getInAppEventMapping": {
 			"web": [
-				{ "oneTrustCookieCategory": "a" },
-				{ "oneTrustCookieCategory": "b" }
+				{ "eventName": "a" },
+				{ "eventName": "b" }
 			]
 		}
 	}`, a)
 
 	s, err := p.ToStateFunc(`{}`, `{
-		"oneTrustCookieCategories": {
+		"getInAppEventMapping": {
 			"web": [
-				{ "oneTrustCookieCategory": "a" },
-				{ "oneTrustCookieCategory": "b" }
+				{ "eventName": "a" },
+				{ "eventName": "b" }
 			]
 		}
 	}`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
-		"onetrust_cookie_categories": [{
+		"get_in_app_event_mapping": [{
 			"web": [ "a", "b" ]
 		}]
 	}`, s)
 }
 
 func TestArrayWithObjects(t *testing.T) {
-	p := configs.ArrayWithObjects("eventChannelSettings", "event_channel_settings", map[string]string{
+	p := configs.ArrayWithObjects("eventChannelSettings", "event_channel_settings", map[string]interface{}{
 		"eventName":    "name",
 		"eventChannel": "channel",
 		"eventRegex":   "regex",
+		"eventNestedValues": configs.APINestedObject{
+			TerraformKey: "event_nested_values",
+			NestedKey:    "nestedKey",
+		},
 	})
 
 	a, err := p.FromStateFunc(`{}`, `{
 		"event_channel_settings": [
-			{ "name": "n1", "channel": "c1", "regex": "r1" },
-			{ "name": "n2", "channel": "c2", "regex": "r2" }
+			{ "name": "n1", "channel": "c1", "regex": "r1", "event_nested_values": [ "val1", "val2" ] },
+			{ "name": "n2", "channel": "c2", "regex": "r2", "event_nested_values": [ "val3", "val4" ] }
 		]
 	}`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
 		"eventChannelSettings": [
-			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1" },
-			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2" }
+			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1", "eventNestedValues": [ { "nestedKey": "val1" }, { "nestedKey": "val2" } ] },
+			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2", "eventNestedValues": [ { "nestedKey": "val3" }, { "nestedKey": "val4" } ] }
 		]
 	}`, a)
 
 	s, err := p.ToStateFunc(`{}`, `{
 		"eventChannelSettings": [
-			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1", "extra": "e1" },
-			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2", "extra": "e2" }
+			{ "eventName": "n1", "eventChannel": "c1", "eventRegex": "r1", "extra": "e1", "eventNestedValues": [ { "nestedKey": "val1" }, { "nestedKey": "val2" } ] },
+			{ "eventName": "n2", "eventChannel": "c2", "eventRegex": "r2", "extra": "e2", "eventNestedValues": [ { "nestedKey": "val3" }, { "nestedKey": "val4" } ] }
 		]
 	}`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
 		"event_channel_settings": [
-			{ "name": "n1", "channel": "c1", "regex": "r1" },
-			{ "name": "n2", "channel": "c2", "regex": "r2" }
+			{ "name": "n1", "channel": "c1", "regex": "r1", "event_nested_values": [ "val1", "val2" ] },
+			{ "name": "n2", "channel": "c2", "regex": "r2", "event_nested_values": [ "val3", "val4" ] }
 		]
 	}`, s)
 }

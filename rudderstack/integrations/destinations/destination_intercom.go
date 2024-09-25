@@ -122,14 +122,6 @@ func init() {
 				},
 			},
 		},
-		"onetrust_cookie_categories": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Description: "Specify the OneTrust category name for mapping the OneTrust consent settings to RudderStack's consent purposes.",
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-		},
 	}
 
 	for key, value := range commonSchema {
