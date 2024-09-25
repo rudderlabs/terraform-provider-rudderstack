@@ -7,7 +7,7 @@ resource "rudderstack_destination_customerio" "example" {
 
     # device_token_event_name = ""
 
-    # datacenter_eu = true
+    # datacenter = "US"
 
     # use_native_sdk {
     #   web = true
