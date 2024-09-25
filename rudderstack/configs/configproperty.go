@@ -159,7 +159,7 @@ func GetInverseFields(fields map[string]interface{}) map[string]interface{} {
 	return inverseFields
 }
 
-func ArrayWithObjects(rootAPIKey string, terraformKey string, fields map[string]interface{}) ConfigProperty {
+func ArrayWithObjects(rootAPIKey, terraformKey string, fields map[string]interface{}) ConfigProperty {
 	// we also need the inverse field map to convert terraform keys to api keys
 	inverseFields := GetInverseFields(fields)
 
@@ -242,7 +242,7 @@ func GetConfigValue(stateValue []interface{}, fields map[string]interface{}) []i
 	contents := []interface{}{}
 	for _, i := range stateValue {
 		av := map[string]interface{}{} // api value
-		
+
 		// iterate terraform values
 		if tv, ok := i.(map[string]interface{}); ok {
 			// iterate api value fields

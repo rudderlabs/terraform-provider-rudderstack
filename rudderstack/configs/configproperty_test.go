@@ -3,9 +3,10 @@ package configs_test
 import (
 	"testing"
 
-	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 func TestSimpleConfigProperty(t *testing.T) {
@@ -61,7 +62,6 @@ func TestConditionalFalse(t *testing.T) {
 	s, err := p.ToStateFunc(`{ "p": true }`, `{ "a": { "b": "123" } }`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{ "p": true }`, s)
-
 }
 
 func TestDiscriminator(t *testing.T) {
@@ -84,7 +84,6 @@ func TestDiscriminator(t *testing.T) {
 	s, err := p.ToStateFunc(`{ "p": true }`, `{ "f": "FOO" }`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{ "p": true }`, s)
-
 }
 
 func TestEquals(t *testing.T) {
@@ -95,30 +94,30 @@ func TestEquals(t *testing.T) {
 }
 
 func TestArrayWithStrings(t *testing.T) {
-	p := configs.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web")
+	p := configs.ArrayWithStrings("getInAppEventMapping.web", "eventName", "get_in_app_event_mapping.0.web")
 
-	a, err := p.FromStateFunc(`{}`, `{ "onetrust_cookie_categories": [ { "web": [ "a", "b" ] } ]}`)
+	a, err := p.FromStateFunc(`{}`, `{ "get_in_app_event_mapping": [ { "web": [ "a", "b" ] } ]}`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
-		"oneTrustCookieCategories": {
+		"getInAppEventMapping": {
 			"web": [
-				{ "oneTrustCookieCategory": "a" },
-				{ "oneTrustCookieCategory": "b" }
+				{ "eventName": "a" },
+				{ "eventName": "b" }
 			]
 		}
 	}`, a)
 
 	s, err := p.ToStateFunc(`{}`, `{
-		"oneTrustCookieCategories": {
+		"getInAppEventMapping": {
 			"web": [
-				{ "oneTrustCookieCategory": "a" },
-				{ "oneTrustCookieCategory": "b" }
+				{ "eventName": "a" },
+				{ "eventName": "b" }
 			]
 		}
 	}`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
-		"onetrust_cookie_categories": [{
+		"get_in_app_event_mapping": [{
 			"web": [ "a", "b" ]
 		}]
 	}`, s)
@@ -131,7 +130,7 @@ func TestArrayWithObjects(t *testing.T) {
 		"eventRegex":   "regex",
 		"eventNestedValues": configs.APINestedObject{
 			TerraformKey: "event_nested_values",
-			NestedKey: "nestedKey",
+			NestedKey:    "nestedKey",
 		},
 	})
 

@@ -23,10 +23,6 @@ func TestGetCommonConfigMeta(t *testing.T) {
 			description:          "Valid list of supported source types",
 			supportedSourceTypes: []string{"web", "android", "ios", "cloudSource"},
 			expectedProperties: []c.ConfigProperty{
-				c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
-				c.ArrayWithStrings("oneTrustCookieCategories.android", "oneTrustCookieCategory", "onetrust_cookie_categories.0.android"),
-				c.ArrayWithStrings("oneTrustCookieCategories.ios", "oneTrustCookieCategory", "onetrust_cookie_categories.0.ios"),
-				c.ArrayWithStrings("oneTrustCookieCategories.cloudSource", "oneTrustCookieCategory", "onetrust_cookie_categories.0.cloud_source"),
 				c.ArrayWithObjects("consentManagement.web", "consent_management.0.web", map[string]interface{}{
 					"provider":           "provider",
 					"resolutionStrategy": "resolution_strategy",
@@ -49,36 +45,6 @@ func TestGetCommonConfigMeta(t *testing.T) {
 				}),
 			},
 			expectedSchema: map[string]*schema.Schema{
-				"onetrust_cookie_categories": {
-					Type:        schema.TypeList,
-					Optional:    true,
-					MaxItems:    1,
-					Description: "Allows you to specify the OneTrust cookie categories for each source type.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"web": {
-								Type:     schema.TypeList,
-								Optional: true,
-								Elem:     &schema.Schema{Type: schema.TypeString},
-							},
-							"android": {
-								Type:     schema.TypeList,
-								Optional: true,
-								Elem:     &schema.Schema{Type: schema.TypeString},
-							},
-							"ios": {
-								Type:     schema.TypeList,
-								Optional: true,
-								Elem:     &schema.Schema{Type: schema.TypeString},
-							},
-							"cloud_source": {
-								Type:     schema.TypeList,
-								Optional: true,
-								Elem:     &schema.Schema{Type: schema.TypeString},
-							},
-						},
-					},
-				},
 				"consent_management": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -91,11 +57,11 @@ func TestGetCommonConfigMeta(t *testing.T) {
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
 								Description: "Allows you to specify consent configuration data for multiple providers.",
-								Elem:        &schema.Resource{ 
+								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"provider": {
-											Type:        schema.TypeString,
-											Required:    true,
+											Type:     schema.TypeString,
+											Required: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"oneTrust",
 												"ketch",
@@ -104,8 +70,8 @@ func TestGetCommonConfigMeta(t *testing.T) {
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
-											Type:        schema.TypeString,
-											Optional:    true,
+											Type:     schema.TypeString,
+											Optional: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"and",
 												"or",
@@ -129,11 +95,11 @@ func TestGetCommonConfigMeta(t *testing.T) {
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
 								Description: "Allows you to specify consent configuration data for multiple providers.",
-								Elem:        &schema.Resource{ 
+								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"provider": {
-											Type:        schema.TypeString,
-											Required:    true,
+											Type:     schema.TypeString,
+											Required: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"oneTrust",
 												"ketch",
@@ -142,8 +108,8 @@ func TestGetCommonConfigMeta(t *testing.T) {
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
-											Type:        schema.TypeString,
-											Optional:    true,
+											Type:     schema.TypeString,
+											Optional: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"and",
 												"or",
@@ -167,11 +133,11 @@ func TestGetCommonConfigMeta(t *testing.T) {
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
 								Description: "Allows you to specify consent configuration data for multiple providers.",
-								Elem:        &schema.Resource{ 
+								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"provider": {
-											Type:        schema.TypeString,
-											Required:    true,
+											Type:     schema.TypeString,
+											Required: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"oneTrust",
 												"ketch",
@@ -180,8 +146,8 @@ func TestGetCommonConfigMeta(t *testing.T) {
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
-											Type:        schema.TypeString,
-											Optional:    true,
+											Type:     schema.TypeString,
+											Optional: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"and",
 												"or",
@@ -200,16 +166,16 @@ func TestGetCommonConfigMeta(t *testing.T) {
 									},
 								},
 							},
-							"cloud_source": {
+							"cloudSource": {
 								Type:        schema.TypeList,
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
 								Description: "Allows you to specify consent configuration data for multiple providers.",
-								Elem:        &schema.Resource{ 
+								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"provider": {
-											Type:        schema.TypeString,
-											Required:    true,
+											Type:     schema.TypeString,
+											Required: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"oneTrust",
 												"ketch",
@@ -218,8 +184,8 @@ func TestGetCommonConfigMeta(t *testing.T) {
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
-											Type:        schema.TypeString,
-											Optional:    true,
+											Type:     schema.TypeString,
+											Optional: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"and",
 												"or",
@@ -259,7 +225,6 @@ func TestGetCommonConfigMeta(t *testing.T) {
 			description:          "A single supported source type",
 			supportedSourceTypes: []string{"web"},
 			expectedProperties: []c.ConfigProperty{
-				c.ArrayWithStrings("oneTrustCookieCategories.web", "oneTrustCookieCategory", "onetrust_cookie_categories.0.web"),
 				c.ArrayWithObjects("consentManagement.web", "consent_management.0.web", map[string]interface{}{
 					"provider":           "provider",
 					"resolutionStrategy": "resolution_strategy",
@@ -267,21 +232,6 @@ func TestGetCommonConfigMeta(t *testing.T) {
 				}),
 			},
 			expectedSchema: map[string]*schema.Schema{
-				"onetrust_cookie_categories": {
-					Type:        schema.TypeList,
-					Optional:    true,
-					MaxItems:    1,
-					Description: "Allows you to specify the OneTrust cookie categories for each source type.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"web": {
-								Type:     schema.TypeList,
-								Optional: true,
-								Elem:     &schema.Schema{Type: schema.TypeString},
-							},
-						},
-					},
-				},
 				"consent_management": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -294,11 +244,11 @@ func TestGetCommonConfigMeta(t *testing.T) {
 								Optional:    true,
 								ConfigMode:  schema.SchemaConfigModeAttr,
 								Description: "Allows you to specify consent configuration data for multiple providers.",
-								Elem:        &schema.Resource{ 
+								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"provider": {
-											Type:        schema.TypeString,
-											Required:    true,
+											Type:     schema.TypeString,
+											Required: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"oneTrust",
 												"ketch",
@@ -307,8 +257,8 @@ func TestGetCommonConfigMeta(t *testing.T) {
 											Description: "The provider name.",
 										},
 										"resolution_strategy": {
-											Type:        schema.TypeString,
-											Optional:    true,
+											Type:     schema.TypeString,
+											Optional: true,
 											ValidateFunc: validation.StringInSlice([]string{
 												"and",
 												"or",
