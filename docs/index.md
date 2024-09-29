@@ -16,7 +16,7 @@ terraform {
   required_providers {
     rudderstack = {
       source  = "rudderlabs/rudderstack"
-      version = "~> 2.0.1"
+      version = "~> 3.0.0"
     }
   }
   required_version = "~> 1.6.6"
@@ -28,6 +28,9 @@ provider "rudderstack" {
 }
 ```
 
+> **:warning: Breaking Change**
+> 
+> Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the examples in the destinations` resource guide.
 
 > **:warning: Breaking Change**
 > 

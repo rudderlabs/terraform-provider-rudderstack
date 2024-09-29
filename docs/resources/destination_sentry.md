@@ -40,12 +40,32 @@ resource "rudderstack_destination_sentry" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
+    # consent_management {
+    # 	web = [
+    # 		{
+    # 			provider = "oneTrust"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "ketch"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "custom"
+    # 			resolution_strategy = "and"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 		}
+    # 	]
     # }
   }
 }
 ```
+
+> **:warning: Breaking Change**
+> 
+> Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
 > 
@@ -79,6 +99,7 @@ Required:
 Optional:
 
 - `allow_urls` (List of String)
+- `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `custom_version_property` (String) This field helps you dynamically track the application version in Sentry.
 - `debug_mode` (Boolean) If enabled, no events are sent to your Sentry instance.
 - `deny_urls` (List of String) This is the list of the regex patterns or exact URL strings - from which the errors need to be exclusively sent to Sentry.
@@ -87,10 +108,27 @@ Optional:
 - `ignore_errors` (List of String) This option refers to a list of error messages that you do not want Sentry to notify you.
 - `include_paths` (List of String) This field should contain the regex patterns of URLs that are part of the app in the stack trace.
 - `logger` (String) Set the name you want Sentry to use as logger.
-- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `release` (String) This field is used for tracking your application's version in Sentry.
 - `server_name` (String) This option is used to track the host on which the client is running.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+
+<a id="nestedblock--config--consent_management"></a>
+### Nested Schema for `config.consent_management`
+
+Optional:
+
+- `web` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--web))
+
+<a id="nestedatt--config--consent_management--web"></a>
+### Nested Schema for `config.consent_management.web`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
 
 <a id="nestedblock--config--event_filtering"></a>
 ### Nested Schema for `config.event_filtering`
@@ -99,14 +137,6 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be denylisted.
 - `whitelist` (List of String) Enter the event names to be allowlisted.
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `web` (List of String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

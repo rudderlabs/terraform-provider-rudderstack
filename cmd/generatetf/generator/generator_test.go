@@ -73,11 +73,53 @@ func TestGeneratorTerraform(t *testing.T) {
 				"categoryToContent": [{ "from": "from", "to": "to" }],
 				"legacyConversionPixelId": { "from": "from", "to": "to" },
 				"useNativeSDK": { "web": true },
-				"oneTrustCookieCategories": {
+				"consentManagement": {
 					"web": [
-						{ "oneTrustCookieCategory": "one" },
-						{ "oneTrustCookieCategory": "two" },
-						{ "oneTrustCookieCategory": "three" }
+						{
+							"provider": "oneTrust",
+							"resolutionStrategy": "",
+							"consents": [
+								{
+									"consent": "one_web"
+								},
+								{
+									"consent": "two_web"
+								},
+								{
+									"consent": "three_web"
+								}
+							]
+						},
+						{
+							"provider": "ketch",
+							"resolutionStrategy": "",
+							"consents": [
+								{
+									"consent": "one_web"
+								},
+								{
+									"consent": "two_web"
+								},
+								{
+									"consent": "three_web"
+								}
+							]
+						},
+						{
+							"provider": "custom",
+							"resolutionStrategy": "and",
+							"consents": [
+								{
+									"consent": "one_web"
+								},
+								{
+									"consent": "two_web"
+								},
+								{
+									"consent": "three_web"
+								}
+							]
+						}
 					]
 				},
 				"blacklistedEvents": [
@@ -135,9 +177,12 @@ resource "rudderstack_destination_redshift" "dst_id-redshift" {
 resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
   name = "name-facebook-pixel"
   config {
-    access_token            = "facebook access token"
-    advanced_mapping        = true
-    category_to_content     = [{ from = "from", to = "to" }]
+    access_token        = "facebook access token"
+    advanced_mapping    = true
+    category_to_content = [{ from = "from", to = "to" }]
+    consent_management {
+      web = [{ consents = ["one_web", "two_web", "three_web"], provider = "oneTrust", resolution_strategy = "" }, { consents = ["one_web", "two_web", "three_web"], provider = "ketch", resolution_strategy = "" }, { consents = ["one_web", "two_web", "three_web"], provider = "custom", resolution_strategy = "and" }]
+    }
     event_custom_properties = ["one", "two", "three"]
     event_filtering {
       blacklist = ["one", "two", "three"]
@@ -146,9 +191,6 @@ resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
     legacy_conversion_pixel_id {
       from = "from"
       to   = "to"
-    }
-    onetrust_cookie_categories {
-      web = ["one", "two", "three"]
     }
     pixel_id           = "facebook pixel id"
     standard_page_call = true

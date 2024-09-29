@@ -36,10 +36,34 @@ func TestDestinationResourceQualtrics(t *testing.T) {
 				event_filtering {
 					blacklist = [ "one", "two", "three" ]
 				}
-				onetrust_cookie_categories {
-					web = ["one", "two", "three"]
-					android = ["one", "two", "three"]
-					ios = ["one", "two", "three"]
+				consent_management {
+					web = [
+						{
+							provider = "oneTrust"
+							consents = ["one_web", "two_web", "three_web"]
+							resolution_strategy = ""
+						},
+						{
+							provider = "ketch"
+							consents = ["one_web", "two_web", "three_web"]
+							resolution_strategy = ""
+						},
+						{
+							provider = "custom"
+							resolution_strategy = "and"
+							consents = ["one_web", "two_web", "three_web"]
+						}
+					]
+					android = [{
+						provider = "ketch"
+						consents = ["one_android", "two_android", "three_android"]
+						resolution_strategy = ""
+					}]
+					ios = [{
+						provider = "custom"
+						resolution_strategy = "and"
+						consents = ["one_ios", "two_ios", "three_ios"]
+					}]
 				}
 			`,
 			APIUpdate: `{
@@ -52,21 +76,87 @@ func TestDestinationResourceQualtrics(t *testing.T) {
 					{"eventName": "three"}
 				],
 				"useNativeSDK":{"ios":true},
-				"oneTrustCookieCategories": {
+				"consentManagement": {
 					"web": [
-						{ "oneTrustCookieCategory": "one" },
-						{ "oneTrustCookieCategory": "two" },
-						{ "oneTrustCookieCategory": "three" }
+						{
+							"provider": "oneTrust",
+							"resolutionStrategy": "",
+							"consents": [
+								{
+									"consent": "one_web"
+								},
+								{
+									"consent": "two_web"
+								},
+								{
+									"consent": "three_web"
+								}
+							]
+						},
+						{
+							"provider": "ketch",
+							"resolutionStrategy": "",
+							"consents": [
+								{
+									"consent": "one_web"
+								},
+								{
+									"consent": "two_web"
+								},
+								{
+									"consent": "three_web"
+								}
+							]
+						},
+						{
+							"provider": "custom",
+							"resolutionStrategy": "and",
+							"consents": [
+								{
+									"consent": "one_web"
+								},
+								{
+									"consent": "two_web"
+								},
+								{
+									"consent": "three_web"
+								}
+							]
+						}
 					],
 					"android": [
-						{ "oneTrustCookieCategory": "one" },
-						{ "oneTrustCookieCategory": "two" },
-						{ "oneTrustCookieCategory": "three" }
+						{
+							"provider": "ketch",
+							"resolutionStrategy": "",
+							"consents": [
+								{
+									"consent": "one_android"
+								},
+								{
+									"consent": "two_android"
+								},
+								{
+									"consent": "three_android"
+								}
+							]
+						}
 					],
 					"ios": [
-						{ "oneTrustCookieCategory": "one" },
-						{ "oneTrustCookieCategory": "two" },
-						{ "oneTrustCookieCategory": "three" }
+						{
+							"provider": "custom",
+							"resolutionStrategy": "and",
+							"consents": [
+								{
+									"consent": "one_ios"
+								},
+								{
+									"consent": "two_ios"
+								},
+								{
+									"consent": "three_ios"
+								}
+							]
+						}
 					]
 				},
 				"enableGenericPageTitle":{"web":true}

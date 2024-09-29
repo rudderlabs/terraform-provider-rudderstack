@@ -86,22 +86,82 @@ resource "rudderstack_destination_iterable" "example" {
       # close_button_position { 
       #   web = "" 
       # }
-      # onetrust_cookie_categories {
-      #   web = ["one", "two", "three"]
-      #   android = ["one", "two", "three"]
-      #   ios = ["one", "two", "three"]
-      #   unity = ["one", "two", "three"]
-      #   reactnative = ["one", "two", "three"]
-      #   flutter = ["one", "two", "three"]
-      #   cordova = ["one", "two", "three"]
-      #   amp = ["one", "two", "three"]
-      #   cloud = ["one", "two", "three"]
-      #   warehouse = ["one", "two", "three"]
-      #   shopify = ["one", "two", "three"]
-      # }
+    # consent_management {
+    # 	web = [
+    # 		{
+    # 			provider = "oneTrust"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "ketch"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "custom"
+    # 			resolution_strategy = "and"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 		}
+    # 	]
+    # 	android = [{
+    # 		provider = "ketch"
+    # 		consents = ["one_android", "two_android", "three_android"]
+    # 		resolution_strategy = ""
+    # 	}]
+    # 	ios = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_ios", "two_ios", "three_ios"]
+    # 	}]
+    # 	unity = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "or"
+    # 		consents = ["one_unity", "two_unity", "three_unity"]
+    # 	}]
+    # 	reactnative = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_reactnative", "two_reactnative", "three_reactnative"]
+    # 	}]
+    # 	flutter = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_flutter", "two_flutter", "three_flutter"]
+    # 	}]
+    # 	cordova = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_cordova", "two_cordova", "three_cordova"]
+    # 	}]
+    # 	amp = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_amp", "two_amp", "three_amp"]
+    # 	}]
+    # 	cloud = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_cloud", "two_cloud", "three_cloud"]
+    # 	}]
+    # 	warehouse = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_warehouse", "two_warehouse", "three_warehouse"]
+    # 	}]
+    # 	shopify = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_shopify", "two_shopify", "three_shopify"]
+    # 	}]
+    # }
     }
 }
 ```
+
+> **:warning: Breaking Change**
+> 
+> Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
 > 
@@ -141,6 +201,7 @@ Optional:
 - `close_button_color_top_offset` (Block List, Max: 1) Space between button & container top (see [below for nested schema](#nestedblock--config--close_button_color_top_offset))
 - `close_button_position` (Block List, Max: 1) Position (see [below for nested schema](#nestedblock--config--close_button_position))
 - `close_button_size` (Block List, Max: 1) Size of Close button (see [below for nested schema](#nestedblock--config--close_button_size))
+- `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `display_interval` (Block List, Max: 1) Wait time for next message (see [below for nested schema](#nestedblock--config--display_interval))
 - `get_in_app_event_mapping` (Block List, Max: 1) Mapping to trigger the getInApp messages (see [below for nested schema](#nestedblock--config--get_in_app_event_mapping))
 - `handle_links` (Block List, Max: 1) Control how to open links. (see [below for nested schema](#nestedblock--config--handle_links))
@@ -150,7 +211,6 @@ Optional:
 - `map_to_single_event` (Boolean) Map All Pages to Single Event Name
 - `on_open_node_to_take_focus` (Block List, Max: 1) Focus Element (see [below for nested schema](#nestedblock--config--on_open_node_to_take_focus))
 - `on_open_screen_reader_message` (Block List, Max: 1) Screen Reader Text (see [below for nested schema](#nestedblock--config--on_open_screen_reader_message))
-- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `package_name` (Block List, Max: 1) Package Name (see [below for nested schema](#nestedblock--config--package_name))
 - `purchase_event_mapping` (List of Object) Mapping to trigger the getInApp messages (see [below for nested schema](#nestedatt--config--purchase_event_mapping))
 - `right_offset` (Block List, Max: 1) Space (px or %) between screen right & messages. (see [below for nested schema](#nestedblock--config--right_offset))
@@ -217,6 +277,134 @@ Optional:
 - `web` (String)
 
 
+<a id="nestedblock--config--consent_management"></a>
+### Nested Schema for `config.consent_management`
+
+Optional:
+
+- `amp` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--amp))
+- `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `cloud` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud))
+- `cordova` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cordova))
+- `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
+- `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
+- `shopify` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--shopify))
+- `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
+- `warehouse` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--warehouse))
+- `web` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--web))
+
+<a id="nestedatt--config--consent_management--amp"></a>
+### Nested Schema for `config.consent_management.amp`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android"></a>
+### Nested Schema for `config.consent_management.android`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cloud"></a>
+### Nested Schema for `config.consent_management.cloud`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cordova"></a>
+### Nested Schema for `config.consent_management.cordova`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--flutter"></a>
+### Nested Schema for `config.consent_management.flutter`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios"></a>
+### Nested Schema for `config.consent_management.ios`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--reactnative"></a>
+### Nested Schema for `config.consent_management.reactnative`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--shopify"></a>
+### Nested Schema for `config.consent_management.shopify`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--unity"></a>
+### Nested Schema for `config.consent_management.unity`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--warehouse"></a>
+### Nested Schema for `config.consent_management.warehouse`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--web"></a>
+### Nested Schema for `config.consent_management.web`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+
 <a id="nestedblock--config--display_interval"></a>
 ### Nested Schema for `config.display_interval`
 
@@ -279,24 +467,6 @@ Optional:
 Optional:
 
 - `web` (String)
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `amp` (List of String)
-- `android` (List of String)
-- `cloud` (List of String)
-- `cordova` (List of String)
-- `flutter` (List of String)
-- `ios` (List of String)
-- `reactnative` (List of String)
-- `shopify` (List of String)
-- `unity` (List of String)
-- `warehouse` (List of String)
-- `web` (List of String)
 
 
 <a id="nestedblock--config--package_name"></a>

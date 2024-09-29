@@ -161,7 +161,7 @@ func sourceName(source client.Source) string {
 	return fmt.Sprintf("src_%s", source.ID)
 }
 
-// generateDestination genertes a destination resource block from an API destinaton object and a terraform destination type and ConfigMeta.
+// generateDestination generates a destination resource block from an API destination object and a terraform destination type and ConfigMeta.
 func generateDestination(destination client.Destination, terraformType string, cm *configs.ConfigMeta) (*hclwrite.Block, error) {
 	resourceType := destinationType(terraformType)
 	resourceName := destinationName(destination)
@@ -224,12 +224,12 @@ func generateConfigBlock(config json.RawMessage, cm *configs.ConfigMeta) (*hclwr
 }
 
 // generateBlock generate blocks with specified name and data which conform to the provided config schema.
-// data should be unmarshaled from a state JSON object.
+// data should be unmarshalled from a state JSON object.
 func generateBlock(name string, data map[string]interface{}, configSchema map[string]*schema.Schema) (*hclwrite.Block, error) {
 	block := hclwrite.NewBlock(name, []string{})
 	body := block.Body()
 
-	// go does not garantee the order of range in maps, we sort the keys so that the output is predictable
+	// go does not guarantee the order of range in maps, we sort the keys so that the output is predictable
 	var keys []string
 	for k := range data {
 		keys = append(keys, k)

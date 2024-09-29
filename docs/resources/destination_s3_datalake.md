@@ -26,18 +26,74 @@ resource "rudderstack_destination_s3_datalake" "example" {
 
     # enable_sse    = true
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
-    #   android = ["one", "two", "three"]
-    #   ios = ["one", "two", "three"]
-    #   unity = ["one", "two", "three"]
-    #   reactnative = ["one", "two", "three"]
-    #   flutter = ["one", "two", "three"]
-    #   cordova = ["one", "two", "three"]
-    #   amp = ["one", "two", "three"]
-    #   cloud = ["one", "two", "three"]
-    #   cloud_source = ["one", "two", "three"]
-    #   shopify = ["one", "two", "three"]
+    # consent_management {
+    # 	web = [
+    # 		{
+    # 			provider = "oneTrust"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "ketch"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "custom"
+    # 			resolution_strategy = "and"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 		}
+    # 	]
+    # 	android = [{
+    # 		provider = "ketch"
+    # 		consents = ["one_android", "two_android", "three_android"]
+    # 		resolution_strategy = ""
+    # 	}]
+    # 	ios = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_ios", "two_ios", "three_ios"]
+    # 	}]
+    # 	unity = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "or"
+    # 		consents = ["one_unity", "two_unity", "three_unity"]
+    # 	}]
+    # 	reactnative = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_reactnative", "two_reactnative", "three_reactnative"]
+    # 	}]
+    # 	flutter = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_flutter", "two_flutter", "three_flutter"]
+    # 	}]
+    # 	cordova = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_cordova", "two_cordova", "three_cordova"]
+    # 	}]
+    # 	amp = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_amp", "two_amp", "three_amp"]
+    # 	}]
+    # 	cloud = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_cloud", "two_cloud", "three_cloud"]
+    # 	}]
+    # 	cloud_source = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_cloud_source", "two_cloud_source", "three_cloud_source"]
+    # 	}]
+    # 	shopify = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_shopify", "two_shopify", "three_shopify"]
+    # 	}]
     # }
 
     use_glue = true
@@ -50,6 +106,10 @@ resource "rudderstack_destination_s3_datalake" "example" {
   }
 }
 ```
+
+> **:warning: Breaking Change**
+> 
+> Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
 > 
@@ -86,9 +146,9 @@ Optional:
 
 - `access_key` (String, Sensitive) Enter your AWS secret access key.
 - `access_key_id` (String) Enter your AWS access key ID.
+- `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `enable_sse` (Boolean) This setting enables server-side encryption.
 - `namespace` (String) If specified, all the data for the destination will be pushed to `s3://<bucketName>/<prefix>/rudder-datalake/<namespace>`.
-- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `prefix` (String) If specified, RudderStack creates a folder in the bucket with this prefix and push all the data within that folder.
 - `region` (String) Enter your AWS Glue region. For example, for N.Virginia, it would be `us-east-1`.
 
@@ -104,19 +164,128 @@ Optional:
 - `start_at` (String) This optional setting lets you specify the particular time of the day (in UTC) when you want RudderStack to sync the data to the warehouse.
 
 
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
+<a id="nestedblock--config--consent_management"></a>
+### Nested Schema for `config.consent_management`
 
 Optional:
 
-- `amp` (List of String)
-- `android` (List of String)
-- `cloud` (List of String)
-- `cloud_source` (List of String)
-- `cordova` (List of String)
-- `flutter` (List of String)
-- `ios` (List of String)
-- `reactnative` (List of String)
-- `shopify` (List of String)
-- `unity` (List of String)
-- `web` (List of String)
+- `amp` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--amp))
+- `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `cloud` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud))
+- `cloud_source` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud_source))
+- `cordova` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cordova))
+- `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
+- `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
+- `shopify` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--shopify))
+- `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
+- `web` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--web))
+
+<a id="nestedatt--config--consent_management--amp"></a>
+### Nested Schema for `config.consent_management.amp`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android"></a>
+### Nested Schema for `config.consent_management.android`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cloud"></a>
+### Nested Schema for `config.consent_management.cloud`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cloud_source"></a>
+### Nested Schema for `config.consent_management.cloud_source`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cordova"></a>
+### Nested Schema for `config.consent_management.cordova`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--flutter"></a>
+### Nested Schema for `config.consent_management.flutter`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios"></a>
+### Nested Schema for `config.consent_management.ios`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--reactnative"></a>
+### Nested Schema for `config.consent_management.reactnative`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--shopify"></a>
+### Nested Schema for `config.consent_management.shopify`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--unity"></a>
+### Nested Schema for `config.consent_management.unity`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--web"></a>
+### Nested Schema for `config.consent_management.web`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
