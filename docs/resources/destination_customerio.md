@@ -21,7 +21,7 @@ resource "rudderstack_destination_customerio" "example" {
 
     # device_token_event_name = ""
 
-    # datacenter_eu = true
+    # datacenter = "US"
 
     # use_native_sdk {
     #   web = true
@@ -142,7 +142,7 @@ Required:
 Optional:
 
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
-- `datacenter_eu` (Boolean) Enable this option in case your account is based in the EU region.
+- `datacenter` (String) Input your Customer.io Data Center. (US or EU).
 - `device_token_event_name` (String) Enter the name of the event that is fired immediately after setting the device token.
 - `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native JavaScript SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
