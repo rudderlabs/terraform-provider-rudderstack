@@ -14,7 +14,7 @@ func init() {
 		c.Simple("siteID", "site_id"),
 		c.Simple("apiKey", "api_key"),
 		c.Simple("deviceTokenEventName", "device_token_event_name", c.SkipZeroValue),
-		c.Simple("datacenterEU", "datacenter_eu", c.SkipZeroValue),
+		c.Simple("datacenter", "datacenter"),
 		c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
@@ -46,10 +46,10 @@ func init() {
 			Description:      "Enter the name of the event that is fired immediately after setting the device token.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
-		"datacenter_eu": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Description: "Enable this option in case your account is based in the EU region.",
+		"datacenter": {
+			Type:        schema.TypeString,
+			Optional:    false,
+			Description: "Input your Customer.io Data Center. (US or EU)",
 		},
 		"use_native_sdk": {
 			Type:        schema.TypeList,

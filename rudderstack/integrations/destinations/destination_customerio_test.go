@@ -13,7 +13,7 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 			TerraformCreate: `
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
-				datacenter_eu = true
+				datacenter = "US"
 
 				use_native_sdk {
 					web = true
@@ -22,7 +22,7 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 			APICreate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
-				"datacenterEU": true,
+				"datacenter": "US",
 				"useNativeSDK": {
 					"web": true
 				}
@@ -30,7 +30,7 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 			TerraformUpdate: `
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
-				datacenter_eu = false
+				datacenter = "EU"
 				device_token_event_name = "name"
 
 				event_filtering {
@@ -109,6 +109,7 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 			APIUpdate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
+				datacenter = "EU"
 				"deviceTokenEventName": "name",
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [{
