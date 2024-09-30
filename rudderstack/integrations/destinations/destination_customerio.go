@@ -49,7 +49,7 @@ func init() {
 		"datacenter": {
 			Type:        schema.TypeString,
 			Optional:    false,
-			Description: "Select your Customer.io Data Center.",
+			Description: "Input your Customer.io Data Center. (US or EU)",
 		},
 		"use_native_sdk": {
 			Type:        schema.TypeList,
