@@ -49,6 +49,7 @@ func init() {
 		"datacenter": {
 			Type:        schema.TypeString,
 			Optional:    false,
+			Default:     "US",
 			Description: "Input your Customer.io Data Center. (US or EU)",
 		},
 		"use_native_sdk": {
