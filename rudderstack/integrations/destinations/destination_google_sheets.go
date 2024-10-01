@@ -14,7 +14,7 @@ func init() {
 		c.Simple("sheetName", "sheet_name"),
 		c.Simple("sheetId", "sheet_id"),
 		c.Simple("credentials", "credentials"),
-		c.ArrayWithObjects("eventKeyMap", "event_key_map", map[string]string{
+		c.ArrayWithObjects("eventKeyMap", "event_key_map", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),

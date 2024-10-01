@@ -52,12 +52,32 @@ resource "rudderstack_destination_google_ads" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # onetrust_cookie_categories {
-    #   web = ["one", "two", "three"]
+    # consent_management {
+    # 	web = [
+    # 		{
+    # 			provider = "oneTrust"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "ketch"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 			resolution_strategy = ""
+    # 		},
+    # 		{
+    # 			provider = "custom"
+    # 			resolution_strategy = "and"
+    # 			consents = ["one_web", "two_web", "three_web"]
+    # 		}
+    # 	]
     # }
   }
 }
 ```
+
+> **:warning: Breaking Change**
+> 
+> Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
 > 
@@ -91,12 +111,12 @@ Required:
 Optional:
 
 - `click_event_conversions` (List of Object) For `track` calls, you can configure these fields. (see [below for nested schema](#nestedatt--config--click_event_conversions))
+- `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `conversion_linker` (Boolean) This setting is enabled by default. If you don't want the global site tag (gtag.js) to set first-party cookies on your website domain, you should disable this setting.
 - `default_page_conversion` (String) Enter the default conversion label.
 - `disable_ad_personalization` (Boolean) Enable this setting to programmatically disable ad personalization.
 - `dynamic_remarketing` (Block List, Max: 1) Enabling this tracking mode allows RudderStack to leverage Google Ads' Dynamic Remarketing feature for event tracking. (see [below for nested schema](#nestedblock--config--dynamic_remarketing))
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Google Ads. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `onetrust_cookie_categories` (Block List, Max: 1) Allows you to specify the OneTrust cookie categories for each source type. (see [below for nested schema](#nestedblock--config--onetrust_cookie_categories))
 - `page_load_conversions` (List of Object) You can configure the page load conversions for multiple instances. (see [below for nested schema](#nestedatt--config--page_load_conversions))
 - `send_page_view` (Boolean) Enabling this setting configures Google Ads to automatically send your `page` events.
 - `use_native_sdk` (Block List, Max: 1) As this is a device mode destination, this setting will always be enabled. (see [below for nested schema](#nestedblock--config--use_native_sdk))
@@ -108,6 +128,24 @@ Optional:
 
 - `label` (String)
 - `name` (String)
+
+
+<a id="nestedblock--config--consent_management"></a>
+### Nested Schema for `config.consent_management`
+
+Optional:
+
+- `web` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--web))
+
+<a id="nestedatt--config--consent_management--web"></a>
+### Nested Schema for `config.consent_management.web`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
 
 
 <a id="nestedblock--config--dynamic_remarketing"></a>
@@ -125,14 +163,6 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be denylisted.
 - `whitelist` (List of String) Enter the event names to be allowlisted.
-
-
-<a id="nestedblock--config--onetrust_cookie_categories"></a>
-### Nested Schema for `config.onetrust_cookie_categories`
-
-Optional:
-
-- `web` (List of String)
 
 
 <a id="nestedatt--config--page_load_conversions"></a>
