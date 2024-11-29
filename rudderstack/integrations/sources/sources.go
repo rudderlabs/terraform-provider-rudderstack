@@ -73,4 +73,9 @@ func init() {
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
+	c.Sources.Register("php", c.ConfigMeta{
+		APIType:    "PHP",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
 }
