@@ -32,75 +32,75 @@ resource "rudderstack_destination_customerio" "example" {
     #   blacklist = ["one", "two", "three"]
     # }
 
-    # consent_management {
-    # 	web = [
-    # 		{
-    # 			provider = "oneTrust"
-    # 			consents = ["one_web", "two_web", "three_web"]
-    # 			resolution_strategy = ""
-    # 		},
-    # 		{
-    # 			provider = "ketch"
-    # 			consents = ["one_web", "two_web", "three_web"]
-    # 			resolution_strategy = ""
-    # 		},
-    # 		{
-    # 			provider = "custom"
-    # 			resolution_strategy = "and"
-    # 			consents = ["one_web", "two_web", "three_web"]
-    # 		}
-    # 	]
-    # 	android = [{
-    # 		provider = "ketch"
-    # 		consents = ["one_android", "two_android", "three_android"]
-    # 		resolution_strategy = ""
-    # 	}]
-    # 	ios = [{
-    # 		provider = "custom"
-    # 		resolution_strategy = "and"
-    # 		consents = ["one_ios", "two_ios", "three_ios"]
-    # 	}]
-    # 	unity = [{
-    # 		provider = "custom"
-    # 		resolution_strategy = "or"
-    # 		consents = ["one_unity", "two_unity", "three_unity"]
-    # 	}]
-    # 	reactnative = [{
-    # 		provider = "custom"
-    # 		resolution_strategy = "and"
-    # 		consents = ["one_reactnative", "two_reactnative", "three_reactnative"]
-    # 	}]
-    # 	flutter = [{
-    # 		provider = "custom"
-    # 		resolution_strategy = "and"
-    # 		consents = ["one_flutter", "two_flutter", "three_flutter"]
-    # 	}]
-    # 	cordova = [{
-    # 		provider = "custom"
-    # 		resolution_strategy = "and"
-    # 		consents = ["one_cordova", "two_cordova", "three_cordova"]
-    # 	}]
-    # 	amp = [{
-    # 		provider = "custom"
-    # 		resolution_strategy = "and"
-    # 		consents = ["one_amp", "two_amp", "three_amp"]
-    # 	}]
-    # 	cloud = [{
-    # 		provider = "custom"
-    # 		resolution_strategy = "and"
-    # 		consents = ["one_cloud", "two_cloud", "three_cloud"]
-    # 	}]
-    # 	warehouse = [{
-    # 		provider = "custom"
-    # 		resolution_strategy = "and"
-    # 		consents = ["one_warehouse", "two_warehouse", "three_warehouse"]
-    # 	}]
-    # 	shopify = [{
-    # 		provider = "custom"
-    # 		resolution_strategy = "and"
-    # 		consents = ["one_shopify", "two_shopify", "three_shopify"]
-    # 	}]
-    # }
+    consent_management {
+      web = [
+        {
+          provider            = "oneTrust"
+          consents            = ["one_web", "two_web", "three_web"]
+          resolution_strategy = ""
+        },
+        {
+          provider            = "ketch"
+          consents            = ["one_web", "two_web", "three_web"]
+          resolution_strategy = ""
+        },
+        {
+          provider            = "custom"
+          resolution_strategy = "and"
+          consents            = ["one_web", "two_web", "three_web"]
+        }
+      ]
+      # 	android = [{
+      # 		provider = "ketch"
+      # 		consents = ["one_android", "two_android", "three_android"]
+      # 		resolution_strategy = ""
+      # 	}]
+      # 	ios = [{
+      # 		provider = "custom"
+      # 		resolution_strategy = "and"
+      # 		consents = ["one_ios", "two_ios", "three_ios"]
+      # 	}]
+      # 	unity = [{
+      # 		provider = "custom"
+      # 		resolution_strategy = "or"
+      # 		consents = ["one_unity", "two_unity", "three_unity"]
+      # 	}]
+      # 	reactnative = [{
+      # 		provider = "custom"
+      # 		resolution_strategy = "and"
+      # 		consents = ["one_reactnative", "two_reactnative", "three_reactnative"]
+      # 	}]
+      # 	flutter = [{
+      # 		provider = "custom"
+      # 		resolution_strategy = "and"
+      # 		consents = ["one_flutter", "two_flutter", "three_flutter"]
+      # 	}]
+      # 	cordova = [{
+      # 		provider = "custom"
+      # 		resolution_strategy = "and"
+      # 		consents = ["one_cordova", "two_cordova", "three_cordova"]
+      # 	}]
+      # 	amp = [{
+      # 		provider = "custom"
+      # 		resolution_strategy = "and"
+      # 		consents = ["one_amp", "two_amp", "three_amp"]
+      # 	}]
+      # 	cloud = [{
+      # 		provider = "custom"
+      # 		resolution_strategy = "and"
+      # 		consents = ["one_cloud", "two_cloud", "three_cloud"]
+      # 	}]
+      # 	warehouse = [{
+      # 		provider = "custom"
+      # 		resolution_strategy = "and"
+      # 		consents = ["one_warehouse", "two_warehouse", "three_warehouse"]
+      # 	}]
+      # 	shopify = [{
+      # 		provider = "custom"
+      # 		resolution_strategy = "and"
+      # 		consents = ["one_shopify", "two_shopify", "three_shopify"]
+      # 	}]
+    }
   }
 }
 ```
@@ -142,7 +142,7 @@ Required:
 Optional:
 
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
-- `datacenter` (String) Input your Customer.io Data Center. (US or EU).
+- `datacenter` (String) Input your Customer.io Data Center. (US or EU)
 - `device_token_event_name` (String) Enter the name of the event that is fired immediately after setting the device token.
 - `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native JavaScript SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))

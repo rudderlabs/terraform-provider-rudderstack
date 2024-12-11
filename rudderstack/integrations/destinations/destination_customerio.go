@@ -48,7 +48,7 @@ func init() {
 		},
 		"datacenter": {
 			Type:        schema.TypeString,
-			Optional:    false,
+			Optional:    true,
 			Default:     "US",
 			Description: "Input your Customer.io Data Center. (US or EU)",
 		},
