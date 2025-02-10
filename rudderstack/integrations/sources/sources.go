@@ -78,4 +78,9 @@ func init() {
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
+	c.Sources.Register("dotnet", c.ConfigMeta{
+		APIType:    "dotnet",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
 }
