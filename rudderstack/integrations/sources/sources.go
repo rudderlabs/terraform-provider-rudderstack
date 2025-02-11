@@ -78,8 +78,15 @@ func init() {
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
+
 	c.Sources.Register("dotnet", c.ConfigMeta{
 		APIType:    "DotNet",
+    Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
+  
+	c.Sources.Register("flutter", c.ConfigMeta{
+		APIType:    "Flutter",
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})

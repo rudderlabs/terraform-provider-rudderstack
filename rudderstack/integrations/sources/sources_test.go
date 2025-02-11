@@ -70,3 +70,7 @@ func TestSourceResourcePHP(t *testing.T) {
 func TestSourceResourceDotNet(t *testing.T) {
 	cmt.AssertSource(t, "dotnet", []configs.TestConfig{configs.EmptyTestConfig})
 }
+
+func TestSourceResourceFlutter(t *testing.T) {
+	cmt.AssertSource(t, "flutter", []configs.TestConfig{configs.EmptyTestConfig})
+}
