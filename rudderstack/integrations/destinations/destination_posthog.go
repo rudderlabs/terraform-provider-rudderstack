@@ -7,7 +7,16 @@ import (
 )
 
 func init() {
-	supportedSourceTypes := []string{"web", "cloud", "flutter"}
+	supportedSourceTypes := []string{"android",
+		"ios",
+		"web",
+		"unity",
+		"amp",
+		"cloud",
+		"warehouse",
+		"reactnative",
+		"flutter",
+		"cordova"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{
