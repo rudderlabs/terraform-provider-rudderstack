@@ -74,7 +74,7 @@ func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag
 	accessToken := d.Get("access_token").(string)
 	client, err := NewAPIClient(accessToken,
 		client.WithBaseURL(apiUrl),
-		client.WithUserAgent("terraform-provider-rudderstack/3.0.0"))
+		client.WithUserAgent("terraform-provider-rudderstack/3.0.2"))
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
