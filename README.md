@@ -49,7 +49,7 @@ $ make install
 ```
 provider_installation {
   dev_overrides {
-    "rudderlabs/rudderstack" = /users/abc/terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.12/linux_amd64/"
+    "rudderlabs/rudderstack" = "/users/abc/terraform.d/plugins/rudderstack.com/rudderlabs/rudderstack/0.2.12/linux_amd64/"
   }
 }
 ```
