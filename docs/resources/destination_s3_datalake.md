@@ -24,6 +24,10 @@ resource "rudderstack_destination_s3_datalake" "example" {
     # access_key_id = "..."
     # access_key    = "..."
 
+    # role_based_authentication {
+    #    i_am_role_arn = "..."
+    # }
+
     # enable_sse    = true
 
     # consent_management {
@@ -151,6 +155,7 @@ Optional:
 - `namespace` (String) If specified, all the data for the destination will be pushed to `s3://<bucketName>/<prefix>/rudder-datalake/<namespace>`.
 - `prefix` (String) If specified, RudderStack creates a folder in the bucket with this prefix and push all the data within that folder.
 - `region` (String) Enter your AWS Glue region. For example, for N.Virginia, it would be `us-east-1`.
+- `role_based_authentication` (Block List, Max: 1) This option allows you select the arn based authentication. (see [below for nested schema](#nestedblock--config--role_based_authentication))
 
 <a id="nestedblock--config--sync"></a>
 ### Nested Schema for `config.sync`
@@ -289,3 +294,12 @@ Optional:
 - `consents` (List of String)
 - `provider` (String)
 - `resolution_strategy` (String)
+
+
+
+<a id="nestedblock--config--role_based_authentication"></a>
+### Nested Schema for `config.role_based_authentication`
+
+Optional:
+
+- `i_am_role_arn` (String) Role Based Authentication

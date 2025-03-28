@@ -9,6 +9,10 @@ resource "rudderstack_destination_s3_datalake" "example" {
     # access_key_id = "..."
     # access_key    = "..."
 
+    # role_based_authentication {
+    #    i_am_role_arn = "..."
+    # }
+
     # enable_sse    = true
 
     # consent_management {
