@@ -81,14 +81,14 @@ func GenerateTerraform(sources []client.Source, destinations []client.Destinatio
 		if cm != nil {
 			b, err := generateSource(src, terraformType, cm)
 			if err != nil {
-				return nil, err
+				logger.Printf("could not generate resource block for source '%s': %v", src.ID, err)
+			} else {
+				body.AppendBlock(b)
+				body.AppendNewline()
+				generatedSourceEntries[src.ID] = &sourceEntry{terraformType: terraformType, source: src}
 			}
-
-			body.AppendBlock(b)
-			body.AppendNewline()
-			generatedSourceEntries[src.ID] = &sourceEntry{terraformType: terraformType, source: src}
 		} else {
-			logger.Printf("could not generate resource block for source '%s':  type '%s' is not supported", src.ID, src.Type)
+			logger.Printf("could not generate resource block for source '%s': type '%s' is not supported", src.ID, src.Type)
 		}
 	}
 
@@ -100,14 +100,14 @@ func GenerateTerraform(sources []client.Source, destinations []client.Destinatio
 		if cm != nil {
 			b, err := generateDestination(dst, terraformType, cm)
 			if err != nil {
-				return nil, err
+				logger.Printf("could not generate resource block for destination '%s': %v", dst.ID, err)
+			} else {
+				body.AppendBlock(b)
+				body.AppendNewline()
+				generatedDestinationEntries[dst.ID] = &destinationEntry{terraformType: terraformType, destination: dst}
 			}
-
-			body.AppendBlock(b)
-			body.AppendNewline()
-			generatedDestinationEntries[dst.ID] = &destinationEntry{terraformType: terraformType, destination: dst}
 		} else {
-			logger.Printf("could not generate resource block for destination '%s':  type '%s' is not supported", dst.ID, dst.Type)
+			logger.Printf("could not generate resource block for destination '%s': type '%s' is not supported", dst.ID, dst.Type)
 		}
 	}
 
@@ -162,10 +162,16 @@ func sourceName(source client.Source) string {
 }
 
 // generateDestination generates a destination resource block from an API destination object and a terraform destination type and ConfigMeta.
-func generateDestination(destination client.Destination, terraformType string, cm *configs.ConfigMeta) (*hclwrite.Block, error) {
+func generateDestination(destination client.Destination, terraformType string, cm *configs.ConfigMeta) (block *hclwrite.Block, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic while generating destination block: %v", r)
+		}
+	}()
+
 	resourceType := destinationType(terraformType)
 	resourceName := destinationName(destination)
-	block := hclwrite.NewBlock("resource", []string{resourceType, resourceName})
+	block = hclwrite.NewBlock("resource", []string{resourceType, resourceName})
 
 	body := block.Body()
 	body.SetAttributeValue("name", cty.StringVal(destination.Name))
