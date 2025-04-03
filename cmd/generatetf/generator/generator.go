@@ -134,10 +134,16 @@ func GenerateTerraform(sources []client.Source, destinations []client.Destinatio
 }
 
 // generateSource generates a source resource block from an API source object and a terraform source type and ConfigMeta.
-func generateSource(source client.Source, terraformType string, cm *configs.ConfigMeta) (*hclwrite.Block, error) {
+func generateSource(source client.Source, terraformType string, cm *configs.ConfigMeta) (block *hclwrite.Block, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic while generating source block: %v", r)
+		}
+	}()
+
 	resourceType := sourceType(terraformType)
 	resourceName := sourceName(source)
-	block := hclwrite.NewBlock("resource", []string{resourceType, resourceName})
+	block = hclwrite.NewBlock("resource", []string{resourceType, resourceName})
 
 	body := block.Body()
 	body.SetAttributeValue("name", cty.StringVal(source.Name))
