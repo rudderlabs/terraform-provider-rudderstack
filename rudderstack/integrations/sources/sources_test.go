@@ -74,3 +74,7 @@ func TestSourceResourceDotNet(t *testing.T) {
 func TestSourceResourceFlutter(t *testing.T) {
 	cmt.AssertSource(t, "flutter", []configs.TestConfig{configs.EmptyTestConfig})
 }
+
+func TestSourceResourceCustomerIO(t *testing.T) {
+	cmt.AssertSource(t, "customerio", []configs.TestConfig{configs.EmptyTestConfig})
+}
