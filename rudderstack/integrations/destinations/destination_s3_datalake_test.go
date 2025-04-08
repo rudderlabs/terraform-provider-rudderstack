@@ -17,11 +17,16 @@ func TestDestinationResourceS3Datalake(t *testing.T) {
 				sync {
 				  frequency = "30"
 				}
+				role_based_authentication {
+					i_am_role_arn = "..."
+				}
 			`,
 			APICreate: `{
 				"bucketName": "bucket",
 				"useGlue": false,
-				"syncFrequency": "30"
+				"syncFrequency": "30",
+				"roleBasedAuth": true,
+				"iamRoleARN": "..."
 			}`,
 			TerraformUpdate: `
 				bucket_name = "bucket"
@@ -115,6 +120,7 @@ func TestDestinationResourceS3Datalake(t *testing.T) {
 				"prefix": "prefix",
 				"accessKeyID": "...",
 				"accessKey": "...",
+				"roleBasedAuth": false,
 				"enableSSE": true,
 				"useGlue": true,
 				"region": "region",
