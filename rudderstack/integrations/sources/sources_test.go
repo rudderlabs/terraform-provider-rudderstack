@@ -78,3 +78,7 @@ func TestSourceResourceFlutter(t *testing.T) {
 func TestSourceResourceCustomerIO(t *testing.T) {
 	cmt.AssertSource(t, "customerio", []configs.TestConfig{configs.EmptyTestConfig})
 }
+
+func TestSourceResourceFacebookLeadAds(t *testing.T) {
+	cmt.AssertSource(t, "facebook_lead_ads", []configs.TestConfig{configs.EmptyTestConfig})
+}

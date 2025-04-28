@@ -96,4 +96,10 @@ func init() {
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
+
+	c.Sources.Register("facebook_lead_ads", c.ConfigMeta{
+		APIType:    "FacebookLeadAds",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
 }

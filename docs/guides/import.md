@@ -19,8 +19,7 @@ cd terraform-provider-rudderstack
 
 ## Step 2: Generate your personal access token
 
-Running the tool requires a RudderStack personal access token to be set in the `RUDDERSTACK_ACCESS_TOKEN` environemnt variable. For more information about generating this token, refer to the [RudderStack Documentation](https://www.rudderstack.com/docs/dashboard-guides/personal-access-token/).
-
+Running the tool requires a RudderStack personal access token to be set in the `RUDDERSTACK_ACCESS_TOKEN` environment variable. For more information about generating this token, refer to the [RudderStack Documentation](https://www.rudderstack.com/docs/rudderstack-api/personal-access-tokens/).
 Once you set this token, you can generate the script using the following command:
 
 ```sh
