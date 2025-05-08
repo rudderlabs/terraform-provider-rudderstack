@@ -127,7 +127,8 @@ func TestGeneratorTerraform(t *testing.T) {
 				  { "eventName": "two" },
 				  { "eventName": "three" }
 				],
-				"eventFilteringOption": "blacklistedEvents"
+				"eventFilteringOption": "blacklistedEvents",
+				"blacklistPiiProperties": [],	
 			}`),
 		},
 		{
@@ -177,9 +178,10 @@ resource "rudderstack_destination_redshift" "dst_id-redshift" {
 resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
   name = "name-facebook-pixel"
   config {
-    access_token        = "facebook access token"
-    advanced_mapping    = true
-    category_to_content = [{ from = "from", to = "to" }]
+    access_token             = "facebook access token"
+    advanced_mapping         = true
+    blacklist_pii_properties = []
+    category_to_content      = [{ from = "from", to = "to" }]
     consent_management {
       web = [{ consents = ["one_web", "two_web", "three_web"], provider = "oneTrust", resolution_strategy = "" }, { consents = ["one_web", "two_web", "three_web"], provider = "ketch", resolution_strategy = "" }, { consents = ["one_web", "two_web", "three_web"], provider = "custom", resolution_strategy = "and" }]
     }
