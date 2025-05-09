@@ -295,6 +295,11 @@ func ctyValue(x interface{}) cty.Value {
 		for _, i := range v {
 			values = append(values, ctyValue(i))
 		}
+		if len(values) == 0 {
+			// ListVal cannot be used with an empty list, so we return an ListValEmpty.
+			// The type of the list is not important because the generated code will have an empty list.
+			return cty.ListValEmpty(cty.String)
+		}
 		return cty.ListVal(values)
 
 	case map[string]interface{}:
