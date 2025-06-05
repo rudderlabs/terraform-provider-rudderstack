@@ -24,6 +24,9 @@ resource "rudderstack_destination_bigquery" "example" {
     # location  = "us-east1"
     # prefix    = ""
     # namespace = ""
+    # skip_tracks_table = true
+    # skip_users_table = true
+    # skip_views = false
     # consent_management {
     # 	web = [
     # 		{
