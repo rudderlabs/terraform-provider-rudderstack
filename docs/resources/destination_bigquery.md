@@ -146,6 +146,9 @@ Optional:
 - `location` (String) Enter the GCP region of your project dataset.
 - `namespace` (String) Enter the schema name where RudderStack will create all the tables. If not specified, RudderStack will set this to the source name by default.
 - `prefix` (String) If specified, RudderStack creates a folder in the bucket with this prefix and loads all the data in it.
+- `skip_tracks_table` (Boolean) If enabled, RudderStack will skip sending the event data to the tracks table.
+- `skip_users_table` (Boolean) If enabled, RudderStack will skip sending the event data to the users table.
+- `skip_views` (Boolean) If enabled, RudderStack will skip creating views.
 
 <a id="nestedblock--config--sync"></a>
 ### Nested Schema for `config.sync`

@@ -17,6 +17,9 @@ func init() {
 		c.Simple("prefix", "prefix", c.SkipZeroValue),
 		c.Simple("namespace", "namespace", c.SkipZeroValue),
 		c.Simple("credentials", "credentials"),
+		c.Simple("skipTracksTable", "skip_tracks_table"),
+		c.Simple("skipViews", "skip_views"),
+		c.Simple("skipUsersTable", "skip_users_table"),
 		c.Simple("syncFrequency", "sync.0.frequency"),
 		c.Simple("syncStartAt", "sync.0.start_at", c.SkipZeroValue),
 		c.Simple("excludeWindow.excludeWindowStartTime", "sync.0.exclude_window_start_time", c.SkipZeroValue),
@@ -99,6 +102,24 @@ func init() {
 					},
 				},
 			},
+		},
+		"skip_tracks_table": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "If enabled, RudderStack will skip sending the event data to the tracks table.",
+		},
+		"skip_views": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "If enabled, RudderStack will skip creating views.",
+		},
+		"skip_users_table": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "If enabled, RudderStack will skip sending the event data to the users table.",
 		},
 	}
 

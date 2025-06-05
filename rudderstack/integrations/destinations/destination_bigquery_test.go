@@ -23,6 +23,9 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				"project": "project",
 				"bucketName": "bucket",
 				"credentials": "...",
+				"skipTracksTable": false,
+				"skipViews": false,
+				"skipUsersTable": true,
 				"syncFrequency": "30"
 			}`,
 			TerraformUpdate: `
@@ -33,6 +36,8 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				location  = "us-east1"
 				prefix    = "prefix"
 				namespace = "namespace"
+				skip_tracks_table = true
+				skip_users_table = false
 			
 				sync {
 					frequency				  = "30"
@@ -114,6 +119,9 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				"project": "project",
 				"bucketName": "bucket",
 				"credentials": "...",
+				"skipTracksTable": true,
+				"skipViews": false,
+				"skipUsersTable": false,
 				"location": "us-east1",
 				"prefix": "prefix",
 				"namespace": "namespace",
