@@ -20,6 +20,8 @@ func init() {
 		c.Simple("skipTracksTable", "skip_tracks_table"),
 		c.Simple("skipViews", "skip_views"),
 		c.Simple("skipUsersTable", "skip_users_table"),
+		c.Simple("partitionColumn", "partition_column"),
+		c.Simple("partitionType", "partition_type"),
 		c.Simple("syncFrequency", "sync.0.frequency"),
 		c.Simple("syncStartAt", "sync.0.start_at", c.SkipZeroValue),
 		c.Simple("excludeWindow.excludeWindowStartTime", "sync.0.exclude_window_start_time", c.SkipZeroValue),
@@ -120,6 +122,20 @@ func init() {
 			Optional:    true,
 			Default:     true,
 			Description: "If enabled, RudderStack will skip sending the event data to the users table.",
+		},
+		"partition_column": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "_PARTITIONTIME",
+			Description:      "Column to use for partitioning",
+			ValidateDiagFunc: c.StringMatchesRegexp("^(\\_PARTITIONTIME|loaded_at|received_at|timestamp|sent_at|original_timestamp)$"),
+		},
+		"partition_type": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "day",
+			Description:      "Partition type",
+			ValidateDiagFunc: c.StringMatchesRegexp("^(hour|day)$"),
 		},
 	}
 

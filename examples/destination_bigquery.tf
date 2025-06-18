@@ -88,5 +88,8 @@ resource "rudderstack_destination_bigquery" "example" {
       # exclude_window_start_time = "11:00"
       # exclude_window_end_time   = "12:00"
     }
+
+    # partition_column = "_PARTITIONTIME"
+    # partition_type   = "day"
   }
 }
