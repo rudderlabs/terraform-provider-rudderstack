@@ -14,6 +14,8 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				project     = "project"
 				bucket_name = "bucket"
 				credentials = "..."
+				partition_column = "loaded_at"
+				partition_type = "hour"
 						
 				sync {
 					frequency = "30"
@@ -26,6 +28,8 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				"skipTracksTable": false,
 				"skipViews": false,
 				"skipUsersTable": true,
+				"partitionColumn": "loaded_at",
+				"partitionType": "hour",
 				"syncFrequency": "30"
 			}`,
 			TerraformUpdate: `
@@ -122,6 +126,8 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				"skipTracksTable": true,
 				"skipViews": false,
 				"skipUsersTable": false,
+				"partitionColumn": "_PARTITIONTIME",
+				"partitionType": "day",
 				"location": "us-east1",
 				"prefix": "prefix",
 				"namespace": "namespace",

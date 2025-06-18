@@ -103,6 +103,9 @@ resource "rudderstack_destination_bigquery" "example" {
       # exclude_window_start_time = "11:00"
       # exclude_window_end_time   = "12:00"
     }
+
+    # partition_column = "_PARTITIONTIME"
+    # partition_type   = "day"
   }
 }
 ```
@@ -148,6 +151,8 @@ Optional:
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `location` (String) Enter the GCP region of your project dataset.
 - `namespace` (String) Enter the schema name where RudderStack will create all the tables. If not specified, RudderStack will set this to the source name by default.
+- `partition_column` (String) Column to use for partitioning
+- `partition_type` (String) Partition type
 - `prefix` (String) If specified, RudderStack creates a folder in the bucket with this prefix and loads all the data in it.
 - `skip_tracks_table` (Boolean) If enabled, RudderStack will skip sending the event data to the tracks table.
 - `skip_users_table` (Boolean) If enabled, RudderStack will skip sending the event data to the users table.
