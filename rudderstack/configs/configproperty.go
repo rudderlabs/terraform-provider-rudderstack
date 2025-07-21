@@ -334,9 +334,16 @@ func discriminatorValue(apiKey string, values DiscriminatorValues) FromStateFunc
 				continue
 			}
 
-			// this is necessary to ignore empty state
-			if SkipZeroValue(r.Value()) {
-				continue
+			// this is necessary to ignore empty state blocks
+			switch r.Type {
+			case gjson.JSON:
+				if r.IsArray() && len(r.Value().([]interface{})) == 0 {
+					continue
+				}
+			case gjson.String:
+				if r.Value() == "" {
+					continue
+				}
 			}
 
 			return sjson.Set(config, apiKey, v)
