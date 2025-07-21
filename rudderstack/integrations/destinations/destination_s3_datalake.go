@@ -18,9 +18,9 @@ func init() {
 		c.Simple("accessKey", "access_key", c.SkipZeroValue),
 		c.Simple("iamRoleARN", "role_based_authentication.0.i_am_role_arn", c.SkipZeroValue),
 		c.Discriminator("roleBasedAuth", c.DiscriminatorValues{
-			"role_based_authentication": true,
 			"access_key":                false,
 			"access_key_id":             false,
+			"role_based_authentication": true,
 		}),
 		c.Simple("enableSSE", "enable_sse", c.SkipZeroValue),
 		c.Simple("useGlue", "use_glue"),

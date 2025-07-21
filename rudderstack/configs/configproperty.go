@@ -334,8 +334,8 @@ func discriminatorValue(apiKey string, values DiscriminatorValues) FromStateFunc
 				continue
 			}
 
-			// this is necessary to ignore empty state blocks
-			if r.IsArray() && len(r.Value().([]interface{})) == 0 {
+			// this is necessary to ignore empty state
+			if SkipZeroValue(r.Value()) {
 				continue
 			}
 
