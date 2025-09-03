@@ -4,9 +4,7 @@
 
 ## What is the related Linear task?
 
-> Linear Link
-
-> Resolves XXX-XXX
+Resolves XXX-XXX
 
 **Fixes** # (*issue*)
 
