@@ -10,6 +10,11 @@
 # in `goreleaser` to indicate this is being used in a non-interactive mode.
 #
 name: release
+
+permissions:
+  contents: write  # Required to create releases and upload assets
+  id-token: write  # Required for OIDC token generation if needed by GoReleaser
+
 on:
   push:
     tags:
@@ -20,13 +25,13 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
       -
         name: Unshallow
         run: git fetch --prune --unshallow
       -
         name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
           cache: true
@@ -40,7 +45,7 @@ jobs:
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
       -
         name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v3.0.0
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
           args: release --clean
