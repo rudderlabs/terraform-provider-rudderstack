@@ -2,9 +2,11 @@
 
 > Description here
 
-## Notion Link
+## What is the related Linear task?
 
-> Notion Link
+> Linear Link
+
+> Resolves XXX-XXX
 
 **Fixes** # (*issue*)
 
