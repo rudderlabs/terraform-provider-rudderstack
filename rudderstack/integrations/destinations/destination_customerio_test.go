@@ -109,7 +109,7 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 			APIUpdate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
-				datacenter = "EU"
+				"datacenter": "EU",
 				"deviceTokenEventName": "name",
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [{
