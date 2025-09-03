@@ -12,6 +12,7 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 		{
 			TerraformCreate: `
 				token = "..."
+				identity_merge_api = "simplified"
 				data_residency = "us"
 				persistence = "none"
 				consolidated_page_calls = false
@@ -19,13 +20,25 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 			APICreate: `{
 				"token": "...",
 				"dataResidency": "us",
+				"identityMergeApi": "simplified",
 				"consolidatedPageCalls": false,
 				"persistence": "none",
-				"useNewMapping": true
+				"useNewMapping": true,
+				"useUserDefinedPageEventName": false,
+				"userDefinedPageEventTemplate":  "Viewed {{ category }} {{ name }} page",
+				"useUserDefinedScreenEventName": false,
+				"userDefinedScreenEventTemplate":  "Viewed {{ category }} {{ name }} screen",
+				"dropTraitsInTrackEvent": false,
+				"strictMode": false,
+				"setOnceProperties": [],
+				"unionProperties": [],
+				"appendProperties": [],
+				"userDeletionApi": "engage"
 			}`,
 			TerraformUpdate: `
 				token = "..."
 				data_residency = "eu"
+				identity_merge_api = "simplified"
 				persistence = "localStorage"
 				api_secret = "..."
 				people = true
@@ -120,11 +133,23 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 					}]
 				}
 				use_new_mapping = true
+				use_user_defined_page_event_name = true
+				user_defined_page_event_template = "Viewed {{ category }} {{ name }} page"
+				use_user_defined_screen_event_name = true
+				user_defined_screen_event_template = "Viewed {{ category }} {{ name }} screen"
+				drop_traits_in_track_event = true
+				strict_mode = true
+				set_once_properties = ["one", "two", "three"]
+				union_properties = ["one", "two", "three"]
+				append_properties = ["one", "two", "three"]
+				user_deletion_api = "task"
+				gdpr_api_token = "..."
 			`,
 			APIUpdate: `
 			{
 				"token": "...",
 				"dataResidency": "eu",
+				"identityMergeApi": "simplified",
 				"persistence": "localStorage",
 				"apiSecret": "...",
 				"people": true,
@@ -418,8 +443,19 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 						}
 					]
 				},
-				"useNewMapping": true
-			}			
+				"useNewMapping": true,
+				"useUserDefinedPageEventName": true,
+				"userDefinedPageEventTemplate":  "Viewed {{ category }} {{ name }} page",
+				"useUserDefinedScreenEventName": true,
+				"userDefinedScreenEventTemplate":  "Viewed {{ category }} {{ name }} screen",
+				"dropTraitsInTrackEvent": true,
+				"strictMode": true,
+				"setOnceProperties": ["one", "two", "three"],
+				"unionProperties": ["one", "two", "three"],
+				"appendProperties": ["one", "two", "three"],
+				"userDeletionApi": "task",
+				"gdprApiToken": "..."
+			}
 			`,
 		},
 	})
