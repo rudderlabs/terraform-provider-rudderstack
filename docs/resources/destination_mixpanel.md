@@ -20,6 +20,12 @@ resource "rudderstack_destination_mixpanel" example{
     token = "..."
     data_residency = "us"
     persistence = "none"
+    identity_merge_api = "simplified"  # Required field - can be "simplified" or "original"
+    strict_mode = true
+    connection_modes {
+      web = "cloud"
+    }
+
     # api_secret = "..."
     # people = true
     # set_all_traits_by_default = true
@@ -149,6 +155,7 @@ resource "rudderstack_destination_mixpanel" example{
 
 Required:
 
+- `connection_modes` (Block List, Min: 1, Max: 1) Enable this setting to send the events via the cloud mode. (see [below for nested schema](#nestedblock--config--connection_modes))
 - `data_residency` (String) Mixpanel Server region either us/eu
 - `identity_merge_api` (String) Mixpanel Identity Merge types
 - `persistence` (String) Choose persistence for Mixpanel SDK. One of none|cookie|localStorage
@@ -157,7 +164,7 @@ Required:
 Optional:
 
 - `api_secret` (String, Sensitive) Mixpanel API secret
-- `append_properties` (List of String) Properties for Append
+- `append_properties` (List of String) Properties to append
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `consolidated_page_calls` (Boolean) This will track Loaded a Page events to Mixpanel for all page method calls. We enable this by default as it's how Mixpanel suggests sending these calls.
 - `cross_subdomain_cookie` (Boolean) This will allow the Mixpanel cookie to persist between different pages of your application.
@@ -185,6 +192,14 @@ Optional:
 - `user_defined_page_event_template` (String) Template for user-defined page event names
 - `user_defined_screen_event_template` (String) Template for user-defined screen event names
 - `user_deletion_api` (String)
+
+<a id="nestedblock--config--connection_modes"></a>
+### Nested Schema for `config.connection_modes`
+
+Optional:
+
+- `web` (String)
+
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`
