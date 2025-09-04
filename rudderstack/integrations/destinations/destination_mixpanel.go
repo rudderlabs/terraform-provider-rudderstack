@@ -36,6 +36,7 @@ func init() {
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 		c.Simple("useNewMapping", "use_new_mapping", c.SkipZeroValue),
+		c.Simple("connectionModes.web", "connection_modes.0.web"),
 		c.Simple("identityMergeApi", "identity_merge_api"),
 		c.Simple("useUserDefinedPageEventName", "use_user_defined_page_event_name"),
 		c.Simple("userDefinedPageEventTemplate", "user_defined_page_event_template"),
@@ -43,9 +44,9 @@ func init() {
 		c.Simple("userDefinedScreenEventTemplate", "user_defined_screen_event_template"),
 		c.Simple("dropTraitsInTrackEvent", "drop_traits_in_track_event"),
 		c.Simple("strictMode", "strict_mode"),
-		c.Simple("setOnceProperties", "set_once_properties"),
-		c.Simple("unionProperties", "union_properties"),
-		c.Simple("appendProperties", "append_properties"),
+		c.ArrayWithStrings("setOnceProperties", "property", "set_once_properties"),
+		c.ArrayWithStrings("unionProperties", "property", "union_properties"),
+		c.ArrayWithStrings("appendProperties", "property", "append_properties"),
 		c.Simple("userDeletionApi", "user_deletion_api"),
 		c.Simple("gdprApiToken", "gdpr_api_token", c.SkipZeroValue),
 	}
@@ -209,6 +210,21 @@ func init() {
 			Default:     true,
 			Description: "This value is true by default and when this flag is enabled, camel case fields are mapped to snake case fields while sending to Mixpanel. Please refer to https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/#connection-settings for more details.",
 		},
+		"connection_modes": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Required:    true,
+			Description: "Enable this setting to send the events via the cloud mode.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Default:  "cloud",
+					},
+				},
+			},
+		},
 		"identity_merge_api": {
 			Type:             schema.TypeString,
 			Required:         true,
@@ -254,28 +270,28 @@ func init() {
 			Description: "Boolean flag to enable strict mode",
 		},
 		"set_once_properties": {
-			Type:     schema.TypeList,
-			Optional: true,
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Properties to set only once",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			Description: "Properties to set only once",
 		},
 		"union_properties": {
-			Type:     schema.TypeList,
-			Optional: true,
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Properties to union",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			Description: "Properties to union",
 		},
 		"append_properties": {
-			Type:     schema.TypeList,
-			Optional: true,
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Properties to append",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			Description: "Properties for Append",
 		},
 		"user_deletion_api": {
 			Type:             schema.TypeString,

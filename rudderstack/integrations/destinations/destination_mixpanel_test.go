@@ -16,10 +16,16 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				data_residency = "us"
 				persistence = "none"
 				consolidated_page_calls = false
+				connection_modes {
+					web = "cloud"
+				}
 			`,
 			APICreate: `{
 				"token": "...",
 				"dataResidency": "us",
+				"connectionModes": {
+					"web": "cloud"
+				},
 				"identityMergeApi": "simplified",
 				"consolidatedPageCalls": false,
 				"persistence": "none",
@@ -30,14 +36,14 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				"userDefinedScreenEventTemplate":  "Viewed {{ category }} {{ name }} screen",
 				"dropTraitsInTrackEvent": false,
 				"strictMode": false,
-				"setOnceProperties": [],
-				"unionProperties": [],
-				"appendProperties": [],
 				"userDeletionApi": "engage"
 			}`,
 			TerraformUpdate: `
 				token = "..."
 				data_residency = "eu"
+				connection_modes {
+					web = "cloud"
+				}
 				identity_merge_api = "simplified"
 				persistence = "localStorage"
 				api_secret = "..."
@@ -149,6 +155,9 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 			{
 				"token": "...",
 				"dataResidency": "eu",
+				"connectionModes": {
+					"web": "cloud"
+				},
 				"identityMergeApi": "simplified",
 				"persistence": "localStorage",
 				"apiSecret": "...",
@@ -450,9 +459,39 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				"userDefinedScreenEventTemplate":  "Viewed {{ category }} {{ name }} screen",
 				"dropTraitsInTrackEvent": true,
 				"strictMode": true,
-				"setOnceProperties": ["one", "two", "three"],
-				"unionProperties": ["one", "two", "three"],
-				"appendProperties": ["one", "two", "three"],
+				"setOnceProperties": [
+					{
+						"property" : "one"
+					},
+					{
+						"property" : "two"
+					},
+					{
+						"property" : "three"
+					}
+				],
+				"unionProperties": [
+					{
+						"property" : "one"
+					},
+					{
+						"property" : "two"
+					},
+					{
+						"property" : "three"
+					}
+				],
+				"appendProperties": [
+					{
+						"property" : "one"
+					},
+					{
+						"property" : "two"
+					},
+					{
+						"property" : "three"
+					}
+				],
 				"userDeletionApi": "task",
 				"gdprApiToken": "..."
 			}
