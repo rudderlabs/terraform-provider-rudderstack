@@ -72,7 +72,7 @@ func init() {
 			Type:             schema.TypeString,
 			Required:         true,
 			Description:      "Mixpanel Server region either us/eu",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(us|eu)$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("^(us|eu|in)$"),
 		},
 		"people": {
 			Type:        schema.TypeBool,
@@ -227,7 +227,8 @@ func init() {
 		},
 		"identity_merge_api": {
 			Type:             schema.TypeString,
-			Required:         true,
+			Optional:         true,
+			Default:          "original",
 			Description:      "Mixpanel Identity Merge types",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(simplified|original)$"),
 		},
