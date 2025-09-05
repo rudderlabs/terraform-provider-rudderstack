@@ -51,4 +51,4 @@ fmt: ## Formats all go files
 
 .PHONY: test-ci
 test-ci:
-	go test ./... -timeout 120m
+	go test ./... -timeout 30m
