@@ -157,7 +157,6 @@ Required:
 
 - `connection_modes` (Block List, Min: 1, Max: 1) Enable this setting to send the events via the cloud mode. (see [below for nested schema](#nestedblock--config--connection_modes))
 - `data_residency` (String) Mixpanel Server region either us/eu
-- `identity_merge_api` (String) Mixpanel Identity Merge types
 - `persistence` (String) Choose persistence for Mixpanel SDK. One of none|cookie|localStorage
 - `token` (String, Sensitive) Mixpanel API Token
 
@@ -173,6 +172,7 @@ Optional:
 - `event_increments` (List of String) Events to increment in People.
 - `gdpr_api_token` (String, Sensitive)
 - `group_key_settings` (List of String) Group Key
+- `identity_merge_api` (String) Mixpanel Identity Merge types
 - `people` (Boolean) Boolean flag to send all of your identify calls to Mixpanel's People feature
 - `people_properties` (List of String) Traits to set as People Properties.
 - `prop_increments` (List of String) Properties to increment in People

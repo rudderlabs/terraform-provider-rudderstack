@@ -24,7 +24,7 @@ Running the tool requires a RudderStack personal access token to be set in the `
 Once you set this token, you can generate the script using the following command:
 
 ```sh
-go run ./scripts/bootstrap-terraform.sh
+./scripts/bootstrap-terraform.sh
 ```
 
 The following example sets the personal access token and outputs the script to the `rudderstack.tf` file:
