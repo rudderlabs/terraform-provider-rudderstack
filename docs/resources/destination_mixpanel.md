@@ -20,6 +20,12 @@ resource "rudderstack_destination_mixpanel" example{
     token = "..."
     data_residency = "us"
     persistence = "none"
+    identity_merge_api = "simplified"  # Required field - can be "simplified" or "original"
+    strict_mode = true
+    connection_modes {
+      web = "cloud"
+    }
+
     # api_secret = "..."
     # people = true
     # set_all_traits_by_default = true
@@ -149,6 +155,7 @@ resource "rudderstack_destination_mixpanel" example{
 
 Required:
 
+- `connection_modes` (Block List, Min: 1, Max: 1) Enable this setting to send the events via the cloud mode. (see [below for nested schema](#nestedblock--config--connection_modes))
 - `data_residency` (String) Mixpanel Server region either us/eu
 - `persistence` (String) Choose persistence for Mixpanel SDK. One of none|cookie|localStorage
 - `token` (String, Sensitive) Mixpanel API Token
@@ -156,23 +163,43 @@ Required:
 Optional:
 
 - `api_secret` (String, Sensitive) Mixpanel API secret
+- `append_properties` (List of String) Properties to append
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `consolidated_page_calls` (Boolean) This will track Loaded a Page events to Mixpanel for all page method calls. We enable this by default as it's how Mixpanel suggests sending these calls.
 - `cross_subdomain_cookie` (Boolean) This will allow the Mixpanel cookie to persist between different pages of your application.
+- `drop_traits_in_track_event` (Boolean) Boolean flag to drop traits in track event calls
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Mixpanel. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `event_increments` (List of String) Events to increment in People.
+- `gdpr_api_token` (String, Sensitive)
 - `group_key_settings` (List of String) Group Key
+- `identity_merge_api` (String) Mixpanel Identity Merge types
 - `people` (Boolean) Boolean flag to send all of your identify calls to Mixpanel's People feature
 - `people_properties` (List of String) Traits to set as People Properties.
 - `prop_increments` (List of String) Properties to increment in People
 - `secure_cookie` (Boolean) This will mark the Mixpanel cookie as secure, meaning it will only be transmitted over https.
 - `set_all_traits_by_default` (Boolean) While this is checked, our integration automatically sets all traits on identify calls as super properties and people properties if Mixpanel People is checked as well.
+- `set_once_properties` (List of String) Properties to set only once
 - `source_name` (String) This value, if it's not blank, will be sent as rudderstack_source_name to Mixpanel for every event/page/screen call.
+- `strict_mode` (Boolean) Boolean flag to enable strict mode
 - `super_properties` (List of String) Property to send as super Properties.
 - `track_categorized_pages` (Boolean) This will track events to Mixpanel for page method calls that have a category associated with them. For example page('Docs', 'Index') would translate to Viewed Docs Index Page.
 - `track_named_pages` (Boolean) This will track events to Mixpanel for page method calls that have a name associated with them. For example page('Signup') would translate to Viewed Signup Page.
+- `union_properties` (List of String) Properties to union
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 - `use_new_mapping` (Boolean) This value is true by default and when this flag is enabled, camel case fields are mapped to snake case fields while sending to Mixpanel. Please refer to https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/#connection-settings for more details.
+- `use_user_defined_page_event_name` (Boolean) Boolean flag to use user-defined page event names
+- `use_user_defined_screen_event_name` (Boolean) Boolean flag to use user-defined screen event names
+- `user_defined_page_event_template` (String) Template for user-defined page event names
+- `user_defined_screen_event_template` (String) Template for user-defined screen event names
+- `user_deletion_api` (String)
+
+<a id="nestedblock--config--connection_modes"></a>
+### Nested Schema for `config.connection_modes`
+
+Optional:
+
+- `web` (String)
+
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`

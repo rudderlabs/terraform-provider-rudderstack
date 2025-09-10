@@ -36,6 +36,19 @@ func init() {
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 		c.Simple("useNewMapping", "use_new_mapping", c.SkipZeroValue),
+		c.Simple("connectionModes.web", "connection_modes.0.web"),
+		c.Simple("identityMergeApi", "identity_merge_api"),
+		c.Simple("useUserDefinedPageEventName", "use_user_defined_page_event_name"),
+		c.Simple("userDefinedPageEventTemplate", "user_defined_page_event_template"),
+		c.Simple("useUserDefinedScreenEventName", "use_user_defined_screen_event_name"),
+		c.Simple("userDefinedScreenEventTemplate", "user_defined_screen_event_template"),
+		c.Simple("dropTraitsInTrackEvent", "drop_traits_in_track_event"),
+		c.Simple("strictMode", "strict_mode"),
+		c.ArrayWithStrings("setOnceProperties", "property", "set_once_properties"),
+		c.ArrayWithStrings("unionProperties", "property", "union_properties"),
+		c.ArrayWithStrings("appendProperties", "property", "append_properties"),
+		c.Simple("userDeletionApi", "user_deletion_api"),
+		c.Simple("gdprApiToken", "gdpr_api_token", c.SkipZeroValue),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -59,7 +72,7 @@ func init() {
 			Type:             schema.TypeString,
 			Required:         true,
 			Description:      "Mixpanel Server region either us/eu",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(us|eu)$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("^(us|eu|in)$"),
 		},
 		"people": {
 			Type:        schema.TypeBool,
@@ -196,6 +209,102 @@ func init() {
 			Optional:    true,
 			Default:     true,
 			Description: "This value is true by default and when this flag is enabled, camel case fields are mapped to snake case fields while sending to Mixpanel. Please refer to https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/#connection-settings for more details.",
+		},
+		"connection_modes": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Required:    true,
+			Description: "Enable this setting to send the events via the cloud mode.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Default:  "cloud",
+					},
+				},
+			},
+		},
+		"identity_merge_api": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "original",
+			Description:      "Mixpanel Identity Merge types",
+			ValidateDiagFunc: c.StringMatchesRegexp("^(simplified|original)$"),
+		},
+		"use_user_defined_page_event_name": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Boolean flag to use user-defined page event names",
+		},
+		"user_defined_page_event_template": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "Viewed {{ category }} {{ name }} page",
+			Description:      "Template for user-defined page event names",
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,200})$"),
+		},
+		"use_user_defined_screen_event_name": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Boolean flag to use user-defined screen event names",
+		},
+		"user_defined_screen_event_template": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "Viewed {{ category }} {{ name }} screen",
+			Description:      "Template for user-defined screen event names",
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,200})$"),
+		},
+		"drop_traits_in_track_event": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Boolean flag to drop traits in track event calls",
+		},
+		"strict_mode": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Boolean flag to enable strict mode",
+		},
+		"set_once_properties": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Properties to set only once",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		"union_properties": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Properties to union",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		"append_properties": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Properties to append",
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+		"user_deletion_api": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "engage",
+			ValidateDiagFunc: c.StringMatchesRegexp("^(engage|task)$"),
+		},
+		"gdpr_api_token": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Sensitive:        true,
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
 	}
 
