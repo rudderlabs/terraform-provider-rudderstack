@@ -181,15 +181,36 @@ resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
     access_token             = "facebook access token"
     advanced_mapping         = true
     blacklist_pii_properties = []
-    category_to_content      = [{ from = "from", to = "to" }]
+    category_to_content = [{
+      from = "from"
+      to   = "to"
+    }]
     consent_management {
-      web = [{ consents = ["one_web", "two_web", "three_web"], provider = "oneTrust", resolution_strategy = "" }, { consents = ["one_web", "two_web", "three_web"], provider = "ketch", resolution_strategy = "" }, { consents = ["one_web", "two_web", "three_web"], provider = "custom", resolution_strategy = "and" }]
+      web = [{
+        consents            = ["one_web", "two_web", "three_web"]
+        provider            = "oneTrust"
+        resolution_strategy = ""
+        }, {
+        consents            = ["one_web", "two_web", "three_web"]
+        provider            = "ketch"
+        resolution_strategy = ""
+        }, {
+        consents            = ["one_web", "two_web", "three_web"]
+        provider            = "custom"
+        resolution_strategy = "and"
+      }]
     }
     event_custom_properties = ["one", "two", "three"]
     event_filtering {
       blacklist = ["one", "two", "three"]
     }
-    events_to_events = [{ from = "a1", to = "b1" }, { from = "a2", to = "b2" }]
+    events_to_events = [{
+      from = "a1"
+      to   = "b1"
+      }, {
+      from = "a2"
+      to   = "b2"
+    }]
     legacy_conversion_pixel_id {
       from = "from"
       to   = "to"
