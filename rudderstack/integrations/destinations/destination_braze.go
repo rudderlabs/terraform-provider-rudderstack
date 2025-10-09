@@ -17,7 +17,7 @@ func init() {
 		c.Simple("enableSubscriptionGroupInGroupCall", "enable_subscription_group_in_group_call", c.SkipZeroValue),
 		c.Simple("enableNestedArrayOperations", "enable_nested_array_operations", c.SkipZeroValue),
 		c.Simple("sendPurchaseEventWithExtraProperties", "send_purchase_event_with_extra_properties", c.SkipZeroValue),
-		c.Simple("trackAnonymousUser", "track_anonymous_user", c.SkipZeroValue),
+		c.Simple("trackAnonymousUser.web", "track_anonymous_user.0.web"),
 		c.Simple("supportDedup", "support_dedup", c.SkipZeroValue),
 		c.Simple("enableBrazeLogging.web", "enable_braze_logging.0.web"),
 		c.Simple("enablePushNotification.web", "enable_push_notification.0.web"),
@@ -82,10 +82,19 @@ func init() {
 			Description: "Use this setting to Enable to send purchase events with custom properties.",
 		},
 		"track_anonymous_user": {
-			Type:        schema.TypeBool,
+			Type:        schema.TypeList,
 			Optional:    true,
-			Default:     false,
+			MaxItems:    1,
 			Description: "Use this setting to Track events for anonymous users.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  false,
+					},
+				},
+			},
 		},
 		"support_dedup": {
 			Type:        schema.TypeBool,

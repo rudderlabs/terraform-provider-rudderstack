@@ -11,7 +11,9 @@ resource "rudderstack_destination_braze" "example" {
     enable_subscription_group_in_group_call    = true
     enable_nested_array_operations    = true
     send_purchase_event_with_extra_properties    = true
-    track_anonymous_user    = true
+    track_anonymous_user {
+      web = true
+    }
     support_dedup    = true
     enable_braze_logging {
       web = true
