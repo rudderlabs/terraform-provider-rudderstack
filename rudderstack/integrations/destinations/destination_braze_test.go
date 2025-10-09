@@ -17,6 +17,9 @@ func TestDestinationResourceBraze(t *testing.T) {
 			}
 			data_center = "US-03"
 			rest_api_key = "rest_api_pass"
+			track_anonymous_user {
+				web = true
+			}
 			`,
 			APICreate: `{
 				"connectionMode": {
@@ -24,7 +27,10 @@ func TestDestinationResourceBraze(t *testing.T) {
 					"ios": "cloud"
 				},
 				"dataCenter": "US-03",
-				"restApiKey": "rest_api_pass"
+				"restApiKey": "rest_api_pass",
+				"trackAnonymousUser": {
+					"web": true
+				}
 			}`,
 			TerraformUpdate: `
 			connection_mode {

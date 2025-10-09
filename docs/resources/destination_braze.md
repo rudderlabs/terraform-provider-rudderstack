@@ -26,7 +26,9 @@ resource "rudderstack_destination_braze" "example" {
     enable_subscription_group_in_group_call    = true
     enable_nested_array_operations    = true
     send_purchase_event_with_extra_properties    = true
-    track_anonymous_user    = true
+    track_anonymous_user {
+      web = true
+    }
     support_dedup    = true
     enable_braze_logging {
       web = true
@@ -161,7 +163,7 @@ Optional:
 - `rest_api_key` (String, Sensitive) Enter your Braze Rest Api Key. Required for cloud mode.
 - `send_purchase_event_with_extra_properties` (Boolean) Use this setting to Enable to send purchase events with custom properties.
 - `support_dedup` (Boolean) Use this setting to enable Deduplicate Traits on identify and track.
-- `track_anonymous_user` (Boolean) Use this setting to Track events for anonymous users.
+- `track_anonymous_user` (Block List, Max: 1) Use this setting to Track events for anonymous users. (see [below for nested schema](#nestedblock--config--track_anonymous_user))
 
 <a id="nestedblock--config--connection_mode"></a>
 ### Nested Schema for `config.connection_mode`
@@ -340,3 +342,11 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be denylisted.
 - `whitelist` (List of String) Enter the event names to be allowlisted.
+
+
+<a id="nestedblock--config--track_anonymous_user"></a>
+### Nested Schema for `config.track_anonymous_user`
+
+Optional:
+
+- `web` (Boolean)
