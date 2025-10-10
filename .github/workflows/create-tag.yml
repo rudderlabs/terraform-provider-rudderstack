@@ -1,0 +1,105 @@
+name: Create Tag
+
+permissions:
+  contents: write  # Required to create tags
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Branch name to create tag from'
+        required: true
+        type: string
+        default: 'main'
+      tag_name:
+        description: 'Tag name to create (e.g., v1.0.0)'
+        required: true
+        type: string
+      tag_message:
+        description: 'Tag annotation message (optional)'
+        required: false
+        type: string
+        default: 'Release tag created via GitHub Actions'
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check organization membership
+        run: |
+          # Check if the user triggering this workflow is a member of rudderlabs organization
+          # This prevents unauthorized users from creating tags in public repos
+          echo "🔐 Checking organization membership for user: ${{ github.actor }}"
+          
+          # Use gh CLI to check if user is a member of rudderlabs organization
+          if gh api "orgs/rudderlabs/memberships/${{ github.actor }}" &>/dev/null; then
+            echo "✅ Organization membership verified. User '${{ github.actor }}' is a member of rudderlabs."
+          else
+            echo "❌ Access denied. Only rudderlabs organization members can create tags."
+            echo "User '${{ github.actor }}' is not a member of the rudderlabs organization."
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Validate inputs
+        run: |
+          # Validate tag name format (should start with 'v' and follow semver pattern)
+          if [[ ! "${{ inputs.tag_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "❌ Tag name must follow semantic versioning format (e.g., v1.0.0, v1.0.0-beta.1)"
+            exit 1
+          fi
+          echo "✅ Tag name format is valid: ${{ inputs.tag_name }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.branch_name }}
+          fetch-depth: 0  # Fetch full history for proper tagging
+
+      - name: Verify branch exists
+        run: |
+          if ! git show-ref --verify --quiet "refs/remotes/origin/${{ inputs.branch_name }}"; then
+            echo "❌ Branch '${{ inputs.branch_name }}' does not exist"
+            exit 1
+          fi
+          echo "✅ Branch '${{ inputs.branch_name }}' exists"
+
+      - name: Check if tag already exists
+        run: |
+          if git show-ref --tags --quiet --verify -- "refs/tags/${{ inputs.tag_name }}"; then
+            echo "❌ Tag '${{ inputs.tag_name }}' already exists"
+            exit 1
+          fi
+          echo "✅ Tag '${{ inputs.tag_name }}' does not exist yet"
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create and push tag
+        run: |
+          # Get the current commit SHA
+          COMMIT_SHA=$(git rev-parse HEAD)
+          echo "📍 Creating tag '${{ inputs.tag_name }}' at commit: $COMMIT_SHA"
+          echo "📝 Branch: ${{ inputs.branch_name }}"
+          echo "💬 Message: ${{ inputs.tag_message }}"
+          
+          # Create annotated tag
+          git tag -a "${{ inputs.tag_name }}" -m "${{ inputs.tag_message }}"
+          
+          # Push the tag
+          git push origin "${{ inputs.tag_name }}"
+          
+          echo "🎉 Successfully created and pushed tag '${{ inputs.tag_name }}'"
+
+      - name: Summary
+        run: |
+          echo "## 🏷️ Tag Creation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Tag Created:** \`${{ inputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "🌿 **Source Branch:** \`${{ inputs.branch_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "📝 **Message:** ${{ inputs.tag_message }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The tag has been successfully created and pushed to the repository." >> $GITHUB_STEP_SUMMARY
+          echo "🚀 The release workflow will be automatically triggered by this tag push." >> $GITHUB_STEP_SUMMARY
