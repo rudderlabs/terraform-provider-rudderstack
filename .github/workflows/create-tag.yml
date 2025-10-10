@@ -30,6 +30,8 @@ jobs:
           # Check if the user triggering this workflow is a member of rudderlabs organization
           # This prevents unauthorized users from creating tags in public repos
           echo "🔐 Checking organization membership for user: ${{ github.actor }}"
+
+          gh api "orgs/rudderlabs/memberships/${{ github.actor }}"
           
           # Use gh CLI to check if user is a member of rudderlabs organization
           if gh api "orgs/rudderlabs/memberships/${{ github.actor }}" &>/dev/null; then
