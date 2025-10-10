@@ -42,7 +42,7 @@ jobs:
             exit 1
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
       - name: Validate inputs
         run: |
           # Validate tag name format (should start with 'v' and follow semver pattern)
