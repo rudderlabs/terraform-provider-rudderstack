@@ -91,7 +91,7 @@ jobs:
           git tag -a "${{ inputs.tag_name }}" -m "${{ inputs.tag_message }}"
           
           # Push the tag
-          git push origin "${{ inputs.tag_name }}"
+          # git push origin "${{ inputs.tag_name }}"
           
           echo "🎉 Successfully created and pushed tag '${{ inputs.tag_name }}'"
 
