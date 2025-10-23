@@ -167,6 +167,100 @@ func sourceName(source client.Source) string {
 	return fmt.Sprintf("src_%s", source.ID)
 }
 
+func cleanupDestinationConfig(destination client.Destination) client.Destination {
+	var jsonConfig map[string]any
+	err := json.Unmarshal(destination.Config, &jsonConfig)
+	if err != nil {
+		logger.Printf("could not unmarshal destination config: %v", err)
+		return destination
+	}
+
+	if destination.Name == "Braze" {
+		jsonConfig = cleanupDestinationConfigForBraze(jsonConfig)
+	}
+
+	jsonConfig = cleanupEventFilteringConfig(jsonConfig)
+	jsonConfig = cleanupConsentManagementConfig(jsonConfig)
+
+	jsonConfigBytes, err := json.Marshal(jsonConfig)
+	if err != nil {
+		logger.Printf("could not marshal destination config: %v", err)
+	}
+	destination.Config = json.RawMessage(jsonConfigBytes)
+	return destination
+}
+
+func cleanupEventFilteringConfig(jsonConfig map[string]any) map[string]any {
+	// Ensure blacklistedEvents and whitelistedEvents are defined only as per the value of eventFilteringOption
+	eventFilteringOption, ok := jsonConfig["eventFilteringOption"]
+	if !ok || eventFilteringOption == "disable" || eventFilteringOption == nil {
+		delete(jsonConfig, "blacklistedEvents")
+		delete(jsonConfig, "whitelistedEvents")
+		delete(jsonConfig, "eventFilteringOption")
+	} else if eventFilteringOption == "whitelistedEvents" {
+		delete(jsonConfig, "blacklistedEvents")
+	} else if eventFilteringOption == "blacklistedEvents" {
+		delete(jsonConfig, "whitelistedEvents")
+	}
+	return jsonConfig
+}
+
+func cleanupDestinationConfigForBraze(jsonConfig map[string]any) map[string]any {
+	trackAnonymousUser, ok := jsonConfig["trackAnonymousUser"]
+	if ok {
+		// Ensure trackAnonymousUser is always defined as an object with web key and value
+		jsonConfig["trackAnonymousUser"] = map[string]any{
+			"web": trackAnonymousUser,
+		}
+	}
+	return jsonConfig
+}
+
+func cleanupConsentManagementConfig(jsonConfig map[string]any) map[string]any {
+	// logger.Printf("cleanupConsentManagementConfig: %v", jsonConfig)
+	consentManagementMap, ok := jsonConfig["consentManagement"].(map[string]any)
+	if ok {
+		// consentManagement is an object with source type as keys and values as consent management objects
+		// We need to iterate the whole map and make sure each entry has "consents" key defined as an array of strings with at least one element.
+		// If not, we should add a default value [""]
+		for _, cmArray := range consentManagementMap {
+			cmArrayObject, ok := cmArray.([]any)
+			if !ok {
+				continue
+			}
+
+			for _, cmObject := range cmArrayObject {
+				// logger.Printf("cmObject: %v", cmObject)
+				cmObjectMap, ok := cmObject.(map[string]any)
+				if !ok {
+					continue
+				}
+
+				// Ensure consents is always defined as an array of strings with at least one element
+				consents, ok := cmObjectMap["consents"]
+				if !ok {
+					cmObjectMap["consents"] = []map[string]any{{"consent": ""}}
+				} else {
+					consentsList, ok := consents.([]map[string]any)
+					if !ok {
+						cmObjectMap["consents"] = []map[string]any{{"consent": ""}}
+					}
+					if len(consentsList) == 0 {
+						cmObjectMap["consents"] = []map[string]any{{"consent": ""}}
+					}
+				}
+
+				// Ensure resolutionStrategy is always defined
+				resolutionStrategy, ok := cmObjectMap["resolutionStrategy"]
+				if !ok || resolutionStrategy == nil {
+					cmObjectMap["resolutionStrategy"] = ""
+				}
+			}
+		}
+	}
+	return jsonConfig
+}
+
 // generateDestination generates a destination resource block from an API destination object and a terraform destination type and ConfigMeta.
 func generateDestination(destination client.Destination, terraformType string, cm *configs.ConfigMeta) (block *hclwrite.Block, err error) {
 	defer func() {
@@ -183,6 +277,8 @@ func generateDestination(destination client.Destination, terraformType string, c
 	body.SetAttributeValue("name", cty.StringVal(destination.Name))
 
 	if !cm.SkipConfig {
+		destination = cleanupDestinationConfig(destination)
+
 		configBlock, err := generateConfigBlock(destination.Config, cm)
 		if err != nil {
 			return nil, fmt.Errorf("could not generate config block for destination '%s': %w", destination.ID, err)

@@ -21,7 +21,6 @@ func init() {
 		c.Simple("trackNamedPages", "track_named_pages", c.SkipZeroValue),
 		c.Simple("sourceName", "source_name", c.SkipZeroValue),
 		c.Simple("crossSubdomainCookie", "cross_subdomain_cookie", c.SkipZeroValue),
-		c.Simple("persistence", "persistence"),
 		c.Simple("secureCookie", "secure_cookie", c.SkipZeroValue),
 		c.ArrayWithStrings("superProperties", "property", "super_properties"),
 		c.ArrayWithStrings("peopleProperties", "property", "people_properties"),
@@ -36,7 +35,7 @@ func init() {
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 		c.Simple("useNewMapping", "use_new_mapping", c.SkipZeroValue),
-		c.Simple("connectionModes.web", "connection_modes.0.web"),
+		c.Simple("connectionMode.web", "connection_mode.0.web"),
 		c.Simple("identityMergeApi", "identity_merge_api"),
 		c.Simple("useUserDefinedPageEventName", "use_user_defined_page_event_name"),
 		c.Simple("userDefinedPageEventTemplate", "user_defined_page_event_template"),
@@ -56,7 +55,7 @@ func init() {
 	schema := map[string]*schema.Schema{
 		"token": {
 			Type:             schema.TypeString,
-			Required:         true,
+			Optional:         true,
 			Description:      "Mixpanel API Token",
 			Sensitive:        true,
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
@@ -110,12 +109,6 @@ func init() {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Description: "This will allow the Mixpanel cookie to persist between different pages of your application.",
-		},
-		"persistence": {
-			Type:             schema.TypeString,
-			Required:         true,
-			Description:      "Choose persistence for Mixpanel SDK. One of none|cookie|localStorage",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(none|cookie|localStorage)$"),
 		},
 		"secure_cookie": {
 			Type:        schema.TypeBool,
@@ -210,7 +203,7 @@ func init() {
 			Default:     true,
 			Description: "This value is true by default and when this flag is enabled, camel case fields are mapped to snake case fields while sending to Mixpanel. Please refer to https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/#connection-settings for more details.",
 		},
-		"connection_modes": {
+		"connection_mode": {
 			Type:        schema.TypeList,
 			MaxItems:    1,
 			Required:    true,

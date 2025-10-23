@@ -16,7 +16,7 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				data_residency = "us"
 				persistence = "none"
 				consolidated_page_calls = false
-				connection_modes {
+				connection_mode {
 					web = "cloud"
 				}
 			`,
@@ -41,7 +41,7 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 			TerraformUpdate: `
 				token = "..."
 				data_residency = "eu"
-				connection_modes {
+				connection_mode {
 					web = "cloud"
 				}
 				identity_merge_api = "simplified"

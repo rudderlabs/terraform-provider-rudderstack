@@ -53,7 +53,7 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "If specified, RudderStack creates a folder in the bucket with this prefix and loads all the data in it.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{0,100})$"),
 		},
 		"namespace": {
 			Type:        schema.TypeString,

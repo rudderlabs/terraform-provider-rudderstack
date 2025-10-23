@@ -22,7 +22,7 @@ resource "rudderstack_destination_mixpanel" example{
     persistence = "none"
     identity_merge_api = "simplified"  # Required field - can be "simplified" or "original"
     strict_mode = true
-    connection_modes {
+    connection_mode {
       web = "cloud"
     }
 
@@ -155,7 +155,7 @@ resource "rudderstack_destination_mixpanel" example{
 
 Required:
 
-- `connection_modes` (Block List, Min: 1, Max: 1) Enable this setting to send the events via the cloud mode. (see [below for nested schema](#nestedblock--config--connection_modes))
+- `connection_mode` (Block List, Min: 1, Max: 1) Enable this setting to send the events via the cloud mode. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `data_residency` (String) Mixpanel Server region either us/eu
 - `persistence` (String) Choose persistence for Mixpanel SDK. One of none|cookie|localStorage
 - `token` (String, Sensitive) Mixpanel API Token
@@ -193,8 +193,8 @@ Optional:
 - `user_defined_screen_event_template` (String) Template for user-defined screen event names
 - `user_deletion_api` (String)
 
-<a id="nestedblock--config--connection_modes"></a>
-### Nested Schema for `config.connection_modes`
+<a id="nestedblock--config--connection_mode"></a>
+### Nested Schema for `config.connection_mode`
 
 Optional:
 

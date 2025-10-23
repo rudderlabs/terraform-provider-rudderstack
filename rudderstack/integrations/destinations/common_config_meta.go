@@ -59,6 +59,7 @@ func GetConfigMetaForGenericConsentManagement(supportedSourceTypes []string) ([]
 							ValidateFunc: validation.StringInSlice([]string{
 								"oneTrust",
 								"ketch",
+								"iubenda",
 								"custom",
 							}, false),
 							Description: "The provider name.",
