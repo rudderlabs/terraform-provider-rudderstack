@@ -175,6 +175,10 @@ func cleanupDestinationConfig(destination client.Destination) client.Destination
 		return destination
 	}
 
+	if destination.Name == "Braze" {
+		jsonConfig = cleanupDestinationConfigForBraze(jsonConfig)
+	}
+
 	jsonConfig = cleanupEventFilteringConfig(jsonConfig)
 	jsonConfig = cleanupConsentManagementConfig(jsonConfig)
 
@@ -201,23 +205,55 @@ func cleanupEventFilteringConfig(jsonConfig map[string]any) map[string]any {
 	return jsonConfig
 }
 
-func cleanupConsentManagementConfig(jsonConfig map[string]any) map[string]any {
-	// Ensure each consent management object has "resolutionStrategy" defined. Otherwise, set to ""
-	consentManagement, ok := jsonConfig["consentManagement"].(map[string]interface{})
+func cleanupDestinationConfigForBraze(jsonConfig map[string]any) map[string]any {
+	trackAnonymousUser, ok := jsonConfig["trackAnonymousUser"]
 	if ok {
-		for _, platformValue := range consentManagement {
-			platformArray, ok := platformValue.([]interface{})
+		// Ensure trackAnonymousUser is always defined as an object with web key and value
+		jsonConfig["trackAnonymousUser"] = map[string]any{
+			"web": trackAnonymousUser,
+		}
+	}
+	return jsonConfig
+}
+
+func cleanupConsentManagementConfig(jsonConfig map[string]any) map[string]any {
+	// logger.Printf("cleanupConsentManagementConfig: %v", jsonConfig)
+	consentManagementMap, ok := jsonConfig["consentManagement"].(map[string]any)
+	if ok {
+		// consentManagement is an object with source type as keys and values as consent management objects
+		// We need to iterate the whole map and make sure each entry has "consents" key defined as an array of strings with at least one element.
+		// If not, we should add a default value [""]
+		for _, cmArray := range consentManagementMap {
+			cmArrayObject, ok := cmArray.([]any)
 			if !ok {
 				continue
 			}
-			for _, item := range platformArray {
-				consentManagementObjectMap, ok := item.(map[string]interface{})
+
+			for _, cmObject := range cmArrayObject {
+				// logger.Printf("cmObject: %v", cmObject)
+				cmObjectMap, ok := cmObject.(map[string]any)
 				if !ok {
 					continue
 				}
-				_, hasResolutionStrategy := consentManagementObjectMap["resolutionStrategy"]
-				if !hasResolutionStrategy {
-					consentManagementObjectMap["resolutionStrategy"] = ""
+
+				// Ensure consents is always defined as an array of strings with at least one element
+				consents, ok := cmObjectMap["consents"]
+				if !ok {
+					cmObjectMap["consents"] = []map[string]any{{"consent": ""}}
+				} else {
+					consentsList, ok := consents.([]map[string]any)
+					if !ok {
+						cmObjectMap["consents"] = []map[string]any{{"consent": ""}}
+					}
+					if len(consentsList) == 0 {
+						cmObjectMap["consents"] = []map[string]any{{"consent": ""}}
+					}
+				}
+
+				// Ensure resolutionStrategy is always defined
+				resolutionStrategy, ok := cmObjectMap["resolutionStrategy"]
+				if !ok || resolutionStrategy == nil {
+					cmObjectMap["resolutionStrategy"] = ""
 				}
 			}
 		}

@@ -34,6 +34,7 @@ func init() {
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 		c.Simple("useNewMapping", "use_new_mapping", c.SkipZeroValue),
+		c.Simple("connectionMode.web", "connection_mode.0.web"),
 		c.Simple("identityMergeApi", "identity_merge_api"),
 		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
@@ -68,7 +69,7 @@ func init() {
 	schema := map[string]*schema.Schema{
 		"token": {
 			Type:             schema.TypeString,
-			Required:         true,
+			Optional:         true,
 			Description:      "Mixpanel API Token",
 			Sensitive:        true,
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
