@@ -11,15 +11,27 @@ func TestDestinationResourceGooglePubSub(t *testing.T) {
 	cmt.AssertDestination(t, "google_pubsub", []c.TestConfig{
 		{
 			TerraformCreate: `
+				connection_mode {
+					web = "cloud"
+					ios = "cloud"
+				}
 				project_id = "project-id"
                 credentials = "..."
 			`,
 			APICreate: `{
 				"projectId": "project-id",
 				"credentials": "..."
+				"connectionMode": {
+					"web": "cloud",
+					"ios": "cloud"
+				}
 			}`,
 			TerraformUpdate: `
-				project_id = "project-id-1"
+			  connection_mode {
+				web = "cloud"
+				ios = "cloud"
+			  }
+			  project_id = "project-id-1"
 			  credentials = "..."
 			  event_to_topic_map = [
 					{
@@ -104,6 +116,10 @@ func TestDestinationResourceGooglePubSub(t *testing.T) {
 				}
 			`,
 			APIUpdate: `{
+				"connectionMode": {
+					"web": "cloud",
+					"ios": "cloud"
+				},
 				"projectId": "project-id-1",
 			  "credentials": "...",
 				"eventToTopicMap": [
