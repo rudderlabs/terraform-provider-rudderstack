@@ -175,10 +175,6 @@ func cleanupDestinationConfig(destination client.Destination) client.Destination
 		return destination
 	}
 
-	if destination.Name == "Braze" {
-		jsonConfig = cleanupDestinationConfigForBraze(jsonConfig)
-	}
-
 	jsonConfig = cleanupEventFilteringConfig(jsonConfig)
 	jsonConfig = cleanupConsentManagementConfig(jsonConfig)
 
@@ -201,17 +197,6 @@ func cleanupEventFilteringConfig(jsonConfig map[string]any) map[string]any {
 		delete(jsonConfig, "blacklistedEvents")
 	} else if eventFilteringOption == "blacklistedEvents" {
 		delete(jsonConfig, "whitelistedEvents")
-	}
-	return jsonConfig
-}
-
-func cleanupDestinationConfigForBraze(jsonConfig map[string]any) map[string]any {
-	trackAnonymousUser, ok := jsonConfig["trackAnonymousUser"]
-	if ok {
-		// Ensure trackAnonymousUser is always defined as an object with web key and value
-		jsonConfig["trackAnonymousUser"] = map[string]any{
-			"web": trackAnonymousUser,
-		}
 	}
 	return jsonConfig
 }
