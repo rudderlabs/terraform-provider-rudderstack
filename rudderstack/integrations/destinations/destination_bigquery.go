@@ -29,7 +29,7 @@ func init() {
 		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
 		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
-		c.Simple("connectionMode.reactnative", "connection_mode.0.reactnative", c.SkipZeroValue),
+		c.Simple("connectionMode.reactnative", "connection_mode.0.react_native", c.SkipZeroValue),
 		c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
 		c.Simple("connectionMode.amp", "connection_mode.0.amp", c.SkipZeroValue),
 		c.Simple("connectionMode.flutter", "connection_mode.0.flutter", c.SkipZeroValue),
@@ -38,7 +38,7 @@ func init() {
 		c.Simple("connectionMode.cloud", "connection_mode.0.cloud", c.SkipZeroValue),
 		c.Simple("connectionMode.cloudSource", "connection_mode.0.cloud_source", c.SkipZeroValue),
 		c.Simple("jsonPaths", "json_paths", c.SkipZeroValue),
-		c.Simple("cleanupObjectStorageFiles", "cleanup_object_storage_files", c.SkipZeroValue),
+		c.Simple("cleanupObjectStorageFiles", "cleanup_object_storage_files"),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -57,37 +57,23 @@ func init() {
 			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{0,100})$"),
 		},
 		"bucket_name": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Enter the name of your staging storage bucket.",
-			ValidateDiagFunc: c.ValidateAll(
-				// Allow env variables or validate bucket name format
-				c.StringMatchesRegexp("(^env[.].+)|^[a-z0-9][a-z0-9-._]{1,61}[a-z0-9]$"),
-				// Reject bucket names starting with "goog"
-				c.StringNotMatchesRegexp("^goog"),
-				// Reject bucket names containing "google"
-				c.StringNotMatchesRegexp("google"),
-				// Reject bucket names that look like IP addresses
-				c.StringNotMatchesRegexp("^\\d+\\.\\d+\\.\\d+\\.\\d+$"),
-				// Reject bucket names with consecutive dots
-				c.StringNotMatchesRegexp("\\.\\."),
-			),
+			Type:             schema.TypeString,
+			Required:         true,
+			Description:      "Enter the name of your staging storage bucket.",
+			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^((?!goog)(?!.*google.*)(?!^(\\d+(\\.|$)){4}$)(?!.*\\.\\..*)[a-z0-9][a-z0-9-._]{1,61}[a-z0-9])$"),
 		},
 		"prefix": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "If specified, RudderStack creates a folder in the bucket with this prefix and loads all the data in it.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{0,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(.{0,100})$"),
 		},
 		"namespace": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Enter the schema name where RudderStack will create all the tables. If not specified, RudderStack will set this to the source name by default.",
 			ValidateDiagFunc: c.ValidateAll(
-				// Allow env variables or validate max length
-				c.StringMatchesRegexp("(^env[.].*)|^.{0,64}$"),
-				// Reject names starting with pg_ (case insensitive)
-				c.StringNotMatchesRegexp("(?i)^pg_"),
+				c.StringMatchesRegexp("(^env[.].*)|^((?!pg_|PG_|pG_|Pg_).{0,64})$"),
 			),
 		},
 		"credentials": {
@@ -100,33 +86,30 @@ func init() {
 		"sync": {
 			Type:     schema.TypeList,
 			MinItems: 1, MaxItems: 1,
-			Required:    true,
+			Optional:    true,
 			Description: "Enter the sync settings for the following fields:",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"frequency": {
 						Type:             schema.TypeString,
-						Required:         true,
+						Optional:         true,
 						Description:      "Specify how often RudderStack should sync the data to your BigQuery dataset.",
 						ValidateDiagFunc: c.StringMatchesRegexp("^(5|15|30|60|180|360|720|1440)$"),
 					},
 					"start_at": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						Description:      "Specify the particular time of the day (in UTC) when you want RudderStack to sync the data to BigQuery.",
-						ValidateDiagFunc: c.StringMatchesRegexp("^([01][0-9]|2[0-3]):[0-5][0-9]$"),
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "Specify the particular time of the day (in UTC) when you want RudderStack to sync the data to BigQuery.",
 					},
 					"exclude_window_start_time": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						Description:      "Set a time window when RudderStack will not sync the data to your database.",
-						ValidateDiagFunc: c.StringMatchesRegexp("^([01][0-9]|2[0-3]):[0-5][0-9]$"),
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "Set a time window when RudderStack will not sync the data to your database.",
 					},
 					"exclude_window_end_time": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						Description:      "Specify the end time for the exclusion window.",
-						ValidateDiagFunc: c.StringMatchesRegexp("^([01][0-9]|2[0-3]):[0-5][0-9]$"),
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "Specify the end time for the exclusion window.",
 					},
 				},
 			},
@@ -185,7 +168,7 @@ func init() {
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
 					},
-					"reactnative": {
+					"react_native": {
 						Type:             schema.TypeString,
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
