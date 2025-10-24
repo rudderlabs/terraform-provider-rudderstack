@@ -206,7 +206,7 @@ func init() {
 		"connection_mode": {
 			Type:        schema.TypeList,
 			MaxItems:    1,
-			Required:    true,
+			Optional:    true,
 			Description: "Enable this setting to send the events via the cloud mode.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
