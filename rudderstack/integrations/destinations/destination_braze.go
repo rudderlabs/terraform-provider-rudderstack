@@ -59,9 +59,10 @@ func init() {
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"data_center": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Enter your Braze Data Center.",
+			Type:             schema.TypeString,
+			Required:         true,
+			Description:      "Enter your Braze Data Center.",
+			ValidateDiagFunc: c.StringMatchesRegexp("^($|US-01|US-02|US-03|US-04|US-05|US-06|US-07|US-08|EU-01|EU-02|EU-03|AU-01)$"),
 		},
 		"enable_subscription_group_in_group_call": {
 			Type:        schema.TypeBool,
