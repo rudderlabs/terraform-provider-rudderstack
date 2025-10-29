@@ -147,13 +147,13 @@ resource "rudderstack_destination_braze" "example" {
 
 Required:
 
-- `connection_mode` (Block List, Min: 1, Max: 1) Use this setting to set how you want to route events from your source to destination.. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `data_center` (String) Enter your Braze Data Center.
 
 Optional:
 
 - `allow_user_supplied_javascript` (Block List, Max: 1) Use this setting to enable HTML in-app messages. (see [below for nested schema](#nestedblock--config--allow_user_supplied_javascript))
 - `app_key` (String, Sensitive) Enter your Braze APP Key. Required for Device mode.
+- `connection_mode` (Block List, Max: 1) Use this setting to set how you want to route events from your source to destination.. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `enable_braze_logging` (Block List, Max: 1) Use this setting to show braze logs to customer. (see [below for nested schema](#nestedblock--config--enable_braze_logging))
 - `enable_nested_array_operations` (Boolean) Use this setting to use Custom Attributes Operation.
@@ -164,6 +164,14 @@ Optional:
 - `send_purchase_event_with_extra_properties` (Boolean) Use this setting to Enable to send purchase events with custom properties.
 - `support_dedup` (Boolean) Use this setting to enable Deduplicate Traits on identify and track.
 - `track_anonymous_user` (Block List, Max: 1) Use this setting to Track events for anonymous users. (see [below for nested schema](#nestedblock--config--track_anonymous_user))
+
+<a id="nestedblock--config--allow_user_supplied_javascript"></a>
+### Nested Schema for `config.allow_user_supplied_javascript`
+
+Optional:
+
+- `web` (Boolean)
+
 
 <a id="nestedblock--config--connection_mode"></a>
 ### Nested Schema for `config.connection_mode`
@@ -176,19 +184,11 @@ Optional:
 - `cordova` (String)
 - `flutter` (String)
 - `ios` (String)
-- `react_native` (String)
+- `reactnative` (String)
 - `shopify` (String)
 - `unity` (String)
 - `warehouse` (String)
 - `web` (String)
-
-
-<a id="nestedblock--config--allow_user_supplied_javascript"></a>
-### Nested Schema for `config.allow_user_supplied_javascript`
-
-Optional:
-
-- `web` (Boolean)
 
 
 <a id="nestedblock--config--consent_management"></a>

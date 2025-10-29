@@ -19,6 +19,11 @@ resource "rudderstack_destination_attentive_tag" "example" {
   config {
     api_key = "sample-dummy-api-key"
     # sign_up_source_id = "123456"
+    # enable_new_identify_flow = false
+
+    # connection_mode {
+    #   web = "cloud"
+    # }
 
     # consent_management {
     # 	web = [
@@ -128,8 +133,28 @@ Required:
 
 Optional:
 
+- `connection_mode` (Block List, Max: 1) Use this setting to set how you want to route events from your source to destination.. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
+- `enable_new_identify_flow` (Boolean) Enable new identify flow.
 - `sign_up_source_id` (String) Enter your Sign Up Source ID.
+
+<a id="nestedblock--config--connection_mode"></a>
+### Nested Schema for `config.connection_mode`
+
+Optional:
+
+- `amp` (String)
+- `android` (String)
+- `cloud` (String)
+- `cordova` (String)
+- `flutter` (String)
+- `ios` (String)
+- `reactnative` (String)
+- `shopify` (String)
+- `unity` (String)
+- `warehouse` (String)
+- `web` (String)
+
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`

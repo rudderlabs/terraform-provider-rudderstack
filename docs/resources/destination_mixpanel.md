@@ -19,9 +19,7 @@ resource "rudderstack_destination_mixpanel" example{
   config {
     token = "..."
     data_residency = "us"
-    persistence = "none"
     identity_merge_api = "simplified"  # Required field - can be "simplified" or "original"
-    strict_mode = true
     connection_mode {
       web = "cloud"
     }
@@ -40,7 +38,24 @@ resource "rudderstack_destination_mixpanel" example{
     # event_increments = ["one","two","three"]
     # prop_increments = ["one","two","three"]
     # group_key_settings = ["one","two","three"]
-    
+    # set_once_properties = ["one","two","three"]
+    # union_properties = ["one","two","three"]
+    # append_properties = ["one","two","three"]
+    # gdpr_api_token = "..."
+    # user_deletion_api = "engage"
+    # persistence_name = "none"
+    # persistence_type = "..."
+    # ignore_dnt = false
+    # use_user_defined_page_event_name = false
+    # user_defined_page_event_template = "Viewed {{ category }} {{ name }} page"
+    # use_user_defined_screen_event_name = false
+    # user_defined_screen_event_template = "Viewed {{ category }} {{ name }} screen"
+    # drop_traits_in_track_event = false
+
+    # session_replay_percentage {
+    #   web = "0"
+    # }
+
     # use_native_sdk {
     #   web = true
     # }
@@ -155,15 +170,14 @@ resource "rudderstack_destination_mixpanel" example{
 
 Required:
 
-- `connection_mode` (Block List, Min: 1, Max: 1) Enable this setting to send the events via the cloud mode. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `data_residency` (String) Mixpanel Server region either us/eu
-- `persistence` (String) Choose persistence for Mixpanel SDK. One of none|cookie|localStorage
+- `identity_merge_api` (String) Mixpanel Identity Merge types
 - `token` (String, Sensitive) Mixpanel API Token
 
 Optional:
 
-- `api_secret` (String, Sensitive) Mixpanel API secret
 - `append_properties` (List of String) Properties to append
+- `connection_mode` (Block List, Max: 1) Enable this setting to send the events via the cloud mode. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `consolidated_page_calls` (Boolean) This will track Loaded a Page events to Mixpanel for all page method calls. We enable this by default as it's how Mixpanel suggests sending these calls.
 - `cross_subdomain_cookie` (Boolean) This will allow the Mixpanel cookie to persist between different pages of your application.
@@ -172,11 +186,14 @@ Optional:
 - `event_increments` (List of String) Events to increment in People.
 - `gdpr_api_token` (String, Sensitive)
 - `group_key_settings` (List of String) Group Key
-- `identity_merge_api` (String) Mixpanel Identity Merge types
+- `ignore_dnt` (Boolean) Ignore 'Do Not Track' setting
 - `people` (Boolean) Boolean flag to send all of your identify calls to Mixpanel's People feature
 - `people_properties` (List of String) Traits to set as People Properties.
+- `persistence_name` (String) Mixpanel Persistence Name
+- `persistence_type` (String) Mixpanel Persistence Type
 - `prop_increments` (List of String) Properties to increment in People
 - `secure_cookie` (Boolean) This will mark the Mixpanel cookie as secure, meaning it will only be transmitted over https.
+- `session_replay_percentage` (Block List, Max: 1) Percentage of SDK initializations that will qualify for replay data capture (see [below for nested schema](#nestedblock--config--session_replay_percentage))
 - `set_all_traits_by_default` (Boolean) While this is checked, our integration automatically sets all traits on identify calls as super properties and people properties if Mixpanel People is checked as well.
 - `set_once_properties` (List of String) Properties to set only once
 - `source_name` (String) This value, if it's not blank, will be sent as rudderstack_source_name to Mixpanel for every event/page/screen call.
@@ -198,6 +215,16 @@ Optional:
 
 Optional:
 
+- `amp` (String)
+- `android` (String)
+- `cloud` (String)
+- `cordova` (String)
+- `flutter` (String)
+- `ios` (String)
+- `reactnative` (String)
+- `shopify` (String)
+- `unity` (String)
+- `warehouse` (String)
 - `web` (String)
 
 
@@ -336,6 +363,14 @@ Optional:
 
 - `blacklist` (List of String) Enter the event names to be denylisted.
 - `whitelist` (List of String) Enter the event names to be allowlisted.
+
+
+<a id="nestedblock--config--session_replay_percentage"></a>
+### Nested Schema for `config.session_replay_percentage`
+
+Optional:
+
+- `web` (String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

@@ -4,9 +4,7 @@ resource "rudderstack_destination_mixpanel" example{
   config {
     token = "..."
     data_residency = "us"
-    persistence = "none"
     identity_merge_api = "simplified"  # Required field - can be "simplified" or "original"
-    strict_mode = true
     connection_mode {
       web = "cloud"
     }
@@ -25,7 +23,24 @@ resource "rudderstack_destination_mixpanel" example{
     # event_increments = ["one","two","three"]
     # prop_increments = ["one","two","three"]
     # group_key_settings = ["one","two","three"]
-    
+    # set_once_properties = ["one","two","three"]
+    # union_properties = ["one","two","three"]
+    # append_properties = ["one","two","three"]
+    # gdpr_api_token = "..."
+    # user_deletion_api = "engage"
+    # persistence_name = "none"
+    # persistence_type = "..."
+    # ignore_dnt = false
+    # use_user_defined_page_event_name = false
+    # user_defined_page_event_template = "Viewed {{ category }} {{ name }} page"
+    # use_user_defined_screen_event_name = false
+    # user_defined_screen_event_template = "Viewed {{ category }} {{ name }} screen"
+    # drop_traits_in_track_event = false
+
+    # session_replay_percentage {
+    #   web = "0"
+    # }
+
     # use_native_sdk {
     #   web = true
     # }

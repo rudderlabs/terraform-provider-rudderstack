@@ -27,6 +27,13 @@ resource "rudderstack_destination_bigquery" "example" {
     # skip_tracks_table = true
     # skip_users_table = true
     # skip_views = false
+    # json_paths = "users.name,users.email"
+    # cleanup_object_storage_files = false
+
+    # connection_mode {
+    #   web = "cloud"
+    # }
+
     # consent_management {
     # 	web = [
     # 		{
@@ -148,7 +155,10 @@ Required:
 
 Optional:
 
+- `cleanup_object_storage_files` (Boolean) Enable for cleanup of object storage files (deletion) after successful sync
+- `connection_mode` (Block List, Max: 1) Use this setting to set how you want to route events from your source to destination.. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
+- `json_paths` (String) Specify required JSON properties in dot notation separated by commas.
 - `location` (String) Enter the GCP region of your project dataset.
 - `namespace` (String) Enter the schema name where RudderStack will create all the tables. If not specified, RudderStack will set this to the source name by default.
 - `partition_column` (String) Column to use for partitioning
@@ -170,6 +180,24 @@ Optional:
 - `exclude_window_end_time` (String) Specify the end time for the exclusion window.
 - `exclude_window_start_time` (String) Set a time window when RudderStack will not sync the data to your database.
 - `start_at` (String) Specify the particular time of the day (in UTC) when you want RudderStack to sync the data to BigQuery.
+
+
+<a id="nestedblock--config--connection_mode"></a>
+### Nested Schema for `config.connection_mode`
+
+Optional:
+
+- `amp` (String)
+- `android` (String)
+- `cloud` (String)
+- `cloud_source` (String)
+- `cordova` (String)
+- `flutter` (String)
+- `ios` (String)
+- `reactnative` (String)
+- `shopify` (String)
+- `unity` (String)
+- `web` (String)
 
 
 <a id="nestedblock--config--consent_management"></a>
