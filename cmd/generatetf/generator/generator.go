@@ -176,7 +176,6 @@ func cleanupDestinationConfig(destination client.Destination) client.Destination
 	}
 
 	jsonConfig = cleanupEventFilteringConfig(jsonConfig)
-	jsonConfig = cleanupConsentManagementConfig(jsonConfig)
 
 	jsonConfigBytes, err := json.Marshal(jsonConfig)
 	if err != nil {
@@ -197,51 +196,6 @@ func cleanupEventFilteringConfig(jsonConfig map[string]any) map[string]any {
 		delete(jsonConfig, "blacklistedEvents")
 	} else if eventFilteringOption == "blacklistedEvents" {
 		delete(jsonConfig, "whitelistedEvents")
-	}
-	return jsonConfig
-}
-
-func cleanupConsentManagementConfig(jsonConfig map[string]any) map[string]any {
-	// logger.Printf("cleanupConsentManagementConfig: %v", jsonConfig)
-	consentManagementMap, ok := jsonConfig["consentManagement"].(map[string]any)
-	if ok {
-		// consentManagement is an object with source type as keys and values as consent management objects
-		// We need to iterate the whole map and make sure each entry has "consents" key defined as an array of strings with at least one element.
-		// If not, we should add a default value [""]
-		for _, cmArray := range consentManagementMap {
-			cmArrayObject, ok := cmArray.([]any)
-			if !ok {
-				continue
-			}
-
-			for _, cmObject := range cmArrayObject {
-				// logger.Printf("cmObject: %v", cmObject)
-				cmObjectMap, ok := cmObject.(map[string]any)
-				if !ok {
-					continue
-				}
-
-				// Ensure consents is always defined as an array of strings with at least one element
-				consents, ok := cmObjectMap["consents"]
-				if !ok {
-					cmObjectMap["consents"] = []map[string]any{{"consent": ""}}
-				} else {
-					consentsList, ok := consents.([]map[string]any)
-					if !ok {
-						cmObjectMap["consents"] = []map[string]any{{"consent": ""}}
-					}
-					if len(consentsList) == 0 {
-						cmObjectMap["consents"] = []map[string]any{{"consent": ""}}
-					}
-				}
-
-				// Ensure resolutionStrategy is always defined
-				resolutionStrategy, ok := cmObjectMap["resolutionStrategy"]
-				if !ok || resolutionStrategy == nil {
-					cmObjectMap["resolutionStrategy"] = ""
-				}
-			}
-		}
 	}
 	return jsonConfig
 }
