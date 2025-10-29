@@ -52,39 +52,3 @@ fmt: ## Formats all go files
 .PHONY: test-ci
 test-ci:
 	go test ./... -timeout 30m
-
-.PHONY: dev-setup
-dev-setup: build
-	@echo "🔨 Building terraform-provider-rudderstack..."
-	@echo "📁 Setting up local provider directory structure..."
-	@mkdir -p test/.terraform/plugins/registry.terraform.io/rudderlabs/rudderstack/3.1.1/darwin_arm64
-	@echo "📋 Copying local binary to test directory..."
-	@cp ${BINARY} test/.terraform/plugins/registry.terraform.io/rudderlabs/rudderstack/3.1.1/darwin_arm64/terraform-provider-rudderstack_v3.1.1
-	@echo "🧹 Cleaning up previous Terraform state..."
-	@cd test && rm -rf .terraform .terraform.lock.hcl
-	@echo "📁 Recreating provider directory structure..."
-	@mkdir -p test/.terraform/plugins/registry.terraform.io/rudderlabs/rudderstack/3.1.1/darwin_arm64
-	@echo "📋 Re-copying local binary to test directory..."
-	@cp ${BINARY} test/.terraform/plugins/registry.terraform.io/rudderlabs/rudderstack/3.1.1/darwin_arm64/terraform-provider-rudderstack_v3.1.1
-	@echo "🚀 Initializing Terraform with local provider..."
-	@cd test && terraform init -plugin-dir=.terraform/plugins
-	@echo "✅ Local provider setup complete!"
-	@echo "📝 You can now run:"
-	@echo "   cd test && terraform plan"
-	@echo "   cd test && terraform apply"
-
-.PHONY: dev-test
-dev-test: dev-setup
-	@echo "🧪 Running Terraform plan with local provider..."
-	@cd test && terraform plan
-
-.PHONY: dev-apply
-dev-apply: dev-setup
-	@echo "🚀 Running Terraform apply with local provider..."
-	@cd test && terraform apply
-
-.PHONY: dev-clean
-dev-clean:
-	@echo "🧹 Cleaning up test environment..."
-	@cd test && rm -rf .terraform .terraform.lock.hcl
-	@echo "✅ Test environment cleaned up!"
