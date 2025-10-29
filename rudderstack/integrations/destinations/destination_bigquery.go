@@ -57,10 +57,21 @@ func init() {
 			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{0,100})$"),
 		},
 		"bucket_name": {
-			Type:             schema.TypeString,
-			Required:         true,
-			Description:      "Enter the name of your staging storage bucket.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^((?!goog)(?!.*google.*)(?!^(\\d+(\\.|$)){4}$)(?!.*\\.\\..*)[a-z0-9][a-z0-9-._]{1,61}[a-z0-9])$"),
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Enter the name of your staging storage bucket.",
+			ValidateDiagFunc: c.ValidateAll(
+				// Allow env variables or validate bucket name format
+				c.StringMatchesRegexp("(^env[.].+)|^[a-z0-9][a-z0-9-._]{1,61}[a-z0-9]$"),
+				// Reject bucket names starting with "goog"
+				c.StringNotMatchesRegexp("^goog"),
+				// Reject bucket names containing "google"
+				c.StringNotMatchesRegexp("google"),
+				// Reject bucket names that look like IP addresses
+				c.StringNotMatchesRegexp("^\\d+\\.\\d+\\.\\d+\\.\\d+$"),
+				// Reject bucket names with consecutive dots
+				c.StringNotMatchesRegexp("\\.\\."),
+			),
 		},
 		"prefix": {
 			Type:             schema.TypeString,
@@ -73,7 +84,10 @@ func init() {
 			Optional:    true,
 			Description: "Enter the schema name where RudderStack will create all the tables. If not specified, RudderStack will set this to the source name by default.",
 			ValidateDiagFunc: c.ValidateAll(
-				c.StringMatchesRegexp("(^env[.].*)|^((?!pg_|PG_|pG_|Pg_).{0,64})$"),
+				// Allow env variables or validate max length
+				c.StringMatchesRegexp("(^env[.].*)|^.{0,64}$"),
+				// Reject names starting with pg_ (case insensitive)
+				c.StringNotMatchesRegexp("(?i)^pg_"),
 			),
 		},
 		"credentials": {
