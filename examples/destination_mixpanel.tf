@@ -5,7 +5,6 @@ resource "rudderstack_destination_mixpanel" example{
     token = "..."
     data_residency = "us"
     identity_merge_api = "simplified"  # Required field - can be "simplified" or "original"
-    strict_mode = true
     connection_mode {
       web = "cloud"
     }

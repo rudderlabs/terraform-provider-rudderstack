@@ -16,7 +16,7 @@ terraform {
   required_providers {
     rudderstack = {
       source  = "rudderlabs/rudderstack"
-      version = "~> 4.0.0"
+      version = "~> 3.1.1"
     }
   }
   required_version = "~> 1.10.5"

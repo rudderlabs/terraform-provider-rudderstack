@@ -20,7 +20,6 @@ resource "rudderstack_destination_mixpanel" example{
     token = "..."
     data_residency = "us"
     identity_merge_api = "simplified"  # Required field - can be "simplified" or "original"
-    strict_mode = true
     connection_mode {
       web = "cloud"
     }
@@ -187,7 +186,6 @@ resource "rudderstack_destination_mixpanel" example{
 
 Required:
 
-- `connection_mode` (Block List, Min: 1, Max: 1) Enable this setting to send the events via the cloud mode. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `data_residency` (String) Mixpanel Server region either us/eu
 - `identity_merge_api` (String) Mixpanel Identity Merge types
 - `token` (String, Sensitive) Mixpanel API Token
