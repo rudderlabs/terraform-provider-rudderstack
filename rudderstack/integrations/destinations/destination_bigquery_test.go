@@ -125,7 +125,7 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 					web = "cloud"
 					ios = "cloud"
 					android = "cloud"
-					reactnative = "cloud"
+					react_native = "cloud"
 					unity = "cloud"
 					amp = "cloud"
 					flutter = "cloud"

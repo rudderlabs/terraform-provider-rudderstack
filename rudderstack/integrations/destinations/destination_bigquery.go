@@ -38,7 +38,7 @@ func init() {
 		c.Simple("connectionMode.cloud", "connection_mode.0.cloud", c.SkipZeroValue),
 		c.Simple("connectionMode.cloudSource", "connection_mode.0.cloud_source", c.SkipZeroValue),
 		c.Simple("jsonPaths", "json_paths", c.SkipZeroValue),
-		c.Simple("cleanupObjectStorageFiles", "cleanup_object_storage_files"),
+		c.Simple("cleanupObjectStorageFiles", "cleanup_object_storage_files", c.SkipZeroValue),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -100,13 +100,13 @@ func init() {
 		"sync": {
 			Type:     schema.TypeList,
 			MinItems: 1, MaxItems: 1,
-			Optional:    true,
+			Required:    true,
 			Description: "Enter the sync settings for the following fields:",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"frequency": {
 						Type:             schema.TypeString,
-						Optional:         true,
+						Required:         true,
 						Description:      "Specify how often RudderStack should sync the data to your BigQuery dataset.",
 						ValidateDiagFunc: c.StringMatchesRegexp("^(5|15|30|60|180|360|720|1440)$"),
 					},
