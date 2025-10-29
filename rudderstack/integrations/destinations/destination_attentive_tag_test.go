@@ -42,6 +42,19 @@ func TestDestinationResourceAttentiveTag(t *testing.T) {
 			`,
 			APIUpdate: `{
 				"apiKey": "key",
+				"connectionMode": {
+					"web": "cloud",
+					"android": "cloud",
+					"ios": "cloud",
+					"unity": "cloud",
+					"reactnative": "cloud",
+					"flutter": "cloud",
+					"cordova": "cloud",
+					"amp": "cloud",
+					"cloud": "cloud",
+					"warehouse": "cloud",
+					"shopify": "cloud"
+				},
 				"signUpSourceId": "123456",
 				"enableNewIdentifyFlow": true
 			}`,

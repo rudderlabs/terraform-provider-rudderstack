@@ -24,7 +24,7 @@ func init() {
 		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
 		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
-		c.Simple("connectionMode.reactnative", "connection_mode.0.react_native", c.SkipZeroValue),
+		c.Simple("connectionMode.reactnative", "connection_mode.0.reactnative", c.SkipZeroValue),
 		c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
 		c.Simple("connectionMode.amp", "connection_mode.0.amp", c.SkipZeroValue),
 		c.Simple("connectionMode.flutter", "connection_mode.0.flutter", c.SkipZeroValue),
@@ -112,7 +112,7 @@ func init() {
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
 					},
-					"react_native": {
+					"reactnative": {
 						Type:             schema.TypeString,
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),

@@ -58,18 +58,9 @@ func init() {
 		c.Simple("userDeletionApi", "user_deletion_api"),
 		c.Simple("gdprApiToken", "gdpr_api_token", c.SkipZeroValue),
 		c.Simple("sessionReplayPercentage.web", "session_replay_percentage.0.web"),
-		c.Simple("consentManagement.web", "consent_management.0.web"),
-		c.Simple("consentManagement.android", "consent_management.0.android"),
-		c.Simple("consentManagement.ios", "consent_management.0.ios"),
-		c.Simple("consentManagement.unity", "consent_management.0.unity"),
-		c.Simple("consentManagement.reactnative", "consent_management.0.react_native"),
-		c.Simple("consentManagement.flutter", "consent_management.0.flutter"),
-		c.Simple("consentManagement.cordova", "consent_management.0.cordova"),
-		c.Simple("consentManagement.shopify", "consent_management.0.shopify"),
-		c.Simple("consentManagement.cloud", "consent_management.0.cloud"),
-		c.Simple("consentManagement.warehouse", "consent_management.0.warehouse"),
-		c.Simple("persistenceName", "persistence_name"),
-		c.Simple("persistenceType", "persistence_type"),
+		c.Simple("persistenceName", "persistence_name", c.SkipZeroValue),
+		c.Simple("persistenceType", "persistence_type", c.SkipZeroValue),
+		c.Simple("ignoreDnt", "ignore_dnt", c.SkipZeroValue),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -77,7 +68,7 @@ func init() {
 	schema := map[string]*schema.Schema{
 		"token": {
 			Type:             schema.TypeString,
-			Optional:         true,
+			Required:         true,
 			Description:      "Mixpanel API Token",
 			Sensitive:        true,
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
@@ -280,6 +271,11 @@ func init() {
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
 					},
+					"amp": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
 				},
 			},
 		},
@@ -385,46 +381,19 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "Mixpanel Persistence Name",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("^(none|cookie|localStorage)$"),
 		},
 		"persistence_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "Mixpanel Persistence Type",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(none|cookie|localStorage)$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"ignore_dnt": {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     false,
 			Description: "Ignore 'Do Not Track' setting",
-		},
-		"session_replay_percentage": {
-			Type:        schema.TypeList,
-			MaxItems:    1,
-			Optional:    true,
-			Description: "Percentage of SDK initializations that will qualify for replay data capture",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"web": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(100|[1-9]?[0-9])$"),
-					},
-				},
-			},
-		},
-		"persistence_name": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			Description:      "Mixpanel Persistence Name",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(none|cookie|localStorage)$"),
-		},
-		"persistence_type": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			Description:      "Mixpanel Persistence Type",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 	}
 
