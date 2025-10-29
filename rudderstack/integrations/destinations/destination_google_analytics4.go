@@ -16,7 +16,7 @@ func init() {
 		c.Simple("measurementId", "measurement_id", c.SkipZeroValue),
 		c.Simple("firebaseAppId", "firebase_app_id", c.SkipZeroValue),
 		c.Simple("blockPageViewEvent", "block_page_view_event", c.SkipZeroValue),
-		c.Simple("extendPageViewParams.web", "extend_page_view_params.0.web", c.SkipZeroValue),
+		c.Simple("extendPageViewParams", "extend_page_view_params", c.SkipZeroValue),
 		c.Simple("sendUserId", "send_user_id", c.SkipZeroValue),
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
@@ -61,18 +61,9 @@ func init() {
 			Description: "Enable this setting to disable sending `page_view` events on load. This setting is applicable only for device mode.",
 		},
 		"extend_page_view_params": {
-			Type:        schema.TypeList,
-			MaxItems:    1,
+			Type:        schema.TypeBool,
 			Optional:    true,
 			Description: "Enable this setting to send `url` and `search` along with any other custom property to the `page` call of the RudderStack SDK. This setting is applicable only for device mode.",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"web": {
-						Type:     schema.TypeBool,
-						Optional: true,
-					},
-				},
-			},
 		},
 		"send_user_id": {
 			Type:        schema.TypeBool,
