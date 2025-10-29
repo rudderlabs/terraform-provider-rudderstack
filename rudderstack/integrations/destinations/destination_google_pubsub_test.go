@@ -20,7 +20,7 @@ func TestDestinationResourceGooglePubSub(t *testing.T) {
 			`,
 			APICreate: `{
 				"projectId": "project-id",
-				"credentials": "..."
+				"credentials": "...",
 				"connectionMode": {
 					"web": "cloud",
 					"ios": "cloud"
