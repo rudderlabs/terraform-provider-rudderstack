@@ -19,10 +19,12 @@ func TestDestinationResourceAttentiveTag(t *testing.T) {
 			TerraformUpdate: `
 				api_key = "key"
 				sign_up_source_id = "123456"
+				enable_new_identify_flow = true
 			`,
 			APIUpdate: `{
 				"apiKey": "key",
-				"signUpSourceId": "123456"
+				"signUpSourceId": "123456",
+				"enableNewIdentifyFlow": true
 			}`,
 		},
 	})

@@ -13,7 +13,7 @@ func init() {
 	properties := []c.ConfigProperty{
 		c.Simple("apiKey", "api_key"),
 		c.Simple("signUpSourceId", "sign_up_source_id", c.SkipZeroValue),
-		c.Simple("enableNewIdentifyFlow", "enable_new_identify_flow"),
+		c.Simple("enableNewIdentifyFlow", "enable_new_identify_flow", c.SkipZeroValue),
 		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
 		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
@@ -47,7 +47,7 @@ func init() {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     false,
-			Description: "Enable for new identify flow",
+			Description: "Enable new identify flow.",
 		},
 		"connection_mode": {
 			Type:        schema.TypeList,
