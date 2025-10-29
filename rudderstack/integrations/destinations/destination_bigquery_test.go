@@ -42,6 +42,7 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				namespace = "namespace"
 				skip_tracks_table = true
 				skip_users_table = false
+				skip_views = false
 			
 				sync {
 					frequency				  = "30"
@@ -117,6 +118,21 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 						resolution_strategy = "and"
 						consents = ["one_shopify", "two_shopify", "three_shopify"]
 					}]
+				}
+				cleanup_object_storage_files = true
+				json_paths = "event.properties.key1,event.properties.key2"
+				connection_mode {
+					web = "cloud"
+					ios = "cloud"
+					android = "cloud"
+					react_native = "cloud"
+					unity = "cloud"
+					amp = "cloud"
+					flutter = "cloud"
+					cordova = "cloud"
+					shopify = "cloud"
+					cloud = "cloud"
+					cloud_source = "cloud"
 				}
 			`,
 			APIUpdate: `{
@@ -355,6 +371,21 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 							]
 						}
 					]
+				},
+				"cleanupObjectStorageFiles": true,
+				"jsonPaths": "event.properties.key1,event.properties.key2",
+				"connectionMode": {
+					"web": "cloud",
+					"ios": "cloud",
+					"android": "cloud",
+					"reactnative": "cloud",
+					"unity": "cloud",
+					"amp": "cloud",
+					"flutter": "cloud",
+					"cordova": "cloud",
+					"shopify": "cloud",
+					"cloud": "cloud",
+					"cloudSource": "cloud"
 				}
 			}`,
 		},
