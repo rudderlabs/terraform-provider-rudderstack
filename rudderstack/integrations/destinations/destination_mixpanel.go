@@ -12,7 +12,6 @@ func init() {
 
 	properties := []c.ConfigProperty{
 		c.Simple("token", "token"),
-		c.Simple("apiSecret", "api_secret", c.SkipZeroValue),
 		c.Simple("dataResidency", "data_residency"),
 		c.Simple("people", "people", c.SkipZeroValue),
 		c.Simple("setAllTraitsByDefault", "set_all_traits_by_default", c.SkipZeroValue),
@@ -36,6 +35,17 @@ func init() {
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 		c.Simple("useNewMapping", "use_new_mapping", c.SkipZeroValue),
 		c.Simple("identityMergeApi", "identity_merge_api"),
+		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
+		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
+		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
+		c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
+		c.Simple("connectionMode.reactnative", "connection_mode.0.reactnative", c.SkipZeroValue),
+		c.Simple("connectionMode.flutter", "connection_mode.0.flutter", c.SkipZeroValue),
+		c.Simple("connectionMode.cordova", "connection_mode.0.cordova", c.SkipZeroValue),
+		c.Simple("connectionMode.shopify", "connection_mode.0.shopify", c.SkipZeroValue),
+		c.Simple("connectionMode.cloud", "connection_mode.0.cloud", c.SkipZeroValue),
+		c.Simple("connectionMode.amp", "connection_mode.0.amp", c.SkipZeroValue),
+		c.Simple("connectionMode.warehouse", "connection_mode.0.warehouse", c.SkipZeroValue),
 		c.Simple("useUserDefinedPageEventName", "use_user_defined_page_event_name"),
 		c.Simple("userDefinedPageEventTemplate", "user_defined_page_event_template"),
 		c.Simple("useUserDefinedScreenEventName", "use_user_defined_screen_event_name"),
@@ -48,18 +58,9 @@ func init() {
 		c.Simple("userDeletionApi", "user_deletion_api"),
 		c.Simple("gdprApiToken", "gdpr_api_token", c.SkipZeroValue),
 		c.Simple("sessionReplayPercentage.web", "session_replay_percentage.0.web"),
-		c.Simple("consentManagement.web", "consent_management.0.web"),
-		c.Simple("consentManagement.android", "consent_management.0.android"),
-		c.Simple("consentManagement.ios", "consent_management.0.ios"),
-		c.Simple("consentManagement.unity", "consent_management.0.unity"),
-		c.Simple("consentManagement.reactnative", "consent_management.0.react_native"),
-		c.Simple("consentManagement.flutter", "consent_management.0.flutter"),
-		c.Simple("consentManagement.cordova", "consent_management.0.cordova"),
-		c.Simple("consentManagement.shopify", "consent_management.0.shopify"),
-		c.Simple("consentManagement.cloud", "consent_management.0.cloud"),
-		c.Simple("consentManagement.warehouse", "consent_management.0.warehouse"),
-		c.Simple("persistenceName", "persistence_name"),
-		c.Simple("persistenceType", "persistence_type"),
+		c.Simple("persistenceName", "persistence_name", c.SkipZeroValue),
+		c.Simple("persistenceType", "persistence_type", c.SkipZeroValue),
+		c.Simple("ignoreDnt", "ignore_dnt", c.SkipZeroValue),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -67,17 +68,10 @@ func init() {
 	schema := map[string]*schema.Schema{
 		"token": {
 			Type:             schema.TypeString,
-			Optional:         true,
+			Required:         true,
 			Description:      "Mixpanel API Token",
 			Sensitive:        true,
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
-		},
-		"api_secret": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			Sensitive:        true,
-			Description:      "Mixpanel API secret",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"data_residency": {
 			Type:             schema.TypeString,
@@ -132,7 +126,8 @@ func init() {
 			Optional:    true,
 			Description: "Property to send as super Properties.",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"people_properties": {
@@ -140,7 +135,8 @@ func init() {
 			Optional:    true,
 			Description: "Traits to set as People Properties.",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"event_increments": {
@@ -148,7 +144,8 @@ func init() {
 			Optional:    true,
 			Description: "Events to increment in People.",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"prop_increments": {
@@ -156,7 +153,8 @@ func init() {
 			Optional:    true,
 			Description: "Properties to increment in People",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"group_key_settings": {
@@ -164,7 +162,8 @@ func init() {
 			Optional:    true,
 			Description: "Group Key",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"use_native_sdk": {
@@ -272,13 +271,17 @@ func init() {
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
 					},
+					"amp": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
 				},
 			},
 		},
 		"identity_merge_api": {
 			Type:             schema.TypeString,
-			Optional:         true,
-			Default:          "original",
+			Required:         true,
 			Description:      "Mixpanel Identity Merge types",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(simplified|original)$"),
 		},
@@ -325,7 +328,8 @@ func init() {
 			Optional:    true,
 			Description: "Properties to set only once",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"union_properties": {
@@ -333,7 +337,8 @@ func init() {
 			Optional:    true,
 			Description: "Properties to union",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"append_properties": {
@@ -341,7 +346,8 @@ func init() {
 			Optional:    true,
 			Description: "Properties to append",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"user_deletion_api": {
@@ -354,7 +360,7 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Sensitive:        true,
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"session_replay_percentage": {
 			Type:        schema.TypeList,
@@ -382,6 +388,12 @@ func init() {
 			Optional:         true,
 			Description:      "Mixpanel Persistence Type",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+		},
+		"ignore_dnt": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Ignore 'Do Not Track' setting",
 		},
 	}
 
