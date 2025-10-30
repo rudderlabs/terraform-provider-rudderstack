@@ -79,7 +79,6 @@ func TestGeneratorTerraform(t *testing.T) {
 					"web": [
 						{
 							"provider": "oneTrust",
-							"resolutionStrategy": "",
 							"consents": [
 								{
 									"consent": "one_web"
@@ -94,7 +93,6 @@ func TestGeneratorTerraform(t *testing.T) {
 						},
 						{
 							"provider": "ketch",
-							"resolutionStrategy": "",
 							"consents": [
 								{
 									"consent": "one_web"
@@ -131,7 +129,7 @@ func TestGeneratorTerraform(t *testing.T) {
 				],
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistPiiProperties": [],
-				"whiteListedEvents": [],
+				"whiteListedEvents": []
 			}`),
 		},
 		{
