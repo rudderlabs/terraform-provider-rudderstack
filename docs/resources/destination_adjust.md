@@ -122,7 +122,7 @@ resource "rudderstack_destination_adjust" "example" {
 
 Required:
 
-- `app_token` (String) Enter your App Token.
+- `app_token` (String, Sensitive) Enter your App Token.
 
 Optional:
 

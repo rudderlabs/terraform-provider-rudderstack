@@ -49,6 +49,7 @@ func init() {
 			Type:             schema.TypeString,
 			Required:         true,
 			Description:      "Enter your App Token.",
+			Sensitive:        true,
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"delay": {
