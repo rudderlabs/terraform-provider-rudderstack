@@ -176,6 +176,7 @@ func cleanupDestinationConfig(destination client.Destination) client.Destination
 	}
 
 	jsonConfig = cleanupEventFilteringConfig(jsonConfig)
+	jsonConfig = cleanupConsentManagementConfig(jsonConfig)
 
 	jsonConfigBytes, err := json.Marshal(jsonConfig)
 	if err != nil {
@@ -196,6 +197,30 @@ func cleanupEventFilteringConfig(jsonConfig map[string]any) map[string]any {
 		delete(jsonConfig, "blacklistedEvents")
 	} else if eventFilteringOption == "blacklistedEvents" {
 		delete(jsonConfig, "whitelistedEvents")
+	}
+	return jsonConfig
+}
+
+func cleanupConsentManagementConfig(jsonConfig map[string]any) map[string]any {
+	// Ensure each consent management object has "resolutionStrategy" defined. Otherwise, set to ""
+	consentManagement, ok := jsonConfig["consentManagement"].(map[string]interface{})
+	if ok {
+		for _, platformValue := range consentManagement {
+			platformArray, ok := platformValue.([]interface{})
+			if !ok {
+				continue
+			}
+			for _, item := range platformArray {
+				consentManagementObjectMap, ok := item.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				_, hasResolutionStrategy := consentManagementObjectMap["resolutionStrategy"]
+				if !hasResolutionStrategy {
+					consentManagementObjectMap["resolutionStrategy"] = ""
+				}
+			}
+		}
 	}
 	return jsonConfig
 }

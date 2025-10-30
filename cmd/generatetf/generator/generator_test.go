@@ -129,7 +129,7 @@ func TestGeneratorTerraform(t *testing.T) {
 				],
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistPiiProperties": [],
-				"whiteListedEvents": [],
+				"whiteListedEvents": []
 			}`),
 		},
 		{
