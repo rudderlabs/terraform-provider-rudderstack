@@ -381,13 +381,13 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "Mixpanel Persistence Name",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(none|cookie|localStorage)$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"persistence_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "Mixpanel Persistence Type",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("^(none|cookie|localStorage)$"),
 		},
 		"ignore_dnt": {
 			Type:        schema.TypeBool,
