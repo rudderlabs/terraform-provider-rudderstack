@@ -82,3 +82,7 @@ func TestSourceResourceCustomerIO(t *testing.T) {
 func TestSourceResourceFacebookLeadAds(t *testing.T) {
 	cmt.AssertSource(t, "facebook_lead_ads", []configs.TestConfig{configs.EmptyTestConfig})
 }
+
+func TestSourceResourceAdjust(t *testing.T) {
+	cmt.AssertSource(t, "adjust", []configs.TestConfig{configs.EmptyTestConfig})
+}
