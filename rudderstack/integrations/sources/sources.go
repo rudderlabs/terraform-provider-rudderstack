@@ -102,4 +102,10 @@ func init() {
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
+
+	c.Sources.Register("adjust", c.ConfigMeta{
+		APIType:    "Adjust",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
 }
