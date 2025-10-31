@@ -26,6 +26,19 @@ func init() {
 		c.Simple("syncStartAt", "sync.0.start_at", c.SkipZeroValue),
 		c.Simple("excludeWindow.excludeWindowStartTime", "sync.0.exclude_window_start_time", c.SkipZeroValue),
 		c.Simple("excludeWindow.excludeWindowEndTime", "sync.0.exclude_window_end_time", c.SkipZeroValue),
+		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
+		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
+		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
+		c.Simple("connectionMode.reactnative", "connection_mode.0.reactnative", c.SkipZeroValue),
+		c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
+		c.Simple("connectionMode.amp", "connection_mode.0.amp", c.SkipZeroValue),
+		c.Simple("connectionMode.flutter", "connection_mode.0.flutter", c.SkipZeroValue),
+		c.Simple("connectionMode.cordova", "connection_mode.0.cordova", c.SkipZeroValue),
+		c.Simple("connectionMode.shopify", "connection_mode.0.shopify", c.SkipZeroValue),
+		c.Simple("connectionMode.cloud", "connection_mode.0.cloud", c.SkipZeroValue),
+		c.Simple("connectionMode.cloudSource", "connection_mode.0.cloud_source", c.SkipZeroValue),
+		c.Simple("jsonPaths", "json_paths", c.SkipZeroValue),
+		c.Simple("cleanupObjectStorageFiles", "cleanup_object_storage_files", c.SkipZeroValue),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -41,27 +54,40 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "Enter the GCP region of your project dataset.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{0,100})$"),
 		},
 		"bucket_name": {
-			Type:             schema.TypeString,
-			Required:         true,
-			Description:      "Enter the name of your staging storage bucket.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Enter the name of your staging storage bucket.",
+			ValidateDiagFunc: c.ValidateAll(
+				// Allow env variables or validate bucket name format
+				c.StringMatchesRegexp("(^env[.].+)|^[a-z0-9][a-z0-9-._]{1,61}[a-z0-9]$"),
+				// Reject bucket names starting with "goog"
+				c.StringNotMatchesRegexp("^goog"),
+				// Reject bucket names containing "google"
+				c.StringNotMatchesRegexp("google"),
+				// Reject bucket names that look like IP addresses
+				c.StringNotMatchesRegexp("^\\d+\\.\\d+\\.\\d+\\.\\d+$"),
+				// Reject bucket names with consecutive dots
+				c.StringNotMatchesRegexp("\\.\\."),
+			),
 		},
 		"prefix": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "If specified, RudderStack creates a folder in the bucket with this prefix and loads all the data in it.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(.{0,100})$"),
 		},
 		"namespace": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "Enter the schema name where RudderStack will create all the tables. If not specified, RudderStack will set this to the source name by default.",
 			ValidateDiagFunc: c.ValidateAll(
-				c.StringMatchesRegexp("(^env[.].*)|^(.{0,64})$"),
-				c.StringNotMatchesRegexp("^(pg_|PG_|pG_|Pg_)"),
+				// Allow env variables or validate max length
+				c.StringMatchesRegexp("(^env[.].*)|^.{0,64}$"),
+				// Reject names starting with pg_ (case insensitive)
+				c.StringNotMatchesRegexp("(?i)^pg_"),
 			),
 		},
 		"credentials": {
@@ -82,7 +108,7 @@ func init() {
 						Type:             schema.TypeString,
 						Required:         true,
 						Description:      "Specify how often RudderStack should sync the data to your BigQuery dataset.",
-						ValidateDiagFunc: c.StringMatchesRegexp("^(30|60|180|360|720|1440)$"),
+						ValidateDiagFunc: c.StringMatchesRegexp("^(5|15|30|60|180|360|720|1440)$"),
 					},
 					"start_at": {
 						Type:             schema.TypeString,
@@ -136,6 +162,83 @@ func init() {
 			Default:          "day",
 			Description:      "Partition type",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(hour|day)$"),
+		},
+		"connection_mode": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Use this setting to set how you want to route events from your source to destination..",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"ios": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"android": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"reactnative": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"unity": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"amp": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"flutter": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"cordova": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"shopify": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"cloud": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"cloud_source": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+				},
+			},
+		},
+		"cleanup_object_storage_files": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Enable for cleanup of object storage files (deletion) after successful sync",
+		},
+		"json_paths": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Description:      "Specify required JSON properties in dot notation separated by commas.",
+			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|.*$"),
 		},
 	}
 

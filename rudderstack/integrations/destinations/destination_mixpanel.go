@@ -12,7 +12,6 @@ func init() {
 
 	properties := []c.ConfigProperty{
 		c.Simple("token", "token"),
-		c.Simple("apiSecret", "api_secret", c.SkipZeroValue),
 		c.Simple("dataResidency", "data_residency"),
 		c.Simple("people", "people", c.SkipZeroValue),
 		c.Simple("setAllTraitsByDefault", "set_all_traits_by_default", c.SkipZeroValue),
@@ -21,7 +20,6 @@ func init() {
 		c.Simple("trackNamedPages", "track_named_pages", c.SkipZeroValue),
 		c.Simple("sourceName", "source_name", c.SkipZeroValue),
 		c.Simple("crossSubdomainCookie", "cross_subdomain_cookie", c.SkipZeroValue),
-		c.Simple("persistence", "persistence"),
 		c.Simple("secureCookie", "secure_cookie", c.SkipZeroValue),
 		c.ArrayWithStrings("superProperties", "property", "super_properties"),
 		c.ArrayWithStrings("peopleProperties", "property", "people_properties"),
@@ -36,8 +34,18 @@ func init() {
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 		c.Simple("useNewMapping", "use_new_mapping", c.SkipZeroValue),
-		c.Simple("connectionModes.web", "connection_modes.0.web"),
 		c.Simple("identityMergeApi", "identity_merge_api"),
+		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
+		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
+		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
+		c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
+		c.Simple("connectionMode.reactnative", "connection_mode.0.reactnative", c.SkipZeroValue),
+		c.Simple("connectionMode.flutter", "connection_mode.0.flutter", c.SkipZeroValue),
+		c.Simple("connectionMode.cordova", "connection_mode.0.cordova", c.SkipZeroValue),
+		c.Simple("connectionMode.shopify", "connection_mode.0.shopify", c.SkipZeroValue),
+		c.Simple("connectionMode.cloud", "connection_mode.0.cloud", c.SkipZeroValue),
+		c.Simple("connectionMode.amp", "connection_mode.0.amp", c.SkipZeroValue),
+		c.Simple("connectionMode.warehouse", "connection_mode.0.warehouse", c.SkipZeroValue),
 		c.Simple("useUserDefinedPageEventName", "use_user_defined_page_event_name"),
 		c.Simple("userDefinedPageEventTemplate", "user_defined_page_event_template"),
 		c.Simple("useUserDefinedScreenEventName", "use_user_defined_screen_event_name"),
@@ -49,6 +57,10 @@ func init() {
 		c.ArrayWithStrings("appendProperties", "property", "append_properties"),
 		c.Simple("userDeletionApi", "user_deletion_api"),
 		c.Simple("gdprApiToken", "gdpr_api_token", c.SkipZeroValue),
+		c.Simple("sessionReplayPercentage.web", "session_replay_percentage.0.web"),
+		c.Simple("persistenceName", "persistence_name", c.SkipZeroValue),
+		c.Simple("persistenceType", "persistence_type", c.SkipZeroValue),
+		c.Simple("ignoreDnt", "ignore_dnt", c.SkipZeroValue),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -60,13 +72,6 @@ func init() {
 			Description:      "Mixpanel API Token",
 			Sensitive:        true,
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
-		},
-		"api_secret": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			Sensitive:        true,
-			Description:      "Mixpanel API secret",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"data_residency": {
 			Type:             schema.TypeString,
@@ -111,12 +116,6 @@ func init() {
 			Optional:    true,
 			Description: "This will allow the Mixpanel cookie to persist between different pages of your application.",
 		},
-		"persistence": {
-			Type:             schema.TypeString,
-			Required:         true,
-			Description:      "Choose persistence for Mixpanel SDK. One of none|cookie|localStorage",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(none|cookie|localStorage)$"),
-		},
 		"secure_cookie": {
 			Type:        schema.TypeBool,
 			Optional:    true,
@@ -127,7 +126,8 @@ func init() {
 			Optional:    true,
 			Description: "Property to send as super Properties.",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"people_properties": {
@@ -135,7 +135,8 @@ func init() {
 			Optional:    true,
 			Description: "Traits to set as People Properties.",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"event_increments": {
@@ -143,7 +144,8 @@ func init() {
 			Optional:    true,
 			Description: "Events to increment in People.",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"prop_increments": {
@@ -151,7 +153,8 @@ func init() {
 			Optional:    true,
 			Description: "Properties to increment in People",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"group_key_settings": {
@@ -159,7 +162,8 @@ func init() {
 			Optional:    true,
 			Description: "Group Key",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"use_native_sdk": {
@@ -210,25 +214,74 @@ func init() {
 			Default:     true,
 			Description: "This value is true by default and when this flag is enabled, camel case fields are mapped to snake case fields while sending to Mixpanel. Please refer to https://www.rudderstack.com/docs/destinations/streaming-destinations/mixpanel/#connection-settings for more details.",
 		},
-		"connection_modes": {
+		"connection_mode": {
 			Type:        schema.TypeList,
 			MaxItems:    1,
-			Required:    true,
+			Optional:    true,
 			Description: "Enable this setting to send the events via the cloud mode.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"web": {
-						Type:     schema.TypeString,
-						Optional: true,
-						Default:  "cloud",
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud|device)$"),
+					},
+					"android": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"ios": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"unity": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"reactnative": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"flutter": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"cordova": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"shopify": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"cloud": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"warehouse": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"amp": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
 					},
 				},
 			},
 		},
 		"identity_merge_api": {
 			Type:             schema.TypeString,
-			Optional:         true,
-			Default:          "original",
+			Required:         true,
 			Description:      "Mixpanel Identity Merge types",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(simplified|original)$"),
 		},
@@ -275,7 +328,8 @@ func init() {
 			Optional:    true,
 			Description: "Properties to set only once",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"union_properties": {
@@ -283,7 +337,8 @@ func init() {
 			Optional:    true,
 			Description: "Properties to union",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"append_properties": {
@@ -291,7 +346,8 @@ func init() {
 			Optional:    true,
 			Description: "Properties to append",
 			Elem: &schema.Schema{
-				Type: schema.TypeString,
+				Type:             schema.TypeString,
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 			},
 		},
 		"user_deletion_api": {
@@ -304,7 +360,40 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Sensitive:        true,
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+		},
+		"session_replay_percentage": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Percentage of SDK initializations that will qualify for replay data capture",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(100|[1-9]?[0-9])$"),
+					},
+				},
+			},
+		},
+		"persistence_name": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Description:      "Mixpanel Persistence Name",
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+		},
+		"persistence_type": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Description:      "Mixpanel Persistence Type",
+			ValidateDiagFunc: c.StringMatchesRegexp("^(none|cookie|localStorage)$"),
+		},
+		"ignore_dnt": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Ignore 'Do Not Track' setting",
 		},
 	}
 

@@ -45,8 +45,10 @@ func TestGeneratorTerraform(t *testing.T) {
 				"database": "example-database",
 				"namespace": "example-namespace",
 				"enableSSE": true,
-				"useRudderStorage": false
-				"unknown": "unknown value"
+				"useRudderStorage": false,
+				"unknown": "unknown value",
+				"whiteListedEvents": [],
+				"blacklistedEvents": []
 			}`),
 		},
 		{
@@ -77,7 +79,6 @@ func TestGeneratorTerraform(t *testing.T) {
 					"web": [
 						{
 							"provider": "oneTrust",
-							"resolutionStrategy": "",
 							"consents": [
 								{
 									"consent": "one_web"
@@ -92,7 +93,6 @@ func TestGeneratorTerraform(t *testing.T) {
 						},
 						{
 							"provider": "ketch",
-							"resolutionStrategy": "",
 							"consents": [
 								{
 									"consent": "one_web"
@@ -128,7 +128,8 @@ func TestGeneratorTerraform(t *testing.T) {
 				  { "eventName": "three" }
 				],
 				"eventFilteringOption": "blacklistedEvents",
-				"blacklistPiiProperties": [],	
+				"blacklistPiiProperties": [],
+				"whiteListedEvents": []
 			}`),
 		},
 		{

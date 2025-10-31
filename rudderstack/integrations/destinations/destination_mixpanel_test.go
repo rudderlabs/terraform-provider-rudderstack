@@ -14,21 +14,19 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				token = "..."
 				identity_merge_api = "simplified"
 				data_residency = "us"
-				persistence = "none"
 				consolidated_page_calls = false
-				connection_modes {
+				connection_mode {
 					web = "cloud"
 				}
 			`,
 			APICreate: `{
 				"token": "...",
 				"dataResidency": "us",
-				"connectionModes": {
+				"connectionMode": {
 					"web": "cloud"
 				},
 				"identityMergeApi": "simplified",
 				"consolidatedPageCalls": false,
-				"persistence": "none",
 				"useNewMapping": true,
 				"useUserDefinedPageEventName": false,
 				"userDefinedPageEventTemplate":  "Viewed {{ category }} {{ name }} page",
@@ -41,12 +39,20 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 			TerraformUpdate: `
 				token = "..."
 				data_residency = "eu"
-				connection_modes {
+				connection_mode {
 					web = "cloud"
+					android = "cloud"
+					ios = "cloud"
+					unity = "cloud"
+					reactnative = "cloud"
+					flutter = "cloud"
+					cordova = "cloud"
+					amp = "cloud"
+					cloud = "cloud"
+					warehouse = "cloud"
+					shopify = "cloud"
 				}
 				identity_merge_api = "simplified"
-				persistence = "localStorage"
-				api_secret = "..."
 				people = true
 				set_all_traits_by_default = true
 				consolidated_page_calls = true
@@ -155,12 +161,20 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 			{
 				"token": "...",
 				"dataResidency": "eu",
-				"connectionModes": {
-					"web": "cloud"
+				"connectionMode": {
+					"web": "cloud",
+					"android": "cloud",
+					"ios": "cloud",
+					"unity": "cloud",
+					"reactnative": "cloud",
+					"flutter": "cloud",
+					"cordova": "cloud",
+					"amp": "cloud",
+					"cloud": "cloud",
+					"warehouse": "cloud",
+					"shopify": "cloud"
 				},
 				"identityMergeApi": "simplified",
-				"persistence": "localStorage",
-				"apiSecret": "...",
 				"people": true,
 				"setAllTraitsByDefault": true,
 				"consolidatedPageCalls": true,

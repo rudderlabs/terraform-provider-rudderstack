@@ -4,6 +4,11 @@ resource "rudderstack_destination_attentive_tag" "example" {
   config {
     api_key = "sample-dummy-api-key"
     # sign_up_source_id = "123456"
+    # enable_new_identify_flow = false
+
+    # connection_mode {
+    #   web = "cloud"
+    # }
 
     # consent_management {
     # 	web = [

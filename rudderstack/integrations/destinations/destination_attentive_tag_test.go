@@ -12,17 +12,51 @@ func TestDestinationResourceAttentiveTag(t *testing.T) {
 		{
 			TerraformCreate: `
 				api_key = "key"
+				connection_mode {
+					web = "cloud"
+				}
 			`,
 			APICreate: `{
-				"apiKey": "key"
+				"apiKey": "key",
+				"connectionMode": {
+					"web": "cloud"
+				}
 			}`,
 			TerraformUpdate: `
+				connection_mode {
+					web = "cloud"
+					android = "cloud"
+					ios = "cloud"
+					unity = "cloud"
+					reactnative = "cloud"
+					flutter = "cloud"
+					cordova = "cloud"
+					amp = "cloud"
+					cloud = "cloud"
+					warehouse = "cloud"
+					shopify = "cloud"
+				}
 				api_key = "key"
 				sign_up_source_id = "123456"
+				enable_new_identify_flow = true
 			`,
 			APIUpdate: `{
 				"apiKey": "key",
-				"signUpSourceId": "123456"
+				"connectionMode": {
+					"web": "cloud",
+					"android": "cloud",
+					"ios": "cloud",
+					"unity": "cloud",
+					"reactnative": "cloud",
+					"flutter": "cloud",
+					"cordova": "cloud",
+					"amp": "cloud",
+					"cloud": "cloud",
+					"warehouse": "cloud",
+					"shopify": "cloud"
+				},
+				"signUpSourceId": "123456",
+				"enableNewIdentifyFlow": true
 			}`,
 		},
 	})

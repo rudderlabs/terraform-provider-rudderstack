@@ -20,6 +20,10 @@ resource "rudderstack_destination_google_pubsub" "example" {
     project_id = "project-id"
     credentials = "..."
 
+#    connection_mode {
+#      web = "cloud"
+#    }
+
 #    event_to_topic_map = [
 #      {
 #        from = "event-1"
@@ -110,6 +114,14 @@ resource "rudderstack_destination_google_pubsub" "example" {
 
 > **:warning: Breaking Change**
 >
+> Note that from the provider versions 4.0.0 and above, 
+> - the schema of `event_to_topic_map` property has been changed. 
+> - the schema of `event_to_attribute_map` property has been changed.
+>
+> Please refer to the example above.
+
+> **:warning: Breaking Change**
+>
 > Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
@@ -144,9 +156,28 @@ Required:
 
 Optional:
 
+- `connection_mode` (Block List, Max: 1) Use this setting to set how you want to route events from your source to destination.. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `event_to_attribute_map` (List of Object) Map message properties to Google pub/sub message Attribute Key (see [below for nested schema](#nestedatt--config--event_to_attribute_map))
 - `event_to_topic_map` (List of Object) Map RudderStack events to Google pub/sub topics (see [below for nested schema](#nestedatt--config--event_to_topic_map))
+
+<a id="nestedblock--config--connection_mode"></a>
+### Nested Schema for `config.connection_mode`
+
+Optional:
+
+- `amp` (String)
+- `android` (String)
+- `cloud` (String)
+- `cordova` (String)
+- `flutter` (String)
+- `ios` (String)
+- `reactnative` (String)
+- `shopify` (String)
+- `unity` (String)
+- `warehouse` (String)
+- `web` (String)
+
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`

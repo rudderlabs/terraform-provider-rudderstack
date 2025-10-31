@@ -12,6 +12,13 @@ resource "rudderstack_destination_bigquery" "example" {
     # skip_tracks_table = true
     # skip_users_table = true
     # skip_views = false
+    # json_paths = "users.name,users.email"
+    # cleanup_object_storage_files = false
+
+    # connection_mode {
+    #   web = "cloud"
+    # }
+
     # consent_management {
     # 	web = [
     # 		{

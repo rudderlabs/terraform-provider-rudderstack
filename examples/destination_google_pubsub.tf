@@ -5,6 +5,10 @@ resource "rudderstack_destination_google_pubsub" "example" {
     project_id = "project-id"
     credentials = "..."
 
+#    connection_mode {
+#      web = "cloud"
+#    }
+
 #    event_to_topic_map = [
 #      {
 #        from = "event-1"

@@ -31,7 +31,7 @@ func init() {
 		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
 		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
-		c.Simple("connectionMode.reactnative", "connection_mode.0.react_native", c.SkipZeroValue),
+		c.Simple("connectionMode.reactnative", "connection_mode.0.reactnative", c.SkipZeroValue),
 		c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
 		c.Simple("connectionMode.amp", "connection_mode.0.amp", c.SkipZeroValue),
 		c.Simple("connectionMode.flutter", "connection_mode.0.flutter", c.SkipZeroValue),
@@ -59,9 +59,10 @@ func init() {
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"data_center": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Enter your Braze Data Center.",
+			Type:             schema.TypeString,
+			Required:         true,
+			Description:      "Enter your Braze Data Center.",
+			ValidateDiagFunc: c.StringMatchesRegexp("^($|US-01|US-02|US-03|US-04|US-05|US-06|US-07|US-08|EU-01|EU-02|EU-03|AU-01)$"),
 		},
 		"enable_subscription_group_in_group_call": {
 			Type:        schema.TypeBool,
@@ -178,7 +179,7 @@ func init() {
 		"connection_mode": {
 			Type:        schema.TypeList,
 			MaxItems:    1,
-			Required:    true,
+			Optional:    true,
 			Description: "Use this setting to set how you want to route events from your source to destination..",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
@@ -197,7 +198,7 @@ func init() {
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud|device|hybrid)$"),
 					},
-					"react_native": {
+					"reactnative": {
 						Type:             schema.TypeString,
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud|device)$"),

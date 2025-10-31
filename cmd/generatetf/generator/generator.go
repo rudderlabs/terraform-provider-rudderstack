@@ -167,6 +167,64 @@ func sourceName(source client.Source) string {
 	return fmt.Sprintf("src_%s", source.ID)
 }
 
+func cleanupDestinationConfig(destination client.Destination) client.Destination {
+	var jsonConfig map[string]any
+	err := json.Unmarshal(destination.Config, &jsonConfig)
+	if err != nil {
+		logger.Printf("could not unmarshal destination config: %v", err)
+		return destination
+	}
+
+	jsonConfig = cleanupEventFilteringConfig(jsonConfig)
+	jsonConfig = cleanupConsentManagementConfig(jsonConfig)
+
+	jsonConfigBytes, err := json.Marshal(jsonConfig)
+	if err != nil {
+		logger.Printf("could not marshal destination config: %v", err)
+	}
+	destination.Config = json.RawMessage(jsonConfigBytes)
+	return destination
+}
+
+func cleanupEventFilteringConfig(jsonConfig map[string]any) map[string]any {
+	// Ensure blacklistedEvents and whitelistedEvents are defined only as per the value of eventFilteringOption
+	eventFilteringOption, ok := jsonConfig["eventFilteringOption"]
+	if !ok || eventFilteringOption == "disable" || eventFilteringOption == nil {
+		delete(jsonConfig, "blacklistedEvents")
+		delete(jsonConfig, "whitelistedEvents")
+		delete(jsonConfig, "eventFilteringOption")
+	} else if eventFilteringOption == "whitelistedEvents" {
+		delete(jsonConfig, "blacklistedEvents")
+	} else if eventFilteringOption == "blacklistedEvents" {
+		delete(jsonConfig, "whitelistedEvents")
+	}
+	return jsonConfig
+}
+
+func cleanupConsentManagementConfig(jsonConfig map[string]any) map[string]any {
+	// Ensure each consent management object has "resolutionStrategy" defined. Otherwise, set to ""
+	consentManagement, ok := jsonConfig["consentManagement"].(map[string]interface{})
+	if ok {
+		for _, platformValue := range consentManagement {
+			platformArray, ok := platformValue.([]interface{})
+			if !ok {
+				continue
+			}
+			for _, item := range platformArray {
+				consentManagementObjectMap, ok := item.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				_, hasResolutionStrategy := consentManagementObjectMap["resolutionStrategy"]
+				if !hasResolutionStrategy {
+					consentManagementObjectMap["resolutionStrategy"] = ""
+				}
+			}
+		}
+	}
+	return jsonConfig
+}
+
 // generateDestination generates a destination resource block from an API destination object and a terraform destination type and ConfigMeta.
 func generateDestination(destination client.Destination, terraformType string, cm *configs.ConfigMeta) (block *hclwrite.Block, err error) {
 	defer func() {
@@ -183,6 +241,8 @@ func generateDestination(destination client.Destination, terraformType string, c
 	body.SetAttributeValue("name", cty.StringVal(destination.Name))
 
 	if !cm.SkipConfig {
+		destination = cleanupDestinationConfig(destination)
+
 		configBlock, err := generateConfigBlock(destination.Config, cm)
 		if err != nil {
 			return nil, fmt.Errorf("could not generate config block for destination '%s': %w", destination.ID, err)

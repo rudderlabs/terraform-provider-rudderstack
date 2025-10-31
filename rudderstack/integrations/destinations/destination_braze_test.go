@@ -36,6 +36,15 @@ func TestDestinationResourceBraze(t *testing.T) {
 			connection_mode {
 				web = "cloud"
 				ios = "cloud"
+				android = "cloud"
+				reactnative = "cloud"
+				unity = "cloud"
+				amp = "cloud"
+				flutter = "cloud"
+				cordova = "cloud"
+				shopify = "cloud"
+				cloud = "cloud"
+				warehouse = "cloud"
 			}
 			data_center = "US-03"
 			rest_api_key = "updated_rest_api_pass"
@@ -112,7 +121,16 @@ func TestDestinationResourceBraze(t *testing.T) {
 			APIUpdate: `{
 				"connectionMode": {
 					"web": "cloud",
-					"ios": "cloud"
+					"ios": "cloud",
+					"android": "cloud",
+					"reactnative": "cloud",
+					"unity": "cloud",
+					"amp": "cloud",
+					"flutter": "cloud",
+					"cordova": "cloud",
+					"cloud": "cloud",
+					"warehouse": "cloud",
+					"shopify": "cloud"
 				},
 				"dataCenter": "US-03",
 				"restApiKey": "updated_rest_api_pass",
