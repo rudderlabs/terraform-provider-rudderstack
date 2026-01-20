@@ -108,4 +108,10 @@ func init() {
 		Properties: []c.ConfigProperty{},
 		SkipConfig: true,
 	})
+
+	c.Sources.Register("rust", c.ConfigMeta{
+		APIType:    "Rust",
+		Properties: []c.ConfigProperty{},
+		SkipConfig: true,
+	})
 }
