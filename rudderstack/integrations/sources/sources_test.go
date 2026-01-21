@@ -86,3 +86,7 @@ func TestSourceResourceFacebookLeadAds(t *testing.T) {
 func TestSourceResourceAdjust(t *testing.T) {
 	cmt.AssertSource(t, "adjust", []configs.TestConfig{configs.EmptyTestConfig})
 }
+
+func TestSourceResourceRust(t *testing.T) {
+	cmt.AssertSource(t, "rust", []configs.TestConfig{configs.EmptyTestConfig})
+}
