@@ -2,10 +2,10 @@ resource "rudderstack_destination_bqstream" "example" {
   name = "my-bqstream"
 
   config {
-    projectId = "your_project_id_here"
-    datasetId = "your_dataset_id_here"
-    tableId = "your_table_id_here"
-    # insertId = "your_insert_id_here"
+    project_id = "your_project_id_here"
+    dataset_id = "your_dataset_id_here"
+    table_id = "your_table_id_here"
+    insert_id = "your_insert_id_here"
     credentials = "your_credentials_here"
     connection_mode {
       web = "cloud"
@@ -16,7 +16,7 @@ resource "rudderstack_destination_bqstream" "example" {
     # 		consents = ["one_android", "two_android", "three_android"]
     # 		resolution_strategy = ""
     # 	}]
-    # 	androidKotlin = [{
+    # 	android_kotlin = [{
     # 		provider = "ketch"
     # 		consents = ["one_androidKotlin", "two_androidKotlin", "three_androidKotlin"]
     # 		resolution_strategy = ""
@@ -26,7 +26,7 @@ resource "rudderstack_destination_bqstream" "example" {
     # 		resolution_strategy = "and"
     # 		consents = ["one_ios", "two_ios", "three_ios"]
     # 	}]
-    # 	iosSwift = [{
+    # 	ios_swift = [{
     # 		provider = "custom"
     # 		resolution_strategy = "and"
     # 		consents = ["one_iosSwift", "two_iosSwift", "three_iosSwift"]
@@ -41,7 +41,7 @@ resource "rudderstack_destination_bqstream" "example" {
     # 		resolution_strategy = "and"
     # 		consents = ["one_amp", "two_amp", "three_amp"]
     # 	}]
-    # 	reactnative = [{
+    # 	react_native = [{
     # 		provider = "custom"
     # 		resolution_strategy = "and"
     # 		consents = ["one_reactnative", "two_reactnative", "three_reactnative"]

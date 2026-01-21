@@ -11,10 +11,10 @@ func TestDestinationResourceBQStream(t *testing.T) {
 	cmt.AssertDestination(t, "bqstream", []c.TestConfig{
 		{
 			TerraformCreate: `
-				projectId = "test_project_id"
-				datasetId = "test_dataset_id"
-				tableId = "test_table_id"
-				insertId = "test_insert_id"
+				project_id = "test_project_id"
+				dataset_id = "test_dataset_id"
+				table_id = "test_table_id"
+				insert_id = "test_insert_id"
 				credentials = "test_credentials"
 				connection_mode {
 					web = "cloud"
@@ -31,25 +31,20 @@ func TestDestinationResourceBQStream(t *testing.T) {
 				}
 			}`,
 			TerraformUpdate: `
-				projectId = "updated_project_id"
-				datasetId = "updated_dataset_id"
-				tableId = "updated_table_id"
-				insertId = "updated_insert_id"
+				project_id = "updated_project_id"
+				dataset_id = "updated_dataset_id"
+				table_id = "updated_table_id"
+				insert_id = "updated_insert_id"
 				credentials = "updated_credentials"
 				connection_mode {
-					web = "cloud"
-				}
-				event_filtering {
-					whitelist = [ "one", "two", "three" ]
-				}
-				connection_mode {
 					android = "cloud"
-					androidKotlin = "cloud"
+					android_kotlin = "cloud"
 					ios = "cloud"
-					iosSwift = "cloud"
+					ios_swift = "cloud"
+					web = "cloud"
 					unity = "cloud"
 					amp = "cloud"
-					reactnative = "cloud"
+					react_native = "cloud"
 					flutter = "cloud"
 					cordova = "cloud"
 					shopify = "cloud"
@@ -62,7 +57,7 @@ func TestDestinationResourceBQStream(t *testing.T) {
 						consents = ["one_android", "two_android", "three_android"]
 						resolution_strategy = ""
 					}]
-					androidKotlin = [{
+					android_kotlin = [{
 						provider = "ketch"
 						consents = ["one_androidKotlin", "two_androidKotlin", "three_androidKotlin"]
 						resolution_strategy = ""
@@ -72,10 +67,15 @@ func TestDestinationResourceBQStream(t *testing.T) {
 						resolution_strategy = "and"
 						consents = ["one_ios", "two_ios", "three_ios"]
 					}]
-					iosSwift = [{
+					ios_swift = [{
 						provider = "custom"
 						resolution_strategy = "and"
 						consents = ["one_iosSwift", "two_iosSwift", "three_iosSwift"]
+					}]
+					web = [{
+						provider = "custom"
+						resolution_strategy = "and"
+						consents = ["one_web", "two_web", "three_web"]
 					}]
 					unity = [{
 						provider = "custom"
@@ -126,7 +126,19 @@ func TestDestinationResourceBQStream(t *testing.T) {
 				"insertId": "updated_insert_id",
 				"credentials": "updated_credentials",
 				"connectionMode": {
-					"web": "cloud"
+					"android": "cloud",
+					"androidKotlin": "cloud",
+					"ios": "cloud",
+					"iosSwift": "cloud",
+					"web": "cloud",
+					"unity": "cloud",
+					"amp": "cloud",
+					"reactnative": "cloud",
+					"flutter": "cloud",
+					"cordova": "cloud",
+					"shopify": "cloud",
+					"cloud": "cloud",
+					"warehouse": "cloud"
 				},
 				"consentManagement": {
 					"android": [
@@ -134,15 +146,9 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "ketch",
 							"resolutionStrategy": "",
 							"consents": [
-								{
-									"consent": "one_android"
-								},
-								{
-									"consent": "two_android"
-								},
-								{
-									"consent": "three_android"
-								}
+								{"consent": "one_android"},
+								{"consent": "two_android"},
+								{"consent": "three_android"}
 							]
 						}
 					],
@@ -151,15 +157,20 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "ketch",
 							"resolutionStrategy": "",
 							"consents": [
-								{
-									"consent": "one_androidKotlin"
-								},
-								{
-									"consent": "two_androidKotlin"
-								},
-								{
-									"consent": "three_androidKotlin"
-								}
+								{"consent": "one_androidKotlin"},
+								{"consent": "two_androidKotlin"},
+								{"consent": "three_androidKotlin"}
+							]
+						}
+					],
+					"ios": [
+						{
+							"provider": "custom",
+							"resolutionStrategy": "and",
+							"consents": [
+								{"consent": "one_ios"},
+								{"consent": "two_ios"},
+								{"consent": "three_ios"}
 							]
 						}
 					],
@@ -168,31 +179,20 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "custom",
 							"resolutionStrategy": "and",
 							"consents": [
-								{
-									"consent": "one_iosSwift"
-								},
-								{
-									"consent": "two_iosSwift"
-								},
-								{
-									"consent": "three_iosSwift"
-								}
+								{"consent": "one_iosSwift"},
+								{"consent": "two_iosSwift"},
+								{"consent": "three_iosSwift"}
 							]
 						}
-					"ios": [
+					],
+					"web": [
 						{
 							"provider": "custom",
 							"resolutionStrategy": "and",
 							"consents": [
-								{
-									"consent": "one_ios"
-								},
-								{
-									"consent": "two_ios"
-								},
-								{
-									"consent": "three_ios"
-								}
+								{"consent": "one_web"},
+								{"consent": "two_web"},
+								{"consent": "three_web"}
 							]
 						}
 					],
@@ -201,15 +201,9 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "custom",
 							"resolutionStrategy": "or",
 							"consents": [
-								{
-									"consent": "one_unity"
-								},
-								{
-									"consent": "two_unity"
-								},
-								{
-									"consent": "three_unity"
-								}
+								{"consent": "one_unity"},
+								{"consent": "two_unity"},
+								{"consent": "three_unity"}
 							]
 						}
 					],
@@ -218,15 +212,9 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "custom",
 							"resolutionStrategy": "and",
 							"consents": [
-								{
-									"consent": "one_amp"
-								},
-								{
-									"consent": "two_amp"
-								},
-								{
-									"consent": "three_amp"
-								}
+								{"consent": "one_amp"},
+								{"consent": "two_amp"},
+								{"consent": "three_amp"}
 							]
 						}
 					],
@@ -235,15 +223,9 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "custom",
 							"resolutionStrategy": "and",
 							"consents": [
-								{
-									"consent": "one_reactnative"
-								},
-								{
-									"consent": "two_reactnative"
-								},
-								{
-									"consent": "three_reactnative"
-								}
+								{"consent": "one_reactnative"},
+								{"consent": "two_reactnative"},
+								{"consent": "three_reactnative"}
 							]
 						}
 					],
@@ -252,15 +234,9 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "custom",
 							"resolutionStrategy": "and",
 							"consents": [
-								{
-									"consent": "one_flutter"
-								},
-								{
-									"consent": "two_flutter"
-								},
-								{
-									"consent": "three_flutter"
-								}
+								{"consent": "one_flutter"},
+								{"consent": "two_flutter"},
+								{"consent": "three_flutter"}
 							]
 						}
 					],
@@ -269,15 +245,9 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "custom",
 							"resolutionStrategy": "and",
 							"consents": [
-								{
-									"consent": "one_cordova"
-								},
-								{
-									"consent": "two_cordova"
-								},
-								{
-									"consent": "three_cordova"
-								}
+								{"consent": "one_cordova"},
+								{"consent": "two_cordova"},
+								{"consent": "three_cordova"}
 							]
 						}
 					],
@@ -286,15 +256,9 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "custom",
 							"resolutionStrategy": "and",
 							"consents": [
-								{
-									"consent": "one_cloud"
-								},
-								{
-									"consent": "two_cloud"
-								},
-								{
-									"consent": "three_cloud"
-								}
+								{"consent": "one_cloud"},
+								{"consent": "two_cloud"},
+								{"consent": "three_cloud"}
 							]
 						}
 					],
@@ -303,15 +267,9 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "custom",
 							"resolutionStrategy": "and",
 							"consents": [
-								{
-									"consent": "one_warehouse"
-								},
-								{
-									"consent": "two_warehouse"
-								},
-								{
-									"consent": "three_warehouse"
-								}
+								{"consent": "one_warehouse"},
+								{"consent": "two_warehouse"},
+								{"consent": "three_warehouse"}
 							]
 						}
 					],
@@ -320,15 +278,9 @@ func TestDestinationResourceBQStream(t *testing.T) {
 							"provider": "custom",
 							"resolutionStrategy": "and",
 							"consents": [
-								{
-									"consent": "one_shopify"
-								},
-								{
-									"consent": "two_shopify"
-								},
-								{
-									"consent": "three_shopify"
-								}
+								{"consent": "one_shopify"},
+								{"consent": "two_shopify"},
+								{"consent": "three_shopify"}
 							]
 						}
 					]
