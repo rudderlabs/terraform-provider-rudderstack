@@ -52,7 +52,7 @@ func init() {
 		},
 		"insert_id": {
 			Type:        schema.TypeString,
-			Required:    true,
+			Optional:    true,
 			Description: "Enter your Insert ID.",
 		},
 		"credentials": {
