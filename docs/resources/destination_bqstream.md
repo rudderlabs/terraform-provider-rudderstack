@@ -5,10 +5,10 @@ description: |-
 
 ---
 
-# rudderstack_destination_adjust (Resource)
+# rudderstack_destination_bqstream (Resource)
 
 This resource represents the BigQuery Stream destination. For more information check
-https://www.rudderstack.com/docs/destinations/streaming-destinations/adjust/
+https://www.rudderstack.com/docs/destinations/streaming-destinations/bigquery-stream/
 
 ## Example Usage
 
