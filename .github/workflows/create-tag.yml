@@ -1,8 +1,5 @@
 name: Create Tag
 
-permissions:
-  contents: write  # Required to create tags
-
 on:
   workflow_dispatch:
     inputs:
@@ -24,18 +21,29 @@ on:
 jobs:
   create-tag:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # GITHUB_TOKEN only needs read for checkout
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
         with:
           egress-policy: audit
 
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PRIVATE_KEY }}
+          permission-contents: write # to create tags
+          permission-members: read # to check org team membership
+
       - name: Check organization membership
         run: |
           # Check if the user triggering this workflow is a member of rudderlabs organization
           # This prevents unauthorized users from creating tags in public repos
           echo "🔐 Checking organization membership for user: ${{ github.actor }}"
-        
+
           # Use gh CLI to check if user is a member of rudderlabs organization
           if gh api "orgs/rudderlabs/memberships/${{ github.actor }}" &>/dev/null; then
             echo "✅ Organization membership verified. User '${{ github.actor }}' is a member of rudderlabs."
@@ -45,7 +53,7 @@ jobs:
             exit 1
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
       - name: Validate inputs
         run: |
           # Validate tag name format (should start with 'v' and follow semver pattern)
@@ -77,26 +85,30 @@ jobs:
           fi
           echo "✅ Tag '${{ inputs.tag_name }}' does not exist yet"
 
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Create and push tag
+      - name: Create tag via GitHub API
+        id: create-tag
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          TAG_NAME: ${{ inputs.tag_name }}
+          TAG_MESSAGE: ${{ inputs.tag_message }}
         run: |
           # Get the current commit SHA
           COMMIT_SHA=$(git rev-parse HEAD)
-          echo "📍 Creating tag '${{ inputs.tag_name }}' at commit: $COMMIT_SHA"
-          echo "📝 Branch: ${{ inputs.branch_name }}"
-          echo "💬 Message: ${{ inputs.tag_message }}"
-          
-          # Create annotated tag
-          git tag -a "${{ inputs.tag_name }}" -m "${{ inputs.tag_message }}"
-          
-          # Push the tag
-          git push origin "${{ inputs.tag_name }}"
-          
-          echo "🎉 Successfully created and pushed tag '${{ inputs.tag_name }}'"
+          echo "Creating tag '$TAG_NAME' at commit: $COMMIT_SHA"
+
+          # Create annotated tag via GitHub API
+          gh api "repos/${{ github.repository }}/git/tags" \
+            -f tag="$TAG_NAME" \
+            -f message="$TAG_MESSAGE" \
+            -f object="$COMMIT_SHA" \
+            -f type="commit"
+
+          # Create the tag reference
+          gh api "repos/${{ github.repository }}/git/refs" \
+            -f ref="refs/tags/$TAG_NAME" \
+            -f sha="$COMMIT_SHA"
+
+          echo "Successfully created tag '$TAG_NAME'"
 
       - name: Summary
         run: |
