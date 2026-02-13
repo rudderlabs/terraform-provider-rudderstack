@@ -1,3 +1,6 @@
+GO=go
+GOLANGCI=github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.9.0
+
 HOSTNAME=rudderstack.com
 NAMESPACE=rudderlabs
 NAME=rudderstack
@@ -6,6 +9,10 @@ VERSION=4.1.0
 OS_ARCH=$(shell go env GOOS)_$(shell go env GOARCH)
 
 default: install
+
+.PHONY: lint
+lint: ## Run linters on all go files
+	$(GO) run $(GOLANGCI) run -v
 
 .PHONY: build
 build:
