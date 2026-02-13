@@ -7,7 +7,6 @@ linters:
     gosec:
       excludes:
         - G104  # Errors unhandled (2 findings)
-        - G117  # Invalid use of os.TempDir (1 finding)
   exclusions:
     generated: lax
     presets:
