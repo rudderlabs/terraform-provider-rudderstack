@@ -18,6 +18,9 @@ on:
         type: string
         default: 'Release tag created via GitHub Actions'
 
+permissions:
+  contents: read
+
 jobs:
   create-tag:
     runs-on: ubuntu-latest
