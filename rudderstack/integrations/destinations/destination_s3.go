@@ -15,6 +15,7 @@ func init() {
 		c.Simple("prefix", "prefix", c.SkipZeroValue),
 		c.Simple("accessKeyID", "access_key_id", c.SkipZeroValue),
 		c.Simple("accessKey", "access_key", c.SkipZeroValue),
+		c.Simple("iamRoleARN", "iam_role_arn", c.SkipZeroValue),
 		c.Simple("enableSSE", "enable_sse", c.SkipZeroValue),
 	}
 
@@ -44,7 +45,13 @@ func init() {
 			Optional:         true,
 			Sensitive:        true,
 			Description:      "Enter your AWS secret access key.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+		},
+		"iam_role_arn": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Description:      "Enter your AWS IAM role ARN.",
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"enable_sse": {
 			Type:        schema.TypeBool,
