@@ -22,6 +22,7 @@ func TestDestinationResourceS3(t *testing.T) {
 				prefix        = "prefix"
 				access_key_id = "..."
 				access_key    = "..."
+				iam_role_arn  = "arn:aws:iam::123456789012:role/RudderStack"
 			
 				enable_sse    = true
 				consent_management {
@@ -99,6 +100,7 @@ func TestDestinationResourceS3(t *testing.T) {
 				"prefix": "prefix",
 				"accessKeyID": "...",
 				"accessKey": "...",
+				"iamRoleARN": "arn:aws:iam::123456789012:role/RudderStack",
 				"enableSSE": true,
 				"consentManagement": {
 					"web": [
