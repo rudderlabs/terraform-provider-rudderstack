@@ -7,7 +7,16 @@ resource "rudderstack_destination_snowflake" example{
     database = "..."
     warehouse = "..."
     user = "..."
+    # Password-based auth (default):
     password = "..."
+    # Key pair auth (set use_key_pair_auth = true to use instead of password):
+    # use_key_pair_auth = true
+    # private_key = <<EOF
+    # -----BEGIN RSA PRIVATE KEY-----
+    # MIIEo...your key content...
+    # -----END RSA PRIVATE KEY-----
+    # EOF
+    # private_key_passphrase = "..."  # only needed if the private key is encrypted
     sync {
       frequency = "60"
       # start_at                  = "10:00"

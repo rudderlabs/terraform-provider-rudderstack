@@ -21,7 +21,16 @@ resource "rudderstack_destination_snowflake" example{
     database = "..."
     warehouse = "..."
     user = "..."
+    # Password-based auth (default):
     password = "..."
+    # Key pair auth (set use_key_pair_auth = true to use instead of password):
+    # use_key_pair_auth = true
+    # private_key = <<EOF
+    # -----BEGIN RSA PRIVATE KEY-----
+    # MIIEo...your key content...
+    # -----END RSA PRIVATE KEY-----
+    # EOF
+    # private_key_passphrase = "..."  # only needed if the private key is encrypted
     sync {
       frequency = "60"
       # start_at                  = "10:00"
@@ -156,10 +165,16 @@ Required:
 
 - `account` (String) Account ID of your Snowflake warehouse. This account ID is part of the Snowflake URL. Example : https://www.rudderstack.com/docs/destinations/warehouse-destinations/faq/#while-configuring-the-snowflake-destination-what-should-i-enter-in-the-account-field
 - `database` (String) Name of the database.
-- `password` (String, Sensitive) Password for the user.
 - `sync` (Block List, Min: 1, Max: 1) Specify your sync settings. (see [below for nested schema](#nestedblock--config--sync))
 - `user` (String) Name of the user.
 - `warehouse` (String) Name of the warehouse.
+
+**One of the following authentication methods is required:**
+
+- `password` (String, Sensitive) Password for the user. Required when `use_key_pair_auth` is `false` (default). Conflicts with `private_key`.
+- `use_key_pair_auth` (Boolean) Set to `true` to use key pair authentication instead of password. When enabled, `private_key` is required and `password` must not be set. Defaults to `false`.
+- `private_key` (String, Sensitive) Private key for key pair authentication. Provide the full PEM contents including the header and footer (e.g. `-----BEGIN RSA PRIVATE KEY-----`). Required when `use_key_pair_auth` is `true`. Conflicts with `password`.
+- `private_key_passphrase` (String, Sensitive) Passphrase for the private key. Required only if the private key is encrypted; leave unset otherwise.
 
 Optional:
 
