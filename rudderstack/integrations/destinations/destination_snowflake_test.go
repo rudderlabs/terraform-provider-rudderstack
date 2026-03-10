@@ -371,6 +371,63 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 	})
 }
 
+func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
+	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
+		{
+			TerraformCreate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				use_key_pair_auth = true
+				private_key = "example-private-key"
+				private_key_passphrase = "example-passphrase"
+				use_rudder_storage = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APICreate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": true,
+				"privateKey": "example-private-key",
+				"privateKeyPassphrase": "example-passphrase",
+				"syncFrequency": "30",
+				"useRudderStorage": true,
+				"additionalProperties": true
+			}`,
+			TerraformUpdate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				use_key_pair_auth = true
+				private_key = "example-private-key-updated"
+				use_rudder_storage = false
+				sync {
+					frequency = "60"
+				}
+				namespace = "example-namespace"
+			`,
+			APIUpdate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": true,
+				"privateKey": "example-private-key-updated",
+				"namespace": "example-namespace",
+				"syncFrequency": "60",
+				"useRudderStorage": false,
+				"additionalProperties": true
+			}`,
+		},
+	})
+}
+
 func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
 		{
