@@ -343,7 +343,7 @@ resource "rudderstack_destination_webhook" "test" {
 `
 		dir := t.TempDir()
 		path := filepath.Join(dir, "main.tf")
-		require.NoError(t, os.WriteFile(path, []byte(tf), 0644))
+		require.NoError(t, os.WriteFile(path, []byte(tf), 0600))
 
 		info, err := ParseTFFile(path, "")
 		require.NoError(t, err)
@@ -372,7 +372,7 @@ resource "rudderstack_destination_webhook" "second" {
 `
 		dir := t.TempDir()
 		path := filepath.Join(dir, "main.tf")
-		require.NoError(t, os.WriteFile(path, []byte(tf), 0644))
+		require.NoError(t, os.WriteFile(path, []byte(tf), 0600))
 
 		info, err := ParseTFFile(path, "second")
 		require.NoError(t, err)
@@ -387,7 +387,7 @@ resource "aws_s3_bucket" "example" {
 `
 		dir := t.TempDir()
 		path := filepath.Join(dir, "main.tf")
-		require.NoError(t, os.WriteFile(path, []byte(tf), 0644))
+		require.NoError(t, os.WriteFile(path, []byte(tf), 0600))
 
 		_, err := ParseTFFile(path, "")
 		require.Error(t, err)
@@ -402,7 +402,7 @@ resource "rudderstack_source_http" "test" {
 `
 		dir := t.TempDir()
 		path := filepath.Join(dir, "main.tf")
-		require.NoError(t, os.WriteFile(path, []byte(tf), 0644))
+		require.NoError(t, os.WriteFile(path, []byte(tf), 0600))
 
 		info, err := ParseTFFile(path, "")
 		require.NoError(t, err)
