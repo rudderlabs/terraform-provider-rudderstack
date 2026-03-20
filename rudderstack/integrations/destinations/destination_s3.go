@@ -13,8 +13,13 @@ func init() {
 	properties := []c.ConfigProperty{
 		c.Simple("bucketName", "bucket_name"),
 		c.Simple("prefix", "prefix", c.SkipZeroValue),
-		c.Simple("accessKeyID", "access_key_id", c.SkipZeroValue),
-		c.Simple("accessKey", "access_key", c.SkipZeroValue),
+		c.Simple("accessKeyID", "key_based_authentication.0.access_key_id", c.SkipZeroValue),
+		c.Simple("accessKey", "key_based_authentication.0.access_key", c.SkipZeroValue),
+		c.Discriminator("roleBasedAuth", c.DiscriminatorValues{
+			"role_based_authentication": true,
+			"key_based_authentication":  false,
+		}),
+		c.Simple("iamRoleARN", "role_based_authentication.0.i_am_role_arn", c.SkipZeroValue),
 		c.Simple("enableSSE", "enable_sse", c.SkipZeroValue),
 	}
 
@@ -33,18 +38,46 @@ func init() {
 			Description:      "Enter a prefix which RudderStack associates as the path prefix to all the files stored in your S3 bucket.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
-		"access_key_id": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			Description:      "Enter your AWS access key ID.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+		"role_based_authentication": {
+			Type:         schema.TypeList,
+			MaxItems:     1,
+			Optional:     true,
+			Description:  "Use an AWS IAM Role ARN for authentication instead of access keys.",
+			ExactlyOneOf: []string{"config.0.role_based_authentication", "config.0.key_based_authentication"},
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"i_am_role_arn": {
+						Type:             schema.TypeString,
+						Required:         true,
+						Description:      "Enter the AWS IAM Role ARN to use for authentication.",
+						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+					},
+				},
+			},
 		},
-		"access_key": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			Sensitive:        true,
-			Description:      "Enter your AWS secret access key.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+		"key_based_authentication": {
+			Type:         schema.TypeList,
+			MaxItems:     1,
+			Optional:     true,
+			Description:  "Use AWS access key and secret for authentication.",
+			ExactlyOneOf: []string{"config.0.role_based_authentication", "config.0.key_based_authentication"},
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"access_key_id": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						Description:      "Enter your AWS access key ID.",
+						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+					},
+					"access_key": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						Sensitive:        true,
+						Description:      "Enter your AWS secret access key.",
+						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+					},
+				},
+			},
 		},
 		"enable_sse": {
 			Type:        schema.TypeBool,
