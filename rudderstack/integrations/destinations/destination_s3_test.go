@@ -12,313 +12,57 @@ func TestDestinationResourceS3(t *testing.T) {
 		{
 			TerraformCreate: `
 				bucket_name = "bucket"
+				key_based_authentication {}
 			`,
 			APICreate: `{
-				"bucketName": "bucket"
+				"bucketName": "bucket",
+				"roleBasedAuth": false
 			}`,
 			TerraformUpdate: `
 				bucket_name = "bucket"
+				prefix      = "prefix"
+				enable_sse  = true
 
-				prefix        = "prefix"
-				access_key_id = "..."
-				access_key    = "..."
-			
-				enable_sse    = true
-				consent_management {
-					web = [
-						{
-							provider = "oneTrust"
-							consents = ["one_web", "two_web", "three_web"]
-							resolution_strategy = ""
-						},
-						{
-							provider = "ketch"
-							consents = ["one_web", "two_web", "three_web"]
-							resolution_strategy = ""
-						},
-						{
-							provider = "custom"
-							resolution_strategy = "and"
-							consents = ["one_web", "two_web", "three_web"]
-						}
-					]
-					android = [{
-						provider = "ketch"
-						consents = ["one_android", "two_android", "three_android"]
-						resolution_strategy = ""
-					}]
-					ios = [{
-						provider = "custom"
-						resolution_strategy = "and"
-						consents = ["one_ios", "two_ios", "three_ios"]
-					}]
-					unity = [{
-						provider = "custom"
-						resolution_strategy = "or"
-						consents = ["one_unity", "two_unity", "three_unity"]
-					}]
-					reactnative = [{
-						provider = "custom"
-						resolution_strategy = "and"
-						consents = ["one_reactnative", "two_reactnative", "three_reactnative"]
-					}]
-					flutter = [{
-						provider = "custom"
-						resolution_strategy = "and"
-						consents = ["one_flutter", "two_flutter", "three_flutter"]
-					}]
-					cordova = [{
-						provider = "custom"
-						resolution_strategy = "and"
-						consents = ["one_cordova", "two_cordova", "three_cordova"]
-					}]
-					amp = [{
-						provider = "custom"
-						resolution_strategy = "and"
-						consents = ["one_amp", "two_amp", "three_amp"]
-					}]
-					cloud = [{
-						provider = "custom"
-						resolution_strategy = "and"
-						consents = ["one_cloud", "two_cloud", "three_cloud"]
-					}]
-					warehouse = [{
-						provider = "custom"
-						resolution_strategy = "and"
-						consents = ["one_warehouse", "two_warehouse", "three_warehouse"]
-					}]
-					shopify = [{
-						provider = "custom"
-						resolution_strategy = "and"
-						consents = ["one_shopify", "two_shopify", "three_shopify"]
-					}]
+				key_based_authentication {
+					access_key_id = "my-key-id"
+					access_key    = "my-secret"
 				}
 			`,
 			APIUpdate: `{
 				"bucketName": "bucket",
 				"prefix": "prefix",
-				"accessKeyID": "...",
-				"accessKey": "...",
 				"enableSSE": true,
-				"consentManagement": {
-					"web": [
-						{
-							"provider": "oneTrust",
-							"resolutionStrategy": "",
-							"consents": [
-								{
-									"consent": "one_web"
-								},
-								{
-									"consent": "two_web"
-								},
-								{
-									"consent": "three_web"
-								}
-							]
-						},
-						{
-							"provider": "ketch",
-							"resolutionStrategy": "",
-							"consents": [
-								{
-									"consent": "one_web"
-								},
-								{
-									"consent": "two_web"
-								},
-								{
-									"consent": "three_web"
-								}
-							]
-						},
-						{
-							"provider": "custom",
-							"resolutionStrategy": "and",
-							"consents": [
-								{
-									"consent": "one_web"
-								},
-								{
-									"consent": "two_web"
-								},
-								{
-									"consent": "three_web"
-								}
-							]
-						}
-					],
-					"android": [
-						{
-							"provider": "ketch",
-							"resolutionStrategy": "",
-							"consents": [
-								{
-									"consent": "one_android"
-								},
-								{
-									"consent": "two_android"
-								},
-								{
-									"consent": "three_android"
-								}
-							]
-						}
-					],
-					"ios": [
-						{
-							"provider": "custom",
-							"resolutionStrategy": "and",
-							"consents": [
-								{
-									"consent": "one_ios"
-								},
-								{
-									"consent": "two_ios"
-								},
-								{
-									"consent": "three_ios"
-								}
-							]
-						}
-					],
-					"unity": [
-						{
-							"provider": "custom",
-							"resolutionStrategy": "or",
-							"consents": [
-								{
-									"consent": "one_unity"
-								},
-								{
-									"consent": "two_unity"
-								},
-								{
-									"consent": "three_unity"
-								}
-							]
-						}
-					],
-					"reactnative": [
-						{
-							"provider": "custom",
-							"resolutionStrategy": "and",
-							"consents": [
-								{
-									"consent": "one_reactnative"
-								},
-								{
-									"consent": "two_reactnative"
-								},
-								{
-									"consent": "three_reactnative"
-								}
-							]
-						}
-					],
-					"flutter": [
-						{
-							"provider": "custom",
-							"resolutionStrategy": "and",
-							"consents": [
-								{
-									"consent": "one_flutter"
-								},
-								{
-									"consent": "two_flutter"
-								},
-								{
-									"consent": "three_flutter"
-								}
-							]
-						}
-					],
-					"cordova": [
-						{
-							"provider": "custom",
-							"resolutionStrategy": "and",
-							"consents": [
-								{
-									"consent": "one_cordova"
-								},
-								{
-									"consent": "two_cordova"
-								},
-								{
-									"consent": "three_cordova"
-								}
-							]
-						}
-					],
-					"amp": [
-						{
-							"provider": "custom",
-							"resolutionStrategy": "and",
-							"consents": [
-								{
-									"consent": "one_amp"
-								},
-								{
-									"consent": "two_amp"
-								},
-								{
-									"consent": "three_amp"
-								}
-							]
-						}
-					],
-					"cloud": [
-						{
-							"provider": "custom",
-							"resolutionStrategy": "and",
-							"consents": [
-								{
-									"consent": "one_cloud"
-								},
-								{
-									"consent": "two_cloud"
-								},
-								{
-									"consent": "three_cloud"
-								}
-							]
-						}
-					],
-					"warehouse": [
-						{
-							"provider": "custom",
-							"resolutionStrategy": "and",
-							"consents": [
-								{
-									"consent": "one_warehouse"
-								},
-								{
-									"consent": "two_warehouse"
-								},
-								{
-									"consent": "three_warehouse"
-								}
-							]
-						}
-					],
-					"shopify": [
-						{
-							"provider": "custom",
-							"resolutionStrategy": "and",
-							"consents": [
-								{
-									"consent": "one_shopify"
-								},
-								{
-									"consent": "two_shopify"
-								},
-								{
-									"consent": "three_shopify"
-								}
-							]
-						}
-					]
+				"roleBasedAuth": false,
+				"accessKeyID": "my-key-id",
+				"accessKey": "my-secret"
+			}`,
+		},
+		{
+			TerraformCreate: `
+				bucket_name = "bucket"
+				role_based_authentication {
+					i_am_role_arn = "arn:aws:iam::123456789012:role/MyRole"
 				}
+			`,
+			APICreate: `{
+				"bucketName": "bucket",
+				"roleBasedAuth": true,
+				"iamRoleARN": "arn:aws:iam::123456789012:role/MyRole"
+			}`,
+			TerraformUpdate: `
+				bucket_name = "bucket"
+				prefix      = "prefix"
+				enable_sse  = true
+				role_based_authentication {
+					i_am_role_arn = "arn:aws:iam::123456789012:role/MyRole"
+				}
+			`,
+			APIUpdate: `{
+				"bucketName": "bucket",
+				"prefix": "prefix",
+				"enableSSE": true,
+				"roleBasedAuth": true,
+				"iamRoleARN": "arn:aws:iam::123456789012:role/MyRole"
 			}`,
 		},
 	})
