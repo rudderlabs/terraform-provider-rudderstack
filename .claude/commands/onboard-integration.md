@@ -545,7 +545,9 @@ If yes:
    resource "rudderstack_{type}_{name}" "test" {
      name = "e2e-test-{name}"
      config {
-       // minimal required fields
+       // ALL config fields (required AND optional) with realistic test values.
+       // This ensures the E2E test validates every field mapping, not just required ones.
+       // Use the same field values from TerraformUpdate in the unit test.
      }
    }
    ```
