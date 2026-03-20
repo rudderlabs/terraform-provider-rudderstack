@@ -567,7 +567,7 @@ If yes:
    ```bash
    RESOURCE_ID=$(terraform show -json | jq -r '.values.root_module.resources[0].values.id')
    cd <terraform-provider-rudderstack repo path>
-   go run ./cmd/verify/ -file /tmp/tf-test-{name}/main.tf -id "$RESOURCE_ID"
+   go run ./cmd/integration-verify/ -file /tmp/tf-test-{name}/main.tf -id "$RESOURCE_ID"
    ```
    This performs a subset comparison: every config key from the .tf file must exist and match in the API response. If the verify script reports FAIL, investigate the differences before proceeding.
 9. **Ask before cleaning up:** Ask the user: "Would you like to verify the resource from the RudderStack dashboard first, or can I go ahead and delete it?" Wait for confirmation before proceeding.
