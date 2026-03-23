@@ -116,7 +116,7 @@ For example:
 3. **Extracts metadata** — Reads `db-config.json`, `schema.json`, and `ui-config.json` to determine field names, types, validations, defaults, and descriptions.
 4. **Generates files** — Creates or updates the `.go` implementation, tests, example `.tf`, and docs template following the repo's established patterns.
 5. **Runs tests** — Executes unit tests, generates docs (`make docs`), runs the full test suite, and lints the code.
-6. **E2E testing (optional)** — Can build and test against a real RudderStack instance using `terraform plan/apply` and a verify script.
+6. **E2E testing** — Automatically builds and tests against a real RudderStack instance using `terraform plan/apply` with all config fields, then runs a verify script to compare against the live API. Loads the access token from `.env`.
 
 ## Requirements
 

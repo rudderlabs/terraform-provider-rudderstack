@@ -505,13 +505,16 @@ Fix any lint issues in the generated code.
 
 ---
 
-## Step 7: E2E Testing (Optional)
+## Step 7: E2E Testing
 
-Ask the user: "Would you like to run E2E tests against a real RudderStack instance? You'll need a `RUDDERSTACK_ACCESS_TOKEN`."
+Automatically proceed with E2E testing. Do NOT ask the user whether to run E2E tests — just run them.
 
-If yes:
-
-1. Ask for the token value.
+1. **Load the access token from `.env`:**
+   ```bash
+   cat .env 2>/dev/null | grep RUDDERSTACK_ACCESS_TOKEN || echo "NOT_FOUND"
+   ```
+   - If `.env` contains `RUDDERSTACK_ACCESS_TOKEN`, use that value automatically. Tell the user: "Using access token from `.env` file."
+   - If `.env` is missing or doesn't contain the token, ask the user: "No `RUDDERSTACK_ACCESS_TOKEN` found in `.env`. Please provide your access token."
 2. **Check for `dev_overrides` in `~/.terraformrc`:**
    ```bash
    cat ~/.terraformrc 2>/dev/null || echo "No .terraformrc found"
@@ -552,13 +555,13 @@ If yes:
    }
    ```
 6. Run:
+   Use the token loaded from `.env` (or provided by the user) as an environment variable prefix for all terraform and verify commands:
    ```bash
-   export RUDDERSTACK_ACCESS_TOKEN="{token}"
    # Skip `terraform init` if dev_overrides are active — it will fail.
    # Only run `terraform init` if there are NO dev_overrides.
-   terraform init  # skip if dev_overrides
-   terraform plan
-   terraform apply -auto-approve
+   RUDDERSTACK_ACCESS_TOKEN="{token}" terraform init  # skip if dev_overrides
+   RUDDERSTACK_ACCESS_TOKEN="{token}" terraform plan
+   RUDDERSTACK_ACCESS_TOKEN="{token}" terraform apply -auto-approve
    ```
 7. Verify the resource was created:
    ```bash
@@ -572,7 +575,7 @@ If yes:
    go run ./cmd/integration-verify/ -file /tmp/tf-test-{name}/main.tf -id "$RESOURCE_ID"
    ```
    This performs a subset comparison: every config key from the .tf file must exist and match in the API response. If the verify script reports FAIL, investigate the differences before proceeding.
-9. **Ask before cleaning up:** Ask the user: "Would you like to verify the resource from the RudderStack dashboard first, or can I go ahead and delete it?" Wait for confirmation before proceeding.
+9. **Ask before cleaning up:** Ask the user: "Would you like to verify the resource from the RudderStack dashboard first, or can I go ahead and delete it?" Wait for confirmation before proceeding. Do NOT proceed with destroy until the user explicitly confirms.
 10. Clean up (only after user confirms):
    ```bash
    terraform destroy -auto-approve
