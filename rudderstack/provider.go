@@ -39,6 +39,12 @@ func NewWithConfigureClientFunc(f ConfigureClientFunc) *schema.Provider {
 					"will look for that value in the `RUDDERSTACK_ACCESS_TOKEN` environmental value, " +
 					"and fail with an error if that is missing.",
 			},
+			"workspace_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("RUDDERSTACK_WORKSPACE_ID", ""),
+				Description: "The RudderStack workspace ID, required for RETL resources.",
+			},
 		},
 		ResourcesMap: resourcesMap(),
 	}
@@ -52,7 +58,11 @@ func New() *schema.Provider {
 
 func resourcesMap() map[string]*schema.Resource {
 	resources := map[string]*schema.Resource{
-		"rudderstack_connection": resourceConnection(),
+		"rudderstack_connection":        resourceConnection(),
+		"rudderstack_warehouse_account": resourceWarehouseAccount(),
+		"rudderstack_retl_source":       resourceRETLSource(),
+		"rudderstack_retl_destination":  resourceRETLDestination(),
+		"rudderstack_retl_connection":   resourceRETLConnection(),
 	}
 
 	// append sources and destinations from integration registries
@@ -72,11 +82,19 @@ func resourcesMap() map[string]*schema.Resource {
 func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag.Diagnostics) {
 	apiUrl := d.Get("api_url").(string)
 	accessToken := d.Get("access_token").(string)
-	client, err := NewAPIClient(accessToken,
+
+	opts := []client.Option{
 		client.WithBaseURL(apiUrl),
-		client.WithUserAgent("terraform-provider-rudderstack/4.2.0"))
+		client.WithUserAgent("terraform-provider-rudderstack/4.2.0"),
+	}
+
+	if workspaceID, ok := d.GetOk("workspace_id"); ok && workspaceID.(string) != "" {
+		opts = append(opts, client.WithWorkspaceID(workspaceID.(string)))
+	}
+
+	c, err := NewAPIClient(accessToken, opts...)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
-	return client, diag.Diagnostics{}
+	return c, diag.Diagnostics{}
 }

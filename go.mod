@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
-	github.com/rudderlabs/rudder-api-go v0.0.0-20220414103425-da0abcae77eb
+	github.com/rudderlabs/rudder-api-go v0.0.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
@@ -93,4 +93,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// replace github.com/rudderlabs/rudder-api-go v0.0.1 => ../rudder-api-go
+replace github.com/rudderlabs/rudder-api-go v0.0.0 => ../rudder-api-go
