@@ -92,7 +92,26 @@ goreleaser release --rm-dist
 
 # Onboarding New Integrations with Claude Code
 
-This repo includes a Claude Code skill (`/onboard-integration`) that automates onboarding **new** source/destination integrations.
+This repo includes a Claude Code skill (`/onboard-integration`) that automates onboarding source/destination integrations to the Terraform provider.
+
+## What can this skill do?
+
+| Scenario | Supported? |
+|---|---|
+| Onboard a **brand new** integration | Yes |
+| **Add new fields** to an existing integration (from latest config JSON) | Yes |
+| Refactor, fix types, update descriptions on existing integrations | No — make those changes manually |
+
+## Prerequisites
+
+Before running the skill, make sure you have:
+
+1. **[Claude Code CLI](https://claude.com/claude-code)** installed
+2. **Integration config files** — The skill needs 3 JSON files (`db-config.json`, `schema.json`, `ui-config.json`) from the [`rudder-integrations-config`](https://github.com/rudderlabs/rudder-integrations-config) repo. You can provide them in one of three ways:
+   - **Auto-detect** — Clone `rudder-integrations-config` as a sibling directory (i.e., `../rudder-integrations-config`). The skill finds it automatically.
+   - **GitHub fetch** — If you have the GitHub MCP connector configured, the skill can fetch the files directly from GitHub.
+   - **Manual path** — Provide the absolute path to your local clone when prompted.
+3. **For E2E testing** — A `RUDDERSTACK_ACCESS_TOKEN` in a `.env` file at the repo root (the skill reads it automatically). Also ensure `~/.terraformrc` has `dev_overrides` configured for the local provider binary (see [Setting up the development environment](#example) above).
 
 ## Usage
 
@@ -100,25 +119,33 @@ This repo includes a Claude Code skill (`/onboard-integration`) that automates o
 /onboard-integration <name> <source|destination>
 ```
 
-For example:
+**Examples:**
 ```
 /onboard-integration slack destination
 /onboard-integration shopify source
 ```
 
-## What it does
+If you omit the name or type, the skill will prompt you.
 
-1. **Gathers inputs** — Parses the integration name and type from your arguments (or asks if missing). Auto-detects a sibling `rudder-integrations-config` repo for config files.
-2. **Checks for existing integrations** — If a matching integration already exists, the skill stops and informs you. This skill only supports onboarding fresh integrations.
-3. **Extracts metadata** — Reads `db-config.json`, `schema.json`, and `ui-config.json` to determine field names, types, validations, defaults, and descriptions. Handles consent management (via `GetCommonConfigMeta`) and connectionMode (per source type) separately.
-4. **Generates files** — Creates the `.go` implementation, tests, example `.tf`, and docs template following the repo's established patterns.
-5. **Runs tests** — Executes unit tests, generates docs (`make docs`), runs the full test suite, and lints the code.
-6. **E2E testing** — Automatically builds and tests against a real RudderStack instance using `terraform plan/apply` with all config fields, then runs a verify script to compare against the live API. Loads the access token from `.env`.
+## How it works
 
-## Requirements
+### New integration
+1. **Gathers inputs** — Parses integration name, type, and locates config JSON files.
+2. **Checks for duplicates** — If an integration with the same name already exists, it offers to add new fields instead (see below).
+3. **Extracts metadata** — Reads `db-config.json`, `schema.json`, and `ui-config.json` to determine field names, types, validations, defaults, descriptions, consent management config, and source-type-specific fields (e.g., `connectionMode`, `useNativeSDK`).
+4. **Studies a similar integration** — Reads an existing integration with similar field patterns as a reference to ensure consistency.
+5. **Generates files** — Creates the `.go` implementation, unit tests, example `.tf`, and docs template following the repo's established patterns.
+6. **Validates** — Runs unit tests, generates docs (`make docs`), runs the full test suite (`go test ./...`), and lints (`make lint`).
+7. **E2E testing** — Builds the provider, creates a resource via `terraform apply` with all config fields, and runs the verify script (`cmd/integration-verify/`) to compare against the live RudderStack API.
 
-- A local clone of [`rudder-integrations-config`](https://github.com/rudderlabs/rudder-integrations-config) as a sibling directory (required).
-- [Claude Code CLI](https://claude.com/claude-code) installed.
+### Adding new fields to an existing integration
+When you run the skill for an integration that already exists, it:
+1. Compares the config JSON files against the current `.go` implementation.
+2. Shows you a table of **new fields** that exist in the config but are missing from the code.
+3. Lets you select which fields to add (all or specific ones).
+4. Updates the `.go`, test, example, and docs files, then runs the full validation and E2E pipeline.
+
+> **Note:** This skill does not support modifying existing fields, fixing types, refactoring, or any other changes to already-implemented integrations. For those, make changes manually.
 
 # Related
 

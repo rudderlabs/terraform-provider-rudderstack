@@ -20,17 +20,30 @@ Parse `$ARGUMENTS` for the integration name and type (source/destination). If ei
 
 1. **Integration name** — the snake_case name (e.g., `webhook`, `slack`, `google_analytics`).
 2. **Type** — `source` or `destination`.
-3. **Path to `rudder-integrations-config` repo** — Before asking the user, auto-detect by checking for a sibling folder:
+3. **Config files from `rudder-integrations-config`** — The 3 config JSON files for the integration are required. Try to locate them in this order:
+
+   **Option A: Local sibling repo** — Auto-detect by checking for a sibling folder:
    ```bash
    ls -d ../rudder-integrations-config 2>/dev/null
    ```
    If found, use that path and tell the user: "Found `rudder-integrations-config` at `{resolved_path}`, using it."
-   If NOT found, ask: "What is the absolute path to your local `rudder-integrations-config` repo?" The user **must** have this repo cloned locally — it is required to proceed.
 
-Once you have the path, check for these 3 JSON config files:
-- `{path}/src/configurations/{destinations|sources}/{name}/db-config.json`
-- `{path}/src/configurations/{destinations|sources}/{name}/schema.json`
-- `{path}/src/configurations/{destinations|sources}/{name}/ui-config.json`
+   **Option B: Fetch from GitHub** — If the local repo is not found, ask the user:
+   "I couldn't find `rudder-integrations-config` locally. Would you like me to:
+   1. Fetch the config files directly from GitHub (requires the GitHub MCP connector)
+   2. Provide the local path to your `rudder-integrations-config` clone"
+
+   If fetching from GitHub, read the files from `https://github.com/rudderlabs/rudder-integrations-config` at:
+   - `src/configurations/{destinations|sources}/{name}/db-config.json`
+   - `src/configurations/{destinations|sources}/{name}/schema.json`
+   - `src/configurations/{destinations|sources}/{name}/ui-config.json`
+
+   **Option C: User provides path** — If the user provides a custom path, use that.
+
+Once you have the config files (from any option), verify all 3 exist:
+- `db-config.json`
+- `schema.json`
+- `ui-config.json`
 
 Read ALL THREE files. If any are missing, tell the user which are missing and stop — all three files are required.
 
@@ -45,9 +58,34 @@ ls rudderstack/integrations/destinations/destination_*{name}*.go 2>/dev/null
 grep -i '{name}' rudderstack/integrations/sources/sources.go 2>/dev/null
 ```
 
-If a match is found, **stop and tell the user**: "An integration with this name already exists: `{matched_file_or_name}`. This skill only supports onboarding fresh integrations. To update an existing integration, please make changes manually or use a different workflow."
+If a match is found, **stop and ask the user** what they'd like to do:
 
-Do NOT proceed with onboarding if an existing integration is found.
+- "I found an existing integration: `{matched_file_or_name}`. What would you like to do?
+  1. **Add new fields** from the latest config JSON that are missing in the current implementation
+  2. **Something else** (refactor, fix types, update descriptions, etc.)"
+
+If the user chooses **add new fields**:
+
+1. Read the current implementation files (`.go`, `_test.go`, example `.tf`, and docs template).
+2. Read the config JSON files (`db-config.json`, `schema.json`, `ui-config.json`) from `rudder-integrations-config`.
+3. Compare the two to identify fields that exist in the config JSON but are **missing from the current `.go` implementation**.
+4. Present the diff to the user in a table:
+
+   "I found the following new fields comparing `rudder-integrations-config` with the current implementation:
+
+   | # | Field (API key) | Type | Status |
+   |---|---|---|---|
+   | 1 | `newApiField` | string | optional |
+   | 2 | `anotherField` | boolean | required |
+
+   Would you like to add **all** of these fields, or select specific ones? (Enter `all` or comma-separated numbers like `1,2`)"
+
+5. Wait for the user to respond. Only add the fields the user selects.
+6. Proceed with the implementation, adding only the selected fields to the `.go`, `_test.go`, example `.tf`, and docs template files. Then continue from Step 3 (Run Unit Tests) onwards.
+
+If the user chooses **something else**, **stop the skill** and tell them: "This skill only supports onboarding new integrations or adding new fields to existing ones. For other changes (refactoring, fixing types, updating descriptions, etc.), please make those changes manually."
+
+Do NOT proceed if the user asks for anything other than adding new fields.
 
 ---
 
@@ -91,20 +129,34 @@ From the 3 JSON files, extract:
 - `oneTrustCookieCategories`
 - `ketchConsentPurposes`
 
-### connectionMode — Source Type Specific Fields (NOT handled by `GetCommonConfigMeta`)
+### Source Type Specific Fields (NOT handled by `GetCommonConfigMeta`)
 
-`connectionMode` is **not** handled by `GetCommonConfigMeta()`. You must add connectionMode properties and schema manually for each supported source type. Use the dot-notation pattern:
+Many config fields are **per-source-type** — in the config JSON they appear with dot-notation like `fieldName.web`, `fieldName.android`, etc. These are **not** handled by `GetCommonConfigMeta()` and must be added manually. Common examples:
 
-**Properties** (one per supported source type):
+- `connectionMode.{sourceType}` — connection mode (cloud/device/hybrid)
+- `useNativeSDK.{sourceType}` — whether to use native SDK (boolean)
+- `eventUploadPeriodMillis.{sourceType}` — event batching settings
+- Other destination-specific fields (e.g., `trackSessionEvents.android`, `capturePageView.web`, `enableLocationListening.android`)
+
+Check `schema.json` for properties that have per-source-type sub-fields. For each one, use the dot-notation pattern:
+
+**Properties** (one entry per source type per field):
 ```go
+// connectionMode — one per supportedSourceType:
 c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
-c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
+c.Simple("connectionMode.androidKotlin", "connection_mode.0.android_kotlin", c.SkipZeroValue),
 // ... one entry per supportedSourceType from db-config.json
-// Note: camelCase in API key (e.g., "androidKotlin"), snake_case in terraform key (e.g., "android_kotlin")
+
+// useNativeSDK — only for source types that support device mode:
+c.Simple("useNativeSDK.web", "use_native_sdk.0.web", c.SkipZeroValue),
+c.Simple("useNativeSDK.android", "use_native_sdk.0.android", c.SkipZeroValue),
+
+// Other per-source-type fields follow the same pattern:
+c.Simple("eventUploadPeriodMillis.web", "event_upload_period_millis.0.web", c.SkipZeroValue),
 ```
 
-**Schema** (a single `connection_mode` block with all source types as nested fields):
+**Schema** (each per-source-type field becomes a `TypeList` + `MaxItems: 1` block):
 ```go
 "connection_mode": {
     Type:        schema.TypeList,
@@ -116,15 +168,27 @@ c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
             "web": {
                 Type:             schema.TypeString,
                 Optional:         true,
-                ValidateDiagFunc: c.StringMatchesRegexp("^(cloud|device|hybrid)$"), // from schema.json connectionMode enum
+                ValidateDiagFunc: c.StringMatchesRegexp("^(cloud|device|hybrid)$"),
             },
             // ... one entry per supportedSourceType
         },
     },
 },
+"use_native_sdk": {
+    Type:        schema.TypeList,
+    MaxItems:    1,
+    Optional:    true,
+    Description: "Enable native SDK for specific source types.",
+    Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+            "web": {Type: schema.TypeBool, Optional: true},
+            // ... one entry per relevant sourceType
+        },
+    },
+},
 ```
 
-Look at the `connectionMode` section in `schema.json` to determine the allowed values (e.g., `cloud`, `device`, `hybrid`) for each source type's `ValidateDiagFunc`.
+Look at `schema.json` to determine which source types each field applies to and the allowed values/types. Study an existing destination with similar patterns (e.g., `destination_amplitude.go` for many per-source-type fields, `destination_bqstream.go` for connectionMode only).
 
 ### Naming Conventions:
 - API keys are camelCase (e.g., `webhookUrl`)
