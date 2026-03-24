@@ -1,3 +1,9 @@
+---
+name: onboard-integration
+description: Onboard a new source or destination integration to the terraform-provider-rudderstack by reading config JSON files from rudder-integrations-config and generating the .go implementation, tests, example .tf, and docs template.
+argument-hint: "[name] [source|destination]"
+---
+
 # Onboard Integration
 
 Add a new source or destination integration to the terraform-provider-rudderstack.
@@ -19,16 +25,16 @@ Parse `$ARGUMENTS` for the integration name and type (source/destination). If ei
    ls -d ../rudder-integrations-config 2>/dev/null
    ```
    If found, use that path and tell the user: "Found `rudder-integrations-config` at `{resolved_path}`, using it."
-   If NOT found, ask: "What is the absolute path to your local `rudder-integrations-config` repo?" If the user says they don't have it, skip to the **Fallback** section below.
+   If NOT found, ask: "What is the absolute path to your local `rudder-integrations-config` repo?" The user **must** have this repo cloned locally — it is required to proceed.
 
 Once you have the path, check for these 3 JSON config files:
 - `{path}/src/configurations/{destinations|sources}/{name}/db-config.json`
 - `{path}/src/configurations/{destinations|sources}/{name}/schema.json`
 - `{path}/src/configurations/{destinations|sources}/{name}/ui-config.json`
 
-Read ALL THREE files. If any are missing, tell the user which are missing and fall back to interactive Q&A.
+Read ALL THREE files. If any are missing, tell the user which are missing and stop — all three files are required.
 
-### Check for Existing Integration with Similar Name
+### Check for Existing Integration
 
 Before proceeding, check if an integration with the same or a similar name already exists in the provider:
 
@@ -39,35 +45,9 @@ ls rudderstack/integrations/destinations/destination_*{name}*.go 2>/dev/null
 grep -i '{name}' rudderstack/integrations/sources/sources.go 2>/dev/null
 ```
 
-If a match is found, **stop and ask the user** what they'd like to do:
+If a match is found, **stop and tell the user**: "An integration with this name already exists: `{matched_file_or_name}`. This skill only supports onboarding fresh integrations. To update an existing integration, please make changes manually or use a different workflow."
 
-- "I found an existing integration that looks similar: `{matched_file_or_name}`. What would you like to do?
-  1. **Add new fields** to the existing integration (update the `.go`, test, example, and docs files)
-  2. **Refactor/fix** the existing integration (e.g., fix types, update descriptions, correct test data)
-  3. **Create a brand new integration** — the name is similar but it's a different integration
-  4. **Something else** — describe what you need"
-
-Do NOT proceed until the user confirms.
-
-If the user chooses to **add new fields** or **update** the existing integration:
-
-1. Read the current implementation files (`.go`, `_test.go`, example `.tf`, and docs template).
-2. Read the config JSON files (`db-config.json`, `schema.json`, `ui-config.json`) from `rudder-integrations-config`.
-3. Compare the two to identify fields that exist in the config JSON but are **missing from the current `.go` implementation**. Also note fields where the type, required/optional status, default value, or validation has changed.
-4. Present the diff to the user in a clear table or list, e.g.:
-
-   "I found the following new/changed fields comparing `rudder-integrations-config` with the current implementation:
-
-   | # | Field (API key) | Type | Status | Change |
-   |---|---|---|---|---|
-   | 1 | `newApiField` | string | optional | **New** — not in current implementation |
-   | 2 | `existingField` | boolean → string | required | **Changed** — type changed |
-   | 3 | `anotherField` | string | optional | **New** — not in current implementation |
-
-   Would you like to add **all** of these fields, or select specific ones? (Enter `all` or comma-separated numbers like `1,3`)"
-
-5. Wait for the user to respond. Only add/modify the fields the user selects.
-6. Proceed with the implementation, modifying only the selected fields in the `.go`, `_test.go`, example `.tf`, and docs template files.
+Do NOT proceed with onboarding if an existing integration is found.
 
 ---
 
@@ -77,7 +57,7 @@ From the 3 JSON files, extract:
 
 ### From `db-config.json`:
 - `name` field → this becomes the `APIType` (e.g., `"WEBHOOK"`, `"SLACK"`)
-- `supportedSourceTypes` → the list for `GetCommonConfigMeta()` (destinations only)
+- `supportedSourceTypes` → the list for `GetCommonConfigMeta()` and for generating `connectionMode` properties (destinations only)
 - `config.secretKeys` → fields that need `Sensitive: true` in the Terraform schema
 - `destConfig.defaultConfig` → field names that belong to this integration
 
@@ -105,10 +85,46 @@ From the 3 JSON files, extract:
 | `"array"` + single nested key | `schema.TypeList` + `Elem: &schema.Schema{Type: schema.TypeString}` + `c.ArrayWithStrings(...)` |
 
 ### Fields to SKIP (handled by `GetCommonConfigMeta()`):
+
+`GetCommonConfigMeta()` **only** handles consent management fields. Skip these:
 - `consentManagement`
 - `oneTrustCookieCategories`
 - `ketchConsentPurposes`
-- `connectionMode`
+
+### connectionMode — Source Type Specific Fields (NOT handled by `GetCommonConfigMeta`)
+
+`connectionMode` is **not** handled by `GetCommonConfigMeta()`. You must add connectionMode properties and schema manually for each supported source type. Use the dot-notation pattern:
+
+**Properties** (one per supported source type):
+```go
+c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
+c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
+c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
+// ... one entry per supportedSourceType from db-config.json
+// Note: camelCase in API key (e.g., "androidKotlin"), snake_case in terraform key (e.g., "android_kotlin")
+```
+
+**Schema** (a single `connection_mode` block with all source types as nested fields):
+```go
+"connection_mode": {
+    Type:        schema.TypeList,
+    MaxItems:    1,
+    Optional:    true,
+    Description: "Configure the connection mode for {name}.",
+    Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+            "web": {
+                Type:             schema.TypeString,
+                Optional:         true,
+                ValidateDiagFunc: c.StringMatchesRegexp("^(cloud|device|hybrid)$"), // from schema.json connectionMode enum
+            },
+            // ... one entry per supportedSourceType
+        },
+    },
+},
+```
+
+Look at the `connectionMode` section in `schema.json` to determine the allowed values (e.g., `cloud`, `device`, `hybrid`) for each source type's `ValidateDiagFunc`.
 
 ### Naming Conventions:
 - API keys are camelCase (e.g., `webhookUrl`)
@@ -162,6 +178,10 @@ func init() {
 		}),
 		// For arrays of strings with a wrapping key:
 		c.ArrayWithStrings("apiArrayKey", "wrappingKey", "terraform_list_key"),
+		// connectionMode — one per supportedSourceType:
+		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
+		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
+		// ... etc for each supportedSourceType
 	}
 	properties = append(properties, commonProperties...)
 
@@ -193,6 +213,23 @@ func init() {
 			Description: "...",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
+			},
+		},
+		// connectionMode block:
+		"connection_mode": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Configure the connection mode.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud|device|hybrid)$"),
+					},
+					// ... one per supportedSourceType
+				},
 			},
 		},
 	}
@@ -582,25 +619,6 @@ Automatically proceed with E2E testing. Do NOT ask the user whether to run E2E t
    cd /
    rm -rf /tmp/tf-test-{name}
    ```
-
----
-
-## Fallback: Interactive Q&A (when config files are unavailable)
-
-If the `rudder-integrations-config` repo is not available or config files are missing, gather information interactively:
-
-1. **API Type**: "What is the API type name? (e.g., `WEBHOOK`, `SLACK`, `GOOGLE_ANALYTICS`)"
-2. **Supported Source Types**: "Which source types are supported? Common set: `web, android, ios, unity, reactnative, flutter, cordova, amp, cloud, warehouse, shopify`"
-3. **Fields**: For each field, ask:
-   - Field name (camelCase API name)
-   - Type (string, boolean, integer, array of strings, array of objects)
-   - Required or optional?
-   - Sensitive? (contains secrets/keys)
-   - Description
-   - Validation pattern (regex) or allowed values (enum)
-   - Default value (if any)
-   - For arrays: what are the nested field names and types?
-4. Generate the files following the same patterns above.
 
 ---
 

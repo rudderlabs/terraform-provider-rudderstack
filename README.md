@@ -92,7 +92,7 @@ goreleaser release --rm-dist
 
 # Onboarding New Integrations with Claude Code
 
-This repo includes a Claude Code skill (`/onboard-integration`) that automates adding or updating source/destination integrations.
+This repo includes a Claude Code skill (`/onboard-integration`) that automates onboarding **new** source/destination integrations.
 
 ## Usage
 
@@ -109,18 +109,15 @@ For example:
 ## What it does
 
 1. **Gathers inputs** — Parses the integration name and type from your arguments (or asks if missing). Auto-detects a sibling `rudder-integrations-config` repo for config files.
-2. **Checks for existing integrations** — If a matching integration already exists, it presents you with options:
-   - **Add new fields** — Compares the config JSON files against the current `.go` implementation and shows a table of new/changed fields. You can choose to add all or select specific ones.
-   - **Refactor/fix** — Update types, descriptions, or test data in the existing integration.
-   - **Create new** — If the name is similar but it's a different integration.
-3. **Extracts metadata** — Reads `db-config.json`, `schema.json`, and `ui-config.json` to determine field names, types, validations, defaults, and descriptions.
-4. **Generates files** — Creates or updates the `.go` implementation, tests, example `.tf`, and docs template following the repo's established patterns.
+2. **Checks for existing integrations** — If a matching integration already exists, the skill stops and informs you. This skill only supports onboarding fresh integrations.
+3. **Extracts metadata** — Reads `db-config.json`, `schema.json`, and `ui-config.json` to determine field names, types, validations, defaults, and descriptions. Handles consent management (via `GetCommonConfigMeta`) and connectionMode (per source type) separately.
+4. **Generates files** — Creates the `.go` implementation, tests, example `.tf`, and docs template following the repo's established patterns.
 5. **Runs tests** — Executes unit tests, generates docs (`make docs`), runs the full test suite, and lints the code.
 6. **E2E testing** — Automatically builds and tests against a real RudderStack instance using `terraform plan/apply` with all config fields, then runs a verify script to compare against the live API. Loads the access token from `.env`.
 
 ## Requirements
 
-- A local clone of [`rudder-integrations-config`](https://github.com/rudderlabs/rudder-integrations-config) as a sibling directory (recommended), or be prepared to provide field details interactively.
+- A local clone of [`rudder-integrations-config`](https://github.com/rudderlabs/rudder-integrations-config) as a sibling directory (required).
 - [Claude Code CLI](https://claude.com/claude-code) installed.
 
 # Related
