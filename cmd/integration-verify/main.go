@@ -3,12 +3,12 @@
 //
 // After the skill generates the .go, test, example, and docs files for a new
 // integration, the optional E2E step deploys the resource to a real RudderStack
-// instance. This tool then compares the Terraform .tf config against the live
-// API response to confirm the onboarded integration works end-to-end.
+// instance. This tool then reads the terraform state and compares it against the
+// live API response to confirm the onboarded integration works end-to-end.
 //
 // Usage:
 //
-//	go run ./cmd/integration-verify/ -file <path.tf> -id <resource-id> [-resource <name>]
+//	go run ./cmd/integration-verify/ -dir <terraform-dir> [-resource <name>]
 //
 // Environment variables:
 //
@@ -20,71 +20,70 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
+	"log"
 	"os"
+	"os/exec"
 
 	"github.com/rudderlabs/rudder-api-go/client"
 
 	// Blank-import integrations so every registered source/destination is
-	// available for schema lookup when parsing .tf files.
+	// available for schema lookup when parsing terraform state.
 	_ "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations"
 )
 
 func main() {
-	code := run(os.Args[1:], os.Stdout, os.Stderr)
-	if code != 0 {
-		os.Exit(code)
+	log.SetFlags(0)
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: integration-verify -dir <terraform-dir> [-resource <name>]\n\n")
+		fmt.Fprintf(os.Stderr, "Validates that an integration onboarded via /onboard-integration matches the live API.\n\n")
+		flag.PrintDefaults()
+	}
+
+	dir := flag.String("dir", "", "terraform working directory containing applied state (required)")
+	targetResource := flag.String("resource", "", "resource name to verify (optional, defaults to all rudderstack resources)")
+	flag.Parse()
+
+	if *dir == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	stateJSON, err := exec.Command("terraform", fmt.Sprintf("-chdir=%s", *dir), "show", "-json").Output()
+	if err != nil {
+		log.Fatalf("Error: running terraform show: %s", err)
+	}
+
+	if err := verifyFromState(stateJSON, *targetResource); err != nil {
+		log.Fatalf("Error: %s", err)
 	}
 }
 
-// run executes the integration-verify CLI logic and returns an exit code.
-// It writes output to stdout and errors to stderr.
-func run(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("integration-verify", flag.ContinueOnError)
-	fs.SetOutput(stderr)
-
-	filePath := fs.String("file", "", "path to the .tf file containing the onboarded integration resource (required)")
-	resourceID := fs.String("id", "", "resource ID from terraform apply (required)")
-	targetResource := fs.String("resource", "", "resource name to verify (optional, defaults to first rudderstack resource)")
-
-	if err := fs.Parse(args); err != nil {
-		return 1
-	}
-
-	if *filePath == "" || *resourceID == "" {
-		fmt.Fprintf(stderr, "Usage: integration-verify -file <path.tf> -id <resource-id> [-resource <name>]\n\n")
-		fmt.Fprintf(stderr, "Validates that an integration onboarded via /onboard-integration matches the live API.\n\n")
-		fs.PrintDefaults()
-		return 1
-	}
-
-	// Parse the .tf file to extract the onboarded integration's resource info.
-	info, err := ParseTFFile(*filePath, *targetResource)
+// verifyFromState performs verification using pre-fetched terraform state JSON.
+// This is separated from main() to enable testing without requiring the terraform CLI.
+func verifyFromState(stateJSON []byte, targetResource string) error {
+	resources, err := ParseTerraformState(stateJSON, targetResource)
 	if err != nil {
-		fmt.Fprintf(stderr, "Error: %s\n", err.Error())
-		return 1
+		return err
 	}
 
 	cl, err := setupClient()
 	if err != nil {
-		fmt.Fprintf(stderr, "Error: could not create API client: %s\n", err.Error())
-		return 1
+		return fmt.Errorf("could not create API client: %w", err)
 	}
 
-	// Verify the onboarded integration: convert .tf state → expected API JSON,
-	// fetch the actual config from the API, and compare.
-	result, err := Verify(context.Background(), cl, info, *resourceID)
-	if err != nil {
-		fmt.Fprintf(stderr, "Error: %s\n", err.Error())
-		return 1
+	for _, info := range resources {
+		result, err := Verify(context.Background(), cl, info)
+		if err != nil {
+			return err
+		}
+
+		if !result.Match {
+			return fmt.Errorf("verification failed for %s (ID: %s)\n\nDiff (-expected +actual):\n%s", info.ResourceType, info.ResourceID, result.Diff)
+		}
 	}
 
-	fmt.Fprint(stdout, FormatResult(info, *resourceID, result))
-
-	if !result.Match {
-		return 1
-	}
-	return 0
+	return nil
 }
 
 func setupClient() (*client.Client, error) {

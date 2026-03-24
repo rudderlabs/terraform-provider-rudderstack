@@ -1,22 +1,19 @@
 package main
 
 import (
-	"os"
-	"path/filepath"
+	"encoding/json"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/zclconf/go-cty/cty"
 )
 
 func TestExtractResourceType(t *testing.T) {
 	tests := []struct {
-		input           string
-		expectedKind    string
-		expectedType    string
-		expectErr       bool
+		input        string
+		expectedKind string
+		expectedType string
+		expectErr    bool
 	}{
 		{"rudderstack_destination_webhook", "destination", "webhook", false},
 		{"rudderstack_destination_google_analytics", "destination", "google_analytics", false},
@@ -40,373 +37,188 @@ func TestExtractResourceType(t *testing.T) {
 	}
 }
 
-func TestCtyToGo(t *testing.T) {
-	tests := []struct {
-		name     string
-		val      cty.Value
-		sch      *schema.Schema
-		expected interface{}
-	}{
-		{
-			name:     "string",
-			val:      cty.StringVal("hello"),
-			sch:      &schema.Schema{Type: schema.TypeString},
-			expected: "hello",
-		},
-		{
-			name:     "bool true",
-			val:      cty.True,
-			sch:      &schema.Schema{Type: schema.TypeBool},
-			expected: true,
-		},
-		{
-			name:     "bool false",
-			val:      cty.False,
-			sch:      &schema.Schema{Type: schema.TypeBool},
-			expected: false,
-		},
-		{
-			name:     "integer",
-			val:      cty.NumberIntVal(42),
-			sch:      &schema.Schema{Type: schema.TypeInt},
-			expected: int64(42),
-		},
-		{
-			name:     "float",
-			val:      cty.NumberFloatVal(3.14),
-			sch:      &schema.Schema{Type: schema.TypeFloat},
-			expected: 3.14,
-		},
-		{
-			name:     "null value",
-			val:      cty.NullVal(cty.String),
-			sch:      &schema.Schema{Type: schema.TypeString},
-			expected: nil,
-		},
+
+
+// buildStateJSON constructs a terraform show -json output for testing.
+func buildStateJSON(t *testing.T, resources ...stateResource) []byte {
+	t.Helper()
+
+	type tfResource struct {
+		Type   string                 `json:"type"`
+		Name   string                 `json:"name"`
+		Values map[string]interface{} `json:"values"`
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			result, err := ctyToGo(tc.val, tc.sch)
-			require.NoError(t, err)
-			assert.Equal(t, tc.expected, result)
+	var tfResources []tfResource
+	for _, r := range resources {
+		values := map[string]interface{}{
+			"id":   r.ID,
+			"name": r.TFName,
+		}
+		if r.Config != nil {
+			values["config"] = []interface{}{r.Config}
+		}
+		tfResources = append(tfResources, tfResource{
+			Type:   r.Type,
+			Name:   r.Name,
+			Values: values,
 		})
 	}
-}
 
-func TestCtyListToGo_Primitives(t *testing.T) {
-	val := cty.ListVal([]cty.Value{
-		cty.StringVal("a"),
-		cty.StringVal("b"),
-		cty.StringVal("c"),
-	})
-	sch := &schema.Schema{
-		Type: schema.TypeList,
-		Elem: &schema.Schema{Type: schema.TypeString},
-	}
-
-	result, err := ctyListToGo(val, sch)
-	require.NoError(t, err)
-
-	items, ok := result.([]interface{})
-	require.True(t, ok)
-	assert.Equal(t, []interface{}{"a", "b", "c"}, items)
-}
-
-func TestCtyListToGo_Objects(t *testing.T) {
-	val := cty.ListVal([]cty.Value{
-		cty.ObjectVal(map[string]cty.Value{
-			"key":   cty.StringVal("k1"),
-			"value": cty.StringVal("v1"),
-		}),
-		cty.ObjectVal(map[string]cty.Value{
-			"key":   cty.StringVal("k2"),
-			"value": cty.StringVal("v2"),
-		}),
-	})
-	sch := &schema.Schema{
-		Type: schema.TypeList,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"key":   {Type: schema.TypeString},
-				"value": {Type: schema.TypeString},
+	state := map[string]interface{}{
+		"values": map[string]interface{}{
+			"root_module": map[string]interface{}{
+				"resources": tfResources,
 			},
 		},
 	}
 
-	result, err := ctyListToGo(val, sch)
+	data, err := json.Marshal(state)
 	require.NoError(t, err)
-
-	items, ok := result.([]interface{})
-	require.True(t, ok)
-	require.Len(t, items, 2)
-
-	first := items[0].(map[string]interface{})
-	assert.Equal(t, "k1", first["key"])
-	assert.Equal(t, "v1", first["value"])
-
-	second := items[1].(map[string]interface{})
-	assert.Equal(t, "k2", second["key"])
-	assert.Equal(t, "v2", second["value"])
+	return data
 }
 
-func TestCtyListToGo_EmptyNonIterable(t *testing.T) {
-	val := cty.NullVal(cty.List(cty.String))
-	sch := &schema.Schema{
-		Type: schema.TypeList,
-		Elem: &schema.Schema{Type: schema.TypeString},
-	}
-
-	result, err := ctyListToGo(val, sch)
-	require.NoError(t, err)
-	assert.Equal(t, []interface{}{}, result)
+type stateResource struct {
+	Type   string                 // terraform resource type, e.g. "rudderstack_destination_webhook"
+	Name   string                 // terraform resource label, e.g. "test"
+	ID     string                 // resource ID
+	TFName string                 // the name attribute in values
+	Config map[string]interface{} // config block content (nil for no config)
 }
 
-func TestSubsetDiff(t *testing.T) {
-	t.Run("matching subset", func(t *testing.T) {
-		expected := map[string]interface{}{
-			"url":    "https://example.com",
-			"method": "POST",
-		}
-		actual := map[string]interface{}{
-			"url":    "https://example.com",
-			"method": "POST",
-			"extra":  "ignored",
-		}
-
-		diffs := SubsetDiff(expected, actual, "")
-		assert.Empty(t, diffs)
-	})
-
-	t.Run("missing key", func(t *testing.T) {
-		expected := map[string]interface{}{
-			"url":    "https://example.com",
-			"apiKey": "secret",
-		}
-		actual := map[string]interface{}{
-			"url": "https://example.com",
-		}
-
-		diffs := SubsetDiff(expected, actual, "")
-		require.Len(t, diffs, 1)
-		assert.Contains(t, diffs[0], "apiKey")
-		assert.Contains(t, diffs[0], "missing")
-	})
-
-	t.Run("value mismatch", func(t *testing.T) {
-		expected := map[string]interface{}{
-			"url": "https://example.com",
-		}
-		actual := map[string]interface{}{
-			"url": "https://other.com",
-		}
-
-		diffs := SubsetDiff(expected, actual, "")
-		require.Len(t, diffs, 1)
-		assert.Contains(t, diffs[0], "url")
-	})
-
-	t.Run("nested map match", func(t *testing.T) {
-		expected := map[string]interface{}{
-			"config": map[string]interface{}{
-				"key": "value",
-			},
-		}
-		actual := map[string]interface{}{
-			"config": map[string]interface{}{
-				"key":   "value",
-				"extra": "ok",
-			},
-		}
-
-		diffs := SubsetDiff(expected, actual, "")
-		assert.Empty(t, diffs)
-	})
-
-	t.Run("nested map mismatch", func(t *testing.T) {
-		expected := map[string]interface{}{
-			"config": map[string]interface{}{
-				"key": "value",
-			},
-		}
-		actual := map[string]interface{}{
-			"config": map[string]interface{}{
-				"key": "wrong",
-			},
-		}
-
-		diffs := SubsetDiff(expected, actual, "")
-		require.Len(t, diffs, 1)
-		assert.Contains(t, diffs[0], "config.key")
-	})
-
-	t.Run("with prefix", func(t *testing.T) {
-		expected := map[string]interface{}{"a": "1"}
-		actual := map[string]interface{}{"a": "2"}
-
-		diffs := SubsetDiff(expected, actual, "root")
-		require.Len(t, diffs, 1)
-		assert.Contains(t, diffs[0], "root.a")
-	})
-}
-
-func TestArrayDiff(t *testing.T) {
-	t.Run("matching arrays", func(t *testing.T) {
-		a := []interface{}{"x", "y"}
-		b := []interface{}{"x", "y"}
-
-		diffs := arrayDiff(a, b, "arr")
-		assert.Empty(t, diffs)
-	})
-
-	t.Run("length mismatch", func(t *testing.T) {
-		a := []interface{}{"x"}
-		b := []interface{}{"x", "y"}
-
-		diffs := arrayDiff(a, b, "arr")
-		require.Len(t, diffs, 1)
-		assert.Contains(t, diffs[0], "array length")
-	})
-
-	t.Run("element mismatch", func(t *testing.T) {
-		a := []interface{}{"x", "y"}
-		b := []interface{}{"x", "z"}
-
-		diffs := arrayDiff(a, b, "arr")
-		require.Len(t, diffs, 1)
-		assert.Contains(t, diffs[0], "arr[1]")
-	})
-
-	t.Run("nested object arrays", func(t *testing.T) {
-		a := []interface{}{
-			map[string]interface{}{"k": "v1"},
-		}
-		b := []interface{}{
-			map[string]interface{}{"k": "v2"},
-		}
-
-		diffs := arrayDiff(a, b, "items")
-		require.Len(t, diffs, 1)
-		assert.Contains(t, diffs[0], "items[0].k")
-	})
-}
-
-func TestFormatResult(t *testing.T) {
-	info := &IntegrationResource{
-		ResourceType: "rudderstack_destination_webhook",
-	}
-
-	t.Run("pass", func(t *testing.T) {
-		result := &VerifyResult{
-			Match:    true,
-			Expected: `{"url":"https://example.com"}`,
-			Actual:   `{"url":"https://example.com"}`,
-		}
-
-		output := FormatResult(info, "abc12345678", result)
-		assert.Contains(t, output, "PASS")
-		assert.Contains(t, output, "abc12345...")
-	})
-
-	t.Run("fail with diffs", func(t *testing.T) {
-		result := &VerifyResult{
-			Match:       false,
-			Expected:    `{"url":"https://a.com"}`,
-			Actual:      `{"url":"https://b.com"}`,
-			Differences: []string{"  url: expected https://a.com, got https://b.com"},
-		}
-
-		output := FormatResult(info, "short", result)
-		assert.Contains(t, output, "FAIL")
-		assert.Contains(t, output, "Differences")
-		assert.Contains(t, output, "url")
-	})
-
-	t.Run("short id not truncated", func(t *testing.T) {
-		result := &VerifyResult{Match: true, Expected: "{}", Actual: "{}"}
-		output := FormatResult(info, "abcd", result)
-		assert.Contains(t, output, "abcd")
-		assert.NotContains(t, output, "...")
-	})
-}
-
-func TestParseTFFile(t *testing.T) {
+func TestParseTerraformState(t *testing.T) {
 	t.Run("parses destination resource", func(t *testing.T) {
-		tf := `
-resource "rudderstack_destination_webhook" "test" {
-  name = "my-webhook"
+		stateJSON := buildStateJSON(t, stateResource{
+			Type:   "rudderstack_destination_webhook",
+			Name:   "test",
+			ID:     "dest-123",
+			TFName: "my-webhook",
+			Config: map[string]interface{}{
+				"webhook_url":    "https://example.com",
+				"webhook_method": "POST",
+			},
+		})
 
-  config {
-    webhook_url = "https://example.com"
-  }
-}
-`
-		dir := t.TempDir()
-		path := filepath.Join(dir, "main.tf")
-		require.NoError(t, os.WriteFile(path, []byte(tf), 0600))
-
-		info, err := ParseTFFile(path, "")
+		resources, err := ParseTerraformState(stateJSON, "")
 		require.NoError(t, err)
-		assert.Equal(t, "destination", info.Kind)
-		assert.Equal(t, "webhook", info.IntegrationType)
-		assert.Equal(t, "rudderstack_destination_webhook", info.ResourceType)
-		assert.Equal(t, "test", info.Name)
-		assert.Contains(t, info.ConfigState, "webhook_url")
+		require.Len(t, resources, 1)
+
+		r := resources[0]
+		assert.Equal(t, "destination", r.Kind)
+		assert.Equal(t, "webhook", r.IntegrationType)
+		assert.Equal(t, "rudderstack_destination_webhook", r.ResourceType)
+		assert.Equal(t, "test", r.Name)
+		assert.Equal(t, "dest-123", r.ResourceID)
+		assert.Contains(t, r.ConfigState, "webhook_url")
+	})
+
+	t.Run("parses source resource", func(t *testing.T) {
+		stateJSON := buildStateJSON(t, stateResource{
+			Type:   "rudderstack_source_http",
+			Name:   "test",
+			ID:     "src-456",
+			TFName: "my-source",
+		})
+
+		resources, err := ParseTerraformState(stateJSON, "")
+		require.NoError(t, err)
+		require.Len(t, resources, 1)
+
+		r := resources[0]
+		assert.Equal(t, "source", r.Kind)
+		assert.Equal(t, "http", r.IntegrationType)
+		assert.Equal(t, "src-456", r.ResourceID)
+		assert.Equal(t, "{}", r.ConfigState)
 	})
 
 	t.Run("filters by target resource name", func(t *testing.T) {
-		tf := `
-resource "rudderstack_destination_webhook" "first" {
-  name = "first"
-  config {
-    webhook_url = "https://first.com"
-  }
-}
+		stateJSON := buildStateJSON(t,
+			stateResource{
+				Type:   "rudderstack_destination_webhook",
+				Name:   "first",
+				ID:     "dest-1",
+				TFName: "first",
+				Config: map[string]interface{}{"webhook_url": "https://first.com"},
+			},
+			stateResource{
+				Type:   "rudderstack_destination_webhook",
+				Name:   "second",
+				ID:     "dest-2",
+				TFName: "second",
+				Config: map[string]interface{}{"webhook_url": "https://second.com"},
+			},
+		)
 
-resource "rudderstack_destination_webhook" "second" {
-  name = "second"
-  config {
-    webhook_url = "https://second.com"
-  }
-}
-`
-		dir := t.TempDir()
-		path := filepath.Join(dir, "main.tf")
-		require.NoError(t, os.WriteFile(path, []byte(tf), 0600))
-
-		info, err := ParseTFFile(path, "second")
+		resources, err := ParseTerraformState(stateJSON, "second")
 		require.NoError(t, err)
-		assert.Equal(t, "second", info.Name)
+		require.Len(t, resources, 1)
+		assert.Equal(t, "second", resources[0].Name)
+		assert.Equal(t, "dest-2", resources[0].ResourceID)
+	})
+
+	t.Run("skips non-rudderstack resources", func(t *testing.T) {
+		stateJSON := buildStateJSON(t,
+			stateResource{
+				Type:   "aws_s3_bucket",
+				Name:   "example",
+				ID:     "bucket-1",
+				TFName: "my-bucket",
+			},
+			stateResource{
+				Type:   "rudderstack_destination_webhook",
+				Name:   "test",
+				ID:     "dest-1",
+				TFName: "my-webhook",
+				Config: map[string]interface{}{"webhook_url": "https://example.com"},
+			},
+		)
+
+		resources, err := ParseTerraformState(stateJSON, "")
+		require.NoError(t, err)
+		require.Len(t, resources, 1)
+		assert.Equal(t, "rudderstack_destination_webhook", resources[0].ResourceType)
 	})
 
 	t.Run("returns error for no matching resource", func(t *testing.T) {
-		tf := `
-resource "aws_s3_bucket" "example" {
-  bucket = "my-bucket"
-}
-`
-		dir := t.TempDir()
-		path := filepath.Join(dir, "main.tf")
-		require.NoError(t, os.WriteFile(path, []byte(tf), 0600))
+		stateJSON := buildStateJSON(t, stateResource{
+			Type:   "aws_s3_bucket",
+			Name:   "example",
+			ID:     "bucket-1",
+			TFName: "my-bucket",
+		})
 
-		_, err := ParseTFFile(path, "")
+		_, err := ParseTerraformState(stateJSON, "")
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "no matching")
 	})
 
-	t.Run("resource without config block returns empty JSON", func(t *testing.T) {
-		tf := `
-resource "rudderstack_source_http" "test" {
-  name = "my-source"
-}
-`
-		dir := t.TempDir()
-		path := filepath.Join(dir, "main.tf")
-		require.NoError(t, os.WriteFile(path, []byte(tf), 0600))
+	t.Run("returns error for empty state", func(t *testing.T) {
+		_, err := ParseTerraformState([]byte(`{}`), "")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "no resources found")
+	})
 
-		info, err := ParseTFFile(path, "")
+	t.Run("returns multiple resources", func(t *testing.T) {
+		stateJSON := buildStateJSON(t,
+			stateResource{
+				Type:   "rudderstack_destination_webhook",
+				Name:   "first",
+				ID:     "dest-1",
+				TFName: "first",
+				Config: map[string]interface{}{"webhook_url": "https://first.com"},
+			},
+			stateResource{
+				Type:   "rudderstack_source_http",
+				Name:   "second",
+				ID:     "src-1",
+				TFName: "second",
+			},
+		)
+
+		resources, err := ParseTerraformState(stateJSON, "")
 		require.NoError(t, err)
-		assert.Equal(t, "source", info.Kind)
-		assert.Equal(t, "{}", info.ConfigState)
+		require.Len(t, resources, 2)
+		assert.Equal(t, "destination", resources[0].Kind)
+		assert.Equal(t, "source", resources[1].Kind)
 	})
 }

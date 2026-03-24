@@ -1,13 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,107 +47,66 @@ func newMockAPI(t *testing.T, kind, id string, config json.RawMessage) *httptest
 	}))
 }
 
-func writeTF(t *testing.T, content string) string {
-	t.Helper()
-	dir := t.TempDir()
-	path := filepath.Join(dir, "main.tf")
-	require.NoError(t, os.WriteFile(path, []byte(content), 0600))
-	return path
-}
-
-func TestE2E_MissingArgs(t *testing.T) {
-	var stdout, stderr bytes.Buffer
-
-	code := run([]string{}, &stdout, &stderr)
-	assert.Equal(t, 1, code)
-	assert.Contains(t, stderr.String(), "Usage:")
-}
-
-func TestE2E_MissingFile(t *testing.T) {
-	var stdout, stderr bytes.Buffer
-
-	code := run([]string{"-file", "", "-id", "some-id"}, &stdout, &stderr)
-	assert.Equal(t, 1, code)
-	assert.Contains(t, stderr.String(), "Usage:")
-}
-
-func TestE2E_MissingID(t *testing.T) {
-	var stdout, stderr bytes.Buffer
-
-	code := run([]string{"-file", "/tmp/some.tf", "-id", ""}, &stdout, &stderr)
-	assert.Equal(t, 1, code)
-	assert.Contains(t, stderr.String(), "Usage:")
-}
-
-func TestE2E_InvalidTFFile(t *testing.T) {
-	path := writeTF(t, `this is not valid HCL {{{`)
-
-	var stdout, stderr bytes.Buffer
-
+func TestE2E_InvalidState(t *testing.T) {
 	t.Setenv("RUDDERSTACK_ACCESS_TOKEN", "test-token")
-	code := run([]string{"-file", path, "-id", "some-id"}, &stdout, &stderr)
-	assert.Equal(t, 1, code)
-	assert.Contains(t, stderr.String(), "Error:")
+	err := verifyFromState([]byte(`{}`), "")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no resources found")
 }
 
 func TestE2E_NoRudderstackResource(t *testing.T) {
-	path := writeTF(t, `
-resource "aws_s3_bucket" "example" {
-  bucket = "my-bucket"
-}
-`)
-	var stdout, stderr bytes.Buffer
+	stateJSON := buildStateJSON(t, stateResource{
+		Type:   "aws_s3_bucket",
+		Name:   "example",
+		ID:     "bucket-1",
+		TFName: "my-bucket",
+	})
 
 	t.Setenv("RUDDERSTACK_ACCESS_TOKEN", "test-token")
-	code := run([]string{"-file", path, "-id", "some-id"}, &stdout, &stderr)
-	assert.Equal(t, 1, code)
-	assert.Contains(t, stderr.String(), "no matching")
+	err := verifyFromState(stateJSON, "")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no matching")
 }
 
 func TestE2E_MissingAccessToken(t *testing.T) {
-	path := writeTF(t, `
-resource "rudderstack_destination_webhook" "test" {
-  name = "my-webhook"
-  config {
-    webhook_url = "https://example.com"
-  }
-}
-`)
-	var stdout, stderr bytes.Buffer
+	stateJSON := buildStateJSON(t, stateResource{
+		Type:   "rudderstack_destination_webhook",
+		Name:   "test",
+		ID:     "dest-1",
+		TFName: "my-webhook",
+		Config: map[string]interface{}{"webhook_url": "https://example.com"},
+	})
 
 	t.Setenv("RUDDERSTACK_ACCESS_TOKEN", "")
-	code := run([]string{"-file", path, "-id", "dest-1"}, &stdout, &stderr)
-	assert.Equal(t, 1, code)
-	assert.Contains(t, stderr.String(), "RUDDERSTACK_ACCESS_TOKEN")
+	err := verifyFromState(stateJSON, "")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "RUDDERSTACK_ACCESS_TOKEN")
 }
 
 func TestE2E_DestinationMatch(t *testing.T) {
 	apiConfig := `{
 		"webhookUrl": "https://example.com/hook",
-		"webhookMethod": "POST",
-		"extraField": "not-in-tf-but-thats-ok"
+		"webhookMethod": "POST"
 	}`
 	server := newMockAPI(t, "destination", "dest-ok", json.RawMessage(apiConfig))
 	defer server.Close()
 
-	path := writeTF(t, `
-resource "rudderstack_destination_webhook" "test" {
-  name = "my-webhook"
-  config {
-    webhook_url    = "https://example.com/hook"
-    webhook_method = "POST"
-  }
-}
-`)
-	var stdout, stderr bytes.Buffer
+	stateJSON := buildStateJSON(t, stateResource{
+		Type:   "rudderstack_destination_webhook",
+		Name:   "test",
+		ID:     "dest-ok",
+		TFName: "my-webhook",
+		Config: map[string]interface{}{
+			"webhook_url":    "https://example.com/hook",
+			"webhook_method": "POST",
+		},
+	})
 
 	t.Setenv("RUDDERSTACK_ACCESS_TOKEN", "test-token")
 	t.Setenv("RUDDERSTACK_API_URL", server.URL)
 
-	code := run([]string{"-file", path, "-id", "dest-ok"}, &stdout, &stderr)
-	assert.Equal(t, 0, code)
-	assert.Contains(t, stdout.String(), "PASS")
-	assert.Empty(t, stderr.String())
+	err := verifyFromState(stateJSON, "")
+	require.NoError(t, err)
 }
 
 func TestE2E_DestinationMismatch(t *testing.T) {
@@ -161,43 +117,41 @@ func TestE2E_DestinationMismatch(t *testing.T) {
 	server := newMockAPI(t, "destination", "dest-bad", json.RawMessage(apiConfig))
 	defer server.Close()
 
-	path := writeTF(t, `
-resource "rudderstack_destination_webhook" "test" {
-  name = "my-webhook"
-  config {
-    webhook_url    = "https://example.com/hook"
-    webhook_method = "POST"
-  }
-}
-`)
-	var stdout, stderr bytes.Buffer
+	stateJSON := buildStateJSON(t, stateResource{
+		Type:   "rudderstack_destination_webhook",
+		Name:   "test",
+		ID:     "dest-bad",
+		TFName: "my-webhook",
+		Config: map[string]interface{}{
+			"webhook_url":    "https://example.com/hook",
+			"webhook_method": "POST",
+		},
+	})
 
 	t.Setenv("RUDDERSTACK_ACCESS_TOKEN", "test-token")
 	t.Setenv("RUDDERSTACK_API_URL", server.URL)
 
-	code := run([]string{"-file", path, "-id", "dest-bad"}, &stdout, &stderr)
-	assert.Equal(t, 1, code)
-	assert.Contains(t, stdout.String(), "FAIL")
-	assert.Contains(t, stdout.String(), "Differences")
+	err := verifyFromState(stateJSON, "")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "verification failed")
 }
 
 func TestE2E_SourceMatch(t *testing.T) {
 	server := newMockAPI(t, "source", "src-ok", json.RawMessage(`{}`))
 	defer server.Close()
 
-	path := writeTF(t, `
-resource "rudderstack_source_http" "test" {
-  name = "my-source"
-}
-`)
-	var stdout, stderr bytes.Buffer
+	stateJSON := buildStateJSON(t, stateResource{
+		Type:   "rudderstack_source_http",
+		Name:   "test",
+		ID:     "src-ok",
+		TFName: "my-source",
+	})
 
 	t.Setenv("RUDDERSTACK_ACCESS_TOKEN", "test-token")
 	t.Setenv("RUDDERSTACK_API_URL", server.URL)
 
-	code := run([]string{"-file", path, "-id", "src-ok"}, &stdout, &stderr)
-	assert.Equal(t, 0, code)
-	assert.Contains(t, stdout.String(), "PASS")
+	err := verifyFromState(stateJSON, "")
+	require.NoError(t, err)
 }
 
 func TestE2E_APIError(t *testing.T) {
@@ -207,22 +161,19 @@ func TestE2E_APIError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	path := writeTF(t, `
-resource "rudderstack_destination_webhook" "test" {
-  name = "my-webhook"
-  config {
-    webhook_url = "https://example.com"
-  }
-}
-`)
-	var stdout, stderr bytes.Buffer
+	stateJSON := buildStateJSON(t, stateResource{
+		Type:   "rudderstack_destination_webhook",
+		Name:   "test",
+		ID:     "dest-err",
+		TFName: "my-webhook",
+		Config: map[string]interface{}{"webhook_url": "https://example.com"},
+	})
 
 	t.Setenv("RUDDERSTACK_ACCESS_TOKEN", "test-token")
 	t.Setenv("RUDDERSTACK_API_URL", server.URL)
 
-	code := run([]string{"-file", path, "-id", "dest-err"}, &stdout, &stderr)
-	assert.Equal(t, 1, code)
-	assert.Contains(t, stderr.String(), "Error:")
+	err := verifyFromState(stateJSON, "")
+	require.Error(t, err)
 }
 
 func TestE2E_TargetResourceFlag(t *testing.T) {
@@ -233,29 +184,32 @@ func TestE2E_TargetResourceFlag(t *testing.T) {
 	server := newMockAPI(t, "destination", "dest-2nd", json.RawMessage(apiConfig))
 	defer server.Close()
 
-	path := writeTF(t, `
-resource "rudderstack_destination_webhook" "first" {
-  name = "first"
-  config {
-    webhook_url    = "https://first.com"
-    webhook_method = "POST"
-  }
-}
-
-resource "rudderstack_destination_webhook" "second" {
-  name = "second"
-  config {
-    webhook_url    = "https://second.com"
-    webhook_method = "GET"
-  }
-}
-`)
-	var stdout, stderr bytes.Buffer
+	stateJSON := buildStateJSON(t,
+		stateResource{
+			Type:   "rudderstack_destination_webhook",
+			Name:   "first",
+			ID:     "dest-1st",
+			TFName: "first",
+			Config: map[string]interface{}{
+				"webhook_url":    "https://first.com",
+				"webhook_method": "POST",
+			},
+		},
+		stateResource{
+			Type:   "rudderstack_destination_webhook",
+			Name:   "second",
+			ID:     "dest-2nd",
+			TFName: "second",
+			Config: map[string]interface{}{
+				"webhook_url":    "https://second.com",
+				"webhook_method": "GET",
+			},
+		},
+	)
 
 	t.Setenv("RUDDERSTACK_ACCESS_TOKEN", "test-token")
 	t.Setenv("RUDDERSTACK_API_URL", server.URL)
 
-	code := run([]string{"-file", path, "-id", "dest-2nd", "-resource", "second"}, &stdout, &stderr)
-	assert.Equal(t, 0, code)
-	assert.Contains(t, stdout.String(), "PASS")
+	err := verifyFromState(stateJSON, "second")
+	require.NoError(t, err)
 }
