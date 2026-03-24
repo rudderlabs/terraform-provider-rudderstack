@@ -49,7 +49,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	stateJSON, err := exec.Command("terraform", fmt.Sprintf("-chdir=%s", *dir), "show", "-json").Output()
+	cmd := exec.Command("terraform", "show", "-json")
+	cmd.Dir = *dir
+	stateJSON, err := cmd.Output()
 	if err != nil {
 		log.Fatalf("Error: running terraform show: %s", err)
 	}
