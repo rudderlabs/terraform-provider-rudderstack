@@ -29,7 +29,10 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				"password": "example-password",
 				"syncFrequency": "30",
 				"useRudderStorage": true,
-				"additionalProperties": true
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -39,6 +42,10 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				password = "example-password"
 				role = "example-role"
 				use_rudder_storage = false
+				prefer_append = false
+				skip_users_table = false
+				skip_tracks_table = true
+				cleanup_object_storage_files = true
 				sync {
 					frequency = "60"
 					start_at                  = "10:00"
@@ -140,8 +147,14 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				},
 				"useRudderStorage": false,
 				"additionalProperties": true,
+				"preferAppend": false,
+				"skipUsersTable": false,
+				"skipTracksTable": true,
+				"cleanupObjectStorageFiles": true,
 				"jsonPaths": "./example-paths",
 				"cloudProvider": "AWS",
+				"roleBasedAuth": false,
+				"storageIntegration": "",
 				"prefix": "example-prefix",
         		"bucketName": "example-bucket-name",
         		"accessKeyID": "example-access-key-id",
@@ -393,11 +406,14 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"warehouse": "example-warehouse",
 				"user": "example-user",
 				"useKeyPairAuth": true,
-				"privateKey": "example-private-key",
+				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key\n-----END PRIVATE KEY-----",
 				"privateKeyPassphrase": "example-passphrase",
 				"syncFrequency": "30",
 				"useRudderStorage": true,
-				"additionalProperties": true
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -418,11 +434,14 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"warehouse": "example-warehouse",
 				"user": "example-user",
 				"useKeyPairAuth": true,
-				"privateKey": "example-private-key-updated",
+				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key-updated\n-----END PRIVATE KEY-----",
 				"namespace": "example-namespace",
 				"syncFrequency": "60",
 				"useRudderStorage": false,
-				"additionalProperties": true
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false
 			}`,
 		},
 	})
@@ -450,7 +469,10 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"password": "example-password",
 				"syncFrequency": "30",
 				"useRudderStorage": true,
-				"additionalProperties": true
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -471,7 +493,7 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				gcp {
 					bucket_name = "example-bucket-name"
 					credentials = "example-credentials"
-					storage_integration = "example-storage"      
+					storage_integration = "example-storage"
 				}
 			`,
 			APIUpdate: `{
@@ -489,6 +511,9 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				},
 				"useRudderStorage": false,
 				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false,
 				"jsonPaths": "./example-paths",
 				"cloudProvider": "GCP",
 				"prefix": "example-prefix",
@@ -522,7 +547,10 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"password": "example-password",
 				"syncFrequency": "30",
 				"useRudderStorage": true,
-				"additionalProperties": true
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -544,7 +572,7 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 					container_name = "example-container-name"
 					account_name = "example-account-name"
 					account_key = "example-account-key"
-					storage_integration = "example-storage" 
+					storage_integration = "example-storage"
 				}
 			`,
 			APIUpdate: `{
@@ -562,6 +590,9 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				},
 				"useRudderStorage": false,
 				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false,
 				"jsonPaths": "./example-paths",
 				"cloudProvider": "AZURE",
 				"containerName": "example-container-name",
@@ -569,6 +600,200 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"accountKey": "example-account-key",
 				"storageIntegration": "example-storage",
 				"prefix": "example-prefix"
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
+	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
+		{
+			TerraformCreate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				use_key_pair_auth = true
+				private_key = "-----BEGIN PRIVATE KEY-----\nexample-pem-key\n-----END PRIVATE KEY-----"
+				use_rudder_storage = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APICreate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": true,
+				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-pem-key\n-----END PRIVATE KEY-----",
+				"syncFrequency": "30",
+				"useRudderStorage": true,
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false
+			}`,
+			TerraformUpdate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				use_key_pair_auth = true
+				private_key = "-----BEGIN ENCRYPTED PRIVATE KEY-----\nexample-encrypted-key\n-----END ENCRYPTED PRIVATE KEY-----"
+				use_rudder_storage = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APIUpdate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": true,
+				"privateKey": "-----BEGIN ENCRYPTED PRIVATE KEY-----\nexample-encrypted-key\n-----END ENCRYPTED PRIVATE KEY-----",
+				"syncFrequency": "30",
+				"useRudderStorage": true,
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
+	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
+		{
+			TerraformCreate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APICreate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"password": "example-password",
+				"syncFrequency": "30",
+				"useRudderStorage": true,
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false
+			}`,
+			TerraformUpdate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = false
+				sync {
+					frequency = "60"
+				}
+				s3 {
+					bucket_name = "example-bucket-name"
+					role_based_authentication {
+						i_am_role_arn = "arn:aws:iam::123456789012:role/S3Access"
+					}
+					storage_integration = "example-aws-int"
+				}
+			`,
+			APIUpdate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"password": "example-password",
+				"syncFrequency": "60",
+				"useRudderStorage": false,
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false,
+				"cloudProvider": "AWS",
+				"bucketName": "example-bucket-name",
+				"roleBasedAuth": true,
+				"iamRoleARN": "arn:aws:iam::123456789012:role/S3Access",
+				"storageIntegration": "example-aws-int"
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceSnowflakeWithAzureSASTokens(t *testing.T) {
+	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
+		{
+			TerraformCreate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APICreate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"password": "example-password",
+				"syncFrequency": "30",
+				"useRudderStorage": true,
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false
+			}`,
+			TerraformUpdate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = false
+				sync {
+					frequency = "60"
+				}
+				azure {
+					container_name = "example-container-name"
+					account_name = "example-account-name"
+					sas_token = "example-sas-token"
+					use_sas_tokens = true
+					storage_integration = "example-storage"
+				}
+			`,
+			APIUpdate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"password": "example-password",
+				"syncFrequency": "60",
+				"useRudderStorage": false,
+				"additionalProperties": true,
+				"preferAppend": true,
+				"skipUsersTable": true,
+				"skipTracksTable": false,
+				"cloudProvider": "AZURE",
+				"containerName": "example-container-name",
+				"accountName": "example-account-name",
+				"sasToken": "example-sas-token",
+				"useSASTokens": true,
+				"storageIntegration": "example-storage"
 			}`,
 		},
 	})
