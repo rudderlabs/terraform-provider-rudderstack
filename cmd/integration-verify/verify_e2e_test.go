@@ -176,6 +176,95 @@ func TestE2E_APIError(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestE2E_FacebookPixelFullConfig(t *testing.T) {
+	apiConfig := `{
+		"pixelId": "facebook-pixel-id-123",
+		"accessToken": "fb-access-token-456",
+		"standardPageCall": true,
+		"valueFieldIdentifier": "properties.price",
+		"advancedMapping": true,
+		"testDestination": true,
+		"testEventCode": "TEST123",
+		"eventsToEvents": [
+			{"from": "signup", "to": "CompleteRegistration"},
+			{"from": "purchase", "to": "Purchase"}
+		],
+		"eventCustomProperties": [
+			{"eventCustomProperties": "customProp1"},
+			{"eventCustomProperties": "customProp2"}
+		],
+		"blacklistPiiProperties": [
+			{"blacklistPiiProperties": "email", "blacklistPiiHash": true},
+			{"blacklistPiiProperties": "phone", "blacklistPiiHash": false}
+		],
+		"whitelistPiiProperties": [
+			{"whitelistPiiProperties": "firstName"},
+			{"whitelistPiiProperties": "lastName"}
+		],
+		"categoryToContent": [
+			{"from": "games", "to": "product"}
+		],
+		"legacyConversionPixelId": {"from": "ViewContent", "to": "pixel-789"},
+		"useNativeSDK": {"web": true},
+		"blacklistedEvents": [
+			{"eventName": "checkout_started"},
+			{"eventName": "product_viewed"}
+		],
+		"eventFilteringOption": "blacklistedEvents"
+	}`
+	server := newMockAPI(t, "destination", "dest-fb", json.RawMessage(apiConfig))
+	defer server.Close()
+
+	stateJSON := buildStateJSON(t, stateResource{
+		Type:   "rudderstack_destination_facebook_pixel",
+		Name:   "test",
+		ID:     "dest-fb",
+		TFName: "e2e-test-facebook-pixel",
+		Config: map[string]interface{}{
+			"pixel_id":               "facebook-pixel-id-123",
+			"access_token":           "fb-access-token-456",
+			"standard_page_call":     true,
+			"value_field_identifier": "properties.price",
+			"advanced_mapping":       true,
+			"test_destination":       true,
+			"test_event_code":        "TEST123",
+			"events_to_events": []interface{}{
+				map[string]interface{}{"from": "signup", "to": "CompleteRegistration"},
+				map[string]interface{}{"from": "purchase", "to": "Purchase"},
+			},
+			"event_custom_properties": []interface{}{"customProp1", "customProp2"},
+			"blacklist_pii_properties": []interface{}{
+				map[string]interface{}{"property": "email", "hash": true},
+				map[string]interface{}{"property": "phone", "hash": false},
+			},
+			"whitelist_pii_properties": []interface{}{
+				map[string]interface{}{"property": "firstName"},
+				map[string]interface{}{"property": "lastName"},
+			},
+			"category_to_content": []interface{}{
+				map[string]interface{}{"from": "games", "to": "product"},
+			},
+			"legacy_conversion_pixel_id": []interface{}{
+				map[string]interface{}{"from": "ViewContent", "to": "pixel-789"},
+			},
+			"use_native_sdk": []interface{}{
+				map[string]interface{}{"web": true},
+			},
+			"event_filtering": []interface{}{
+				map[string]interface{}{
+					"blacklist": []interface{}{"checkout_started", "product_viewed"},
+				},
+			},
+		},
+	})
+
+	t.Setenv("RUDDERSTACK_ACCESS_TOKEN", "test-token")
+	t.Setenv("RUDDERSTACK_API_URL", server.URL)
+
+	err := verifyFromState(stateJSON, "")
+	require.NoError(t, err)
+}
+
 func TestE2E_TargetResourceFlag(t *testing.T) {
 	apiConfig := `{
 		"webhookUrl": "https://second.com",
