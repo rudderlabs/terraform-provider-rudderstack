@@ -149,7 +149,7 @@ func init() {
 						Type:             schema.TypeString,
 						Required:         true,
 						Description:      "Specify how often RudderStack should sync the data to your snowflake database.",
-						ValidateDiagFunc: c.StringMatchesRegexp("^(5|15|30|60|180|360|720|1440)$"),
+						ValidateDiagFunc: c.StringMatchesRegexp("^(30|60|180|360|720|1440)$"),
 					},
 					"start_at": {
 						Type:             schema.TypeString,
