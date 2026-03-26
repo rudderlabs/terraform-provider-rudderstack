@@ -103,6 +103,7 @@ func init() {
 			Sensitive:        true,
 			Description:      "Password for the user. Required when use_key_pair_auth is false.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
+			AtLeastOneOf:     []string{"config.0.password", "config.0.private_key"},
 			ConflictsWith:    []string{"config.0.private_key"},
 		},
 		"private_key": {
@@ -112,6 +113,7 @@ func init() {
 			Description:      "Private key for key pair authentication. Required when use_key_pair_auth is true. Accepts both PEM-formatted keys (with BEGIN/END headers) and raw base64-encoded key bodies. Raw keys are automatically wrapped with PEM headers before being sent to the API.",
 			ValidateDiagFunc: c.StringMatchesRegexp(".+"),
 			DiffSuppressFunc: suppressPEMKeyDiff,
+			AtLeastOneOf:     []string{"config.0.password", "config.0.private_key"},
 			ConflictsWith:    []string{"config.0.password"},
 		},
 		"private_key_passphrase": {
@@ -231,7 +233,9 @@ func init() {
 						Sensitive:        true,
 						Description:      "Enter your AWS access key ID obtained from the AWS console.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+						AtLeastOneOf:     []string{"config.0.s3.0.access_key_id", "config.0.s3.0.role_based_authentication"},
 						ConflictsWith:    []string{"config.0.s3.0.role_based_authentication"},
+						RequiredWith:     []string{"config.0.s3.0.access_key"},
 					},
 					"access_key": {
 						Type:             schema.TypeString,
@@ -240,6 +244,7 @@ func init() {
 						Description:      "Enter your AWS secret access key.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 						ConflictsWith:    []string{"config.0.s3.0.role_based_authentication"},
+						RequiredWith:     []string{"config.0.s3.0.access_key_id"},
 					},
 					"enable_sse": {
 						Type:        schema.TypeBool,
@@ -251,6 +256,7 @@ func init() {
 						MaxItems:      1,
 						Optional:      true,
 						Description:   "Use IAM role-based authentication for S3 access.",
+						AtLeastOneOf:  []string{"config.0.s3.0.access_key_id", "config.0.s3.0.role_based_authentication"},
 						ConflictsWith: []string{"config.0.s3.0.access_key_id", "config.0.s3.0.access_key"},
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
@@ -327,6 +333,7 @@ func init() {
 						Sensitive:        true,
 						Description:      "Enter the account key for your Azure container.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+						AtLeastOneOf:     []string{"config.0.azure.0.account_key", "config.0.azure.0.sas_token"},
 						ConflictsWith:    []string{"config.0.azure.0.sas_token"},
 					},
 					"sas_token": {
@@ -335,6 +342,7 @@ func init() {
 						Sensitive:        true,
 						Description:      "Enter the SAS token for your Azure Blob Storage.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.+)$"),
+						AtLeastOneOf:     []string{"config.0.azure.0.account_key", "config.0.azure.0.sas_token"},
 						ConflictsWith:    []string{"config.0.azure.0.account_key"},
 					},
 					"use_sas_tokens": {
