@@ -1,5 +1,5 @@
 
-resource "rudderstack_destination_snowflake" example{
+resource "rudderstack_destination_snowflake" "example" {
   name = "my-snowflake"
 
   config {
@@ -11,11 +11,7 @@ resource "rudderstack_destination_snowflake" example{
     password = "..."
     # Key pair auth (set use_key_pair_auth = true to use instead of password):
     # use_key_pair_auth = true
-    # private_key = <<EOF
-    # -----BEGIN RSA PRIVATE KEY-----
-    # MIIEo...your key content...
-    # -----END RSA PRIVATE KEY-----
-    # EOF
+    # private_key = "MIIEvQIBADA..."  # raw base64 key body or full PEM format
     # private_key_passphrase = "..."  # only needed if the private key is encrypted
     sync {
       frequency = "60"
@@ -28,11 +24,21 @@ resource "rudderstack_destination_snowflake" example{
     # namespace = "..."
     # prefix = "..."
     # additional_properties = true
+    # S3 with access keys:
     # s3 {
     #   bucket_name = "..."
     #   access_key_id = "..."
     #   access_key = "..."
     #   enable_sse = true
+    #   storage_integration = "..."
+    # }
+    # S3 with IAM role-based auth (conflicts with access_key_id/access_key):
+    # s3 {
+    #   bucket_name = "..."
+    #   role_based_authentication {
+    #     i_am_role_arn = "arn:aws:iam::123456789012:role/MyRole"
+    #   }
+    #   storage_integration = "..."
     # }
     # gcp {
     #   bucket_name = "..."

@@ -142,6 +142,8 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
 				"cloudProvider": "AWS",
+				"roleBasedAuth": false,
+				"storageIntegration": "",
 				"prefix": "example-prefix",
         		"bucketName": "example-bucket-name",
         		"accessKeyID": "example-access-key-id",
@@ -393,7 +395,7 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"warehouse": "example-warehouse",
 				"user": "example-user",
 				"useKeyPairAuth": true,
-				"privateKey": "example-private-key",
+				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key\n-----END PRIVATE KEY-----",
 				"privateKeyPassphrase": "example-passphrase",
 				"syncFrequency": "30",
 				"useRudderStorage": true,
@@ -418,7 +420,7 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"warehouse": "example-warehouse",
 				"user": "example-user",
 				"useKeyPairAuth": true,
-				"privateKey": "example-private-key-updated",
+				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key-updated\n-----END PRIVATE KEY-----",
 				"namespace": "example-namespace",
 				"syncFrequency": "60",
 				"useRudderStorage": false,
@@ -569,6 +571,120 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"accountKey": "example-account-key",
 				"storageIntegration": "example-storage",
 				"prefix": "example-prefix"
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
+	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
+		{
+			TerraformCreate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				use_key_pair_auth = true
+				private_key = "-----BEGIN PRIVATE KEY-----\nexample-pem-key\n-----END PRIVATE KEY-----"
+				use_rudder_storage = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APICreate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": true,
+				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-pem-key\n-----END PRIVATE KEY-----",
+				"syncFrequency": "30",
+				"useRudderStorage": true,
+				"additionalProperties": true
+			}`,
+			TerraformUpdate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				use_key_pair_auth = true
+				private_key = "-----BEGIN ENCRYPTED PRIVATE KEY-----\nexample-encrypted-key\n-----END ENCRYPTED PRIVATE KEY-----"
+				use_rudder_storage = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APIUpdate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": true,
+				"privateKey": "-----BEGIN ENCRYPTED PRIVATE KEY-----\nexample-encrypted-key\n-----END ENCRYPTED PRIVATE KEY-----",
+				"syncFrequency": "30",
+				"useRudderStorage": true,
+				"additionalProperties": true
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
+	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
+		{
+			TerraformCreate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APICreate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"password": "example-password",
+				"syncFrequency": "30",
+				"useRudderStorage": true,
+				"additionalProperties": true
+			}`,
+			TerraformUpdate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = false
+				sync {
+					frequency = "60"
+				}
+				s3 {
+					bucket_name = "example-bucket-name"
+					role_based_authentication {
+						i_am_role_arn = "arn:aws:iam::123456789012:role/S3Access"
+					}
+					storage_integration = "example-aws-int"
+				}
+			`,
+			APIUpdate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"password": "example-password",
+				"syncFrequency": "60",
+				"useRudderStorage": false,
+				"additionalProperties": true,
+				"cloudProvider": "AWS",
+				"bucketName": "example-bucket-name",
+				"roleBasedAuth": true,
+				"iamRoleARN": "arn:aws:iam::123456789012:role/S3Access",
+				"storageIntegration": "example-aws-int"
 			}`,
 		},
 	})
