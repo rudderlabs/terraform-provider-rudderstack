@@ -13,7 +13,7 @@ https://www.rudderstack.com/docs/destinations/warehouse-destinations/snowflake/
 ## Example Usage
 
 ```terraform
-resource "rudderstack_destination_snowflake" example{
+resource "rudderstack_destination_snowflake" "example" {
   name = "my-snowflake"
 
   config {
@@ -25,11 +25,7 @@ resource "rudderstack_destination_snowflake" example{
     password = "..."
     # Key pair auth (set use_key_pair_auth = true to use instead of password):
     # use_key_pair_auth = true
-    # private_key = <<EOF
-    # -----BEGIN RSA PRIVATE KEY-----
-    # MIIEo...your key content...
-    # -----END RSA PRIVATE KEY-----
-    # EOF
+    # private_key = "MIIEvQIBADA..."  # raw base64 key body or full PEM format
     # private_key_passphrase = "..."  # only needed if the private key is encrypted
     sync {
       frequency = "60"
@@ -42,21 +38,44 @@ resource "rudderstack_destination_snowflake" example{
     # namespace = "..."
     # prefix = "..."
     # additional_properties = true
+    # prefer_append = true
+    # skip_users_table = true
+    # skip_tracks_table = false
+    # cleanup_object_storage_files = false
+    # S3 with access keys:
     # s3 {
     #   bucket_name = "..."
     #   access_key_id = "..."
     #   access_key = "..."
     #   enable_sse = true
+    #   storage_integration = "..."
+    # }
+    # S3 with IAM role-based auth (conflicts with access_key_id/access_key):
+    # s3 {
+    #   bucket_name = "..."
+    #   role_based_authentication {
+    #     i_am_role_arn = "arn:aws:iam::123456789012:role/MyRole"
+    #   }
+    #   storage_integration = "..."
     # }
     # gcp {
     #   bucket_name = "..."
     #   credentials = "..."
     #   storage_integration = "..."
     # }
+    # Azure with account key:
     # azure {
     #   container_name = "..."
     #   account_name = "..."
     #   account_key = "..."
+    #   storage_integration = "..."
+    # }
+    # Azure with SAS token (conflicts with account_key):
+    # azure {
+    #   container_name = "..."
+    #   account_name = "..."
+    #   sas_token = "..."
+    #   use_sas_tokens = true
     #   storage_integration = "..."
     # }
     # consent_management {
@@ -169,24 +188,25 @@ Required:
 - `user` (String) Name of the user.
 - `warehouse` (String) Name of the warehouse.
 
-**One of the following authentication methods is required:**
-
-- `password` (String, Sensitive) Password for the user. Required when `use_key_pair_auth` is `false` (default). Conflicts with `private_key`.
-- `use_key_pair_auth` (Boolean) Set to `true` to use key pair authentication instead of password. When enabled, `private_key` is required and `password` must not be set. Defaults to `false`.
-- `private_key` (String, Sensitive) Private key for key pair authentication. Provide the full PEM contents including the header and footer (e.g. `-----BEGIN RSA PRIVATE KEY-----`). Required when `use_key_pair_auth` is `true`. Conflicts with `password`.
-- `private_key_passphrase` (String, Sensitive) Passphrase for the private key. Required only if the private key is encrypted; leave unset otherwise.
-
 Optional:
 
 - `additional_properties` (Boolean)
 - `azure` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--azure))
+- `cleanup_object_storage_files` (Boolean) Enable for cleanup of object storage files (deletion) after successful sync.
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `gcp` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--gcp))
 - `json_paths` (String) Specify required json properties in dot notation separated by commas.
 - `namespace` (String) Schema name for the warehouse where the tables are created by Rudderstack.
+- `password` (String, Sensitive) Password for the user. Required when use_key_pair_auth is false.
+- `prefer_append` (Boolean) Disable to move from Append to Merge operation. Switching from Append to Merge ensures 100% non-duplicate data, but would increase warehouse operations time significantly.
 - `prefix` (String) If specified, RudderStack will create a folder in the bucket with this prefix and push all the data within that folder.
+- `private_key` (String, Sensitive) Private key for key pair authentication. Required when use_key_pair_auth is true. Accepts both PEM-formatted keys (with BEGIN/END headers) and raw base64-encoded key bodies. Raw keys are automatically wrapped with PEM headers before being sent to the API.
+- `private_key_passphrase` (String, Sensitive) Passphrase for the private key, if the private key is encrypted.
 - `role` (String) Role for the user. If not specified, the default role is used
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
+- `skip_tracks_table` (Boolean) Enable this toggle to skip sending the event data to the tracks table.
+- `skip_users_table` (Boolean) Disable the creation of a Users table. The table stores all unique users, but note that due to merge operations, it can significantly increase warehouse operation time.
+- `use_key_pair_auth` (Boolean) Enable this setting to use key pair authentication instead of password-based authentication.
 - `use_rudder_storage` (Boolean) Enable this setting to use RudderStack-managed buckets for object storage.
 
 <a id="nestedblock--config--sync"></a>
@@ -208,10 +228,15 @@ Optional:
 
 Required:
 
-- `account_key` (String) Enter the account key for your Azure container.
 - `account_name` (String) Enter the account name for the Azure container.
 - `container_name` (String) Specify the name of your Azure container where RudderStack will store the data before loading it into Snowflake.
 - `storage_integration` (String) Create the cloud storage integration in Snowflake and enter the name of integration. Please refer to this for more details -> https://www.rudderstack.com/docs/destinations/warehouse-destinations/snowflake/#configuring-cloud-storage-integration-with-snowflake
+
+Optional:
+
+- `account_key` (String, Sensitive) Enter the account key for your Azure container.
+- `sas_token` (String, Sensitive) Enter the SAS token for your Azure Blob Storage.
+- `use_sas_tokens` (Boolean) Use shared access signature (SAS) tokens to grant limited access to Azure Storage resources.
 
 
 <a id="nestedblock--config--consent_management"></a>
@@ -364,3 +389,12 @@ Optional:
 - `access_key` (String, Sensitive) Enter your AWS secret access key.
 - `access_key_id` (String, Sensitive) Enter your AWS access key ID obtained from the AWS console.
 - `enable_sse` (Boolean) Toggle on this setting to enable server-side encryption for your S3 bucket.
+- `role_based_authentication` (Block List, Max: 1) Use IAM role-based authentication for S3 access. (see [below for nested schema](#nestedblock--config--s3--role_based_authentication))
+- `storage_integration` (String) Create the cloud storage integration in Snowflake and enter the name of integration.
+
+<a id="nestedblock--config--s3--role_based_authentication"></a>
+### Nested Schema for `config.s3.role_based_authentication`
+
+Required:
+
+- `i_am_role_arn` (String) The IAM role ARN to use for authentication.

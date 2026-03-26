@@ -1,7 +1,11 @@
 package destinations
 
 import (
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -17,7 +21,7 @@ func init() {
 		c.Simple("user", "user"),
 		c.Simple("useKeyPairAuth", "use_key_pair_auth", c.SkipZeroValue),
 		c.Simple("password", "password", c.SkipZeroValue),
-		c.Simple("privateKey", "private_key", c.SkipZeroValue),
+		privateKeyProperty(),
 		c.Simple("privateKeyPassphrase", "private_key_passphrase", c.SkipZeroValue),
 		c.Simple("role", "role", c.SkipZeroValue),
 		c.Simple("namespace", "namespace", c.SkipZeroValue),
@@ -33,16 +37,29 @@ func init() {
 			"azure": "AZURE",
 		}),
 		c.Simple("additionalProperties", "additional_properties"),
+		c.Simple("preferAppend", "prefer_append"),
+		c.Simple("skipUsersTable", "skip_users_table"),
+		c.Simple("skipTracksTable", "skip_tracks_table"),
+		c.Simple("cleanupObjectStorageFiles", "cleanup_object_storage_files", c.SkipZeroValue),
 		c.Conditional("bucketName", "s3.0.bucket_name", c.Equals("cloudProvider", "AWS")),
 		c.Simple("accessKeyID", "s3.0.access_key_id", c.SkipZeroValue),
 		c.Simple("accessKey", "s3.0.access_key", c.SkipZeroValue),
 		c.Simple("enableSSE", "s3.0.enable_sse", c.SkipZeroValue),
+		c.Simple("iamRoleARN", "s3.0.role_based_authentication.0.i_am_role_arn", c.SkipZeroValue),
+		c.Discriminator("roleBasedAuth", c.DiscriminatorValues{
+			"s3.0.access_key":                false,
+			"s3.0.access_key_id":             false,
+			"s3.0.role_based_authentication": true,
+		}),
+		c.Conditional("storageIntegration", "s3.0.storage_integration", c.Equals("cloudProvider", "AWS")),
 		c.Conditional("bucketName", "gcp.0.bucket_name", c.Equals("cloudProvider", "GCP")),
 		c.Simple("credentials", "gcp.0.credentials", c.SkipZeroValue),
 		c.Conditional("storageIntegration", "gcp.0.storage_integration", c.Equals("cloudProvider", "GCP")),
 		c.Simple("containerName", "azure.0.container_name", c.SkipZeroValue),
 		c.Simple("accountName", "azure.0.account_name", c.SkipZeroValue),
 		c.Simple("accountKey", "azure.0.account_key", c.SkipZeroValue),
+		c.Simple("sasToken", "azure.0.sas_token", c.SkipZeroValue),
+		c.Simple("useSASTokens", "azure.0.use_sas_tokens", c.SkipZeroValue),
 		c.Conditional("storageIntegration", "azure.0.storage_integration", c.Equals("cloudProvider", "AZURE")),
 		c.Simple("prefix", "prefix", c.SkipZeroValue),
 	}
@@ -86,14 +103,17 @@ func init() {
 			Sensitive:        true,
 			Description:      "Password for the user. Required when use_key_pair_auth is false.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
+			AtLeastOneOf:     []string{"config.0.password", "config.0.private_key"},
 			ConflictsWith:    []string{"config.0.private_key"},
 		},
 		"private_key": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Sensitive:        true,
-			Description:      "Private key for key pair authentication. Required when use_key_pair_auth is true.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
+			Description:      "Private key for key pair authentication. Required when use_key_pair_auth is true. Accepts both PEM-formatted keys (with BEGIN/END headers) and raw base64-encoded key bodies. Raw keys are automatically wrapped with PEM headers before being sent to the API.",
+			ValidateDiagFunc: c.StringMatchesRegexp(".+"),
+			DiffSuppressFunc: suppressPEMKeyDiff,
+			AtLeastOneOf:     []string{"config.0.password", "config.0.private_key"},
 			ConflictsWith:    []string{"config.0.password"},
 		},
 		"private_key_passphrase": {
@@ -101,7 +121,7 @@ func init() {
 			Optional:         true,
 			Sensitive:        true,
 			Description:      "Passphrase for the private key, if the private key is encrypted.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
+			ValidateDiagFunc: c.StringMatchesRegexp("^(.{0,100})$"),
 		},
 		"role": {
 			Type:             schema.TypeString,
@@ -169,6 +189,30 @@ func init() {
 			Optional: true,
 			Default:  true,
 		},
+		"prefer_append": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Disable to move from Append to Merge operation. Switching from Append to Merge ensures 100% non-duplicate data, but would increase warehouse operations time significantly.",
+		},
+		"skip_users_table": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     true,
+			Description: "Disable the creation of a Users table. The table stores all unique users, but note that due to merge operations, it can significantly increase warehouse operation time.",
+		},
+		"skip_tracks_table": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Enable this toggle to skip sending the event data to the tracks table.",
+		},
+		"cleanup_object_storage_files": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Default:     false,
+			Description: "Enable for cleanup of object storage files (deletion) after successful sync.",
+		},
 		"s3": {
 			Type:          schema.TypeList,
 			MaxItems:      1,
@@ -189,6 +233,9 @@ func init() {
 						Sensitive:        true,
 						Description:      "Enter your AWS access key ID obtained from the AWS console.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+						AtLeastOneOf:     []string{"config.0.s3.0.access_key_id", "config.0.s3.0.role_based_authentication"},
+						ConflictsWith:    []string{"config.0.s3.0.role_based_authentication"},
+						RequiredWith:     []string{"config.0.s3.0.access_key"},
 					},
 					"access_key": {
 						Type:             schema.TypeString,
@@ -196,11 +243,37 @@ func init() {
 						Sensitive:        true,
 						Description:      "Enter your AWS secret access key.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+						ConflictsWith:    []string{"config.0.s3.0.role_based_authentication"},
+						RequiredWith:     []string{"config.0.s3.0.access_key_id"},
 					},
 					"enable_sse": {
 						Type:        schema.TypeBool,
 						Optional:    true,
 						Description: "Toggle on this setting to enable server-side encryption for your S3 bucket.",
+					},
+					"role_based_authentication": {
+						Type:          schema.TypeList,
+						MaxItems:      1,
+						Optional:      true,
+						Description:   "Use IAM role-based authentication for S3 access.",
+						AtLeastOneOf:  []string{"config.0.s3.0.access_key_id", "config.0.s3.0.role_based_authentication"},
+						ConflictsWith: []string{"config.0.s3.0.access_key_id", "config.0.s3.0.access_key"},
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"i_am_role_arn": {
+									Type:             schema.TypeString,
+									Required:         true,
+									Description:      "The IAM role ARN to use for authentication.",
+									ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+								},
+							},
+						},
+					},
+					"storage_integration": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						Description:      "Create the cloud storage integration in Snowflake and enter the name of integration.",
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{0,100})$"),
 					},
 				},
 			},
@@ -256,9 +329,27 @@ func init() {
 					},
 					"account_key": {
 						Type:             schema.TypeString,
-						Required:         true,
+						Optional:         true,
+						Sensitive:        true,
 						Description:      "Enter the account key for your Azure container.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+						AtLeastOneOf:     []string{"config.0.azure.0.account_key", "config.0.azure.0.sas_token"},
+						ConflictsWith:    []string{"config.0.azure.0.sas_token"},
+					},
+					"sas_token": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						Sensitive:        true,
+						Description:      "Enter the SAS token for your Azure Blob Storage.",
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.+)$"),
+						AtLeastOneOf:     []string{"config.0.azure.0.account_key", "config.0.azure.0.sas_token"},
+						ConflictsWith:    []string{"config.0.azure.0.account_key"},
+					},
+					"use_sas_tokens": {
+						Type:        schema.TypeBool,
+						Optional:    true,
+						Default:     false,
+						Description: "Use shared access signature (SAS) tokens to grant limited access to Azure Storage resources.",
 					},
 					"storage_integration": {
 						Type:             schema.TypeString,
@@ -286,4 +377,54 @@ func init() {
 		Properties:   properties,
 		ConfigSchema: schema,
 	})
+}
+
+// privateKeyProperty creates a ConfigProperty for the privateKey field that
+// auto-wraps raw base64-encoded key bodies with PEM headers.
+func privateKeyProperty() c.ConfigProperty {
+	return c.ConfigProperty{
+		FromStateFunc: func(config, state string) (string, error) {
+			v := gjson.Get(state, "private_key")
+			if !v.Exists() || v.String() == "" {
+				return config, nil
+			}
+			return sjson.Set(config, "privateKey", wrapPEMKey(v.String()))
+		},
+		ToStateFunc: func(state, config string) (string, error) {
+			r := gjson.Get(config, "privateKey")
+			if r.Exists() {
+				return sjson.Set(state, "private_key", r.Value())
+			}
+			return state, nil
+		},
+	}
+}
+
+// suppressPEMKeyDiff suppresses diffs between PEM-wrapped and raw key representations.
+func suppressPEMKeyDiff(_, old, new string, _ *schema.ResourceData) bool {
+	return stripPEMHeaders(old) == stripPEMHeaders(new)
+}
+
+// wrapPEMKey wraps a raw key body with PEM headers if not already PEM-formatted.
+func wrapPEMKey(key string) string {
+	if strings.HasPrefix(key, "-----BEGIN") {
+		return key
+	}
+	return "-----BEGIN PRIVATE KEY-----\n" + key + "\n-----END PRIVATE KEY-----"
+}
+
+// stripPEMHeaders removes PEM header/footer lines and whitespace, returning just the key body.
+func stripPEMHeaders(key string) string {
+	s := key
+	for _, marker := range []string{
+		"-----BEGIN ENCRYPTED PRIVATE KEY-----",
+		"-----END ENCRYPTED PRIVATE KEY-----",
+		"-----BEGIN PRIVATE KEY-----",
+		"-----END PRIVATE KEY-----",
+	} {
+		s = strings.ReplaceAll(s, marker, "")
+	}
+	s = strings.ReplaceAll(s, "\n", "")
+	s = strings.ReplaceAll(s, "\r", "")
+	return strings.TrimSpace(s)
 }
