@@ -19,7 +19,7 @@ func init() {
 		c.Simple("database", "database"),
 		c.Simple("warehouse", "warehouse"),
 		c.Simple("user", "user"),
-		c.Simple("useKeyPairAuth", "use_key_pair_auth", c.SkipZeroValue),
+		c.Simple("useKeyPairAuth", "use_key_pair_auth"),
 		c.Simple("password", "password", c.SkipZeroValue),
 		privateKeyProperty(),
 		c.Simple("privateKeyPassphrase", "private_key_passphrase", c.SkipZeroValue),
