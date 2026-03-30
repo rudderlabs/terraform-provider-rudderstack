@@ -1,7 +1,11 @@
 package destinations
 
 import (
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -15,9 +19,9 @@ func init() {
 		c.Simple("database", "database"),
 		c.Simple("warehouse", "warehouse"),
 		c.Simple("user", "user"),
-		c.Simple("useKeyPairAuth", "use_key_pair_auth", c.SkipZeroValue),
+		c.Simple("useKeyPairAuth", "use_key_pair_auth"),
 		c.Simple("password", "password", c.SkipZeroValue),
-		c.Simple("privateKey", "private_key", c.SkipZeroValue),
+		privateKeyProperty(),
 		c.Simple("privateKeyPassphrase", "private_key_passphrase", c.SkipZeroValue),
 		c.Simple("role", "role", c.SkipZeroValue),
 		c.Simple("namespace", "namespace", c.SkipZeroValue),
@@ -37,6 +41,13 @@ func init() {
 		c.Simple("accessKeyID", "s3.0.access_key_id", c.SkipZeroValue),
 		c.Simple("accessKey", "s3.0.access_key", c.SkipZeroValue),
 		c.Simple("enableSSE", "s3.0.enable_sse", c.SkipZeroValue),
+		c.Simple("iamRoleARN", "s3.0.role_based_authentication.0.i_am_role_arn", c.SkipZeroValue),
+		c.Discriminator("roleBasedAuth", c.DiscriminatorValues{
+			"s3.0.access_key":                false,
+			"s3.0.access_key_id":             false,
+			"s3.0.role_based_authentication": true,
+		}),
+		c.Conditional("storageIntegration", "s3.0.storage_integration", c.Equals("cloudProvider", "AWS")),
 		c.Conditional("bucketName", "gcp.0.bucket_name", c.Equals("cloudProvider", "GCP")),
 		c.Simple("credentials", "gcp.0.credentials", c.SkipZeroValue),
 		c.Conditional("storageIntegration", "gcp.0.storage_integration", c.Equals("cloudProvider", "GCP")),
@@ -86,14 +97,17 @@ func init() {
 			Sensitive:        true,
 			Description:      "Password for the user. Required when use_key_pair_auth is false.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
+			AtLeastOneOf:     []string{"config.0.password", "config.0.private_key"},
 			ConflictsWith:    []string{"config.0.private_key"},
 		},
 		"private_key": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Sensitive:        true,
-			Description:      "Private key for key pair authentication. Required when use_key_pair_auth is true.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
+			Description:      "Private key for key pair authentication. Required when use_key_pair_auth is true. Accepts both PEM-formatted keys (with BEGIN/END headers) and raw base64-encoded key bodies. Raw keys are automatically wrapped with PEM headers before being sent to the API.",
+			ValidateDiagFunc: c.StringMatchesRegexp(".+"),
+			DiffSuppressFunc: suppressPEMKeyDiff,
+			AtLeastOneOf:     []string{"config.0.password", "config.0.private_key"},
 			ConflictsWith:    []string{"config.0.password"},
 		},
 		"private_key_passphrase": {
@@ -189,6 +203,9 @@ func init() {
 						Sensitive:        true,
 						Description:      "Enter your AWS access key ID obtained from the AWS console.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+						AtLeastOneOf:     []string{"config.0.s3.0.access_key_id", "config.0.s3.0.role_based_authentication"},
+						ConflictsWith:    []string{"config.0.s3.0.role_based_authentication"},
+						RequiredWith:     []string{"config.0.s3.0.access_key"},
 					},
 					"access_key": {
 						Type:             schema.TypeString,
@@ -196,11 +213,37 @@ func init() {
 						Sensitive:        true,
 						Description:      "Enter your AWS secret access key.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+						ConflictsWith:    []string{"config.0.s3.0.role_based_authentication"},
+						RequiredWith:     []string{"config.0.s3.0.access_key_id"},
 					},
 					"enable_sse": {
 						Type:        schema.TypeBool,
 						Optional:    true,
 						Description: "Toggle on this setting to enable server-side encryption for your S3 bucket.",
+					},
+					"role_based_authentication": {
+						Type:          schema.TypeList,
+						MaxItems:      1,
+						Optional:      true,
+						Description:   "Use IAM role-based authentication for S3 access.",
+						AtLeastOneOf:  []string{"config.0.s3.0.access_key_id", "config.0.s3.0.role_based_authentication"},
+						ConflictsWith: []string{"config.0.s3.0.access_key_id", "config.0.s3.0.access_key"},
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"i_am_role_arn": {
+									Type:             schema.TypeString,
+									Required:         true,
+									Description:      "The IAM role ARN to use for authentication.",
+									ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+								},
+							},
+						},
+					},
+					"storage_integration": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						Description:      "Create the cloud storage integration in Snowflake and enter the name of integration.",
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{0,100})$"),
 					},
 				},
 			},
@@ -286,4 +329,54 @@ func init() {
 		Properties:   properties,
 		ConfigSchema: schema,
 	})
+}
+
+// privateKeyProperty creates a ConfigProperty for the privateKey field that
+// auto-wraps raw base64-encoded key bodies with PEM headers.
+func privateKeyProperty() c.ConfigProperty {
+	return c.ConfigProperty{
+		FromStateFunc: func(config, state string) (string, error) {
+			v := gjson.Get(state, "private_key")
+			if !v.Exists() || v.String() == "" {
+				return config, nil
+			}
+			return sjson.Set(config, "privateKey", wrapPEMKey(v.String()))
+		},
+		ToStateFunc: func(state, config string) (string, error) {
+			r := gjson.Get(config, "privateKey")
+			if r.Exists() {
+				return sjson.Set(state, "private_key", r.Value())
+			}
+			return state, nil
+		},
+	}
+}
+
+// suppressPEMKeyDiff suppresses diffs between PEM-wrapped and raw key representations.
+func suppressPEMKeyDiff(_, old, new string, _ *schema.ResourceData) bool {
+	return stripPEMHeaders(old) == stripPEMHeaders(new)
+}
+
+// wrapPEMKey wraps a raw key body with PEM headers if not already PEM-formatted.
+func wrapPEMKey(key string) string {
+	if strings.HasPrefix(key, "-----BEGIN") {
+		return key
+	}
+	return "-----BEGIN PRIVATE KEY-----\n" + key + "\n-----END PRIVATE KEY-----"
+}
+
+// stripPEMHeaders removes PEM header/footer lines and whitespace, returning just the key body.
+func stripPEMHeaders(key string) string {
+	s := key
+	for _, marker := range []string{
+		"-----BEGIN ENCRYPTED PRIVATE KEY-----",
+		"-----END ENCRYPTED PRIVATE KEY-----",
+		"-----BEGIN PRIVATE KEY-----",
+		"-----END PRIVATE KEY-----",
+	} {
+		s = strings.ReplaceAll(s, marker, "")
+	}
+	s = strings.ReplaceAll(s, "\n", "")
+	s = strings.ReplaceAll(s, "\r", "")
+	return strings.TrimSpace(s)
 }
