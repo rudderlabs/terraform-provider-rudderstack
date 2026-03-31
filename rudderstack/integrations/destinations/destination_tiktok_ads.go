@@ -48,7 +48,6 @@ func init() {
 		"pixel_code": {
 			Type:             schema.TypeString,
 			Required:         true,
-			Sensitive:        true,
 			Description:      "Your TikTok Pixel Code.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
@@ -107,6 +106,7 @@ func init() {
 					"whitelist": {
 						Type:         schema.TypeList,
 						Optional:     true,
+						Description:  "Enter the event names to be allowlisted.",
 						ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 						Elem: &schema.Schema{
 							Type: schema.TypeString,
@@ -115,6 +115,7 @@ func init() {
 					"blacklist": {
 						Type:         schema.TypeList,
 						Optional:     true,
+						Description:  "Enter the event names to be denylisted.",
 						ExactlyOneOf: []string{"config.0.event_filtering.0.whitelist", "config.0.event_filtering.0.blacklist"},
 						Elem: &schema.Schema{
 							Type: schema.TypeString,

@@ -46,7 +46,7 @@ resource "rudderstack_destination_tiktok_ads" "example" {
 
 Required:
 
-- `pixel_code` (String, Sensitive) Your TikTok Pixel Code.
+- `pixel_code` (String) Your TikTok Pixel Code.
 
 Optional:
 
@@ -235,8 +235,8 @@ Optional:
 
 Optional:
 
-- `blacklist` (List of String)
-- `whitelist` (List of String)
+- `blacklist` (List of String) Enter the event names to be denylisted.
+- `whitelist` (List of String) Enter the event names to be allowlisted.
 
 
 <a id="nestedatt--config--events_to_standard"></a>

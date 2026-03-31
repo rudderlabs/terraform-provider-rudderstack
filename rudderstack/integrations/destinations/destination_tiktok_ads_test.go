@@ -41,6 +41,22 @@ func TestDestinationResourceTiktokAds(t *testing.T) {
 					web = true
 				}
 
+				connection_mode {
+					web            = "cloud"
+					cloud          = "cloud"
+					ios            = "cloud"
+					ios_swift      = "cloud"
+					android        = "cloud"
+					android_kotlin = "cloud"
+					unity          = "cloud"
+					amp            = "cloud"
+					warehouse      = "cloud"
+					react_native   = "cloud"
+					flutter        = "cloud"
+					cordova        = "cloud"
+					shopify        = "cloud"
+				}
+
 				consent_management {
 					web = [
 						{
@@ -138,6 +154,21 @@ func TestDestinationResourceTiktokAds(t *testing.T) {
 				],
 				"eventFilteringOption": "blacklistedEvents",
 				"useNativeSDK": { "web": true },
+				"connectionMode": {
+					"web": "cloud",
+					"cloud": "cloud",
+					"ios": "cloud",
+					"iosSwift": "cloud",
+					"android": "cloud",
+					"androidKotlin": "cloud",
+					"unity": "cloud",
+					"amp": "cloud",
+					"warehouse": "cloud",
+					"reactnative": "cloud",
+					"flutter": "cloud",
+					"cordova": "cloud",
+					"shopify": "cloud"
+				},
 				"consentManagement": {
 					"web": [
 						{
