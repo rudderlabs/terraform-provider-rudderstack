@@ -8,7 +8,7 @@ description: |-
 # rudderstack_source_unity (Resource)
 
 This resource represents an Unity event stream source. For more information check
-https://www.rudderstack.com/docs/sources/event-streams/sdks/unity/
+https://www.rudderstack.com/docs/sources/event-streams/sdks/rudderstack-unity-sdk/
 
 ## Example Usage
 

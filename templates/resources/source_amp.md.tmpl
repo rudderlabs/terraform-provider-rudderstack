@@ -8,7 +8,7 @@ description: |-
 # rudderstack_source_amp (Resource)
 
 This resource represents an AMP event stream source. For more information check
-https://www.rudderstack.com/docs/sources/event-streams/sdks/amp/
+https://www.rudderstack.com/docs/sources/event-streams/sdks/rudderstack-amp-analytics/
 
 ## Example Usage
 

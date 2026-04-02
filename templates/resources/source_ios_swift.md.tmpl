@@ -8,7 +8,7 @@ description: |-
 # rudderstack_source_ios_swift (Resource)
 
 This resource represents an iOS Swift event stream source. For more information check
-https://www.rudderstack.com/docs/sources/event-streams/sdks/rudderstack-swift-sdk/
+https://www.rudderstack.com/docs/sources/event-streams/sdks/swift-sdk/
 
 ## Example Usage
 

@@ -8,7 +8,7 @@ description: |-
 # rudderstack_source_android_kotlin (Resource)
 
 This resource represents an Android Kotlin event stream source. For more information check
-https://www.rudderstack.com/docs/sources/event-streams/sdks/rudderstack-kotlin-sdk/
+https://www.rudderstack.com/docs/sources/event-streams/sdks/kotlin-sdk/
 
 ## Example Usage
 
