@@ -74,6 +74,7 @@ func init() {
 		"send_custom_events": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     false,
 			Description: "Enable this flag if you want to send Custom events to TikTok Ads.",
 		},
 		"events_to_standard": {
