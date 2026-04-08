@@ -41,7 +41,7 @@ func StringNotMatchesRegexp(rs string) schema.SchemaValidateDiagFunc {
 			return nil, []error{fmt.Errorf("value for %q is not of type string", k)}
 		}
 		if ok := r.MatchString(v); ok {
-			return nil, []error{fmt.Errorf("value for %q does matches regular expression %q", k, r)}
+			return nil, []error{fmt.Errorf("value for %q matches a disallowed pattern", k)}
 		}
 
 		return nil, nil

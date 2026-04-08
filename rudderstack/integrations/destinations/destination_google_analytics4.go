@@ -9,6 +9,8 @@ import (
 func init() {
 	supportedSourceTypes := []string{"web", "android", "ios", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
+	ga4URLPattern := "(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:\\/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]*|^$"
+	ga4NgrokPattern := ".*\\.ngrok\\.io.*"
 
 	properties := []c.ConfigProperty{
 		c.Simple("apiSecret", "api_secret"),
@@ -75,13 +77,13 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "Enter your GA4 Custom Domain URL. By default, it is https://www.googletagmanager.com.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]*$|^$"),
+			ValidateDiagFunc: c.ValidateAll(c.StringMatchesRegexp(ga4URLPattern), c.StringNotMatchesRegexp(ga4NgrokPattern)),
 		},
 		"server_container_url": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "Enter your GA4 Server Side Container URL.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]*$|^$"),
+			ValidateDiagFunc: c.ValidateAll(c.StringMatchesRegexp(ga4URLPattern), c.StringNotMatchesRegexp(ga4NgrokPattern)),
 		},
 		"pii_properties_to_ignore": {
 			Type:        schema.TypeList,
