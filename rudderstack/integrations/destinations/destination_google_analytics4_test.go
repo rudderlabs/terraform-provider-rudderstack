@@ -54,7 +54,7 @@ func TestDestinationResourceGoogleAnalytics4(t *testing.T) {
 					web = true
 				}
 
-				override_client_and_session_id {
+				override_client_and_session_ids {
 					web = true
 				}
 

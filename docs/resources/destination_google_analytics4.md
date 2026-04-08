@@ -156,7 +156,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Google Analytics 4. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `extend_page_view_params` (Boolean) Enable this setting to send `url` and `search` along with any other custom property to the `page` call of the RudderStack SDK. This setting is applicable only for device mode.
 - `firebase_app_id` (String) Enter the Firebase App ID which is the identifier for Firebase app.
-- `override_client_and_session_id` (Block List, Max: 1) Override the gtag client ID and session ID with RudderStack's to ensure attribution is properly unified across page and track events. (see [below for nested schema](#nestedblock--config--override_client_and_session_id))
+- `override_client_and_session_ids` (Block List, Max: 1) Override the gtag client ID and session ID with RudderStack's to ensure attribution is properly unified across page and track events. (see [below for nested schema](#nestedblock--config--override_client_and_session_ids))
 - `pii_properties_to_ignore` (List of Object) Use this field to filter sensitive PII fields from your events before sending them to GA4. (see [below for nested schema](#nestedatt--config--pii_properties_to_ignore))
 - `sdk_base_url` (String) Enter your GA4 Custom Domain URL. By default, it is https://www.googletagmanager.com.
 - `send_user_id` (Boolean) If enabled, the user ID is set to the identified visitors and sent to Google Analytics 4.
@@ -338,8 +338,8 @@ Optional:
 - `whitelist` (List of String) Enter the event names to be allowlisted.
 
 
-<a id="nestedblock--config--override_client_and_session_id"></a>
-### Nested Schema for `config.override_client_and_session_id`
+<a id="nestedblock--config--override_client_and_session_ids"></a>
+### Nested Schema for `config.override_client_and_session_ids`
 
 Optional:
 

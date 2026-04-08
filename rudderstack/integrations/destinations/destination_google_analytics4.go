@@ -37,7 +37,7 @@ func init() {
 		c.Simple("useNativeSDK.ios", "use_native_sdk.0.ios"),
 		c.Simple("capturePageView.web", "capture_page_view.0.web"),
 		c.Simple("debugView.web", "debug_view.0.web"),
-		c.Simple("overrideClientAndSessionId.web", "override_client_and_session_id.0.web"),
+		c.Simple("overrideClientAndSessionId.web", "override_client_and_session_ids.0.web"),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -196,7 +196,7 @@ func init() {
 				},
 			},
 		},
-		"override_client_and_session_id": {
+		"override_client_and_session_ids": {
 			Type:        schema.TypeList,
 			MaxItems:    1,
 			Optional:    true,
