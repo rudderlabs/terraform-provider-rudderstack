@@ -11,6 +11,40 @@ func TestDestinationResourceHTTP(t *testing.T) {
 	cmt.AssertDestination(t, "http", []c.TestConfig{
 		{
 			TerraformCreate: `
+				api_url  = "https://example.com/base"
+				auth     = "basicAuth"
+				username = "myuser"
+				password = "mypass"
+			`,
+			APICreate: `{
+				"apiUrl": "https://example.com/base",
+				"auth": "basicAuth",
+				"username": "myuser",
+				"password": "mypass",
+				"method": "POST",
+				"format": "JSON",
+				"isBatchingEnabled": false,
+				"isDefaultMapping": true
+			}`,
+			TerraformUpdate: `
+				api_url  = "https://example.com/base"
+				auth     = "basicAuth"
+				username = "myuser"
+				password = "mypass"
+			`,
+			APIUpdate: `{
+				"apiUrl": "https://example.com/base",
+				"auth": "basicAuth",
+				"username": "myuser",
+				"password": "mypass",
+				"method": "POST",
+				"format": "JSON",
+				"isBatchingEnabled": false,
+				"isDefaultMapping": true
+			}`,
+		},
+		{
+			TerraformCreate: `
 				api_url = "https://example.com/base"
 			`,
 			APICreate: `{

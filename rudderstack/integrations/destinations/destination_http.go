@@ -9,7 +9,12 @@ import (
 func init() {
 	supportedSourceTypes := []string{"android", "androidKotlin", "ios", "iosSwift", "web", "unity", "amp", "cloud", "warehouse", "reactnative", "flutter", "cordova", "shopify"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
+	// IP-based endpoints (e.g. https://10.0.0.1/webhook) are intentionally not supported;
+	// only domain-name URLs are allowed to reduce misconfiguration risk.
 	httpURLPattern := `^(https?://)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,}(:(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5]\d{4}|[1-9]\d{1,3}))?(/.*)?$`
+	// Go's regexp (RE2) doesn't support negative lookaheads, so we split the
+	// source schema's single URL pattern into a positive match + two negative
+	// matches to block ngrok and localhost URLs.
 	httpNgrokPattern := `^https?://[^/]*\.ngrok\.io(?:[:/].*)?$`
 	httpLocalhostPattern := `^https?://(?:localhost[^/:]*|[^/]*\.localhost[^/:]*)(?:[:/].*)?$`
 
@@ -86,34 +91,34 @@ func init() {
 		"username": {
 			Type:             schema.TypeString,
 			Optional:         true,
-			Description:      "Enter the username for basic authentication.",
+			Description:      "Enter the username for basic authentication. Required when `auth` is set to `basicAuth`.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(.{1,100})$"),
 		},
 		"password": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Sensitive:        true,
-			Description:      "Enter the password for basic authentication.",
+			Description:      "Enter the password for basic authentication. Required when `auth` is set to `basicAuth`.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(.{0,100})$"),
 		},
 		"bearer_token": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Sensitive:        true,
-			Description:      "Enter the bearer token used for authorization.",
+			Description:      "Enter the bearer token used for authorization. Required when `auth` is set to `bearerTokenAuth`.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(.{1,255})$"),
 		},
 		"api_key_name": {
 			Type:             schema.TypeString,
 			Optional:         true,
-			Description:      "Enter the header name for API key authentication.",
+			Description:      "Enter the header name for API key authentication. Required when `auth` is set to `apiKeyAuth`.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(\\S{1,100})$"),
 		},
 		"api_key_value": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Sensitive:        true,
-			Description:      "Enter the value for API key authentication.",
+			Description:      "Enter the value for API key authentication. Required when `auth` is set to `apiKeyAuth`.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(.{1,100})$"),
 		},
 		"xml_root_key": {
