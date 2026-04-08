@@ -24,19 +24,41 @@ func TestDestinationResourceGoogleAnalytics4(t *testing.T) {
 				types_of_client = "gtag"
 				measurement_id  = "G-000000"
 				firebase_app_id = "..."
-			
+
+				debug_mode              = true
 				block_page_view_event   = true
 				extend_page_view_params = true
 				send_user_id            = true
-			
+				sdk_base_url            = "https://www.example.com"
+				server_container_url    = "https://analytics.example.com"
+
+				pii_properties_to_ignore = [
+					{ pii_property = "email" },
+					{ pii_property = "phone" }
+				]
+
 				use_native_sdk {
+					web     = true
+					android = true
+					ios     = true
+				}
+
+				capture_page_view {
+					web = "gtag"
+				}
+
+				debug_view {
 					web = true
 				}
-			
+
+				override_client_and_session_id {
+					web = true
+				}
+
 				event_filtering {
 					blacklist = ["one", "two", "three"]
 				}
-			
+
 				consent_management {
 					web = [
 						{
@@ -112,9 +134,16 @@ func TestDestinationResourceGoogleAnalytics4(t *testing.T) {
 				"typesOfClient": "gtag",
 				"measurementId": "G-000000",
 				"firebaseAppId": "...",
+				"debugMode": true,
 				"blockPageViewEvent": true,
 				"extendPageViewParams": true,
 				"sendUserId": true,
+				"sdkBaseUrl": "https://www.example.com",
+				"serverContainerUrl": "https://analytics.example.com",
+				"piiPropertiesToIgnore": [
+					{"piiProperty": "email"},
+					{"piiProperty": "phone"}
+				],
 				"blacklistedEvents": [
 				  {
 					"eventName": "one"
@@ -128,6 +157,17 @@ func TestDestinationResourceGoogleAnalytics4(t *testing.T) {
 				],
 				"eventFilteringOption": "blacklistedEvents",
 				"useNativeSDK": {
+				  "web": true,
+				  "android": true,
+				  "ios": true
+				},
+				"capturePageView": {
+				  "web": "gtag"
+				},
+				"debugView": {
+				  "web": true
+				},
+				"overrideClientAndSessionId": {
 				  "web": true
 				},
 				"consentManagement": {

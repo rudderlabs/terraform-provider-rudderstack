@@ -148,13 +148,28 @@ Optional:
 
 - `api_secret` (String, Sensitive) This field is required only for the cloud mode setup where you can enter the API Secret generated through the Google Analytics dashboard.
 - `block_page_view_event` (Boolean) Enable this setting to disable sending `page_view` events on load. This setting is applicable only for device mode.
+- `capture_page_view` (Block List, Max: 1) Choose whether to send page view events through the RudderStack JS SDK or through automatic collection using GA4 Enhanced Measurement. (see [below for nested schema](#nestedblock--config--capture_page_view))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
+- `debug_mode` (Boolean) Enable this setting to send events to GA4's validation server instead of reporting them. This allows you to check validation responses in Live Events, but these events will not show up in reports.
+- `debug_view` (Block List, Max: 1) Enable this setting to monitor your device mode events in GA4 DebugView. (see [below for nested schema](#nestedblock--config--debug_view))
 - `event_filtering` (Block List, Max: 1) With this option, you can determine which events are blocked or allowed to flow through to Google Analytics 4. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `extend_page_view_params` (Boolean) Enable this setting to send `url` and `search` along with any other custom property to the `page` call of the RudderStack SDK. This setting is applicable only for device mode.
 - `firebase_app_id` (String) Enter the Firebase App ID which is the identifier for Firebase app.
+- `override_client_and_session_id` (Block List, Max: 1) Override the gtag clientID and sessionID with RudderStack's to ensure attribution is properly unified across page and track events. (see [below for nested schema](#nestedblock--config--override_client_and_session_id))
+- `pii_properties_to_ignore` (List of Object) Use this field to filter sensitive PII fields from your events before sending them to GA4. (see [below for nested schema](#nestedatt--config--pii_properties_to_ignore))
+- `sdk_base_url` (String) Enter your GA4 Custom Domain URL. By default, it is https://www.googletagmanager.com.
 - `send_user_id` (Boolean) If enabled, the user ID is set to the identified visitors and sent to Google Analytics 4.
+- `server_container_url` (String) Enter your GA4 Server Side Container URL.
 - `types_of_client` (String) Select the client type as gtag or Firebase.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+
+<a id="nestedblock--config--capture_page_view"></a>
+### Nested Schema for `config.capture_page_view`
+
+Optional:
+
+- `web` (String)
+
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`
@@ -284,6 +299,14 @@ Optional:
 
 
 
+<a id="nestedblock--config--debug_view"></a>
+### Nested Schema for `config.debug_view`
+
+Optional:
+
+- `web` (Boolean)
+
+
 <a id="nestedblock--config--event_filtering"></a>
 ### Nested Schema for `config.event_filtering`
 
@@ -293,9 +316,27 @@ Optional:
 - `whitelist` (List of String) Enter the event names to be allowlisted.
 
 
+<a id="nestedblock--config--override_client_and_session_id"></a>
+### Nested Schema for `config.override_client_and_session_id`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedatt--config--pii_properties_to_ignore"></a>
+### Nested Schema for `config.pii_properties_to_ignore`
+
+Optional:
+
+- `pii_property` (String)
+
+
 <a id="nestedblock--config--use_native_sdk"></a>
 ### Nested Schema for `config.use_native_sdk`
 
 Optional:
 
+- `android` (Boolean)
+- `ios` (Boolean)
 - `web` (Boolean)
