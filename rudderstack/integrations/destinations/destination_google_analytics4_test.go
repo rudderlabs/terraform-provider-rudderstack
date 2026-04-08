@@ -12,10 +12,12 @@ func TestDestinationResourceGoogleAnalytics4(t *testing.T) {
 		{
 			TerraformCreate: `
 				api_secret      = "..."
+				types_of_client = "gtag"
 				measurement_id  = "G-000000"
 			`,
 			APICreate: `{
 				"apiSecret": "...",
+				"typesOfClient": "gtag",
 				"measurementId": "G-000000"
 			}`,
 			TerraformUpdate: `
