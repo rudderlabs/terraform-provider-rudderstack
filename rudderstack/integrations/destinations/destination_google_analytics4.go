@@ -7,17 +7,17 @@ import (
 )
 
 func init() {
-	supportedSourceTypes := []string{"web", "android", "ios", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
+	supportedSourceTypes := []string{"web", "android", "ios", "androidKotlin", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 	ga4URLPattern := "(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:\\/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]*|^$"
 	ga4NgrokPattern := ".*\\.ngrok\\.io.*"
 
 	properties := []c.ConfigProperty{
 		c.Simple("apiSecret", "api_secret"),
-		c.Simple("typesOfClient", "types_of_client"),
+		c.Simple("typesOfClient", "client_type"),
 		c.Simple("measurementId", "measurement_id", c.SkipZeroValue),
 		c.Simple("firebaseAppId", "firebase_app_id", c.SkipZeroValue),
-		c.Simple("debugMode", "debug_mode", c.SkipZeroValue),
+		c.Simple("debugMode", "debug_mode"),
 		c.Simple("blockPageViewEvent", "block_page_view_event", c.SkipZeroValue),
 		c.Simple("extendPageViewParams", "extend_page_view_params", c.SkipZeroValue),
 		c.Simple("sendUserId", "send_user_id", c.SkipZeroValue),
@@ -47,12 +47,13 @@ func init() {
 			Type:             schema.TypeString,
 			Required:         true,
 			Sensitive:        true,
-			Description:      "This field is required only for the cloud mode setup where you can enter the API Secret generated through the Google Analytics dashboard.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+			Description:      "Enter the API Secret generated through the Google Analytics dashboard.",
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
-		"types_of_client": {
+		"client_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
+			Default:          "gtag",
 			Description:      "Select the client type as gtag or Firebase.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(gtag|firebase)$"),
 		},
@@ -71,6 +72,7 @@ func init() {
 		"debug_mode": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     false,
 			Description: "Enable this setting to send events to GA4's validation server instead of reporting them. This allows you to check validation responses in Live Events, but these events will not show up in reports.",
 		},
 		"sdk_base_url": {
@@ -95,7 +97,7 @@ func init() {
 					"pii_property": {
 						Type:             schema.TypeString,
 						Required:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 					},
 				},
 			},
@@ -198,7 +200,7 @@ func init() {
 			Type:        schema.TypeList,
 			MaxItems:    1,
 			Optional:    true,
-			Description: "Override the gtag clientID and sessionID with RudderStack's to ensure attribution is properly unified across page and track events.",
+			Description: "Override the gtag client ID and session ID with RudderStack's to ensure attribution is properly unified across page and track events.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"web": {
