@@ -360,6 +360,20 @@ func ctyValue(x interface{}) cty.Value {
 			// The type of the list is not important because the generated code will have an empty list.
 			return cty.ListValEmpty(cty.String)
 		}
+		// // ListVal requires all elements to have the same type. If types differ
+		// // (e.g. a non-empty object list mixed with an empty-list placeholder),
+		// // fall back to TupleVal which allows heterogeneous element types.
+		firstType := values[0].Type()
+		allSameType := true
+		for _, val := range values[1:] {
+			if !val.Type().Equals(firstType) {
+				allSameType = false
+				break
+			}
+		}
+		if !allSameType {
+			return cty.TupleVal(values)
+		}
 		return cty.ListVal(values)
 
 	case map[string]interface{}:
