@@ -46,7 +46,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 					exclude_window_start_time = "11:00"
 					exclude_window_end_time   = "12:00"
 				}
-				namespace = "example-namespace"
 				json_paths = "./example-paths"
 				prefix = "example-prefix"
 				s3 {
@@ -133,7 +132,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"role": "example-role",
-				"namespace": "example-namespace",
 				"syncFrequency": "60",
 				"syncStartAt": "10:00",
 				"excludeWindow": {
@@ -421,7 +419,6 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				sync {
 					frequency = "60"
 				}
-				namespace = "example-namespace"
 			`,
 			APIUpdate: `{
 				"account": "example-account",
@@ -430,7 +427,6 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"user": "example-user",
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key-updated\n-----END PRIVATE KEY-----",
-				"namespace": "example-namespace",
 				"syncFrequency": "60",
 				"useRudderStorage": false,
 				"additionalProperties": true
@@ -477,7 +473,6 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 					exclude_window_start_time = "11:00"
 					exclude_window_end_time   = "12:00"
 				}
-				namespace = "example-namespace"
 				json_paths = "./example-paths"
 				prefix = "example-prefix"
 				gcp {
@@ -493,7 +488,6 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"user": "example-user",
 				"useKeyPairAuth": false,
 				"password": "example-password",
-				"namespace": "example-namespace",
 				"syncFrequency": "60",
 				"syncStartAt": "10:00",
 				"excludeWindow": {
@@ -551,7 +545,6 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 					exclude_window_start_time = "11:00"
 					exclude_window_end_time   = "12:00"
 				}
-				namespace = "example-namespace"
 				json_paths = "./example-paths"
 				prefix = "example-prefix"
 				azure {
@@ -568,7 +561,6 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"user": "example-user",
 				"useKeyPairAuth": false,
 				"password": "example-password",
-				"namespace": "example-namespace",
 				"syncFrequency": "60",
 				"syncStartAt": "10:00",
 				"excludeWindow": {

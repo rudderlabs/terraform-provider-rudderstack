@@ -25,7 +25,9 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
   				"trackPageName": true,
   				"useLegacyLinkName": true,
   				"pageNameFallbackTostring": true,
-  				"sendFalseValues": true
+  				"sendFalseValues": true,
+  				"timestampOption": "disabled",
+  				"productIdentifier": "name"
 			}`,
 			TerraformUpdate: `
 				report_suite_ids = "id003, id004"
@@ -491,7 +493,9 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 						}
 					]
 				},
-				"eventFilteringOption": "blacklistedEvents"
+				"eventFilteringOption": "blacklistedEvents",
+				"timestampOption": "disabled",
+				"productIdentifier": "name"
 			  }`,
 	},
 }

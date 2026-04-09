@@ -31,7 +31,6 @@ var s3DatalakeTestConfigs = []c.TestConfig{
 			TerraformUpdate: `
 				bucket_name = "bucket"
 
-				namespace	  = "namespace"
 				prefix        = "prefix"
 				access_key_id = "..."
 				access_key    = "..."
@@ -116,7 +115,6 @@ var s3DatalakeTestConfigs = []c.TestConfig{
 			`,
 			APIUpdate: `{
 				"bucketName": "bucket",
-				"namespace": "namespace",
 				"prefix": "prefix",
 				"accessKeyID": "...",
 				"accessKey": "...",

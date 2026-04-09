@@ -39,7 +39,6 @@ var bigqueryTestConfigs = []c.TestConfig{
 			
 				location  = "us-east1"
 				prefix    = "prefix"
-				namespace = "namespace"
 				skip_tracks_table = true
 				skip_users_table = false
 				skip_views = false
@@ -146,7 +145,6 @@ var bigqueryTestConfigs = []c.TestConfig{
 				"partitionType": "day",
 				"location": "us-east1",
 				"prefix": "prefix",
-				"namespace": "namespace",
 				"syncFrequency": "30",
 				"syncStartAt": "10:00",
 				"excludeWindow": {

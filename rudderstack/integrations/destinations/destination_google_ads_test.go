@@ -14,7 +14,9 @@ var googleAdsTestConfigs = []c.TestConfig{
 				conversion_id = "AW-00000000"
 			`,
 			APICreate: `{
-				"conversionID": "AW-00000000"
+				"conversionID": "AW-00000000",
+				"conversionLinker": true,
+				"sendPageView": true
 			}`,
 			TerraformUpdate: `
 				conversion_id = "AW-00000000"

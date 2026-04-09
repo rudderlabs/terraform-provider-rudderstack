@@ -16,7 +16,10 @@ var amplitudeTestConfigs = []c.TestConfig{
 			`,
 			APICreate: `{
 				"apiKey": "123abc",
-				"apiSecret": "abc123"
+				"apiSecret": "abc123",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard"
 			}`,
 			TerraformUpdate: `
 				api_key = "123abc"

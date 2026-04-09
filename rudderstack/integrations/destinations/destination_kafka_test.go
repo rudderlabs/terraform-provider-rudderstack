@@ -19,7 +19,8 @@ var kafkaTestConfigs = []c.TestConfig{
 				"hostName": "example.com",
 				"port": "9092",
 				"topic": "example-topic",
-				"sslEnabled": true
+				"sslEnabled": true,
+				"saslType": "plain"
 			}`,
 			TerraformUpdate: `
 				host_name = "example-updated.com"
@@ -102,6 +103,7 @@ var kafkaTestConfigs = []c.TestConfig{
 				"port": "9092",
 				"topic": "example-topic",
 				"sslEnabled": true,
+				"saslType": "plain",
 				"caCertificate": "example-ca-certificate",
 				"consentManagement": {
 					"web": [

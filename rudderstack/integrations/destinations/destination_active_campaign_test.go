@@ -11,15 +11,15 @@ import (
 var activeCampaignTestConfigs = []c.TestConfig{
 	{
 			TerraformCreate: `
-				api_url = "https://some-url"
+				api_url = "https://example.api-us1.com"
 				api_key = "api-key"
 			`,
 			APICreate: `{
-				"apiUrl": "https://some-url",
+				"apiUrl": "https://example.api-us1.com",
 				"apiKey": "api-key"
 			}`,
 			TerraformUpdate: `
-				api_url   = "https://some-url"
+				api_url   = "https://example.api-us1.com"
 				api_key   = "api-key"
 				actid     = "actid"
 				event_key = "event-key"
@@ -94,7 +94,7 @@ var activeCampaignTestConfigs = []c.TestConfig{
 				}
 			`,
 			APIUpdate: `{
-				"apiUrl": "https://some-url",
+				"apiUrl": "https://example.api-us1.com",
 				"apiKey": "api-key",
 				"actid": "actid",
 				"eventKey": "event-key",

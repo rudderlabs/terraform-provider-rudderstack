@@ -34,7 +34,8 @@ var mixpanelTestConfigs = []c.TestConfig{
 				"userDefinedScreenEventTemplate":  "Viewed {{ category }} {{ name }} screen",
 				"dropTraitsInTrackEvent": false,
 				"strictMode": false,
-				"userDeletionApi": "engage"
+				"userDeletionApi": "engage",
+				"persistenceType": "cookie"
 			}`,
 			TerraformUpdate: `
 				token = "..."
@@ -507,7 +508,8 @@ var mixpanelTestConfigs = []c.TestConfig{
 					}
 				],
 				"userDeletionApi": "task",
-				"gdprApiToken": "..."
+				"gdprApiToken": "...",
+				"persistenceType": "cookie"
 			}
 			`,
 	},

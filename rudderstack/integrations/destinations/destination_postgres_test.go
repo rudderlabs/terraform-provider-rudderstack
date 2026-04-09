@@ -36,7 +36,7 @@ var postgresTestConfigs = []c.TestConfig{
 				user = "test-user"
 				password = "test-password"
 				port = "test-port"
-				ssl_mode = "verify-ca"
+				ssl_mode = "disable"
 				sync_frequency = "60"
 				use_rudder_storage = true
 				consent_management {
@@ -115,7 +115,7 @@ var postgresTestConfigs = []c.TestConfig{
 				"user": "test-user",
 				"password": "test-password",
 				"port": "test-port",
-				"sslMode": "verify-ca",
+				"sslMode": "disable",
 				"syncFrequency": "60",
 				"useRudderStorage": true,
 				"consentManagement": {

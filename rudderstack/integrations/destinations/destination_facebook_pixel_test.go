@@ -11,10 +11,12 @@ import (
 var facebookPixelTestConfigs = []c.TestConfig{
 	{
 			TerraformCreate: `
-				pixel_id = "abc123"
+				pixel_id     = "abc123"
+				access_token = "placeholder-access-token"
 			`,
 			APICreate: `{
-				"pixelId": "abc123"
+				"pixelId": "abc123",
+				"accessToken": "placeholder-access-token"
 			}`,
 			TerraformUpdate: `
 				pixel_id = "facebook pixel id"

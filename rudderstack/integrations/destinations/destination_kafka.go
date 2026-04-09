@@ -17,7 +17,7 @@ func init() {
 		c.Simple("sslEnabled", "ssl_enabled", c.SkipZeroValue),
 		c.Simple("caCertificate", "ca_certificate", c.SkipZeroValue),
 		c.Simple("useSASL", "use_sasl", c.SkipZeroValue),
-		c.Simple("saslType", "sasl_type", c.SkipZeroValue),
+		c.Simple("saslType", "sasl_type"),
 		c.Simple("username", "username", c.SkipZeroValue),
 		c.Simple("password", "password", c.SkipZeroValue),
 		c.Simple("convertToAvro", "convert_to_avro", c.SkipZeroValue),
@@ -75,6 +75,7 @@ func init() {
 		"sasl_type": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Default:     "plain",
 			Description: "The SASL type for the Kafka service.",
 		},
 		"username": {

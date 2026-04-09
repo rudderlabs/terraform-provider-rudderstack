@@ -88,8 +88,8 @@ var iterableTestConfigs = []c.TestConfig{
 				is_required_to_dismiss_message { 
 					web = true 
 				}
-				close_button_position { 
-					web = "..." 
+				close_button_position {
+					web = "top-right"
 				}
 				consent_management {
 					web = [
@@ -202,7 +202,7 @@ var iterableTestConfigs = []c.TestConfig{
 				"closeButtonColorSideOffset": { "web": "2%" },
 				"iconPath": { "web": "..." },
 				"isRequiredToDismissMessage": { "web": true },
-				"closeButtonPosition": { "web": "..." },
+				"closeButtonPosition": { "web": "top-right" },
 				"consentManagement": {
 					"web": [
 						{
