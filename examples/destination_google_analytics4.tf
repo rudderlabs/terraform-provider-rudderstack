@@ -8,7 +8,7 @@ resource "rudderstack_destination_google_analytics4" "example" {
 
     # api_secret = "..."
 
-    # types_of_client = "gtag"
+    # client_type = "gtag"
 
     # block_page_view_event   = false
     # extend_page_view_params = false
