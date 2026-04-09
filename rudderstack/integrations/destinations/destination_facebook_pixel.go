@@ -14,7 +14,7 @@ func init() {
 		c.Simple("pixelId", "pixel_id"),
 		c.Simple("accessToken", "access_token", c.SkipZeroValue),
 		c.Simple("standardPageCall", "standard_page_call", c.SkipZeroValue),
-		c.Simple("valueFieldIdentifier", "value_field_identifier", c.SkipZeroValue),
+		c.Simple("valueFieldIdentifier", "value_field_identifier"),
 		c.Simple("advancedMapping", "advanced_mapping", c.SkipZeroValue),
 		c.Simple("testDestination", "test_destination", c.SkipZeroValue),
 		c.Simple("testEventCode", "test_event_code", c.SkipZeroValue),
@@ -63,6 +63,7 @@ func init() {
 		"value_field_identifier": {
 			Type:             schema.TypeString,
 			Optional:         true,
+			Default:          "properties.price",
 			Description:      "You can set this field to `properties.price` or `properties.value`. RudderStack will then assign this to the value field of the Facebook payload.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(properties.value|properties.price)$"),
 		},
@@ -86,6 +87,7 @@ func init() {
 			Type:        schema.TypeList,
 			MaxItems:    10,
 			Optional:    true,
+			Computed:    true,
 			Description: "You can map your events to standard Facebook events using this setting.",
 			ConfigMode:  schema.SchemaConfigModeAttr,
 			Elem: &schema.Resource{
@@ -106,6 +108,7 @@ func init() {
 		"event_custom_properties": {
 			Type:        schema.TypeList,
 			Optional:    true,
+			Computed:    true,
 			Description: "For the standard events, some predefined properties are taken by Facebook. If you want to send more properties for your events, mention those properties in this field.",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
@@ -114,6 +117,7 @@ func init() {
 		"blacklist_pii_properties": {
 			Type:        schema.TypeList,
 			Optional:    true,
+			Computed:    true,
 			Description: "Enter the PII properties to be denylisted.",
 			ConfigMode:  schema.SchemaConfigModeAttr,
 			Elem: &schema.Resource{
@@ -133,6 +137,7 @@ func init() {
 		"whitelist_pii_properties": {
 			Type:        schema.TypeList,
 			Optional:    true,
+			Computed:    true,
 			Description: "Enter the PII properties to be allowlisted.",
 			ConfigMode:  schema.SchemaConfigModeAttr,
 			Elem: &schema.Resource{
@@ -148,6 +153,7 @@ func init() {
 		"category_to_content": {
 			Type:        schema.TypeList,
 			Optional:    true,
+			Computed:    true,
 			Description: "This option lets you specify the category fields to specific Facebook content type.",
 			ConfigMode:  schema.SchemaConfigModeAttr,
 			Elem: &schema.Resource{

@@ -16,7 +16,8 @@ var facebookPixelTestConfigs = []c.TestConfig{
 			`,
 			APICreate: `{
 				"pixelId": "abc123",
-				"accessToken": "placeholder-access-token"
+				"accessToken": "placeholder-access-token",
+				"valueFieldIdentifier": "properties.price"
 			}`,
 			TerraformUpdate: `
 				pixel_id = "facebook pixel id"
@@ -30,11 +31,11 @@ var facebookPixelTestConfigs = []c.TestConfig{
 				test_event_code        = "..."
 			
 				events_to_events = [{
-					from = "a1"
-					to   = "b1"
+					from = "Order Completed"
+					to   = "Purchase"
 				}, {
-					from = "a2"
-					to   = "b2"
+					from = "Product Added"
+					to   = "AddToCart"
 				}]
 			
 				event_custom_properties = ["one", "two", "three"]
@@ -156,8 +157,8 @@ var facebookPixelTestConfigs = []c.TestConfig{
 				"testDestination": true,
 				"testEventCode": "...",
 				"eventsToEvents": [
-				  { "from": "a1", "to": "b1" },
-				  { "from": "a2", "to": "b2" }
+				  { "from": "Order Completed", "to": "Purchase" },
+				  { "from": "Product Added", "to": "AddToCart" }
 				],
 				"eventCustomProperties": [
 					{ "eventCustomProperties": "one" },

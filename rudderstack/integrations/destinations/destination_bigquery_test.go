@@ -36,7 +36,9 @@ var bigqueryTestConfigs = []c.TestConfig{
 				project     = "project"
 				bucket_name = "bucket"
 				credentials = "..."
-			
+				partition_column = "loaded_at"
+				partition_type = "hour"
+
 				location  = "us-east1"
 				prefix    = "prefix"
 				skip_tracks_table = true
@@ -141,8 +143,8 @@ var bigqueryTestConfigs = []c.TestConfig{
 				"skipTracksTable": true,
 				"skipViews": false,
 				"skipUsersTable": false,
-				"partitionColumn": "_PARTITIONTIME",
-				"partitionType": "day",
+				"partitionColumn": "loaded_at",
+				"partitionType": "hour",
 				"location": "us-east1",
 				"prefix": "prefix",
 				"syncFrequency": "30",

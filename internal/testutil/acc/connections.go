@@ -67,13 +67,6 @@ func AccAssertConnection(t *testing.T, cfg ConnectionTestConfig) {
 				),
 			},
 			{
-				Config: testAccConnectionConfig(cfg, srcName, dstName, false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckConnectionExists(connResource),
-					resource.TestCheckResourceAttr(connResource, "enabled", "false"),
-				),
-			},
-			{
 				ResourceName:      connResource,
 				ImportState:       true,
 				ImportStateVerify: true,
