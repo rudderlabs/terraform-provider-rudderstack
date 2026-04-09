@@ -136,7 +136,7 @@ jobs:
           RUDDERSTACK_API_URL: ${{ secrets.RUDDERSTACK_ACC_TEST_API_URL }}
           DEST_NAME: ${{ matrix.destination }}
         run: |
-          DEST_PATTERN=$(echo "$DEST_NAME" | sed 's/_/./g')
+          DEST_PATTERN=$(echo "$DEST_NAME" | sed 's/_/.*/g')
           go test \
             ./rudderstack/integrations/destinations/ \
             -v \
