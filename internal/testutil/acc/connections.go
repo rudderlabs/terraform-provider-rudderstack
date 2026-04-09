@@ -20,8 +20,8 @@ type ConnectionTestConfig struct {
 // AccAssertConnection runs an E2E test that creates a source + destination, connects
 // them, updates the connection (disable/enable), imports, and destroys.
 //
-// In short mode: plan-only validation (zero API calls).
-// In full mode: full CRUD against the real API.
+// When PlanOnly() is enabled (TF_ACC_PLAN_ONLY=1): plan-only validation (zero API calls).
+// Otherwise: full CRUD against the real API.
 func AccAssertConnection(t *testing.T, cfg ConnectionTestConfig) {
 	t.Helper()
 	t.Parallel()

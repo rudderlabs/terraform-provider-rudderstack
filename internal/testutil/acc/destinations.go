@@ -79,7 +79,10 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 
 // RandomName generates a unique resource name with a tf-acc- prefix for test isolation.
 func RandomName(prefix string) string {
-	n, _ := rand.Int(rand.Reader, big.NewInt(1<<62))
+	n, err := rand.Int(rand.Reader, big.NewInt(1<<62))
+	if err != nil || n == nil {
+		return fmt.Sprintf("tf-acc-%s-%d", prefix, os.Getpid())
+	}
 	return fmt.Sprintf("tf-acc-%s-%d", prefix, n.Int64())
 }
 
