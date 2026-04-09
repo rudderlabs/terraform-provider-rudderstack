@@ -246,6 +246,103 @@ resource "rudderstack_connection" "cnxn_id-connection-2" {
 	assert.Equal(t, expected, string(data))
 }
 
+// TestGeneratorTerraformNestedListInListOfObjects tests ctyValue handling for a list of objects
+// where each object contains a nested list attribute. Three scenarios are covered:
+//   - all items have an empty nested list
+//   - all items have a non-empty nested list
+//   - some items have an empty nested list and some have a non-empty nested list (the mixed case)
+//
+// The mixed case previously caused a panic ("inconsistent list element types") because empty
+// lists were represented as List(String) while non-empty lists had a concrete element type,
+// making it impossible to construct a uniform cty.ListVal.
+func TestGeneratorTerraformNestedListInListOfObjects(t *testing.T) {
+	// HS destination is used because it has hubspot_events (list of objects) where each
+	// object contains event_properties (nested list), which is the structure that exercises
+	// the ctyValue fix. The test is about the generator behavior, not the HS destination itself.
+	sources := []client.Source{
+		{ID: "id-js", Name: "source-js", Type: "Javascript"},
+	}
+
+	t.Run("all items have empty nested list", func(t *testing.T) {
+		destinations := []client.Destination{
+			{
+				ID:   "id-dst-1",
+				Name: "dest-1",
+				Type: "HS",
+				Config: json.RawMessage(`{
+					"authorizationType": "newPrivateAppApi",
+					"apiVersion": "newApi",
+					"hubspotEvents": [
+						{"rsEventName": "e1", "hubspotEventName": "pe_e1", "eventProperties": []},
+						{"rsEventName": "e2", "hubspotEventName": "pe_e2", "eventProperties": []}
+					]
+				}`),
+			},
+		}
+		data, err := generator.GenerateTerraform(sources, destinations, nil)
+		require.NoError(t, err)
+		output := string(data)
+		assert.Contains(t, output, `hubspot_event_name = "pe_e1"`)
+		assert.Contains(t, output, `hubspot_event_name = "pe_e2"`)
+	})
+
+	t.Run("all items have non-empty nested list", func(t *testing.T) {
+		destinations := []client.Destination{
+			{
+				ID:   "id-dst-2",
+				Name: "dest-2",
+				Type: "HS",
+				Config: json.RawMessage(`{
+					"authorizationType": "newPrivateAppApi",
+					"apiVersion": "newApi",
+					"hubspotEvents": [
+						{
+							"rsEventName": "e1", "hubspotEventName": "pe_e1",
+							"eventProperties": [{"from": "f1", "to": "t1"}]
+						},
+						{
+							"rsEventName": "e2", "hubspotEventName": "pe_e2",
+							"eventProperties": [{"from": "f2", "to": "t2"}]
+						}
+					]
+				}`),
+			},
+		}
+		data, err := generator.GenerateTerraform(sources, destinations, nil)
+		require.NoError(t, err)
+		output := string(data)
+		assert.Contains(t, output, `from = "f1"`)
+		assert.Contains(t, output, `from = "f2"`)
+	})
+
+	t.Run("mixed: some items have empty nested list and some have non-empty", func(t *testing.T) {
+		destinations := []client.Destination{
+			{
+				ID:   "id-dst-3",
+				Name: "dest-3",
+				Type: "HS",
+				Config: json.RawMessage(`{
+					"authorizationType": "newPrivateAppApi",
+					"apiVersion": "newApi",
+					"hubspotEvents": [
+						{"rsEventName": "e1", "hubspotEventName": "pe_e1", "eventProperties": []},
+						{
+							"rsEventName": "e2", "hubspotEventName": "pe_e2",
+							"eventProperties": [{"from": "f2", "to": "t2"}]
+						}
+					]
+				}`),
+			},
+		}
+		data, err := generator.GenerateTerraform(sources, destinations, nil)
+		require.NoError(t, err)
+		output := string(data)
+		assert.Contains(t, output, `hubspot_event_name = "pe_e1"`)
+		assert.Contains(t, output, `hubspot_event_name = "pe_e2"`)
+		assert.Contains(t, output, `from = "f2"`)
+	})
+}
+
 func TestGeneratorImportScript(t *testing.T) {
 	sources := []client.Source{
 		{

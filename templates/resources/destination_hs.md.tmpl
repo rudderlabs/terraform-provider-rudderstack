@@ -1,0 +1,31 @@
+---
+page_title: "rudderstack_destination_hs Resource - terraform-provider-rudderstack"
+subcategory: ""
+description: |-
+
+---
+
+# rudderstack_destination_hs (Resource)
+
+This resource represents a HubSpot destination. For more information check
+https://www.rudderstack.com/docs/destinations/crm/hubspot/
+
+## Example Usage
+
+{{tffile "examples/destination_hs.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Notes
+
+### `config.hubspot_events` nested fields
+
+When specifying `hubspot_events` entries, `rs_event_name` and `hubspot_event_name` are **required**:
+
+- `rs_event_name` (String) — **Required.** The RudderStack event name.
+- `hubspot_event_name` (String) — **Required.** The HubSpot Custom Behavioral event name.
+
+When specifying `event_properties` entries within `hubspot_events`, both `from` and `to` are **required**:
+
+- `from` (String) — **Required.** The RudderStack event property name.
+- `to` (String) — **Required.** The HubSpot event property name.
