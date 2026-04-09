@@ -10,82 +10,60 @@ resource "rudderstack_destination_customerio" "example" {
     # datacenter = "US"
 
     # use_native_sdk {
+    #   web     = true
+    #   android = true
+    #   ios     = true
+    # }
+
+    # send_page_name_in_sdk {
     #   web = true
     # }
 
-    # event_filtering {
-    #   whitelist = ["one", "two", "three"]
-    #   blacklist = ["one", "two", "three"]
+    # data_use_in_app {
+    #   web = false
     # }
 
-    consent_management {
-      web = [
-        {
-          provider            = "oneTrust"
-          consents            = ["one_web", "two_web", "three_web"]
-          resolution_strategy = ""
-        },
-        {
-          provider            = "ketch"
-          consents            = ["one_web", "two_web", "three_web"]
-          resolution_strategy = ""
-        },
-        {
-          provider            = "custom"
-          resolution_strategy = "and"
-          consents            = ["one_web", "two_web", "three_web"]
-        }
-      ]
-      # 	android = [{
-      # 		provider = "ketch"
-      # 		consents = ["one_android", "two_android", "three_android"]
-      # 		resolution_strategy = ""
-      # 	}]
-      # 	ios = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_ios", "two_ios", "three_ios"]
-      # 	}]
-      # 	unity = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "or"
-      # 		consents = ["one_unity", "two_unity", "three_unity"]
-      # 	}]
-      # 	reactnative = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_reactnative", "two_reactnative", "three_reactnative"]
-      # 	}]
-      # 	flutter = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_flutter", "two_flutter", "three_flutter"]
-      # 	}]
-      # 	cordova = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_cordova", "two_cordova", "three_cordova"]
-      # 	}]
-      # 	amp = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_amp", "two_amp", "three_amp"]
-      # 	}]
-      # 	cloud = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_cloud", "two_cloud", "three_cloud"]
-      # 	}]
-      # 	warehouse = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_warehouse", "two_warehouse", "three_warehouse"]
-      # 	}]
-      # 	shopify = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_shopify", "two_shopify", "three_shopify"]
-      # 	}]
-    }
+    # auto_track_device_attributes {
+    #   android = true
+    #   ios     = true
+    # }
+
+    # background_queue_min_number_of_tasks {
+    #   android = "10"
+    # }
+
+    # background_queue_seconds_delay {
+    #   android = "30"
+    # }
+
+    # event_filtering {
+    #   whitelist = ["event-one", "event-two"]
+    #   # blacklist = ["event-one", "event-two"]  # use either whitelist or blacklist, not both
+    # }
+
+    # consent_management {
+    #   web = [
+    #     {
+    #       provider            = "oneTrust"
+    #       consents            = ["category-1", "category-2"]
+    #       resolution_strategy = ""
+    #     },
+    #     {
+    #       provider            = "custom"
+    #       resolution_strategy = "and"
+    #       consents            = ["category-1", "category-2"]
+    #     }
+    #   ]
+    #   android = [{
+    #     provider            = "oneTrust"
+    #     consents            = ["category-1", "category-2"]
+    #     resolution_strategy = ""
+    #   }]
+    #   ios = [{
+    #     provider            = "oneTrust"
+    #     consents            = ["category-1", "category-2"]
+    #     resolution_strategy = ""
+    #   }]
+    # }
   }
 }

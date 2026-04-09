@@ -24,83 +24,61 @@ resource "rudderstack_destination_customerio" "example" {
     # datacenter = "US"
 
     # use_native_sdk {
+    #   web     = true
+    #   android = true
+    #   ios     = true
+    # }
+
+    # send_page_name_in_sdk {
     #   web = true
     # }
 
-    # event_filtering {
-    #   whitelist = ["one", "two", "three"]
-    #   blacklist = ["one", "two", "three"]
+    # data_use_in_app {
+    #   web = false
     # }
 
-    consent_management {
-      web = [
-        {
-          provider            = "oneTrust"
-          consents            = ["one_web", "two_web", "three_web"]
-          resolution_strategy = ""
-        },
-        {
-          provider            = "ketch"
-          consents            = ["one_web", "two_web", "three_web"]
-          resolution_strategy = ""
-        },
-        {
-          provider            = "custom"
-          resolution_strategy = "and"
-          consents            = ["one_web", "two_web", "three_web"]
-        }
-      ]
-      # 	android = [{
-      # 		provider = "ketch"
-      # 		consents = ["one_android", "two_android", "three_android"]
-      # 		resolution_strategy = ""
-      # 	}]
-      # 	ios = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_ios", "two_ios", "three_ios"]
-      # 	}]
-      # 	unity = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "or"
-      # 		consents = ["one_unity", "two_unity", "three_unity"]
-      # 	}]
-      # 	reactnative = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_reactnative", "two_reactnative", "three_reactnative"]
-      # 	}]
-      # 	flutter = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_flutter", "two_flutter", "three_flutter"]
-      # 	}]
-      # 	cordova = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_cordova", "two_cordova", "three_cordova"]
-      # 	}]
-      # 	amp = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_amp", "two_amp", "three_amp"]
-      # 	}]
-      # 	cloud = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_cloud", "two_cloud", "three_cloud"]
-      # 	}]
-      # 	warehouse = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_warehouse", "two_warehouse", "three_warehouse"]
-      # 	}]
-      # 	shopify = [{
-      # 		provider = "custom"
-      # 		resolution_strategy = "and"
-      # 		consents = ["one_shopify", "two_shopify", "three_shopify"]
-      # 	}]
-    }
+    # auto_track_device_attributes {
+    #   android = true
+    #   ios     = true
+    # }
+
+    # background_queue_min_number_of_tasks {
+    #   android = "10"
+    # }
+
+    # background_queue_seconds_delay {
+    #   android = "30"
+    # }
+
+    # event_filtering {
+    #   whitelist = ["event-one", "event-two"]
+    #   # blacklist = ["event-one", "event-two"]  # use either whitelist or blacklist, not both
+    # }
+
+    # consent_management {
+    #   web = [
+    #     {
+    #       provider            = "oneTrust"
+    #       consents            = ["category-1", "category-2"]
+    #       resolution_strategy = ""
+    #     },
+    #     {
+    #       provider            = "custom"
+    #       resolution_strategy = "and"
+    #       consents            = ["category-1", "category-2"]
+    #     }
+    #   ]
+    #   android = [{
+    #     provider            = "oneTrust"
+    #     consents            = ["category-1", "category-2"]
+    #     resolution_strategy = ""
+    #   }]
+    #   ios = [{
+    #     provider            = "oneTrust"
+    #     consents            = ["category-1", "category-2"]
+    #     resolution_strategy = ""
+    #   }]
+    # }
   }
 }
 ```
@@ -141,11 +119,41 @@ Required:
 
 Optional:
 
+- `auto_track_device_attributes` (Block List, Max: 1) Enable this setting to automatically track device attributes in SDK mode. (see [below for nested schema](#nestedblock--config--auto_track_device_attributes))
+- `background_queue_min_number_of_tasks` (Block List, Max: 1) Configure the minimum number of tasks in the background queue. (see [below for nested schema](#nestedblock--config--background_queue_min_number_of_tasks))
+- `background_queue_seconds_delay` (Block List, Max: 1) Configure the delay in seconds for the background queue. (see [below for nested schema](#nestedblock--config--background_queue_seconds_delay))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
+- `data_use_in_app` (Block List, Max: 1) Enable this setting to send in-app messages to your website. (see [below for nested schema](#nestedblock--config--data_use_in_app))
 - `datacenter` (String) Input your Customer.io Data Center. (US or EU)
 - `device_token_event_name` (String) Enter the name of the event that is fired immediately after setting the device token.
 - `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native JavaScript SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+- `send_page_name_in_sdk` (Block List, Max: 1) Configure whether to send the page name in SDK mode. (see [below for nested schema](#nestedblock--config--send_page_name_in_sdk))
+- `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+
+<a id="nestedblock--config--auto_track_device_attributes"></a>
+### Nested Schema for `config.auto_track_device_attributes`
+
+Optional:
+
+- `android` (Boolean)
+- `ios` (Boolean)
+
+
+<a id="nestedblock--config--background_queue_min_number_of_tasks"></a>
+### Nested Schema for `config.background_queue_min_number_of_tasks`
+
+Optional:
+
+- `android` (String)
+
+
+<a id="nestedblock--config--background_queue_seconds_delay"></a>
+### Nested Schema for `config.background_queue_seconds_delay`
+
+Optional:
+
+- `android` (String)
+
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`
@@ -154,10 +162,12 @@ Optional:
 
 - `amp` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--amp))
 - `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `android_kotlin` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android_kotlin))
 - `cloud` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud))
 - `cordova` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cordova))
 - `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
 - `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `ios_swift` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios_swift))
 - `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
 - `shopify` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--shopify))
 - `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
@@ -176,6 +186,16 @@ Optional:
 
 <a id="nestedatt--config--consent_management--android"></a>
 ### Nested Schema for `config.consent_management.android`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android_kotlin"></a>
+### Nested Schema for `config.consent_management.android_kotlin`
 
 Optional:
 
@@ -216,6 +236,16 @@ Optional:
 
 <a id="nestedatt--config--consent_management--ios"></a>
 ### Nested Schema for `config.consent_management.ios`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios_swift"></a>
+### Nested Schema for `config.consent_management.ios_swift`
 
 Optional:
 
@@ -275,6 +305,14 @@ Optional:
 
 
 
+<a id="nestedblock--config--data_use_in_app"></a>
+### Nested Schema for `config.data_use_in_app`
+
+Optional:
+
+- `web` (Boolean)
+
+
 <a id="nestedblock--config--event_filtering"></a>
 ### Nested Schema for `config.event_filtering`
 
@@ -284,9 +322,19 @@ Optional:
 - `whitelist` (List of String) Enter the event names to be allowlisted.
 
 
+<a id="nestedblock--config--send_page_name_in_sdk"></a>
+### Nested Schema for `config.send_page_name_in_sdk`
+
+Optional:
+
+- `web` (Boolean)
+
+
 <a id="nestedblock--config--use_native_sdk"></a>
 ### Nested Schema for `config.use_native_sdk`
 
 Optional:
 
+- `android` (Boolean)
+- `ios` (Boolean)
 - `web` (Boolean)

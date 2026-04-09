@@ -16,7 +16,30 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 				datacenter = "US"
 
 				use_native_sdk {
+					web     = true
+					android = true
+					ios     = true
+				}
+
+				send_page_name_in_sdk {
 					web = true
+				}
+
+				data_use_in_app {
+					web = true
+				}
+
+				auto_track_device_attributes {
+					android = true
+					ios     = false
+				}
+
+				background_queue_min_number_of_tasks {
+					android = "10"
+				}
+
+				background_queue_seconds_delay {
+					android = "30"
 				}
 			`,
 			APICreate: `{
@@ -24,7 +47,25 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "US",
 				"useNativeSDK": {
+					"web": true,
+					"android": true,
+					"ios": true
+				},
+				"sendPageNameInSDK": {
 					"web": true
+				},
+				"dataUseInApp": {
+					"web": true
+				},
+				"autoTrackDeviceAttributes": {
+					"android": true,
+					"ios": false
+				},
+				"backgroundQueueMinNumberOfTasks": {
+					"android": "10"
+				},
+				"backgroundQueueSecondsDelay": {
+					"android": "30"
 				}
 			}`,
 			TerraformUpdate: `
