@@ -231,6 +231,10 @@ func storeSourceToState(cm configs.ConfigMeta, source *client.Source, d *schema.
 		return err
 	}
 
+	if cm.SkipConfig {
+		return nil
+	}
+
 	if len(properties) > 0 {
 		if err := d.Set("config", []interface{}{properties}); err != nil {
 			return err
