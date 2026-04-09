@@ -150,7 +150,7 @@ jobs:
         env:
           TF_ACC: "1"
           RUDDERSTACK_ACCESS_TOKEN: ${{ secrets.RUDDERSTACK_ACC_TEST_TOKEN }}
-          RUDDERSTACK_API_URL: ${{ secrets.RUDDERSTACK_ACC_TEST_API_URL }}
+          RUDDERSTACK_API_URL: ${{ vars.RUDDERSTACK_ACC_TEST_API_URL }}
           DEST_NAME: ${{ matrix.destination }}
         run: |
           DEST_PATTERN=$(echo "$DEST_NAME" | sed 's/_/.*/g')
@@ -185,7 +185,7 @@ jobs:
         env:
           TF_ACC: "1"
           RUDDERSTACK_ACCESS_TOKEN: ${{ secrets.RUDDERSTACK_ACC_TEST_TOKEN }}
-          RUDDERSTACK_API_URL: ${{ secrets.RUDDERSTACK_ACC_TEST_API_URL }}
+          RUDDERSTACK_API_URL: ${{ vars.RUDDERSTACK_ACC_TEST_API_URL }}
         run: |
           go test \
             ./rudderstack/integrations/sources/ \
@@ -218,7 +218,7 @@ jobs:
         env:
           TF_ACC: "1"
           RUDDERSTACK_ACCESS_TOKEN: ${{ secrets.RUDDERSTACK_ACC_TEST_TOKEN }}
-          RUDDERSTACK_API_URL: ${{ secrets.RUDDERSTACK_ACC_TEST_API_URL }}
+          RUDDERSTACK_API_URL: ${{ vars.RUDDERSTACK_ACC_TEST_API_URL }}
         run: |
           go test \
             ./rudderstack/integrations/connections/ \
