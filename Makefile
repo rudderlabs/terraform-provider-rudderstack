@@ -71,12 +71,14 @@ testacc-all: ## Run all E2E acceptance tests (full CRUD)
 .PHONY: testacc-dest
 testacc-dest: ## Run E2E for one destination. Usage: make testacc-dest DEST=webhook
 	@if [ -z "$(DEST)" ]; then echo "Usage: make testacc-dest DEST=<name>"; exit 1; fi
-	TF_ACC=1 go test ./rudderstack/integrations/destinations/ -v -run "(?i)TestAccDestination.*$(DEST)" -timeout 10m -count=1
+	@pattern=$$(printf '%s' "$(DEST)" | sed 's/_/.*/g'); \
+	TF_ACC=1 go test ./rudderstack/integrations/destinations/ -v -run "(?i)TestAccDestination.*$$pattern" -timeout 10m -count=1
 
 .PHONY: testacc-source
 testacc-source: ## Run E2E for one source. Usage: make testacc-source SRC=http
 	@if [ -z "$(SRC)" ]; then echo "Usage: make testacc-source SRC=<name>"; exit 1; fi
-	TF_ACC=1 go test ./rudderstack/integrations/sources/ -v -run "(?i)TestAccSource.*$(SRC)" -timeout 10m -count=1
+	@pattern=$$(printf '%s' "$(SRC)" | sed 's/_/.*/g'); \
+	TF_ACC=1 go test ./rudderstack/integrations/sources/ -v -run "(?i)TestAccSource.*$$pattern" -timeout 10m -count=1
 
 .PHONY: testacc-conn
 testacc-conn: ## Run E2E for connections. Usage: make testacc-conn
