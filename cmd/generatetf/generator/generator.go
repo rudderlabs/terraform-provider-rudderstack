@@ -356,13 +356,39 @@ func ctyValue(x interface{}) cty.Value {
 			values = append(values, ctyValue(i))
 		}
 		if len(values) == 0 {
-			// ListVal cannot be used with an empty list, so we return a ListValEmpty.
-			// Use DynamicPseudoType so the empty list is compatible with any element type,
-			// preventing type mismatches when sibling lists have object elements (e.g. event_properties).
-			return cty.ListValEmpty(cty.DynamicPseudoType)
+			return cty.ListValEmpty(cty.String)
+		}
+
+		// When elements are objects, a list attribute may be empty (cty.String placeholder
+		// from the len==0 case above) in some elements but have a concrete type in others.
+		// Collect concrete types first, then fix the placeholders so all elements have the same type.
+		concreteAttrElemTypes := map[string]cty.Type{}
+		for _, val := range values {
+			if !val.Type().IsObjectType() {
+				continue
+			}
+			for k, attrVal := range val.AsValueMap() {
+				if attrVal.Type().IsListType() && !attrVal.Type().ElementType().Equals(cty.String) {
+					concreteAttrElemTypes[k] = attrVal.Type().ElementType()
+				}
+			}
+		}
+		for i, val := range values {
+			if !val.Type().IsObjectType() {
+				continue
+			}
+			attrs := val.AsValueMap()
+			for k, attrVal := range attrs {
+				if elemType, ok := concreteAttrElemTypes[k]; ok &&
+					attrVal.Type().IsListType() &&
+					attrVal.Type().ElementType().Equals(cty.String) &&
+					attrVal.LengthInt() == 0 {
+					attrs[k] = cty.ListValEmpty(elemType)
+					values[i] = cty.ObjectVal(attrs)
+				}
+			}
 		}
 		return cty.ListVal(values)
-
 	case map[string]interface{}:
 		values := map[string]cty.Value{}
 		for k, i := range v {
