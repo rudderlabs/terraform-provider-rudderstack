@@ -24,13 +24,17 @@ type ConnectionTestConfig struct {
 // Otherwise: full CRUD against the real API.
 func AccAssertConnection(t *testing.T, cfg ConnectionTestConfig) {
 	t.Helper()
-	t.Parallel()
+
+	planOnly := PlanOnly()
+	if planOnly {
+		t.Parallel()
+	}
 
 	connResource := "rudderstack_connection.test"
 	srcName := RandomName("conn-src-" + cfg.Source)
 	dstName := RandomName("conn-dst-" + cfg.Destination)
 
-	if PlanOnly() {
+	if planOnly {
 		ensureDummyToken(t)
 		resource.UnitTest(t, resource.TestCase{
 			ProviderFactories: TestAccProviderFactories,

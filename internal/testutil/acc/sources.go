@@ -19,13 +19,17 @@ import (
 // and verifies the API config matches the expected JSON from test configs.
 func AccAssertSource(t *testing.T, source string, testConfigs []configs.TestConfig) {
 	t.Helper()
-	t.Parallel()
+
+	planOnly := PlanOnly()
+	if planOnly {
+		t.Parallel()
+	}
 
 	resourceName := fmt.Sprintf("rudderstack_source_%s.test", source)
 	name := RandomName(source)
 	cfg := testConfigs[0]
 
-	if PlanOnly() {
+	if planOnly {
 		ensureDummyToken(t)
 		resource.UnitTest(t, resource.TestCase{
 			ProviderFactories: TestAccProviderFactories,
