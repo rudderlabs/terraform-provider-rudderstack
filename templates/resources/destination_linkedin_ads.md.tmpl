@@ -15,3 +15,12 @@ https://www.rudderstack.com/docs/destinations/linkedin-ads/
 {{tffile "examples/destination_linkedin_ads.tf"}}
 
 {{ .SchemaMarkdown | trimspace }}
+
+## Notes
+
+### `config.conversion_mapping`
+
+When specifying `conversion_mapping` entries, both `from` and `to` are **required**:
+
+- `from` (String) — **Required.** The RudderStack event name.
+- `to` (String) — **Required.** The LinkedIn Ads Conversion Rule ID.
