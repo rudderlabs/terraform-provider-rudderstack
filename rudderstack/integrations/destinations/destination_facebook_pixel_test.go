@@ -10,16 +10,16 @@ import (
 
 var facebookPixelTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				pixel_id     = "abc123"
 				access_token = "placeholder-access-token"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"pixelId": "abc123",
 				"accessToken": "placeholder-access-token",
 				"valueFieldIdentifier": "properties.price"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				pixel_id = "facebook pixel id"
 
 				access_token = "facebook access token"
@@ -148,7 +148,7 @@ var facebookPixelTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"pixelId": "facebook pixel id",
 				"accessToken": "facebook access token",
 				"standardPageCall": true,
@@ -402,7 +402,7 @@ var facebookPixelTestConfigs = []c.TestConfig{
 				],
 				"eventFilteringOption": "blacklistedEvents"
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceFacebookPixel(t *testing.T) {

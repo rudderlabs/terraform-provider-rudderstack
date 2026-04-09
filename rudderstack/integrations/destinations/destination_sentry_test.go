@@ -9,15 +9,15 @@ import (
 )
 
 var sentryTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				dsn = "https://some-url"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"dsn": "https://some-url",
 				"debugMode": false
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				dsn = "https://some-url"
 				server_name             = "..."
 				release                 = "..."
@@ -59,7 +59,7 @@ var sentryTestConfigs = []c.TestConfig{
 					]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"dsn": "https://some-url",
 				"serverName": "...",
 				"release": "...",

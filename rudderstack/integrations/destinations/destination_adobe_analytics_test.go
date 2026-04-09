@@ -10,10 +10,10 @@ import (
 
 var adobeAnalyticsTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				report_suite_ids = "id001, id002"
 							`,
-			APICreate: `{
+		APICreate: `{
 				"reportSuiteIds": "id001, id002",
   				"sslHeartbeat": true,
   				"useUtf8Charset": true,
@@ -29,7 +29,7 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
   				"timestampOption": "disabled",
   				"productIdentifier": "name"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				report_suite_ids = "id003, id004"
 				events_to_types = [{
 					from = "video start"
@@ -162,7 +162,7 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 					}]
 				}
 			  `,
-			APIUpdate: `{
+		APIUpdate: `{
 				"reportSuiteIds": "id003, id004",
 				"sslHeartbeat": true,
 				"useUtf8Charset": true,

@@ -10,7 +10,7 @@ import (
 
 var brazeTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 			connection_mode {
 				web = "cloud"
 				ios = "cloud"
@@ -21,7 +21,7 @@ var brazeTestConfigs = []c.TestConfig{
 				web = true
 			}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"connectionMode": {
 					"web": "cloud",
 					"ios": "cloud"
@@ -32,7 +32,7 @@ var brazeTestConfigs = []c.TestConfig{
 					"web": true
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 			connection_mode {
 				web = "cloud"
 				ios = "cloud"
@@ -118,7 +118,7 @@ var brazeTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"connectionMode": {
 					"web": "cloud",
 					"ios": "cloud",
@@ -354,7 +354,7 @@ var brazeTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceBraze(t *testing.T) {

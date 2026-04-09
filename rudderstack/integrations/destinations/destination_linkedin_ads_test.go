@@ -10,15 +10,15 @@ import (
 
 var linkedinAdsTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				rudder_account_id = "account-id-1"
 				hash_data         = true
 			`,
-			APICreate: `{
+		APICreate: `{
 				"rudderAccountId": "account-id-1",
 				"hashData": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				rudder_account_id  = "account-id-1"
 				hash_data          = true
 				ad_account_id      = "123456789"
@@ -128,7 +128,7 @@ var linkedinAdsTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"rudderAccountId": "account-id-1",
 				"hashData": true,
 				"adAccountId": "123456789",

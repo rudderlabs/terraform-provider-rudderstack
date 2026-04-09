@@ -9,14 +9,14 @@ import (
 )
 
 var httpTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				api_url  = "https://example.com/base"
 				auth     = "basicAuth"
 				username = "myuser"
 				password = "mypass"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiUrl": "https://example.com/base",
 				"auth": "basicAuth",
 				"username": "myuser",
@@ -26,13 +26,13 @@ var httpTestConfigs = []c.TestConfig{
 				"isBatchingEnabled": false,
 				"isDefaultMapping": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				api_url  = "https://example.com/base"
 				auth     = "basicAuth"
 				username = "myuser"
 				password = "mypass"
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiUrl": "https://example.com/base",
 				"auth": "basicAuth",
 				"username": "myuser",
@@ -42,12 +42,12 @@ var httpTestConfigs = []c.TestConfig{
 				"isBatchingEnabled": false,
 				"isDefaultMapping": true
 			}`,
-		},
-		{
-			TerraformCreate: `
+	},
+	{
+		TerraformCreate: `
 				api_url = "https://example.com/base"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiUrl": "https://example.com/base",
 				"auth": "noAuth",
 				"method": "POST",
@@ -55,7 +55,7 @@ var httpTestConfigs = []c.TestConfig{
 				"isBatchingEnabled": false,
 				"isDefaultMapping": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				api_url       = "https://example.com/base"
 				auth          = "apiKeyAuth"
 				api_key_name  = "x-api-key"
@@ -209,7 +209,7 @@ var httpTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiUrl": "https://example.com/base",
 				"auth": "apiKeyAuth",
 				"apiKeyName": "x-api-key",
@@ -421,7 +421,7 @@ var httpTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceHTTP(t *testing.T) {

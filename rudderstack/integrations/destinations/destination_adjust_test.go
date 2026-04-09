@@ -10,7 +10,7 @@ import (
 
 var adjustTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 			app_token = "test_app_token"
 			environment = true
 			connection_mode {
@@ -18,7 +18,7 @@ var adjustTestConfigs = []c.TestConfig{
 				ios = "device"
 			}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"appToken": "test_app_token",
 				"environment": true,
 				"connectionMode": {
@@ -26,7 +26,7 @@ var adjustTestConfigs = []c.TestConfig{
 					"ios": "device"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 			app_token = "updated_app_token"
 			delay = "5"
 			environment = false
@@ -112,7 +112,7 @@ var adjustTestConfigs = []c.TestConfig{
 				}]
 			}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"appToken": "updated_app_token",
 				"delay": "5",
 				"customMappings": [

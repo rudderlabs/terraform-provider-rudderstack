@@ -10,15 +10,15 @@ import (
 
 var tiktokAdsTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				pixel_code = "A1T8T4XXXXVIQA8ORZMX9"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"pixelCode": "A1T8T4XXXXVIQA8ORZMX9",
 				"version": "v2",
 				"hashUserProperties": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				pixel_code           = "A1T8T4XXXXVIQA8ORZMX9"
 				access_token         = "test-access-token"
 				version              = "v1"
@@ -137,7 +137,7 @@ var tiktokAdsTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"pixelCode": "A1T8T4XXXXVIQA8ORZMX9",
 				"accessToken": "test-access-token",
 				"version": "v1",

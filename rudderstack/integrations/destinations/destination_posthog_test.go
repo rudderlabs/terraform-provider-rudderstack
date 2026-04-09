@@ -10,7 +10,7 @@ import (
 
 var posthogTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				endpoint = "https://app.posthog.com"
 				api_key = "api_key"
 				use_v2_group = true
@@ -20,7 +20,7 @@ var posthogTestConfigs = []c.TestConfig{
 					cloud = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"yourInstance": "https://app.posthog.com",
 				"teamApiKey": "api_key",
 				"useV2Group": true,
@@ -30,7 +30,7 @@ var posthogTestConfigs = []c.TestConfig{
 					"cloud": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				endpoint = "https://app.posthog.com"
 				api_key = "api_key"
 				use_v2_group = true
@@ -66,7 +66,7 @@ var posthogTestConfigs = []c.TestConfig{
 					}
 				]
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"yourInstance": "https://app.posthog.com",
 				"teamApiKey": "api_key",
 				"useV2Group": true,

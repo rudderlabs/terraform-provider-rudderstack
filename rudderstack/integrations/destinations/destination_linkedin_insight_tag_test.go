@@ -10,13 +10,13 @@ import (
 
 var linkedinInsightTagTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				partner_id = "p-id"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"partnerId": "p-id"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				partner_id = "p-id"
 				event_to_conversion_id_map = [
 				{
@@ -53,7 +53,7 @@ var linkedinInsightTagTestConfigs = []c.TestConfig{
 					]
 				}
 			`,
-			APIUpdate: `
+		APIUpdate: `
 			{
 				"partnerId": "p-id",
 				"eventToConversionIdMap": [

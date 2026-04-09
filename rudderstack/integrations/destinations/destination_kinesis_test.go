@@ -9,21 +9,21 @@ import (
 )
 
 var kinesisTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				region = "usa-east"
 				stream = "test"
 				role_based_authentication {
                   i_am_role_arn = "arn"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"region":"usa-east",
 				"stream":"test",
 				"roleBasedAuth":true,
 				"iamRoleARN":"arn"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				region = "usa-east"
 				stream = "test"
 				key_based_authentication {
@@ -101,7 +101,7 @@ var kinesisTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"region": "usa-east",
 				"stream": "test",
 				"roleBasedAuth": false,

@@ -10,19 +10,19 @@ import (
 
 var attentiveTagTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				api_key = "key"
 				connection_mode {
 					web = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiKey": "key",
 				"connectionMode": {
 					"web": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				connection_mode {
 					web = "cloud"
 					android = "cloud"
@@ -40,7 +40,7 @@ var attentiveTagTestConfigs = []c.TestConfig{
 				sign_up_source_id = "123456"
 				enable_new_identify_flow = true
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiKey": "key",
 				"connectionMode": {
 					"web": "cloud",

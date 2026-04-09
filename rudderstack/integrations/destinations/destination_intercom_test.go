@@ -9,8 +9,8 @@ import (
 )
 
 var intercomTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				app_id = "app-id"
 				api_key = "api-key"
 				use_native_sdk {
@@ -18,7 +18,7 @@ var intercomTestConfigs = []c.TestConfig{
 					ios = true
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"appId": "app-id",
 				"apiKey": "api-key",
 				"useNativeSDK": {
@@ -27,7 +27,7 @@ var intercomTestConfigs = []c.TestConfig{
 				},				
 				"updateLastRequestAt": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				app_id = "app-id"
 				api_key = "api-key"
 				use_native_sdk {
@@ -111,7 +111,7 @@ var intercomTestConfigs = []c.TestConfig{
 				mobile_api_key_android = "and-key"
 				mobile_api_key_ios = "ios-key"
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"appId": "app-id",
 				"apiKey": "api-key",
 				"useNativeSDK": {

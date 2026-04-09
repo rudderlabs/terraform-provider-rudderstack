@@ -55,9 +55,9 @@ func compareFields(prefix string, expected, actual map[string]any, mismatches *[
 }
 
 // compareValue recursively compares JSON values using subset semantics for objects and arrays:
-// - objects: all expected keys must exist in actual, but extra actual keys are allowed
-// - arrays: all expected elements must exist in actual at the same indexes, but extra actual
-//   elements are allowed; objects within arrays also use subset semantics
+//   - objects: all expected keys must exist in actual, but extra actual keys are allowed
+//   - arrays: all expected elements must exist in actual at the same indexes, but extra actual
+//     elements are allowed; objects within arrays also use subset semantics
 func compareValue(path string, expectedVal, actualVal any, mismatches *[]string) {
 	switch ev := expectedVal.(type) {
 	case map[string]any:

@@ -10,21 +10,21 @@ import (
 
 var qualtricsTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				project_id = "p-id"
 				brand_id = "b-id"
 				use_native_sdk {
 					web = true
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"projectId": "p-id",
 				"brandId": "b-id",
 				"useNativeSDK": {
 					"web": true
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				project_id = "p-id"
 				brand_id = "b-id"
 
@@ -66,7 +66,7 @@ var qualtricsTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"projectId": "p-id",
 				"brandId": "b-id",
 				"eventFilteringOption": "blacklistedEvents",

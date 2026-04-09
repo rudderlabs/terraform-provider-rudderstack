@@ -10,15 +10,15 @@ import (
 
 var webhookTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				webhook_url = "https://example.com/some/path?query=a"
 				webhook_method = "GET"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"webhookUrl": "https://example.com/some/path?query=a",
 				"webhookMethod": "GET"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				webhook_url = "https://example.com/some/path?query=a"
 				webhook_method = "GET"
 				headers = [
@@ -101,7 +101,7 @@ var webhookTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"webhookUrl": "https://example.com/some/path?query=a",
 				"webhookMethod": "GET",
 				"headers": [
@@ -334,7 +334,7 @@ var webhookTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceWebhook(t *testing.T) {

@@ -9,8 +9,8 @@ import (
 )
 
 var marketoTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				account_id = "..."
 				client_id = "cid"
 				client_secret = "cs"
@@ -21,7 +21,7 @@ var marketoTestConfigs = []c.TestConfig{
 					ios = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"accountId": "...",
 				"clientId": "cid",
 				"clientSecret": "cs",
@@ -32,7 +32,7 @@ var marketoTestConfigs = []c.TestConfig{
 					"ios": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				account_id = "..."
 				client_id = "cid2"
 				client_secret = "cs"
@@ -131,7 +131,7 @@ var marketoTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"accountId": "...",
 				"clientId": "cid2",
 				"clientSecret": "cs",

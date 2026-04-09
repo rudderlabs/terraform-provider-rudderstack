@@ -9,8 +9,8 @@ import (
 )
 
 var customerioTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
 				datacenter = "US"
@@ -42,7 +42,7 @@ var customerioTestConfigs = []c.TestConfig{
 					android = "30"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "US",
@@ -68,7 +68,7 @@ var customerioTestConfigs = []c.TestConfig{
 					"android": "30"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
 				datacenter = "EU"
@@ -147,7 +147,7 @@ var customerioTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "EU",

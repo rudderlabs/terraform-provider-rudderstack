@@ -9,8 +9,8 @@ import (
 )
 
 var googlePubsubTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				connection_mode {
 					web = "cloud"
 					ios = "cloud"
@@ -18,7 +18,7 @@ var googlePubsubTestConfigs = []c.TestConfig{
 				project_id = "project-id"
                 credentials = "..."
 			`,
-			APICreate: `{
+		APICreate: `{
 				"projectId": "project-id",
 				"credentials": "...",
 				"connectionMode": {
@@ -26,7 +26,7 @@ var googlePubsubTestConfigs = []c.TestConfig{
 					"ios": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 			  connection_mode {
 				web = "cloud"
 				ios = "cloud"
@@ -124,7 +124,7 @@ var googlePubsubTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"connectionMode": {
 					"web": "cloud",
 					"ios": "cloud",

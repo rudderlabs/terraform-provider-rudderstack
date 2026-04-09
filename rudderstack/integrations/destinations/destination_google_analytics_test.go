@@ -10,13 +10,13 @@ import (
 
 var googleAnalyticsTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				tracking_id = "UA-00-0000"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"trackingID": "UA-00-0000"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				tracking_id = "UA-00-0000"
 
 				double_click              = true
@@ -160,7 +160,7 @@ var googleAnalyticsTestConfigs = []c.TestConfig{
 				  to   = "to"
 				}]
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"trackingID": "UA-00-0000",
 				"doubleClick": true,
 				"enhancedLinkAttribution": true,
@@ -417,7 +417,7 @@ var googleAnalyticsTestConfigs = []c.TestConfig{
 				"contentGroupings": [{ "from": "from", "to": "to" }],
 				"dimensions": [{ "from": "from", "to": "to" }]
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceGoogleAnalytics(t *testing.T) {

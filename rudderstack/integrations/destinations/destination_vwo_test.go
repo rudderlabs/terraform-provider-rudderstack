@@ -10,13 +10,13 @@ import (
 
 var vwoTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				account_id = "..."
 			`,
-			APICreate: `{
+		APICreate: `{
 				"accountId": "..."
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				account_id = "..."
 
 				is_spa                   = true
@@ -55,7 +55,7 @@ var vwoTestConfigs = []c.TestConfig{
 					]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"accountId": "...",
 				"isSPA": true,
 				"sendExperimentTrack": true,

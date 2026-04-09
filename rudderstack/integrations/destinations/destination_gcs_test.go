@@ -10,13 +10,13 @@ import (
 
 var gcsTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				bucket_name = "bucket"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"bucketName": "bucket"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				bucket_name = "bucket"
 				prefix        = "prefix"
 				credentials   = "..."
@@ -90,7 +90,7 @@ var gcsTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"bucketName": "bucket",
 				"prefix": "prefix",
 				"credentials": "...",

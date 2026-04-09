@@ -10,7 +10,7 @@ import (
 
 var bigqueryTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				project     = "project"
 				bucket_name = "bucket"
 				credentials = "..."
@@ -21,7 +21,7 @@ var bigqueryTestConfigs = []c.TestConfig{
 					frequency = "30"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"project": "project",
 				"bucketName": "bucket",
 				"credentials": "...",
@@ -32,7 +32,7 @@ var bigqueryTestConfigs = []c.TestConfig{
 				"partitionType": "hour",
 				"syncFrequency": "30"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				project     = "project"
 				bucket_name = "bucket"
 				credentials = "..."
@@ -136,7 +136,7 @@ var bigqueryTestConfigs = []c.TestConfig{
 					cloud_source = "cloud"
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"project": "project",
 				"bucketName": "bucket",
 				"credentials": "...",
@@ -388,7 +388,7 @@ var bigqueryTestConfigs = []c.TestConfig{
 					"cloudSource": "cloud"
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceBigQuery(t *testing.T) {

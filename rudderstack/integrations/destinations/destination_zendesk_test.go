@@ -9,18 +9,18 @@ import (
 )
 
 var zendeskTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				email     = "test@example.com"
 				api_token = "..."
 				domain    = "..."
 			`,
-			APICreate: `{
+		APICreate: `{
 				"email": "test@example.com",
 				"apiToken": "...",
 				"domain": "..."
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				email     = "test@example.com"
 				api_token = "..."
 				domain    = "..."
@@ -99,7 +99,7 @@ var zendeskTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"email": "test@example.com",
 				"apiToken": "...",
 				"domain": "...",

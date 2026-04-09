@@ -9,20 +9,20 @@ import (
 )
 
 var iterableTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				api_key = "73983282843839749873"	
 				map_to_single_event = true
 				track_categorized_pages = true
 				track_named_pages = true
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiKey": "73983282843839749873",
 				"mapToSingleEvent": true,
 				"trackCategorisedPages": true,
 				"trackNamedPages": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				api_key = "83983282843839749873"
 				map_to_single_event = false
 				track_all_pages = true
@@ -162,7 +162,7 @@ var iterableTestConfigs = []c.TestConfig{
 				}
 
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiKey": "83983282843839749873",
 				"mapToSingleEvent": false,
 				"trackAllPages": true,

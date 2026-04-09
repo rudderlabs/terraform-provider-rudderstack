@@ -10,16 +10,16 @@ import (
 
 var facebookConversionsTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				dataset_id   = "1234567898765"
 				access_token = "my-access-token"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"datasetId": "1234567898765",
 				"accessToken": "my-access-token",
 				"actionSource": "website"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				dataset_id   = "1234567898765"
 				access_token = "my-access-token"
 
@@ -137,7 +137,7 @@ var facebookConversionsTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"datasetId": "1234567898765",
 				"accessToken": "my-access-token",
 				"actionSource": "app",
@@ -321,7 +321,7 @@ var facebookConversionsTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceFacebookConversions(t *testing.T) {

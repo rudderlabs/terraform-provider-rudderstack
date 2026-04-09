@@ -9,8 +9,8 @@ import (
 )
 
 var redshiftTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				host = "example.com"
 				port = "5432"
 				user = "example-user"
@@ -23,7 +23,7 @@ var redshiftTestConfigs = []c.TestConfig{
 					frequency = "30"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"host": "example.com",
 				"port": "5432",
 				"user": "example-user",
@@ -33,7 +33,7 @@ var redshiftTestConfigs = []c.TestConfig{
 				"useRudderStorage": true,
 				"syncFrequency": "30"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				host = "example.com"
 				port = "5432"
 				user = "example-user"
@@ -125,7 +125,7 @@ var redshiftTestConfigs = []c.TestConfig{
 					}]
 				}
 				`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"host": "example.com",
 				"port": "5432",
 				"user": "example-user",

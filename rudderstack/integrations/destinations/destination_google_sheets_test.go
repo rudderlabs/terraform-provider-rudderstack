@@ -9,18 +9,18 @@ import (
 )
 
 var googleSheetsTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				sheet_name = "sheet"
                 credentials = "..."
                 sheet_id = "123"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"sheetName": "sheet",
                  "credentials": "...",
                  "sheetId": "123"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				sheet_name = "sheetName"
                 credentials = "..."
                 sheet_id = "1234"
@@ -100,7 +100,7 @@ var googleSheetsTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"sheetName": "sheetName",
                 "credentials": "...",
                 "sheetId": "1234",

@@ -10,7 +10,7 @@ import (
 
 var firebaseTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 			connection_mode {
 				android = "device"
 				ios = "device"
@@ -19,7 +19,7 @@ var firebaseTestConfigs = []c.TestConfig{
 				whitelist = ["event1", "event2"]
 			}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"connectionMode": {
 					"android": "device",
 					"ios": "device"
@@ -34,7 +34,7 @@ var firebaseTestConfigs = []c.TestConfig{
 				],
 				"eventFilteringOption": "whitelistedEvents"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 			connection_mode {
 				android = "device"
 				ios = "device"
@@ -46,7 +46,7 @@ var firebaseTestConfigs = []c.TestConfig{
 				blacklist = ["event3", "event4", "event5"]
 			}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"connectionMode": {
 					"android": "device",
 					"ios": "device",
@@ -67,7 +67,7 @@ var firebaseTestConfigs = []c.TestConfig{
 				],
 				"eventFilteringOption": "blacklistedEvents"
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceFirebase(t *testing.T) {

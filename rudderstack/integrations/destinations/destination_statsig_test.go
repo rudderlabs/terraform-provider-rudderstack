@@ -10,21 +10,21 @@ import (
 
 var statsigTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				secret_key = "key"
 				connection_mode {
 				 web = "cloud"
 				 ios = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"secretKey": "key",
 				"connectionMode": {
 					"web": "cloud",
 					"ios": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				secret_key = "key"
 				connection_mode {
 				 web = "cloud"
@@ -102,7 +102,7 @@ var statsigTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"secretKey": "key",
 				"connectionMode": {
 					"web": "cloud",

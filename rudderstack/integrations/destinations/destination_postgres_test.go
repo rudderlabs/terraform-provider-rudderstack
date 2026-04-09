@@ -10,7 +10,7 @@ import (
 
 var postgresTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				host = "test-host"
 				database = "test-database"
 				user = "test-user"
@@ -20,7 +20,7 @@ var postgresTestConfigs = []c.TestConfig{
 				sync_frequency = "30"
 				use_rudder_storage = true
 			`,
-			APICreate: `{
+		APICreate: `{
 				"host": "test-host",
 				"database": "test-database",
 				"user": "test-user",
@@ -30,7 +30,7 @@ var postgresTestConfigs = []c.TestConfig{
 				"syncFrequency": "30",
 				"useRudderStorage": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				host = "test-host"
 				database = "test-database"
 				user = "test-user"
@@ -109,7 +109,7 @@ var postgresTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"host": "test-host",
 				"database": "test-database",
 				"user": "test-user",
@@ -338,7 +338,7 @@ var postgresTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourcePostgres(t *testing.T) {

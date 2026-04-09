@@ -10,18 +10,18 @@ import (
 
 var googleAnalytics4TestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				api_secret      = "..."
 				client_type = "gtag"
 				measurement_id  = "G-000000"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiSecret": "...",
 				"typesOfClient": "gtag",
 				"measurementId": "G-000000",
 				"debugMode": false
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				api_secret = "..."
 
 				client_type = "gtag"
@@ -131,7 +131,7 @@ var googleAnalytics4TestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiSecret": "...",
 				"typesOfClient": "gtag",
 				"measurementId": "G-000000",
@@ -391,7 +391,7 @@ var googleAnalytics4TestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceGoogleAnalytics4(t *testing.T) {

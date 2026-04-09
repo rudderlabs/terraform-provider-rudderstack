@@ -10,7 +10,7 @@ import (
 
 var s3DatalakeTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				bucket_name = "bucket"
 				use_glue    = false
 
@@ -21,14 +21,14 @@ var s3DatalakeTestConfigs = []c.TestConfig{
 					i_am_role_arn = "..."
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"bucketName": "bucket",
 				"useGlue": false,
 				"syncFrequency": "30",
 				"roleBasedAuth": true,
 				"iamRoleARN": "..."
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				bucket_name = "bucket"
 
 				prefix        = "prefix"
@@ -113,7 +113,7 @@ var s3DatalakeTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"bucketName": "bucket",
 				"prefix": "prefix",
 				"accessKeyID": "...",

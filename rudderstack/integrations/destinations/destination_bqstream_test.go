@@ -10,7 +10,7 @@ import (
 
 var bqstreamTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				project_id = "test_project_id"
 				dataset_id = "test_dataset_id"
 				table_id = "test_table_id"
@@ -20,7 +20,7 @@ var bqstreamTestConfigs = []c.TestConfig{
 					web = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"projectId": "test_project_id",
 				"datasetId": "test_dataset_id",
 				"tableId": "test_table_id",
@@ -30,7 +30,7 @@ var bqstreamTestConfigs = []c.TestConfig{
 					"web": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				project_id = "updated_project_id"
 				dataset_id = "updated_dataset_id"
 				table_id = "updated_table_id"
@@ -119,7 +119,7 @@ var bqstreamTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"projectId": "updated_project_id",
 				"datasetId": "updated_dataset_id",
 				"tableId": "updated_table_id",

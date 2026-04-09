@@ -10,16 +10,16 @@ import (
 
 var redisTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				address = "https://some-url"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"address": "https://some-url",
 				"clusterMode": false,
 				"secure": false,
 				"skipVerify": false
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				address = "1.2.3.4"
 
 				password      = "..."
@@ -99,7 +99,7 @@ var redisTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"address": "1.2.3.4",
 				"password": "...",
 				"clusterMode": true,
@@ -328,7 +328,7 @@ var redisTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceRedis(t *testing.T) {

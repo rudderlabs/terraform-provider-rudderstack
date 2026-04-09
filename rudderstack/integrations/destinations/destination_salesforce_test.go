@@ -9,19 +9,19 @@ import (
 )
 
 var salesforceTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				user_name = "user"
 				password = "pwd"
 				initial_access_token = "token"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"userName": "user",
 				"password": "pwd",
 				"initialAccessToken": "token",
 				"mapProperties":true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				user_name = "bucket"
 				password = "pwd"
 				initial_access_token = "token"
@@ -97,7 +97,7 @@ var salesforceTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"userName": "bucket",
 				"password": "pwd",
 				"initialAccessToken": "token",

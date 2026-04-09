@@ -10,18 +10,18 @@ import (
 
 var amplitudeTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				api_key = "123abc"
 				api_secret = "abc123"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiKey": "123abc",
 				"apiSecret": "abc123",
 				"trackCategorizedPages": true,
 				"trackNamedPages": true,
 				"residencyServer": "standard"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				api_key = "123abc"
 				api_secret = "abc123"
 
@@ -197,7 +197,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 
 				residency_server = "EU"
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiKey": "123abc",
 				"apiSecret": "abc123",
 				"groupTypeTrait": "type",
@@ -487,7 +487,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				},
 				"residencyServer": "EU"
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceAmplitude(t *testing.T) {

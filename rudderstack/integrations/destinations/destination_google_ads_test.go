@@ -9,16 +9,16 @@ import (
 )
 
 var googleAdsTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				conversion_id = "AW-00000000"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"conversionID": "AW-00000000",
 				"conversionLinker": true,
 				"sendPageView": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				conversion_id = "AW-00000000"
 
 				default_page_conversion = "..."
@@ -73,7 +73,7 @@ var googleAdsTestConfigs = []c.TestConfig{
 					]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"conversionID": "AW-00000000",
 				"pageLoadConversions": [
 				  {

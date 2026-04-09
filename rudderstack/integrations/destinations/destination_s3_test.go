@@ -10,13 +10,13 @@ import (
 
 var s3TestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				bucket_name = "bucket"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"bucketName": "bucket"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				bucket_name = "bucket"
 
 				prefix        = "prefix"
@@ -94,7 +94,7 @@ var s3TestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"bucketName": "bucket",
 				"prefix": "prefix",
 				"accessKeyID": "...",
@@ -320,7 +320,7 @@ var s3TestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceS3(t *testing.T) {

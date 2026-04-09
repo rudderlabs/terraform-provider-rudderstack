@@ -9,14 +9,14 @@ import (
 )
 
 var googleTagManagerTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				container_id = "GTM-000000"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"containerID": "GTM-000000"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				container_id = "GTM-000000"
 
 				server_url = "https://example.com"
@@ -49,7 +49,7 @@ var googleTagManagerTestConfigs = []c.TestConfig{
 					]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"containerID": "GTM-000000",
 				"serverUrl": "https://example.com",
 				"blacklistedEvents": [

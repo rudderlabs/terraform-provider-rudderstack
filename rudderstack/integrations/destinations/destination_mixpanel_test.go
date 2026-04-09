@@ -9,8 +9,8 @@ import (
 )
 
 var mixpanelTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				token = "..."
 				identity_merge_api = "simplified"
 				data_residency = "us"
@@ -19,7 +19,7 @@ var mixpanelTestConfigs = []c.TestConfig{
 					web = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"token": "...",
 				"dataResidency": "us",
 				"connectionMode": {
@@ -37,7 +37,7 @@ var mixpanelTestConfigs = []c.TestConfig{
 				"userDeletionApi": "engage",
 				"persistenceType": "cookie"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				token = "..."
 				data_residency = "eu"
 				connection_mode {
@@ -158,7 +158,7 @@ var mixpanelTestConfigs = []c.TestConfig{
 				user_deletion_api = "task"
 				gdpr_api_token = "..."
 			`,
-			APIUpdate: `
+		APIUpdate: `
 			{
 				"token": "...",
 				"dataResidency": "eu",

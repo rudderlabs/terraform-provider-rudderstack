@@ -10,19 +10,19 @@ import (
 
 var kafkaTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				host_name = "example.com"
 				port = "9092"
 				topic = "example-topic"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"hostName": "example.com",
 				"port": "9092",
 				"topic": "example-topic",
 				"sslEnabled": true,
 				"saslType": "plain"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				host_name = "example-updated.com"
 				port = "9092"
 				topic = "example-topic"
@@ -98,7 +98,7 @@ var kafkaTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"hostName": "example-updated.com",
 				"port": "9092",
 				"topic": "example-topic",
@@ -325,7 +325,7 @@ var kafkaTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceKafka(t *testing.T) {

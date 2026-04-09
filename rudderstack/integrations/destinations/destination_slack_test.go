@@ -10,13 +10,13 @@ import (
 
 var slackTestConfigs = []c.TestConfig{
 	{
-			TerraformCreate: `
+		TerraformCreate: `
 				webhook_url = "https://some-url"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"webhookUrl": "https://some-url"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				webhook_url = "https://some-url"
 				identify_template = "it"
 
@@ -107,7 +107,7 @@ var slackTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"webhookUrl": "https://some-url",
 				"identifyTemplate": "it",
 				"eventChannelSettings": [
@@ -349,7 +349,7 @@ var slackTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceSlack(t *testing.T) {
