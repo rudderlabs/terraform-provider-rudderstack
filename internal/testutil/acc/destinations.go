@@ -156,8 +156,8 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 // testAccCheckDestinationDestroy verifies all destinations created by the test
 // are deleted from the API after the test completes.
 // Note: The RudderStack API uses soft-delete, so Get may still return a 200
-// after deletion. We check for a non-2xx error (e.g. 404) to confirm deletion,
-// and treat a successful Get as acceptable (soft-deleted).
+// after deletion. We accept this and do not fail — the destroy step already
+// verified the Delete handler ran without error.
 func testAccCheckDestinationDestroy(destination string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		cl, err := newTestAPIClient()
