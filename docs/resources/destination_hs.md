@@ -69,12 +69,15 @@ resource "rudderstack_destination_hs" "example" {
 <a id="nestedblock--config"></a>
 ### Nested Schema for `config`
 
+Required:
+
+- `api_version` (String) HubSpot API version to use.
+- `authorization_type` (String) Authorization type: API Key (legacy) or Private Apps.
+
 Optional:
 
 - `access_token` (String, Sensitive) Your private app access token. Required when Authorization Type is Private Apps.
 - `api_key` (String, Sensitive) Your API Key (Settings -> Integrations -> API Key). Required when Authorization Type is API Key.
-- `api_version` (String) HubSpot API version to use.
-- `authorization_type` (String) Authorization type: API Key (legacy) or Private Apps.
 - `connection_mode` (Block List, Max: 1) Configure the connection mode for HubSpot. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `do_association` (Boolean) Create associations between object records.
@@ -288,3 +291,17 @@ Optional:
 Optional:
 
 - `web` (Boolean)
+
+## Notes
+
+### `config.hubspot_events` nested fields
+
+When specifying `hubspot_events` entries, `rs_event_name` and `hubspot_event_name` are **required**:
+
+- `rs_event_name` (String) — **Required.** The RudderStack event name.
+- `hubspot_event_name` (String) — **Required.** The HubSpot Custom Behavioral event name.
+
+When specifying `event_properties` entries within `hubspot_events`, both `from` and `to` are **required**:
+
+- `from` (String) — **Required.** The RudderStack event property name.
+- `to` (String) — **Required.** The HubSpot event property name.

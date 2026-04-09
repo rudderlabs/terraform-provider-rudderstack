@@ -50,15 +50,13 @@ func init() {
 	destinationSchema := map[string]*schema.Schema{
 		"authorization_type": {
 			Type:             schema.TypeString,
-			Optional:         true,
-			Default:          "legacyApiKey",
+			Required:         true,
 			Description:      "Authorization type: API Key (legacy) or Private Apps.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(legacyApiKey|newPrivateAppApi)$"),
 		},
 		"api_version": {
 			Type:             schema.TypeString,
-			Optional:         true,
-			Default:          "newApi",
+			Required:         true,
 			Description:      "HubSpot API version to use.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(newApi|legacyApi)$"),
 		},

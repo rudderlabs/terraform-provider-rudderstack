@@ -356,23 +356,10 @@ func ctyValue(x interface{}) cty.Value {
 			values = append(values, ctyValue(i))
 		}
 		if len(values) == 0 {
-			// ListVal cannot be used with an empty list, so we return an ListValEmpty.
-			// The type of the list is not important because the generated code will have an empty list.
-			return cty.ListValEmpty(cty.String)
-		}
-		// // ListVal requires all elements to have the same type. If types differ
-		// // (e.g. a non-empty object list mixed with an empty-list placeholder),
-		// // fall back to TupleVal which allows heterogeneous element types.
-		firstType := values[0].Type()
-		allSameType := true
-		for _, val := range values[1:] {
-			if !val.Type().Equals(firstType) {
-				allSameType = false
-				break
-			}
-		}
-		if !allSameType {
-			return cty.TupleVal(values)
+			// ListVal cannot be used with an empty list, so we return a ListValEmpty.
+			// Use DynamicPseudoType so the empty list is compatible with any element type,
+			// preventing type mismatches when sibling lists have object elements (e.g. event_properties).
+			return cty.ListValEmpty(cty.DynamicPseudoType)
 		}
 		return cty.ListVal(values)
 
