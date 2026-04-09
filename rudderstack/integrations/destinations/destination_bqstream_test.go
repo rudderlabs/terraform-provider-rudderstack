@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceBQStream(t *testing.T) {
-	cmt.AssertDestination(t, "bqstream", []c.TestConfig{
-		{
+var bqstreamTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				project_id = "test_project_id"
 				dataset_id = "test_dataset_id"
@@ -286,6 +286,13 @@ func TestDestinationResourceBQStream(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceBQStream(t *testing.T) {
+	cmt.AssertDestination(t, "bqstream", bqstreamTestConfigs)
+}
+
+func TestAccDestinationBQStream(t *testing.T) {
+	acc.AccAssertDestination(t, "bqstream", bqstreamTestConfigs)
 }

@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceSnowflake(t *testing.T) {
-	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
-		{
-			TerraformCreate: `
+var snowflakeTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				account = "example-account"
 				database = "example-database"
 				warehouse = "example-warehouse"
@@ -21,7 +21,7 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 					frequency = "30"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -32,7 +32,7 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				account = "example-account"
 				database = "example-database"
 				warehouse = "example-warehouse"
@@ -125,7 +125,7 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -371,8 +371,15 @@ func TestDestinationResourceSnowflake(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceSnowflake(t *testing.T) {
+	cmt.AssertDestination(t, "snowflake", snowflakeTestConfigs)
+}
+
+func TestAccDestinationSnowflake(t *testing.T) {
+	acc.AccAssertDestination(t, "snowflake", snowflakeTestConfigs)
 }
 
 func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {

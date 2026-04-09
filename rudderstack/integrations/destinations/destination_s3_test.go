@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceS3(t *testing.T) {
-	cmt.AssertDestination(t, "s3", []c.TestConfig{
-		{
+var s3TestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				bucket_name = "bucket"
 			`,
@@ -321,5 +321,12 @@ func TestDestinationResourceS3(t *testing.T) {
 				}
 			}`,
 		},
-	})
+}
+
+func TestDestinationResourceS3(t *testing.T) {
+	cmt.AssertDestination(t, "s3", s3TestConfigs)
+}
+
+func TestAccDestinationS3(t *testing.T) {
+	acc.AccAssertDestination(t, "s3", s3TestConfigs)
 }

@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourcePosthog(t *testing.T) {
-	cmt.AssertDestination(t, "posthog", []c.TestConfig{
-		{
+var posthogTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				endpoint = "https://app.posthog.com"
 				api_key = "api_key"
@@ -110,6 +110,13 @@ func TestDestinationResourcePosthog(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourcePosthog(t *testing.T) {
+	cmt.AssertDestination(t, "posthog", posthogTestConfigs)
+}
+
+func TestAccDestinationPosthog(t *testing.T) {
+	acc.AccAssertDestination(t, "posthog", posthogTestConfigs)
 }

@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceAdobeAnalytics(t *testing.T) {
-	cmt.AssertDestination(t, "adobe_analytics", []c.TestConfig{
-		{
+var adobeAnalyticsTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				report_suite_ids = "id001, id002"
 							`,
@@ -493,6 +493,13 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 				},
 				"eventFilteringOption": "blacklistedEvents"
 			  }`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceAdobeAnalytics(t *testing.T) {
+	cmt.AssertDestination(t, "adobe_analytics", adobeAnalyticsTestConfigs)
+}
+
+func TestAccDestinationAdobeAnalytics(t *testing.T) {
+	acc.AccAssertDestination(t, "adobe_analytics", adobeAnalyticsTestConfigs)
 }

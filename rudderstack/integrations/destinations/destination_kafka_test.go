@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceKafka(t *testing.T) {
-	cmt.AssertDestination(t, "kafka", []c.TestConfig{
-		{
+var kafkaTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				host_name = "example.com"
 				port = "9092"
@@ -324,5 +324,12 @@ func TestDestinationResourceKafka(t *testing.T) {
 				}
 			}`,
 		},
-	})
+}
+
+func TestDestinationResourceKafka(t *testing.T) {
+	cmt.AssertDestination(t, "kafka", kafkaTestConfigs)
+}
+
+func TestAccDestinationKafka(t *testing.T) {
+	acc.AccAssertDestination(t, "kafka", kafkaTestConfigs)
 }

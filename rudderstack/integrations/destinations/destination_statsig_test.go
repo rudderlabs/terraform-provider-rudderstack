@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceStatSig(t *testing.T) {
-	cmt.AssertDestination(t, "statsig", []c.TestConfig{
-		{
+var statsigTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				secret_key = "key"
 				connection_mode {
@@ -330,6 +330,13 @@ func TestDestinationResourceStatSig(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceStatSig(t *testing.T) {
+	cmt.AssertDestination(t, "statsig", statsigTestConfigs)
+}
+
+func TestAccDestinationStatSig(t *testing.T) {
+	acc.AccAssertDestination(t, "statsig", statsigTestConfigs)
 }

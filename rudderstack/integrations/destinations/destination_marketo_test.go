@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceMarketo(t *testing.T) {
-	cmt.AssertDestination(t, "marketo", []c.TestConfig{
+var marketoTestConfigs = []c.TestConfig{
 		{
 			TerraformCreate: `
 				account_id = "..."
@@ -380,6 +380,13 @@ func TestDestinationResourceMarketo(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceMarketo(t *testing.T) {
+	cmt.AssertDestination(t, "marketo", marketoTestConfigs)
+}
+
+func TestAccDestinationMarketo(t *testing.T) {
+	acc.AccAssertDestination(t, "marketo", marketoTestConfigs)
 }

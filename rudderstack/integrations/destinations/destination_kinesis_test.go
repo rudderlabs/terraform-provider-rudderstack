@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceKinesis(t *testing.T) {
-	cmt.AssertDestination(t, "kinesis", []c.TestConfig{
+var kinesisTestConfigs = []c.TestConfig{
 		{
 			TerraformCreate: `
 				region = "usa-east"
@@ -328,6 +328,13 @@ func TestDestinationResourceKinesis(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceKinesis(t *testing.T) {
+	cmt.AssertDestination(t, "kinesis", kinesisTestConfigs)
+}
+
+func TestAccDestinationKinesis(t *testing.T) {
+	acc.AccAssertDestination(t, "kinesis", kinesisTestConfigs)
 }

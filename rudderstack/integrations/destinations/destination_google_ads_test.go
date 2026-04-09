@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceGoogleAds(t *testing.T) {
-	cmt.AssertDestination(t, "google_ads", []c.TestConfig{
+var googleAdsTestConfigs = []c.TestConfig{
 		{
 			TerraformCreate: `
 				conversion_id = "AW-00000000"
@@ -157,6 +157,13 @@ func TestDestinationResourceGoogleAds(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceGoogleAds(t *testing.T) {
+	cmt.AssertDestination(t, "google_ads", googleAdsTestConfigs)
+}
+
+func TestAccDestinationGoogleAds(t *testing.T) {
+	acc.AccAssertDestination(t, "google_ads", googleAdsTestConfigs)
 }

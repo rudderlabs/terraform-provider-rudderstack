@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceZendesk(t *testing.T) {
-	cmt.AssertDestination(t, "zendesk", []c.TestConfig{
+var zendeskTestConfigs = []c.TestConfig{
 		{
 			TerraformCreate: `
 				email     = "test@example.com"
@@ -327,6 +327,13 @@ func TestDestinationResourceZendesk(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceZendesk(t *testing.T) {
+	cmt.AssertDestination(t, "zendesk", zendeskTestConfigs)
+}
+
+func TestAccDestinationZendesk(t *testing.T) {
+	acc.AccAssertDestination(t, "zendesk", zendeskTestConfigs)
 }

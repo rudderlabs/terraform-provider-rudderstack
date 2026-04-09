@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceAttentiveTag(t *testing.T) {
-	cmt.AssertDestination(t, "attentive_tag", []c.TestConfig{
-		{
+var attentiveTagTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				api_key = "key"
 				connection_mode {
@@ -58,6 +58,13 @@ func TestDestinationResourceAttentiveTag(t *testing.T) {
 				"signUpSourceId": "123456",
 				"enableNewIdentifyFlow": true
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceAttentiveTag(t *testing.T) {
+	cmt.AssertDestination(t, "attentive_tag", attentiveTagTestConfigs)
+}
+
+func TestAccDestinationAttentiveTag(t *testing.T) {
+	acc.AccAssertDestination(t, "attentive_tag", attentiveTagTestConfigs)
 }

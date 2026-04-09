@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourcePostgres(t *testing.T) {
-	cmt.AssertDestination(t, "postgres", []c.TestConfig{
-		{
+var postgresTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				host = "test-host"
 				database = "test-database"
@@ -339,5 +339,12 @@ func TestDestinationResourcePostgres(t *testing.T) {
 				}
 			}`,
 		},
-	})
+}
+
+func TestDestinationResourcePostgres(t *testing.T) {
+	cmt.AssertDestination(t, "postgres", postgresTestConfigs)
+}
+
+func TestAccDestinationPostgres(t *testing.T) {
+	acc.AccAssertDestination(t, "postgres", postgresTestConfigs)
 }

@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceTiktokAds(t *testing.T) {
-	cmt.AssertDestination(t, "tiktok_ads", []c.TestConfig{
-		{
+var tiktokAdsTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				pixel_code = "A1T8T4XXXXVIQA8ORZMX9"
 			`,
@@ -333,6 +333,13 @@ func TestDestinationResourceTiktokAds(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceTiktokAds(t *testing.T) {
+	cmt.AssertDestination(t, "tiktok_ads", tiktokAdsTestConfigs)
+}
+
+func TestAccDestinationTiktokAds(t *testing.T) {
+	acc.AccAssertDestination(t, "tiktok_ads", tiktokAdsTestConfigs)
 }

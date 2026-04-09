@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceMixpanel(t *testing.T) {
-	cmt.AssertDestination(t, "mixpanel", []c.TestConfig{
+var mixpanelTestConfigs = []c.TestConfig{
 		{
 			TerraformCreate: `
 				token = "..."
@@ -510,6 +510,13 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				"gdprApiToken": "..."
 			}
 			`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceMixpanel(t *testing.T) {
+	cmt.AssertDestination(t, "mixpanel", mixpanelTestConfigs)
+}
+
+func TestAccDestinationMixpanel(t *testing.T) {
+	acc.AccAssertDestination(t, "mixpanel", mixpanelTestConfigs)
 }

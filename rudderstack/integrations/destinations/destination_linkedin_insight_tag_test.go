@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceLinkedinInsightTag(t *testing.T) {
-	cmt.AssertDestination(t, "LINKEDIN_INSIGHT_TAG", []c.TestConfig{
-		{
+var linkedinInsightTagTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				partner_id = "p-id"
 			`,
@@ -125,6 +125,13 @@ func TestDestinationResourceLinkedinInsightTag(t *testing.T) {
 				}
 			}			
 			`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceLinkedinInsightTag(t *testing.T) {
+	cmt.AssertDestination(t, "LINKEDIN_INSIGHT_TAG", linkedinInsightTagTestConfigs)
+}
+
+func TestAccDestinationLinkedinInsightTag(t *testing.T) {
+	acc.AccAssertDestination(t, "LINKEDIN_INSIGHT_TAG", linkedinInsightTagTestConfigs)
 }

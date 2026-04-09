@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceWebhook(t *testing.T) {
-	cmt.AssertDestination(t, "webhook", []c.TestConfig{
-		{
+var webhookTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				webhook_url = "https://example.com/some/path?query=a"
 				webhook_method = "GET"
@@ -335,5 +335,12 @@ func TestDestinationResourceWebhook(t *testing.T) {
 				}
 			}`,
 		},
-	})
+}
+
+func TestDestinationResourceWebhook(t *testing.T) {
+	cmt.AssertDestination(t, "webhook", webhookTestConfigs)
+}
+
+func TestAccDestinationWebhook(t *testing.T) {
+	acc.AccAssertDestination(t, "webhook", webhookTestConfigs)
 }

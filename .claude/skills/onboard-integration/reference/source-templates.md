@@ -14,13 +14,21 @@ c.Sources.Register("{name}", c.ConfigMeta{
 
 ## Modify: `rudderstack/integrations/sources/sources_test.go`
 
-Add a new test function at the end of the file. Note: sources use `configs` (NOT aliased as `c`):
+Add TWO new test functions at the end of the file — one unit test and one E2E acceptance test. Note: sources use `configs` (NOT aliased as `c`):
 
 ```go
+// Unit test
 func TestSourceResource{PascalCaseName}(t *testing.T) {
 	cmt.AssertSource(t, "{name}", []configs.TestConfig{configs.EmptyTestConfig})
 }
+
+// E2E acceptance test
+func TestAccSource{PascalCaseName}(t *testing.T) {
+	acc.AccAssertSource(t, "{name}", emptyTestConfigs)
+}
 ```
+
+The `acc` import is already present in `sources_test.go`. The `emptyTestConfigs` var is a shared package-level variable.
 
 ## Create: `examples/source_{name}.tf`
 

@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceLinkedinAds(t *testing.T) {
-	cmt.AssertDestination(t, "linkedin_ads", []c.TestConfig{
-		{
+var linkedinAdsTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				rudder_account_id = "account-id-1"
 				hash_data         = true
@@ -316,6 +316,13 @@ func TestDestinationResourceLinkedinAds(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceLinkedinAds(t *testing.T) {
+	cmt.AssertDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
+}
+
+func TestAccDestinationLinkedinAds(t *testing.T) {
+	acc.AccAssertDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
 }

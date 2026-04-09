@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceRedis(t *testing.T) {
-	cmt.AssertDestination(t, "redis", []c.TestConfig{
-		{
+var redisTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				address = "https://some-url"
 			`,
@@ -329,5 +329,12 @@ func TestDestinationResourceRedis(t *testing.T) {
 				}
 			}`,
 		},
-	})
+}
+
+func TestDestinationResourceRedis(t *testing.T) {
+	cmt.AssertDestination(t, "redis", redisTestConfigs)
+}
+
+func TestAccDestinationRedis(t *testing.T) {
+	acc.AccAssertDestination(t, "redis", redisTestConfigs)
 }

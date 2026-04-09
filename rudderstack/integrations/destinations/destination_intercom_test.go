@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceIntercom(t *testing.T) {
-	cmt.AssertDestination(t, "intercom", []c.TestConfig{
+var intercomTestConfigs = []c.TestConfig{
 		{
 			TerraformCreate: `
 				app_id = "app-id"
@@ -353,6 +353,13 @@ func TestDestinationResourceIntercom(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceIntercom(t *testing.T) {
+	cmt.AssertDestination(t, "intercom", intercomTestConfigs)
+}
+
+func TestAccDestinationIntercom(t *testing.T) {
+	acc.AccAssertDestination(t, "intercom", intercomTestConfigs)
 }

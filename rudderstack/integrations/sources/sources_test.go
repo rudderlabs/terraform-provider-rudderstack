@@ -3,9 +3,12 @@ package sources_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
+
+var emptyTestConfigs = []configs.TestConfig{configs.EmptyTestConfig}
 
 func TestSourceResourceBraze(t *testing.T) {
 	cmt.AssertSource(t, "braze", []configs.TestConfig{configs.EmptyTestConfig})
@@ -89,4 +92,90 @@ func TestSourceResourceAdjust(t *testing.T) {
 
 func TestSourceResourceRust(t *testing.T) {
 	cmt.AssertSource(t, "rust", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+// E2E acceptance tests — reuse the same empty test configs from unit tests.
+
+func TestAccSourceBraze(t *testing.T) {
+	acc.AccAssertSource(t, "braze", emptyTestConfigs)
+}
+
+func TestAccSourceCordova(t *testing.T) {
+	acc.AccAssertSource(t, "cordova", emptyTestConfigs)
+}
+
+func TestAccSourceGo(t *testing.T) {
+	acc.AccAssertSource(t, "go", emptyTestConfigs)
+}
+
+func TestAccSourceHTTP(t *testing.T) {
+	acc.AccAssertSource(t, "http", emptyTestConfigs)
+}
+
+func TestAccSourceAndroid(t *testing.T) {
+	acc.AccAssertSource(t, "android", emptyTestConfigs)
+}
+
+func TestAccSourceIOS(t *testing.T) {
+	acc.AccAssertSource(t, "ios", emptyTestConfigs)
+}
+
+func TestAccSourceJava(t *testing.T) {
+	acc.AccAssertSource(t, "java", emptyTestConfigs)
+}
+
+func TestAccSourceJavascript(t *testing.T) {
+	acc.AccAssertSource(t, "javascript", emptyTestConfigs)
+}
+
+func TestAccSourceNode(t *testing.T) {
+	acc.AccAssertSource(t, "node", emptyTestConfigs)
+}
+
+func TestAccSourceReactnative(t *testing.T) {
+	acc.AccAssertSource(t, "reactnative", emptyTestConfigs)
+}
+
+func TestAccSourceRuby(t *testing.T) {
+	acc.AccAssertSource(t, "ruby", emptyTestConfigs)
+}
+
+func TestAccSourceWebhook(t *testing.T) {
+	acc.AccAssertSource(t, "webhook", emptyTestConfigs)
+}
+
+func TestAccSourceWebhookShopify(t *testing.T) {
+	acc.AccAssertSource(t, "webhook_shopify", emptyTestConfigs)
+}
+
+func TestAccSourcePython(t *testing.T) {
+	acc.AccAssertSource(t, "python", emptyTestConfigs)
+}
+
+func TestAccSourcePhp(t *testing.T) {
+	acc.AccAssertSource(t, "php", emptyTestConfigs)
+}
+
+func TestAccSourceDotnet(t *testing.T) {
+	acc.AccAssertSource(t, "dotnet", emptyTestConfigs)
+}
+
+func TestAccSourceFlutter(t *testing.T) {
+	acc.AccAssertSource(t, "flutter", emptyTestConfigs)
+}
+
+func TestAccSourceCustomerio(t *testing.T) {
+	acc.AccAssertSource(t, "customerio", emptyTestConfigs)
+}
+
+func TestAccSourceFacebookLeadAds(t *testing.T) {
+	acc.AccAssertSource(t, "facebook_lead_ads", emptyTestConfigs)
+}
+
+func TestAccSourceAdjust(t *testing.T) {
+	acc.AccAssertSource(t, "adjust", emptyTestConfigs)
+}
+
+func TestAccSourceRust(t *testing.T) {
+	acc.AccAssertSource(t, "rust", emptyTestConfigs)
 }

@@ -3,12 +3,12 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceSalesforce(t *testing.T) {
-	cmt.AssertDestination(t, "salesforce", []c.TestConfig{
+var salesforceTestConfigs = []c.TestConfig{
 		{
 			TerraformCreate: `
 				user_name = "user"
@@ -323,6 +323,13 @@ func TestDestinationResourceSalesforce(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceSalesforce(t *testing.T) {
+	cmt.AssertDestination(t, "salesforce", salesforceTestConfigs)
+}
+
+func TestAccDestinationSalesforce(t *testing.T) {
+	acc.AccAssertDestination(t, "salesforce", salesforceTestConfigs)
 }

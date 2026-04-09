@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceQualtrics(t *testing.T) {
-	cmt.AssertDestination(t, "qualtrics", []c.TestConfig{
-		{
+var qualtricsTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				project_id = "p-id"
 				brand_id = "b-id"
@@ -161,6 +161,13 @@ func TestDestinationResourceQualtrics(t *testing.T) {
 				},
 				"enableGenericPageTitle":{"web":true}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceQualtrics(t *testing.T) {
+	cmt.AssertDestination(t, "qualtrics", qualtricsTestConfigs)
+}
+
+func TestAccDestinationQualtrics(t *testing.T) {
+	acc.AccAssertDestination(t, "qualtrics", qualtricsTestConfigs)
 }

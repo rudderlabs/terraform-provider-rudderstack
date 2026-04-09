@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceAmplitude(t *testing.T) {
-	cmt.AssertDestination(t, "amplitude", []c.TestConfig{
-		{
+var amplitudeTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				api_key = "123abc"
 				api_secret = "abc123"
@@ -485,5 +485,12 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 				"residencyServer": "EU"
 			}`,
 		},
-	})
+}
+
+func TestDestinationResourceAmplitude(t *testing.T) {
+	cmt.AssertDestination(t, "amplitude", amplitudeTestConfigs)
+}
+
+func TestAccDestinationAmplitude(t *testing.T) {
+	acc.AccAssertDestination(t, "amplitude", amplitudeTestConfigs)
 }

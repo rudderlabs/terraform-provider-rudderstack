@@ -3,13 +3,13 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceBigQuery(t *testing.T) {
-	cmt.AssertDestination(t, "bigquery", []c.TestConfig{
-		{
+var bigqueryTestConfigs = []c.TestConfig{
+	{
 			TerraformCreate: `
 				project     = "project"
 				bucket_name = "bucket"
@@ -389,5 +389,12 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				}
 			}`,
 		},
-	})
+}
+
+func TestDestinationResourceBigQuery(t *testing.T) {
+	cmt.AssertDestination(t, "bigquery", bigqueryTestConfigs)
+}
+
+func TestAccDestinationBigQuery(t *testing.T) {
+	acc.AccAssertDestination(t, "bigquery", bigqueryTestConfigs)
 }
