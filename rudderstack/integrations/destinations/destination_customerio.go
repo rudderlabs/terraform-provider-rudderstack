@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	supportedSourceTypes := []string{"web", "android", "ios", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
+	supportedSourceTypes := []string{"web", "android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{
@@ -16,6 +16,14 @@ func init() {
 		c.Simple("deviceTokenEventName", "device_token_event_name", c.SkipZeroValue),
 		c.Simple("datacenter", "datacenter"),
 		c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
+		c.Simple("useNativeSDK.android", "use_native_sdk.0.android"),
+		c.Simple("useNativeSDK.ios", "use_native_sdk.0.ios"),
+		c.Simple("sendPageNameInSDK.web", "send_page_name_in_sdk.0.web"),
+		c.Simple("dataUseInApp.web", "data_use_in_app.0.web"),
+		c.Simple("autoTrackDeviceAttributes.android", "auto_track_device_attributes.0.android"),
+		c.Simple("autoTrackDeviceAttributes.ios", "auto_track_device_attributes.0.ios"),
+		c.Simple("backgroundQueueMinNumberOfTasks.android", "background_queue_min_number_of_tasks.0.android", c.SkipZeroValue),
+		c.Simple("backgroundQueueSecondsDelay.android", "background_queue_seconds_delay.0.android", c.SkipZeroValue),
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 		c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
@@ -56,12 +64,96 @@ func init() {
 			Type:        schema.TypeList,
 			MaxItems:    1,
 			Optional:    true,
-			Description: "Enable this setting to send the events through Customer.io's native JavaScript SDK.",
+			Description: "Enable this setting to send the events through Customer.io's native SDK.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"web": {
 						Type:     schema.TypeBool,
 						Optional: true,
+					},
+					"android": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+					"ios": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"send_page_name_in_sdk": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Configure whether to send the page name in SDK mode.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"data_use_in_app": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to send in-app messages to your website.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"auto_track_device_attributes": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to automatically track device attributes in SDK mode.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"android": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+					"ios": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"background_queue_min_number_of_tasks": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Configure the minimum number of tasks in the background queue.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"android": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+					},
+				},
+			},
+		},
+		"background_queue_seconds_delay": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Configure the delay in seconds for the background queue.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"android": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 					},
 				},
 			},
