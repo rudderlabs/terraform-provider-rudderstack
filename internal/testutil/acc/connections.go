@@ -18,7 +18,7 @@ type ConnectionTestConfig struct {
 }
 
 // AccAssertConnection runs an E2E test that creates a source + destination, connects
-// them, updates the connection (disable/enable), imports, and destroys.
+// them, imports the connection, and destroys all resources.
 //
 // When PlanOnly() is enabled (TF_ACC_PLAN_ONLY=1): plan-only validation (zero API calls).
 // Otherwise: full CRUD against the real API.
