@@ -3,15 +3,9 @@ package acc
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"reflect"
 	"strings"
 )
-
-// dumpConfigEnv, when set to "1", causes compareConfig to print the full
-// expected and actual JSON to stdout whenever a mismatch is detected. This is
-// useful for diagnosing flaky or hard-to-reproduce acceptance test failures.
-const dumpConfigEnv = "TF_ACC_DUMP_CONFIG"
 
 // compareConfig verifies that actualRaw contains all fields specified in expectedJSON.
 // Extra fields in the actual config are allowed (the API may add defaults).
@@ -36,20 +30,12 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string) error {
 	compareFields("", expected, actual, &mismatches)
 
 	if len(mismatches) > 0 {
-		if os.Getenv(dumpConfigEnv) == "1" {
-			dumpConfigs(expected, actual)
-		}
+		expectedPretty, _ := json.MarshalIndent(expected, "", "  ")
+		actualPretty, _ := json.MarshalIndent(actual, "", "  ")
+		fmt.Printf("\n=== expected config ===\n%s\n=== actual config ===\n%s\n===\n", expectedPretty, actualPretty)
 		return fmt.Errorf("API config verification failed:\n%s", strings.Join(mismatches, "\n"))
 	}
 	return nil
-}
-
-// dumpConfigs prints the full expected and actual JSON to stdout for debugging.
-// Called from compareConfig when TF_ACC_DUMP_CONFIG=1 and a mismatch is found.
-func dumpConfigs(expected, actual map[string]any) {
-	expectedPretty, _ := json.MarshalIndent(expected, "", "  ")
-	actualPretty, _ := json.MarshalIndent(actual, "", "  ")
-	fmt.Printf("\n=== TF_ACC_DUMP_CONFIG: expected ===\n%s\n=== TF_ACC_DUMP_CONFIG: actual ===\n%s\n===\n", expectedPretty, actualPretty)
 }
 
 // compareFields recursively checks that every key in expected exists in actual with the
