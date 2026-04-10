@@ -3,15 +3,15 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceHsHubspotEvents(t *testing.T) {
-	cmt.AssertDestination(t, "hs", []c.TestConfig{
-		{
-			// Create: single event, no event_properties
-			TerraformCreate: `
+var hsHubspotEventsTestConfigs = []c.TestConfig{
+	{
+		// Create: single event, no event_properties
+		TerraformCreate: `
 				authorization_type = "legacyApiKey"
 				api_version        = "newApi"
 				api_key            = "my-api-key"
@@ -25,7 +25,7 @@ func TestDestinationResourceHsHubspotEvents(t *testing.T) {
 					}
 				]
 			`,
-			APICreate: `{
+		APICreate: `{
 				"authorizationType": "legacyApiKey",
 				"apiVersion": "newApi",
 				"apiKey": "my-api-key",
@@ -38,8 +38,8 @@ func TestDestinationResourceHsHubspotEvents(t *testing.T) {
 					}
 				]
 			}`,
-			// Update: multiple events, some with event_properties and some without
-			TerraformUpdate: `
+		// Update: multiple events, some with event_properties and some without
+		TerraformUpdate: `
 				authorization_type = "legacyApiKey"
 				api_version        = "newApi"
 				api_key            = "my-api-key"
@@ -67,7 +67,7 @@ func TestDestinationResourceHsHubspotEvents(t *testing.T) {
 					}
 				]
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"authorizationType": "legacyApiKey",
 				"apiVersion": "newApi",
 				"apiKey": "my-api-key",
@@ -88,12 +88,10 @@ func TestDestinationResourceHsHubspotEvents(t *testing.T) {
 					}
 				]
 			}`,
-		},
-	})
+	},
 }
 
-func TestDestinationResourceHs(t *testing.T) {
-	cmt.AssertDestination(t, "hs", []c.TestConfig{
+var hsTestConfigs = []c.TestConfig{
 		{
 			TerraformCreate: `
 				authorization_type = "legacyApiKey"
@@ -423,5 +421,20 @@ func TestDestinationResourceHs(t *testing.T) {
 				}
 			}`,
 		},
-	})
+}
+
+func TestDestinationResourceHsHubspotEvents(t *testing.T) {
+	cmt.AssertDestination(t, "hs", hsHubspotEventsTestConfigs)
+}
+
+func TestDestinationResourceHs(t *testing.T) {
+	cmt.AssertDestination(t, "hs", hsTestConfigs)
+}
+
+func TestAccDestinationHsHubspotEvents(t *testing.T) {
+	acc.AccAssertDestination(t, "hs", hsHubspotEventsTestConfigs)
+}
+
+func TestAccDestinationHs(t *testing.T) {
+	acc.AccAssertDestination(t, "hs", hsTestConfigs)
 }

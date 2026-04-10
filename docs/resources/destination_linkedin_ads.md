@@ -76,7 +76,6 @@ resource "rudderstack_destination_linkedin_ads" "example" {
 
 Required:
 
-- `hash_data` (Boolean) Hash and Encode Data. Disable it if you are sending hashed and encoded user email.
 - `rudder_account_id` (String) The RudderStack account ID for OAuth-based event delivery.
 
 Optional:
@@ -86,6 +85,7 @@ Optional:
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `conversion_mapping` (List of Object) Map RudderStack events to Linkedin Ads Conversion Rule Id. (see [below for nested schema](#nestedatt--config--conversion_mapping))
 - `deduplication_key` (String) By default, RudderStack will send messageId as the event_id field. You can utilize this input, to specify another field value sent via payload, to be used instead.
+- `hash_data` (Boolean) Hash and Encode Data. Disable it if you are sending hashed and encoded user email.
 
 <a id="nestedblock--config--connection_mode"></a>
 ### Nested Schema for `config.connection_mode`
