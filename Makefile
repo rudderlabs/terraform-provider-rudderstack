@@ -1,11 +1,12 @@
 GO=go
 GOLANGCI=github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.9.0
+TFPLUGINDOCS=github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.24.0
 
 HOSTNAME=rudderstack.com
 NAMESPACE=rudderlabs
 NAME=rudderstack
 BINARY=terraform-provider-${NAME}
-VERSION=4.1.0
+VERSION=4.3.1
 OS_ARCH=$(shell go env GOOS)_$(shell go env GOARCH)
 
 default: install
@@ -49,7 +50,7 @@ testacc:
 
 .PHONY: docs
 docs:
-	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+	$(GO) run $(TFPLUGINDOCS)
 
 .PHONY: fmt
 fmt: ## Formats all go files

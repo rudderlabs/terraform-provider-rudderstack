@@ -39,6 +39,9 @@ func TestStringNotMatchesRegexp(t *testing.T) {
 	for s, b := range tests {
 		d := f(s, cty.GetAttrPath("some-path"))
 		assert.Equal(t, b, d.HasError())
+		if b {
+			assert.Contains(t, d[0].Summary, "matches a disallowed pattern")
+		}
 	}
 }
 
