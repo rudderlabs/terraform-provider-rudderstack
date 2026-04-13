@@ -94,6 +94,122 @@ func TestSourceResourceRust(t *testing.T) {
 	cmt.AssertSource(t, "rust", []configs.TestConfig{configs.EmptyTestConfig})
 }
 
+func TestSourceResourceAMP(t *testing.T) {
+	cmt.AssertSource(t, "amp", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceAndroidKotlin(t *testing.T) {
+	cmt.AssertSource(t, "android_kotlin", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceIOSSwift(t *testing.T) {
+	cmt.AssertSource(t, "ios_swift", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceUnity(t *testing.T) {
+	cmt.AssertSource(t, "unity", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceAppcenter(t *testing.T) {
+	cmt.AssertSource(t, "appcenter", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceAppsflyer(t *testing.T) {
+	cmt.AssertSource(t, "appsflyer", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceAuth0(t *testing.T) {
+	cmt.AssertSource(t, "auth0", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceCanny(t *testing.T) {
+	cmt.AssertSource(t, "canny", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceCloseCRM(t *testing.T) {
+	cmt.AssertSource(t, "close_crm", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceCordial(t *testing.T) {
+	cmt.AssertSource(t, "cordial", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceExtole(t *testing.T) {
+	cmt.AssertSource(t, "extole", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceFormsort(t *testing.T) {
+	cmt.AssertSource(t, "formsort", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceGainsightPX(t *testing.T) {
+	cmt.AssertSource(t, "gainsightpx", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceIterable(t *testing.T) {
+	cmt.AssertSource(t, "iterable", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceLooker(t *testing.T) {
+	cmt.AssertSource(t, "looker", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceMailjet(t *testing.T) {
+	cmt.AssertSource(t, "mailjet", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceMailmodo(t *testing.T) {
+	cmt.AssertSource(t, "mailmodo", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceMoEngage(t *testing.T) {
+	cmt.AssertSource(t, "moengage", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceMonday(t *testing.T) {
+	cmt.AssertSource(t, "monday", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceOlark(t *testing.T) {
+	cmt.AssertSource(t, "olark", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceOrtto(t *testing.T) {
+	cmt.AssertSource(t, "ortto", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourcePagerDuty(t *testing.T) {
+	cmt.AssertSource(t, "pagerduty", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourcePipedream(t *testing.T) {
+	cmt.AssertSource(t, "pipedream", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceRefiner(t *testing.T) {
+	cmt.AssertSource(t, "refiner", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceRevenuecat(t *testing.T) {
+	cmt.AssertSource(t, "revenuecat", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceSatisMeter(t *testing.T) {
+	cmt.AssertSource(t, "satismeter", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceSegment(t *testing.T) {
+	cmt.AssertSource(t, "segment", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceSIGNL4(t *testing.T) {
+	cmt.AssertSource(t, "signl4", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceSlack(t *testing.T) {
+	cmt.AssertSource(t, "slack", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
 // E2E acceptance tests — reuse the same empty test configs from unit tests.
 
 func TestAccSourceBraze(t *testing.T) {
