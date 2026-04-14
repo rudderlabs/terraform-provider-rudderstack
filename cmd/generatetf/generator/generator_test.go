@@ -67,12 +67,6 @@ func TestGeneratorTerraform(t *testing.T) {
 				  { "from": "a1", "to": "b1" },
 				  { "from": "a2", "to": "b2" }
 				],
-				"eventCustomProperties": [
-				  { "eventCustomProperties": "one" },
-				  { "eventCustomProperties": "two" },
-				  { "eventCustomProperties": "three" }
-				],
-				"categoryToContent": [{ "from": "from", "to": "to" }],
 				"legacyConversionPixelId": { "from": "from", "to": "to" },
 				"useNativeSDK": { "web": true },
 				"consentManagement": {
@@ -182,10 +176,6 @@ resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
     access_token             = "facebook access token"
     advanced_mapping         = true
     blacklist_pii_properties = []
-    category_to_content = [{
-      from = "from"
-      to   = "to"
-    }]
     consent_management {
       web = [{
         consents            = ["one_web", "two_web", "three_web"]
@@ -201,7 +191,6 @@ resource "rudderstack_destination_facebook_pixel" "dst_id-facebook-pixel" {
         resolution_strategy = "and"
       }]
     }
-    event_custom_properties = ["one", "two", "three"]
     event_filtering {
       blacklist = ["one", "two", "three"]
     }
