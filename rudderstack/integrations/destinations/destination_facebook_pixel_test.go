@@ -37,9 +37,7 @@ var facebookPixelTestConfigs = []c.TestConfig{
 					from = "Product Added"
 					to   = "AddToCart"
 				}]
-			
-				event_custom_properties = ["one", "two", "three"]
-			
+
 				blacklist_pii_properties = [
 					{ 
 						property = "one"
@@ -52,19 +50,14 @@ var facebookPixelTestConfigs = []c.TestConfig{
 				]
 
 				whitelist_pii_properties = [
-					{ 
+					{
 						property = "one"
 					},
-					{ 
+					{
 						property = "two"
 					}
 				]
-			
-				category_to_content = [{
-				  from = "from"
-				  to   = "to"
-				}]
-			
+
 				legacy_conversion_pixel_id {
 				  from = "from"
 				  to   = "to"
@@ -160,11 +153,6 @@ var facebookPixelTestConfigs = []c.TestConfig{
 				  { "from": "Order Completed", "to": "Purchase" },
 				  { "from": "Product Added", "to": "AddToCart" }
 				],
-				"eventCustomProperties": [
-					{ "eventCustomProperties": "one" },
-					{ "eventCustomProperties": "two" },
-					{ "eventCustomProperties": "three" }
-				],
 				"blacklistPiiProperties": [
 				  { "blacklistPiiProperties": "one", "blacklistPiiHash": false },
 				  { "blacklistPiiProperties": "two", "blacklistPiiHash": true }
@@ -173,7 +161,6 @@ var facebookPixelTestConfigs = []c.TestConfig{
 				  { "whitelistPiiProperties": "one" },
 				  { "whitelistPiiProperties": "two" }
 				],
-				"categoryToContent": [{ "from": "from", "to": "to" }],
 				"legacyConversionPixelId": { "from": "from", "to": "to" },
 				"useNativeSDK": { "web": true },
 				"consentManagement": {

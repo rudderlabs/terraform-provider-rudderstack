@@ -119,7 +119,7 @@ jobs:
         env:
           TF_ACC: "1"
           TF_ACC_PLAN_ONLY: "1"
-        run: go test ./rudderstack/integrations/... -run "TestAcc" -timeout 5m -count=1
+        run: make testacc-plan
 
   e2e-crud:
     needs: detect-changes
