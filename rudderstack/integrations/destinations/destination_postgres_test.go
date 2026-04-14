@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourcePostgres(t *testing.T) {
-	cmt.AssertDestination(t, "postgres", []c.TestConfig{
-		{
-			TerraformCreate: `
+var postgresTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				host = "test-host"
 				database = "test-database"
 				user = "test-user"
@@ -20,7 +20,7 @@ func TestDestinationResourcePostgres(t *testing.T) {
 				sync_frequency = "30"
 				use_rudder_storage = true
 			`,
-			APICreate: `{
+		APICreate: `{
 				"host": "test-host",
 				"database": "test-database",
 				"user": "test-user",
@@ -30,13 +30,13 @@ func TestDestinationResourcePostgres(t *testing.T) {
 				"syncFrequency": "30",
 				"useRudderStorage": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				host = "test-host"
 				database = "test-database"
 				user = "test-user"
 				password = "test-password"
 				port = "test-port"
-				ssl_mode = "verify-ca"
+				ssl_mode = "disable"
 				sync_frequency = "60"
 				use_rudder_storage = true
 				consent_management {
@@ -109,13 +109,13 @@ func TestDestinationResourcePostgres(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"host": "test-host",
 				"database": "test-database",
 				"user": "test-user",
 				"password": "test-password",
 				"port": "test-port",
-				"sslMode": "verify-ca",
+				"sslMode": "disable",
 				"syncFrequency": "60",
 				"useRudderStorage": true,
 				"consentManagement": {
@@ -338,6 +338,13 @@ func TestDestinationResourcePostgres(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourcePostgres(t *testing.T) {
+	cmt.AssertDestination(t, "postgres", postgresTestConfigs)
+}
+
+func TestAccDestinationPostgres(t *testing.T) {
+	acc.AccAssertDestination(t, "postgres", postgresTestConfigs)
 }

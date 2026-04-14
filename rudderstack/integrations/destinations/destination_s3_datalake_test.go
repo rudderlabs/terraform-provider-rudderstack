@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceS3Datalake(t *testing.T) {
-	cmt.AssertDestination(t, "s3_datalake", []c.TestConfig{
-		{
-			TerraformCreate: `
+var s3DatalakeTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				bucket_name = "bucket"
 				use_glue    = false
 
@@ -21,17 +21,16 @@ func TestDestinationResourceS3Datalake(t *testing.T) {
 					i_am_role_arn = "..."
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"bucketName": "bucket",
 				"useGlue": false,
 				"syncFrequency": "30",
 				"roleBasedAuth": true,
 				"iamRoleARN": "..."
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				bucket_name = "bucket"
 
-				namespace	  = "namespace"
 				prefix        = "prefix"
 				access_key_id = "..."
 				access_key    = "..."
@@ -114,9 +113,8 @@ func TestDestinationResourceS3Datalake(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"bucketName": "bucket",
-				"namespace": "namespace",
 				"prefix": "prefix",
 				"accessKeyID": "...",
 				"accessKey": "...",
@@ -346,6 +344,13 @@ func TestDestinationResourceS3Datalake(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceS3Datalake(t *testing.T) {
+	cmt.AssertDestination(t, "s3_datalake", s3DatalakeTestConfigs)
+}
+
+func TestAccDestinationS3Datalake(t *testing.T) {
+	acc.AccAssertDestination(t, "s3_datalake", s3DatalakeTestConfigs)
 }

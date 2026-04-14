@@ -3,22 +3,22 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceWebhook(t *testing.T) {
-	cmt.AssertDestination(t, "webhook", []c.TestConfig{
-		{
-			TerraformCreate: `
+var webhookTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				webhook_url = "https://example.com/some/path?query=a"
 				webhook_method = "GET"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"webhookUrl": "https://example.com/some/path?query=a",
 				"webhookMethod": "GET"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				webhook_url = "https://example.com/some/path?query=a"
 				webhook_method = "GET"
 				headers = [
@@ -101,7 +101,7 @@ func TestDestinationResourceWebhook(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"webhookUrl": "https://example.com/some/path?query=a",
 				"webhookMethod": "GET",
 				"headers": [
@@ -334,6 +334,13 @@ func TestDestinationResourceWebhook(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceWebhook(t *testing.T) {
+	cmt.AssertDestination(t, "webhook", webhookTestConfigs)
+}
+
+func TestAccDestinationWebhook(t *testing.T) {
+	acc.AccAssertDestination(t, "webhook", webhookTestConfigs)
 }

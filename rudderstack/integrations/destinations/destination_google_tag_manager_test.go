@@ -3,20 +3,20 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceGoogleTagManager(t *testing.T) {
-	cmt.AssertDestination(t, "google_tag_manager", []c.TestConfig{
-		{
-			TerraformCreate: `
+var googleTagManagerTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				container_id = "GTM-000000"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"containerID": "GTM-000000"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				container_id = "GTM-000000"
 
 				server_url = "https://example.com"
@@ -49,7 +49,7 @@ func TestDestinationResourceGoogleTagManager(t *testing.T) {
 					]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"containerID": "GTM-000000",
 				"serverUrl": "https://example.com",
 				"blacklistedEvents": [
@@ -117,6 +117,13 @@ func TestDestinationResourceGoogleTagManager(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceGoogleTagManager(t *testing.T) {
+	cmt.AssertDestination(t, "google_tag_manager", googleTagManagerTestConfigs)
+}
+
+func TestAccDestinationGoogleTagManager(t *testing.T) {
+	acc.AccAssertDestination(t, "google_tag_manager", googleTagManagerTestConfigs)
 }

@@ -14,12 +14,11 @@ func init() {
 		c.Simple("pixelId", "pixel_id"),
 		c.Simple("accessToken", "access_token", c.SkipZeroValue),
 		c.Simple("standardPageCall", "standard_page_call", c.SkipZeroValue),
-		c.Simple("valueFieldIdentifier", "value_field_identifier", c.SkipZeroValue),
+		c.Simple("valueFieldIdentifier", "value_field_identifier"),
 		c.Simple("advancedMapping", "advanced_mapping", c.SkipZeroValue),
 		c.Simple("testDestination", "test_destination", c.SkipZeroValue),
 		c.Simple("testEventCode", "test_event_code", c.SkipZeroValue),
 		c.Simple("eventsToEvents", "events_to_events", c.SkipZeroValue),
-		c.ArrayWithStrings("eventCustomProperties", "eventCustomProperties", "event_custom_properties"),
 		c.ArrayWithObjects("blacklistPiiProperties", "blacklist_pii_properties", map[string]interface{}{
 			"blacklistPiiProperties": "property",
 			"blacklistPiiHash":       "hash",
@@ -27,7 +26,6 @@ func init() {
 		c.ArrayWithObjects("whitelistPiiProperties", "whitelist_pii_properties", map[string]interface{}{
 			"whitelistPiiProperties": "property",
 		}),
-		c.Simple("categoryToContent", "category_to_content", c.SkipZeroValue),
 		c.Simple("legacyConversionPixelId.from", "legacy_conversion_pixel_id.0.from"),
 		c.Simple("legacyConversionPixelId.to", "legacy_conversion_pixel_id.0.to"),
 		c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
@@ -63,6 +61,7 @@ func init() {
 		"value_field_identifier": {
 			Type:             schema.TypeString,
 			Optional:         true,
+			Default:          "properties.price",
 			Description:      "You can set this field to `properties.price` or `properties.value`. RudderStack will then assign this to the value field of the Facebook payload.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(properties.value|properties.price)$"),
 		},
@@ -103,14 +102,6 @@ func init() {
 				},
 			},
 		},
-		"event_custom_properties": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Description: "For the standard events, some predefined properties are taken by Facebook. If you want to send more properties for your events, mention those properties in this field.",
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-		},
 		"blacklist_pii_properties": {
 			Type:        schema.TypeList,
 			Optional:    true,
@@ -138,26 +129,6 @@ func init() {
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"property": {
-						Type:             schema.TypeString,
-						Required:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
-					},
-				},
-			},
-		},
-		"category_to_content": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Description: "This option lets you specify the category fields to specific Facebook content type.",
-			ConfigMode:  schema.SchemaConfigModeAttr,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"from": {
-						Type:             schema.TypeString,
-						Required:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
-					},
-					"to": {
 						Type:             schema.TypeString,
 						Required:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),

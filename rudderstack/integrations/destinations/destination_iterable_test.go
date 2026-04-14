@@ -3,26 +3,26 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceIterable(t *testing.T) {
-	cmt.AssertDestination(t, "iterable", []c.TestConfig{
-		{
-			TerraformCreate: `
+var iterableTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				api_key = "73983282843839749873"	
 				map_to_single_event = true
 				track_categorized_pages = true
 				track_named_pages = true
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiKey": "73983282843839749873",
 				"mapToSingleEvent": true,
 				"trackCategorisedPages": true,
 				"trackNamedPages": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				api_key = "83983282843839749873"
 				map_to_single_event = false
 				track_all_pages = true
@@ -88,8 +88,8 @@ func TestDestinationResourceIterable(t *testing.T) {
 				is_required_to_dismiss_message { 
 					web = true 
 				}
-				close_button_position { 
-					web = "..." 
+				close_button_position {
+					web = "top-right"
 				}
 				consent_management {
 					web = [
@@ -162,7 +162,7 @@ func TestDestinationResourceIterable(t *testing.T) {
 				}
 
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiKey": "83983282843839749873",
 				"mapToSingleEvent": false,
 				"trackAllPages": true,
@@ -202,7 +202,7 @@ func TestDestinationResourceIterable(t *testing.T) {
 				"closeButtonColorSideOffset": { "web": "2%" },
 				"iconPath": { "web": "..." },
 				"isRequiredToDismissMessage": { "web": true },
-				"closeButtonPosition": { "web": "..." },
+				"closeButtonPosition": { "web": "top-right" },
 				"consentManagement": {
 					"web": [
 						{
@@ -423,6 +423,13 @@ func TestDestinationResourceIterable(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceIterable(t *testing.T) {
+	cmt.AssertDestination(t, "iterable", iterableTestConfigs)
+}
+
+func TestAccDestinationIterable(t *testing.T) {
+	acc.AccAssertDestination(t, "iterable", iterableTestConfigs)
 }

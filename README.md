@@ -111,7 +111,7 @@ Before running the skill, make sure you have:
    - **Auto-detect** — Clone `rudder-integrations-config` as a sibling directory (i.e., `../rudder-integrations-config`). The skill finds it automatically.
    - **GitHub fetch** — If you have the GitHub MCP connector configured, the skill can fetch the files directly from GitHub.
    - **Manual path** — Provide the absolute path to your local clone when prompted.
-3. **For E2E testing** — A `RUDDERSTACK_ACCESS_TOKEN` in a `.env` file at the repo root (the skill reads it automatically). Also ensure `~/.terraformrc` has `dev_overrides` configured for the local provider binary (see [Setting up the development environment](#example) above).
+3. **For E2E testing** — A `.env` file at the repo root with `RUDDERSTACK_ACCESS_TOKEN` and `RUDDERSTACK_API_URL` (see [E2E Testing](#e2e-testing) below).
 
 ## Usage
 
@@ -136,7 +136,7 @@ If you omit the name or type, the skill will prompt you.
 4. **Studies a similar integration** — Reads an existing integration with similar field patterns as a reference to ensure consistency.
 5. **Generates files** — Creates the `.go` implementation, unit tests, example `.tf`, and docs template following the repo's established patterns.
 6. **Validates** — Runs unit tests, generates docs (`make docs`), runs the full test suite (`go test ./...`), and lints (`make lint`).
-7. **E2E testing** — Builds the provider, creates a resource via `terraform apply` with all config fields, and runs the verify script (`cmd/integration-verify/`) to compare against the live RudderStack API.
+7. **E2E testing** — Runs plan-only validation (`make testacc-plan`) and, if a `RUDDERSTACK_ACCESS_TOKEN` is available, runs full CRUD acceptance tests against the live API.
 
 ### Adding new fields to an existing integration
 When you run the skill for an integration that already exists, it:
@@ -146,6 +146,130 @@ When you run the skill for an integration that already exists, it:
 4. Updates the `.go`, test, example, and docs files, then runs the full validation and E2E pipeline.
 
 > **Note:** This skill does not support modifying existing fields, fixing types, refactoring, or any other changes to already-implemented integrations. For those, make changes manually.
+
+<a id="e2e-testing"></a>
+# E2E Testing
+
+The provider includes an E2E acceptance test framework that validates integrations against the real RudderStack API. Every registered source and destination has a corresponding `TestAcc*` function.
+
+## Two Modes
+
+| Mode | Env vars | What it does | API calls |
+|---|---|---|---|
+| **Plan-only** | `TF_ACC=1 TF_ACC_PLAN_ONLY=1` | Validates HCL config + provider schema | Zero |
+| **Full CRUD** | `TF_ACC=1` | Create → Update → Import → Destroy | ~5 per integration |
+
+- **Plan-only** runs for all integrations on every PR. It sets a dummy token automatically — no credentials needed.
+- **Full CRUD** runs only for integrations affected by the PR, using real API credentials. After each Create and Update step, the test fetches the resource from the API and verifies its config matches the expected `APICreate`/`APIUpdate` JSON from the test configs.
+
+## Setup
+
+Create a `.env` file at the repo root (git-ignored):
+
+```
+RUDDERSTACK_ACCESS_TOKEN=your-access-token
+RUDDERSTACK_API_URL=https://api.rudderstack.com/v2
+```
+
+The Makefile auto-loads `.env` via `-include .env` + `export`.
+
+> **Note:** `RUDDERSTACK_API_URL` must include `/v2` — the API client uses it as the complete base URL.
+
+## Running Locally
+
+```bash
+# Plan-only validation for all integrations (no token needed):
+make testacc-plan
+
+# Full CRUD for a single destination:
+make testacc-dest DEST=webhook
+
+# Full CRUD for a single source:
+make testacc-source SRC=http
+
+# Full CRUD for connection tests:
+make testacc-conn
+
+# Full CRUD for everything:
+make testacc-all
+```
+
+The `-run` patterns use `(?i)` for case-insensitive matching, so `DEST=webhook` matches `TestAccDestinationWebhook`.
+
+## Architecture
+
+The framework lives in `internal/testutil/acc/`:
+
+| File | Purpose |
+|---|---|
+| `provider.go` | Provider factory, `TestAccPreCheck()`, `PlanOnly()`, dummy token helper |
+| `destinations.go` | `AccAssertDestination()` — plan-only or full CRUD for destinations |
+| `sources.go` | `AccAssertSource()` — plan-only or full CRUD for sources |
+| `connections.go` | `AccAssertConnection()` — tests source→destination wiring |
+| `config_verify.go` | Shared API config comparison logic (subset check) |
+| `coverage_test.go` | CI enforcement — fails if any registered integration lacks a `TestAcc*` function |
+
+E2E tests reuse the same `[]configs.TestConfig` data as unit tests — no duplicated HCL.
+
+## Adding E2E Tests for New Integrations
+
+### Destinations
+
+In `destination_{name}_test.go`, extract configs to a package-level var and add the E2E function:
+
+```go
+var exampleTestConfigs = []c.TestConfig{
+    {TerraformCreate: `...`, APICreate: `...`, TerraformUpdate: `...`, APIUpdate: `...`},
+}
+
+func TestDestinationResourceExample(t *testing.T) {
+    cmt.AssertDestination(t, "example", exampleTestConfigs)
+}
+
+func TestAccDestinationExample(t *testing.T) {
+    acc.AccAssertDestination(t, "example", exampleTestConfigs)
+}
+```
+
+### Sources
+
+In `sources_test.go`, add the E2E function:
+
+```go
+func TestAccSourceExample(t *testing.T) {
+    acc.AccAssertSource(t, "example", emptyTestConfigs)
+}
+```
+
+### Connections
+
+In `connections/connections_test.go`:
+
+```go
+func TestAccConnectionExampleToWebhook(t *testing.T) {
+    acc.AccAssertConnection(t, acc.ConnectionTestConfig{
+        Source:      "example",
+        Destination: "webhook",
+        DestConfig:  `webhook_url = "https://example.com/test"
+                      webhook_method = "POST"`,
+    })
+}
+```
+
+## CI Workflow
+
+The GitHub Actions workflow (`.github/workflows/e2e-tests.yml`) runs on every PR:
+
+1. **detect-changes** — Determines which integrations are affected by the PR
+2. **plan-only** — Validates all integration configs with zero API calls
+3. **e2e-crud** — Runs full CRUD tests only for affected integrations (matrix strategy, max 5 parallel)
+4. **e2e-summary** — Gates the PR on both plan-only and CRUD results
+
+Core file changes (provider, configs, client, acc helpers) trigger CRUD tests for **all** integrations.
+
+## CI Enforcement
+
+A coverage test (`internal/testutil/acc/coverage_test.go`) runs during `make test-ci` and fails if any registered integration is missing its `TestAcc*` function. This uses case-insensitive matching — exact PascalCase is not required.
 
 # Related
 

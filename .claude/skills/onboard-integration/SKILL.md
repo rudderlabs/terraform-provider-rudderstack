@@ -195,19 +195,34 @@ Fix any lint issues in the generated code.
 
 ---
 
-## Step 7: E2E Testing
+## Step 7: E2E Acceptance Testing
 
-Automatically proceed with E2E testing. Do NOT ask the user whether to run E2E tests — just run them. Follow the detailed E2E steps in [reference/e2e-testing.md](reference/e2e-testing.md).
+The E2E test function was already added in Step 2 (see [reference/e2e-testing.md](reference/e2e-testing.md)). Now validate it works.
 
-High-level flow:
-1. Load access token from `.env`
-2. Check for `dev_overrides` in `~/.terraformrc`
-3. Build and install provider (`make install`)
-4. Create temp workspace, write `main.tf` with ALL config fields
-5. Run `terraform plan` and `terraform apply`
-6. Verify resource with `terraform show`
-7. Run the verify script (`go run ./cmd/integration-verify/`)
-8. **Ask before cleaning up** — wait for user confirmation before `terraform destroy`
+Run plan-only validation (no API calls, no token needed):
+
+```bash
+# For destinations:
+TF_ACC=1 TF_ACC_PLAN_ONLY=1 go test ./rudderstack/integrations/destinations/ -run "(?i)TestAccDestination.*{name}" -v -count=1
+
+# For sources:
+TF_ACC=1 TF_ACC_PLAN_ONLY=1 go test ./rudderstack/integrations/sources/ -run "(?i)TestAccSource.*{name}" -v -count=1
+```
+
+If plan-only passes and `RUDDERSTACK_ACCESS_TOKEN` is available (from `.env`), also run the full CRUD test:
+
+```bash
+# For destinations:
+make testacc-dest DEST={name}
+
+# For sources:
+make testacc-source SRC={name}
+```
+
+If the full CRUD test fails, analyze the error and fix. Common issues:
+- Config field type mismatches between Terraform schema and API
+- Missing required fields in TerraformCreate
+- API validation errors for placeholder values
 
 ---
 
@@ -218,6 +233,8 @@ Before finishing, verify:
 - [ ] All files created/modified
 - [ ] `init()` function registers the integration (self-registering, no provider.go changes needed)
 - [ ] Unit tests pass
+- [ ] E2E acceptance test function added (`TestAccDestination*` or `TestAccSource*`)
+- [ ] E2E plan-only validation passes
 - [ ] `make docs` generates the docs file
 - [ ] Full test suite passes (`go test ./...`)
 - [ ] Lint passes (`make lint`)

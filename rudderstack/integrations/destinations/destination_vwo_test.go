@@ -3,20 +3,20 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceVWO(t *testing.T) {
-	cmt.AssertDestination(t, "vwo", []c.TestConfig{
-		{
-			TerraformCreate: `
+var vwoTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				account_id = "..."
 			`,
-			APICreate: `{
+		APICreate: `{
 				"accountId": "..."
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				account_id = "..."
 
 				is_spa                   = true
@@ -55,7 +55,7 @@ func TestDestinationResourceVWO(t *testing.T) {
 					]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"accountId": "...",
 				"isSPA": true,
 				"sendExperimentTrack": true,
@@ -127,6 +127,13 @@ func TestDestinationResourceVWO(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceVWO(t *testing.T) {
+	cmt.AssertDestination(t, "vwo", vwoTestConfigs)
+}
+
+func TestAccDestinationVWO(t *testing.T) {
+	acc.AccAssertDestination(t, "vwo", vwoTestConfigs)
 }

@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceBQStream(t *testing.T) {
-	cmt.AssertDestination(t, "bqstream", []c.TestConfig{
-		{
-			TerraformCreate: `
+var bqstreamTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				project_id = "test_project_id"
 				dataset_id = "test_dataset_id"
 				table_id = "test_table_id"
@@ -20,7 +20,7 @@ func TestDestinationResourceBQStream(t *testing.T) {
 					web = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"projectId": "test_project_id",
 				"datasetId": "test_dataset_id",
 				"tableId": "test_table_id",
@@ -30,7 +30,7 @@ func TestDestinationResourceBQStream(t *testing.T) {
 					"web": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				project_id = "updated_project_id"
 				dataset_id = "updated_dataset_id"
 				table_id = "updated_table_id"
@@ -119,7 +119,7 @@ func TestDestinationResourceBQStream(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"projectId": "updated_project_id",
 				"datasetId": "updated_dataset_id",
 				"tableId": "updated_table_id",
@@ -286,6 +286,13 @@ func TestDestinationResourceBQStream(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceBQStream(t *testing.T) {
+	cmt.AssertDestination(t, "bqstream", bqstreamTestConfigs)
+}
+
+func TestAccDestinationBQStream(t *testing.T) {
+	acc.AccAssertDestination(t, "bqstream", bqstreamTestConfigs)
 }

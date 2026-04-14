@@ -3,28 +3,28 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceStatSig(t *testing.T) {
-	cmt.AssertDestination(t, "statsig", []c.TestConfig{
-		{
-			TerraformCreate: `
+var statsigTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				secret_key = "key"
 				connection_mode {
 				 web = "cloud"
 				 ios = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"secretKey": "key",
 				"connectionMode": {
 					"web": "cloud",
 					"ios": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				secret_key = "key"
 				connection_mode {
 				 web = "cloud"
@@ -102,7 +102,7 @@ func TestDestinationResourceStatSig(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"secretKey": "key",
 				"connectionMode": {
 					"web": "cloud",
@@ -330,6 +330,13 @@ func TestDestinationResourceStatSig(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceStatSig(t *testing.T) {
+	cmt.AssertDestination(t, "statsig", statsigTestConfigs)
+}
+
+func TestAccDestinationStatSig(t *testing.T) {
+	acc.AccAssertDestination(t, "statsig", statsigTestConfigs)
 }

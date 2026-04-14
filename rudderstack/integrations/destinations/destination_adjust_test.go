@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceAdjust(t *testing.T) {
-	cmt.AssertDestination(t, "adjust", []c.TestConfig{
-		{
-			TerraformCreate: `
+var adjustTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 			app_token = "test_app_token"
 			environment = true
 			connection_mode {
@@ -18,7 +18,7 @@ func TestDestinationResourceAdjust(t *testing.T) {
 				ios = "device"
 			}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"appToken": "test_app_token",
 				"environment": true,
 				"connectionMode": {
@@ -26,7 +26,7 @@ func TestDestinationResourceAdjust(t *testing.T) {
 					"ios": "device"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 			app_token = "updated_app_token"
 			delay = "5"
 			environment = false
@@ -112,7 +112,7 @@ func TestDestinationResourceAdjust(t *testing.T) {
 				}]
 			}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"appToken": "updated_app_token",
 				"delay": "5",
 				"customMappings": [
@@ -310,6 +310,13 @@ func TestDestinationResourceAdjust(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceAdjust(t *testing.T) {
+	cmt.AssertDestination(t, "adjust", adjustTestConfigs)
+}
+
+func TestAccDestinationAdjust(t *testing.T) {
+	acc.AccAssertDestination(t, "adjust", adjustTestConfigs)
 }

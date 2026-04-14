@@ -26,7 +26,7 @@ func init() {
 		}),
 		c.Simple("marketingCloudOrgId", "marketing_cloud_org_id", c.SkipZeroValue),
 		c.Simple("dropVisitorId", "drop_visitor_id"),
-		c.Simple("timestampOption", "timestamp_option", c.SkipZeroValue),
+		c.Simple("timestampOption", "timestamp_option"),
 		c.Simple("timestampOptionalReporting", "timestamp_optional_reporting"),
 		c.Simple("noFallbackVisitorId", "no_fallback_visitor_id"),
 		c.Simple("preferVisitorId", "prefer_visitor_id"),
@@ -88,7 +88,7 @@ func init() {
 			"from": "from",
 			"to":   "to",
 		}),
-		c.Simple("productIdentifier", "product_identifier", c.SkipZeroValue),
+		c.Simple("productIdentifier", "product_identifier"),
 		c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
 		c.Simple("useNativeSDK.ios", "use_native_sdk.0.ios"),
 		c.Simple("useNativeSDK.android", "use_native_sdk.0.android"),
@@ -196,6 +196,7 @@ func init() {
 		"timestamp_option": {
 			Type:             schema.TypeString,
 			Optional:         true,
+			Default:          "disabled",
 			Description:      "Enter your Timestamp Option.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(disabled|hybrid|optional|enabled)$"),
 		},
@@ -527,6 +528,7 @@ func init() {
 		"product_identifier": {
 			Type:             schema.TypeString,
 			Optional:         true,
+			Default:          "name",
 			Description:      "Enter your Product Identifier",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(name|id|sku)$"),
 		},

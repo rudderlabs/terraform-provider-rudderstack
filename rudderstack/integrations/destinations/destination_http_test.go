@@ -3,20 +3,20 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceHTTP(t *testing.T) {
-	cmt.AssertDestination(t, "http", []c.TestConfig{
-		{
-			TerraformCreate: `
+var httpTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				api_url  = "https://example.com/base"
 				auth     = "basicAuth"
 				username = "myuser"
 				password = "mypass"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiUrl": "https://example.com/base",
 				"auth": "basicAuth",
 				"username": "myuser",
@@ -26,13 +26,13 @@ func TestDestinationResourceHTTP(t *testing.T) {
 				"isBatchingEnabled": false,
 				"isDefaultMapping": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				api_url  = "https://example.com/base"
 				auth     = "basicAuth"
 				username = "myuser"
 				password = "mypass"
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiUrl": "https://example.com/base",
 				"auth": "basicAuth",
 				"username": "myuser",
@@ -42,12 +42,12 @@ func TestDestinationResourceHTTP(t *testing.T) {
 				"isBatchingEnabled": false,
 				"isDefaultMapping": true
 			}`,
-		},
-		{
-			TerraformCreate: `
+	},
+	{
+		TerraformCreate: `
 				api_url = "https://example.com/base"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiUrl": "https://example.com/base",
 				"auth": "noAuth",
 				"method": "POST",
@@ -55,7 +55,7 @@ func TestDestinationResourceHTTP(t *testing.T) {
 				"isBatchingEnabled": false,
 				"isDefaultMapping": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				api_url       = "https://example.com/base"
 				auth          = "apiKeyAuth"
 				api_key_name  = "x-api-key"
@@ -209,7 +209,7 @@ func TestDestinationResourceHTTP(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiUrl": "https://example.com/base",
 				"auth": "apiKeyAuth",
 				"apiKeyName": "x-api-key",
@@ -421,6 +421,13 @@ func TestDestinationResourceHTTP(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceHTTP(t *testing.T) {
+	cmt.AssertDestination(t, "http", httpTestConfigs)
+}
+
+func TestAccDestinationHttp(t *testing.T) {
+	acc.AccAssertDestination(t, "http", httpTestConfigs)
 }

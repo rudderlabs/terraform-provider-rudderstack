@@ -3,25 +3,26 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceKafka(t *testing.T) {
-	cmt.AssertDestination(t, "kafka", []c.TestConfig{
-		{
-			TerraformCreate: `
+var kafkaTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				host_name = "example.com"
 				port = "9092"
 				topic = "example-topic"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"hostName": "example.com",
 				"port": "9092",
 				"topic": "example-topic",
-				"sslEnabled": true
+				"sslEnabled": true,
+				"saslType": "plain"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				host_name = "example-updated.com"
 				port = "9092"
 				topic = "example-topic"
@@ -97,11 +98,12 @@ func TestDestinationResourceKafka(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"hostName": "example-updated.com",
 				"port": "9092",
 				"topic": "example-topic",
 				"sslEnabled": true,
+				"saslType": "plain",
 				"caCertificate": "example-ca-certificate",
 				"consentManagement": {
 					"web": [
@@ -323,6 +325,13 @@ func TestDestinationResourceKafka(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceKafka(t *testing.T) {
+	cmt.AssertDestination(t, "kafka", kafkaTestConfigs)
+}
+
+func TestAccDestinationKafka(t *testing.T) {
+	acc.AccAssertDestination(t, "kafka", kafkaTestConfigs)
 }

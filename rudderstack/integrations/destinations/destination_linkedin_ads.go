@@ -44,7 +44,8 @@ func init() {
 		},
 		"hash_data": {
 			Type:        schema.TypeBool,
-			Required:    true,
+			Optional:    true,
+			Default:     true,
 			Description: "Hash and Encode Data. Disable it if you are sending hashed and encoded user email.",
 		},
 		"ad_account_id": {

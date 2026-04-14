@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceFirebase(t *testing.T) {
-	cmt.AssertDestination(t, "firebase", []c.TestConfig{
-		{
-			TerraformCreate: `
+var firebaseTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 			connection_mode {
 				android = "device"
 				ios = "device"
@@ -19,7 +19,7 @@ func TestDestinationResourceFirebase(t *testing.T) {
 				whitelist = ["event1", "event2"]
 			}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"connectionMode": {
 					"android": "device",
 					"ios": "device"
@@ -34,7 +34,7 @@ func TestDestinationResourceFirebase(t *testing.T) {
 				],
 				"eventFilteringOption": "whitelistedEvents"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 			connection_mode {
 				android = "device"
 				ios = "device"
@@ -46,7 +46,7 @@ func TestDestinationResourceFirebase(t *testing.T) {
 				blacklist = ["event3", "event4", "event5"]
 			}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"connectionMode": {
 					"android": "device",
 					"ios": "device",
@@ -67,6 +67,13 @@ func TestDestinationResourceFirebase(t *testing.T) {
 				],
 				"eventFilteringOption": "blacklistedEvents"
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceFirebase(t *testing.T) {
+	cmt.AssertDestination(t, "firebase", firebaseTestConfigs)
+}
+
+func TestAccDestinationFirebase(t *testing.T) {
+	acc.AccAssertDestination(t, "firebase", firebaseTestConfigs)
 }

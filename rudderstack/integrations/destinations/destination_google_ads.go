@@ -22,8 +22,8 @@ func init() {
 		}),
 		c.Simple("defaultPageConversion", "default_page_conversion", c.SkipZeroValue),
 		c.Simple("dynamicRemarketing.web", "dynamic_remarketing.0.web"),
-		c.Simple("conversionLinker", "conversion_linker", c.SkipZeroValue),
-		c.Simple("sendPageView", "send_page_view", c.SkipZeroValue),
+		c.Simple("conversionLinker", "conversion_linker"),
+		c.Simple("sendPageView", "send_page_view"),
 		c.Simple("disableAdPersonalization", "disable_ad_personalization", c.SkipZeroValue),
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
@@ -110,11 +110,13 @@ func init() {
 		"conversion_linker": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     true,
 			Description: "This setting is enabled by default. If you don't want the global site tag (gtag.js) to set first-party cookies on your website domain, you should disable this setting.",
 		},
 		"send_page_view": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     true,
 			Description: "Enabling this setting configures Google Ads to automatically send your `page` events.",
 		},
 		"disable_ad_personalization": {

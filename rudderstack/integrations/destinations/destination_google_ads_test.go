@@ -3,20 +3,22 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceGoogleAds(t *testing.T) {
-	cmt.AssertDestination(t, "google_ads", []c.TestConfig{
-		{
-			TerraformCreate: `
+var googleAdsTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				conversion_id = "AW-00000000"
 			`,
-			APICreate: `{
-				"conversionID": "AW-00000000"
+		APICreate: `{
+				"conversionID": "AW-00000000",
+				"conversionLinker": true,
+				"sendPageView": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				conversion_id = "AW-00000000"
 
 				default_page_conversion = "..."
@@ -71,7 +73,7 @@ func TestDestinationResourceGoogleAds(t *testing.T) {
 					]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"conversionID": "AW-00000000",
 				"pageLoadConversions": [
 				  {
@@ -157,6 +159,13 @@ func TestDestinationResourceGoogleAds(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceGoogleAds(t *testing.T) {
+	cmt.AssertDestination(t, "google_ads", googleAdsTestConfigs)
+}
+
+func TestAccDestinationGoogleAds(t *testing.T) {
+	acc.AccAssertDestination(t, "google_ads", googleAdsTestConfigs)
 }

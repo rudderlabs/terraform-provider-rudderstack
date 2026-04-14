@@ -59,7 +59,7 @@ func init() {
 		c.Simple("gdprApiToken", "gdpr_api_token", c.SkipZeroValue),
 		c.Simple("sessionReplayPercentage.web", "session_replay_percentage.0.web"),
 		c.Simple("persistenceName", "persistence_name", c.SkipZeroValue),
-		c.Simple("persistenceType", "persistence_type", c.SkipZeroValue),
+		c.Simple("persistenceType", "persistence_type"),
 		c.Simple("ignoreDnt", "ignore_dnt", c.SkipZeroValue),
 	}
 
@@ -386,6 +386,7 @@ func init() {
 		"persistence_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
+			Default:          "cookie",
 			Description:      "Mixpanel Persistence Type",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(none|cookie|localStorage)$"),
 		},

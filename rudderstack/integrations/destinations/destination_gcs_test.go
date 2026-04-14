@@ -3,20 +3,20 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceGCS(t *testing.T) {
-	cmt.AssertDestination(t, "gcs", []c.TestConfig{
-		{
-			TerraformCreate: `
+var gcsTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				bucket_name = "bucket"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"bucketName": "bucket"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				bucket_name = "bucket"
 				prefix        = "prefix"
 				credentials   = "..."
@@ -90,7 +90,7 @@ func TestDestinationResourceGCS(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"bucketName": "bucket",
 				"prefix": "prefix",
 				"credentials": "...",
@@ -314,6 +314,13 @@ func TestDestinationResourceGCS(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceGCS(t *testing.T) {
+	cmt.AssertDestination(t, "gcs", gcsTestConfigs)
+}
+
+func TestAccDestinationGCS(t *testing.T) {
+	acc.AccAssertDestination(t, "gcs", gcsTestConfigs)
 }

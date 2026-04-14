@@ -114,27 +114,28 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResource{PascalCaseName}(t *testing.T) {
-	cmt.AssertDestination(t, "{name}", []c.TestConfig{
-		{
-			TerraformCreate: `
-				required_field = "value"
-			`,
-			APICreate: `{
-				"requiredField": "value"
-			}`,
-			// NOTE: If any field has a non-zero Default (e.g. Default: "v2"),
-			// include it in APICreate too — Terraform always sends defaults.
-			// Example: APICreate: `{"requiredField": "value", "version": "v2"}`
-			TerraformUpdate: `
-				required_field = "value"
-				optional_field = "updated"
-				// ... all fields with values ...
-				consent_management {
+// Extract test configs to a package-level var so both unit and E2E tests can reuse them.
+var {camelCaseName}TestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
+			required_field = "value"
+		`,
+		APICreate: `{
+			"requiredField": "value"
+		}`,
+		// NOTE: If any field has a non-zero Default (e.g. Default: "v2"),
+		// include it in APICreate too — Terraform always sends defaults.
+		// Example: APICreate: `{"requiredField": "value", "version": "v2"}`
+		TerraformUpdate: `
+			required_field = "value"
+			optional_field = "updated"
+			// ... all fields with values ...
+			consent_management {
 					web = [
 						{
 							provider = "oneTrust"
@@ -224,8 +225,17 @@ func TestDestinationResource{PascalCaseName}(t *testing.T) {
 					// ... one entry per supportedSourceType with same pattern ...
 				}
 			}`,
-		},
-	})
+	},
+}
+
+// Unit test — validates Terraform state ↔ API JSON conversion using mocked client.
+func TestDestinationResource{PascalCaseName}(t *testing.T) {
+	cmt.AssertDestination(t, "{name}", {camelCaseName}TestConfigs)
+}
+
+// E2E acceptance test — reuses the same test configs for real API validation.
+func TestAccDestination{PascalCaseName}(t *testing.T) {
+	acc.AccAssertDestination(t, "{name}", {camelCaseName}TestConfigs)
 }
 ```
 

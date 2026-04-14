@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourcePosthog(t *testing.T) {
-	cmt.AssertDestination(t, "posthog", []c.TestConfig{
-		{
-			TerraformCreate: `
+var posthogTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				endpoint = "https://app.posthog.com"
 				api_key = "api_key"
 				use_v2_group = true
@@ -20,7 +20,7 @@ func TestDestinationResourcePosthog(t *testing.T) {
 					cloud = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"yourInstance": "https://app.posthog.com",
 				"teamApiKey": "api_key",
 				"useV2Group": true,
@@ -30,7 +30,7 @@ func TestDestinationResourcePosthog(t *testing.T) {
 					"cloud": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				endpoint = "https://app.posthog.com"
 				api_key = "api_key"
 				use_v2_group = true
@@ -66,7 +66,7 @@ func TestDestinationResourcePosthog(t *testing.T) {
 					}
 				]
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"yourInstance": "https://app.posthog.com",
 				"teamApiKey": "api_key",
 				"useV2Group": true,
@@ -110,6 +110,13 @@ func TestDestinationResourcePosthog(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourcePosthog(t *testing.T) {
+	cmt.AssertDestination(t, "posthog", posthogTestConfigs)
+}
+
+func TestAccDestinationPosthog(t *testing.T) {
+	acc.AccAssertDestination(t, "posthog", posthogTestConfigs)
 }

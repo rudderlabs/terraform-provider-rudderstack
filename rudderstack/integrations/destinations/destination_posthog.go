@@ -7,7 +7,8 @@ import (
 )
 
 func init() {
-	supportedSourceTypes := []string{"android",
+	supportedSourceTypes := []string{
+		"android",
 		"ios",
 		"web",
 		"unity",
@@ -16,7 +17,8 @@ func init() {
 		"warehouse",
 		"reactnative",
 		"flutter",
-		"cordova"}
+		"cordova",
+	}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{

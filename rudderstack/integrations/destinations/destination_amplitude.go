@@ -16,8 +16,8 @@ func init() {
 		c.Simple("groupTypeTrait", "group_type_trait", c.SkipZeroValue),
 		c.Simple("groupValueTrait", "group_value_trait", c.SkipZeroValue),
 		c.Simple("trackAllPages", "track_all_pages", c.SkipZeroValue),
-		c.Simple("trackCategorizedPages", "track_categorized_pages", c.SkipZeroValue),
-		c.Simple("trackNamedPages", "track_named_pages", c.SkipZeroValue),
+		c.Simple("trackCategorizedPages", "track_categorized_pages"),
+		c.Simple("trackNamedPages", "track_named_pages"),
 		c.Simple("trackProductsOnce", "track_products_once", c.SkipZeroValue),
 		c.Simple("trackRevenuePerProduct", "track_revenue_per_product", c.SkipZeroValue),
 		c.Simple("versionName", "version_name", c.SkipZeroValue),
@@ -62,7 +62,7 @@ func init() {
 		c.Simple("useAdvertisingIdForDeviceId.reactnative", "use_advertising_id_for_device_id.0.react_native"),
 		c.Simple("useIdfaAsDeviceId.ios", "use_idfa_as_device_id.0.ios"),
 		c.Simple("useIdfaAsDeviceId.reactnative", "use_idfa_as_device_id.0.react_native"),
-		c.Simple("residencyServer", "residency_server", c.SkipZeroValue),
+		c.Simple("residencyServer", "residency_server"),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -96,6 +96,7 @@ func init() {
 		"residency_server": {
 			Type:             schema.TypeString,
 			Optional:         true,
+			Default:          "standard",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(standard|EU)$"),
 		},
 		"track_all_pages": {
@@ -106,11 +107,13 @@ func init() {
 		"track_categorized_pages": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     true,
 			Description: "If this setting is enabled and if `category` is present in a `page` / `screen` call, then an event named `Viewed {category} page` / `Viewed {category} Screen` will be sent to Amplitude.",
 		},
 		"track_named_pages": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     true,
 			Description: "If this setting is enabled and `name` is present in a `page` call, then an event named `Viewed {name} page` will be sent to Amplitude.",
 		},
 		"track_products_once": {

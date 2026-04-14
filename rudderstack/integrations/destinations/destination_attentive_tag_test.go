@@ -3,26 +3,26 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceAttentiveTag(t *testing.T) {
-	cmt.AssertDestination(t, "attentive_tag", []c.TestConfig{
-		{
-			TerraformCreate: `
+var attentiveTagTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				api_key = "key"
 				connection_mode {
 					web = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiKey": "key",
 				"connectionMode": {
 					"web": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				connection_mode {
 					web = "cloud"
 					android = "cloud"
@@ -40,7 +40,7 @@ func TestDestinationResourceAttentiveTag(t *testing.T) {
 				sign_up_source_id = "123456"
 				enable_new_identify_flow = true
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiKey": "key",
 				"connectionMode": {
 					"web": "cloud",
@@ -58,6 +58,13 @@ func TestDestinationResourceAttentiveTag(t *testing.T) {
 				"signUpSourceId": "123456",
 				"enableNewIdentifyFlow": true
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceAttentiveTag(t *testing.T) {
+	cmt.AssertDestination(t, "attentive_tag", attentiveTagTestConfigs)
+}
+
+func TestAccDestinationAttentiveTag(t *testing.T) {
+	acc.AccAssertDestination(t, "attentive_tag", attentiveTagTestConfigs)
 }

@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceMarketo(t *testing.T) {
-	cmt.AssertDestination(t, "marketo", []c.TestConfig{
-		{
-			TerraformCreate: `
+var marketoTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				account_id = "..."
 				client_id = "cid"
 				client_secret = "cs"
@@ -21,7 +21,7 @@ func TestDestinationResourceMarketo(t *testing.T) {
 					ios = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"accountId": "...",
 				"clientId": "cid",
 				"clientSecret": "cs",
@@ -32,7 +32,7 @@ func TestDestinationResourceMarketo(t *testing.T) {
 					"ios": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				account_id = "..."
 				client_id = "cid2"
 				client_secret = "cs"
@@ -131,7 +131,7 @@ func TestDestinationResourceMarketo(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"accountId": "...",
 				"clientId": "cid2",
 				"clientSecret": "cs",
@@ -380,6 +380,13 @@ func TestDestinationResourceMarketo(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceMarketo(t *testing.T) {
+	cmt.AssertDestination(t, "marketo", marketoTestConfigs)
+}
+
+func TestAccDestinationMarketo(t *testing.T) {
+	acc.AccAssertDestination(t, "marketo", marketoTestConfigs)
 }

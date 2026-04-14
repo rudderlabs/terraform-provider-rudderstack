@@ -3,20 +3,20 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceGoogleAnalytics(t *testing.T) {
-	cmt.AssertDestination(t, "google_analytics", []c.TestConfig{
-		{
-			TerraformCreate: `
+var googleAnalyticsTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				tracking_id = "UA-00-0000"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"trackingID": "UA-00-0000"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				tracking_id = "UA-00-0000"
 
 				double_click              = true
@@ -160,7 +160,7 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 				  to   = "to"
 				}]
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"trackingID": "UA-00-0000",
 				"doubleClick": true,
 				"enhancedLinkAttribution": true,
@@ -417,6 +417,13 @@ func TestDestinationResourceGoogleAnalytics(t *testing.T) {
 				"contentGroupings": [{ "from": "from", "to": "to" }],
 				"dimensions": [{ "from": "from", "to": "to" }]
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceGoogleAnalytics(t *testing.T) {
+	cmt.AssertDestination(t, "google_analytics", googleAnalyticsTestConfigs)
+}
+
+func TestAccDestinationGoogleAnalytics(t *testing.T) {
+	acc.AccAssertDestination(t, "google_analytics", googleAnalyticsTestConfigs)
 }

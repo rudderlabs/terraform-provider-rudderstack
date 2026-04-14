@@ -17,10 +17,10 @@ resource "rudderstack_destination_bqstream" "example" {
   name = "my-bqstream"
 
   config {
-    projectId = "your_project_id_here"
-    datasetId = "your_dataset_id_here"
-    tableId = "your_table_id_here"
-    # insertId = "your_insert_id_here"
+    project_id = "your_project_id_here"
+    dataset_id = "your_dataset_id_here"
+    table_id = "your_table_id_here"
+    insert_id = "your_insert_id_here"
     credentials = "your_credentials_here"
     connection_mode {
       web = "cloud"
@@ -31,9 +31,9 @@ resource "rudderstack_destination_bqstream" "example" {
     # 		consents = ["one_android", "two_android", "three_android"]
     # 		resolution_strategy = ""
     # 	}]
-    # 	androidkotlin = [{
+    # 	android_kotlin = [{
     # 		provider = "ketch"
-    # 		consents = ["one_androidkotlin", "two_androidkotlin", "three_androidkotlin"]
+    # 		consents = ["one_androidKotlin", "two_androidKotlin", "three_androidKotlin"]
     # 		resolution_strategy = ""
     # 	}]
     # 	ios = [{
@@ -41,10 +41,10 @@ resource "rudderstack_destination_bqstream" "example" {
     # 		resolution_strategy = "and"
     # 		consents = ["one_ios", "two_ios", "three_ios"]
     # 	}]
-    # 	iosswift = [{
+    # 	ios_swift = [{
     # 		provider = "custom"
     # 		resolution_strategy = "and"
-    # 		consents = ["one_iosswift", "two_iosswift", "three_iosswift"]
+    # 		consents = ["one_iosSwift", "two_iosSwift", "three_iosSwift"]
     # 	}]
     # 	unity = [{
     # 		provider = "custom"
@@ -53,10 +53,10 @@ resource "rudderstack_destination_bqstream" "example" {
     # 	}]
     # 	amp = [{
     # 		provider = "custom"
-    # 		resolution_strategy = "or"
+    # 		resolution_strategy = "and"
     # 		consents = ["one_amp", "two_amp", "three_amp"]
     # 	}]
-    # 	reactnative = [{
+    # 	react_native = [{
     # 		provider = "custom"
     # 		resolution_strategy = "and"
     # 		consents = ["one_reactnative", "two_reactnative", "three_reactnative"]
@@ -114,34 +114,35 @@ resource "rudderstack_destination_bqstream" "example" {
 
 Required:
 
-- `projectId` (String) Enter your Project Id.
-- `datasetId` (String) Enter your Dataset Id.
-- `tableId` (String) Enter your Table Id.
-- `credentials` = (String) The Big Query Stream credentials JSON.
+- `credentials` (String, Sensitive) Enter your Credentials.
+- `dataset_id` (String) Enter your Dataset ID.
+- `project_id` (String, Sensitive) Enter your Project ID.
+- `table_id` (String) Enter your Table ID.
 
 Optional:
 
-- `insertId` (String) Enter your Insert Id.
-- `connection_mode` (Block List, Max: 1) Configure the connection mode to send events to Big Query Stream. (see [below for nested schema](#nestedblock--config--connection_mode))
+- `connection_mode` (Block List, Max: 1) Configure the connection mode to send events to BigQuery Stream. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
+- `insert_id` (String) Enter your Insert ID.
 
 <a id="nestedblock--config--connection_mode"></a>
 ### Nested Schema for `config.connection_mode`
 
 Optional:
 
+- `amp` (String)
 - `android` (String)
-- `androidKotlin` (String)
+- `android_kotlin` (String)
 - `cloud` (String)
 - `cordova` (String)
 - `flutter` (String)
 - `ios` (String)
-- `iosSwift` (String)
-- `amp` (String)
-- `reactnative` (String)
+- `ios_swift` (String)
+- `react_native` (String)
 - `shopify` (String)
 - `unity` (String)
 - `warehouse` (String)
+- `web` (String)
 
 
 <a id="nestedblock--config--consent_management"></a>
@@ -149,18 +150,29 @@ Optional:
 
 Optional:
 
-- `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
-- `androidKotlin` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--androidKotlin))
-- `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
-- `iosSwift` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--iosSwift))
-- `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
 - `amp` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--amp))
+- `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `android_kotlin` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android_kotlin))
 - `cloud` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud))
 - `cordova` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cordova))
 - `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
+- `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `ios_swift` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios_swift))
 - `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
 - `shopify` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--shopify))
+- `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
 - `warehouse` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--warehouse))
+- `web` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--web))
+
+<a id="nestedatt--config--consent_management--amp"></a>
+### Nested Schema for `config.consent_management.amp`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
 
 <a id="nestedatt--config--consent_management--android"></a>
 ### Nested Schema for `config.consent_management.android`
@@ -172,48 +184,8 @@ Optional:
 - `resolution_strategy` (String)
 
 
-<a id="nestedatt--config--consent_management--androidkKotlin"></a>
-### Nested Schema for `config.consent_management.androidKotlin`
-
-Optional:
-
-- `consents` (List of String)
-- `provider` (String)
-- `resolution_strategy` (String)
-
-
-<a id="nestedatt--config--consent_management--ios"></a>
-### Nested Schema for `config.consent_management.ios`
-
-Optional:
-
-- `consents` (List of String)
-- `provider` (String)
-- `resolution_strategy` (String)
-
-
-<a id="nestedatt--config--consent_management--iosSwift"></a>
-### Nested Schema for `config.consent_management.iosSwift`
-
-Optional:
-
-- `consents` (List of String)
-- `provider` (String)
-- `resolution_strategy` (String)
-
-
-<a id="nestedatt--config--consent_management--unity"></a>
-### Nested Schema for `config.consent_management.unity`
-
-Optional:
-
-- `consents` (List of String)
-- `provider` (String)
-- `resolution_strategy` (String)
-
-
-<a id="nestedatt--config--consent_management--amp"></a>
-### Nested Schema for `config.consent_management.amp`
+<a id="nestedatt--config--consent_management--android_kotlin"></a>
+### Nested Schema for `config.consent_management.android_kotlin`
 
 Optional:
 
@@ -252,6 +224,26 @@ Optional:
 - `resolution_strategy` (String)
 
 
+<a id="nestedatt--config--consent_management--ios"></a>
+### Nested Schema for `config.consent_management.ios`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios_swift"></a>
+### Nested Schema for `config.consent_management.ios_swift`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
 <a id="nestedatt--config--consent_management--reactnative"></a>
 ### Nested Schema for `config.consent_management.reactnative`
 
@@ -272,8 +264,28 @@ Optional:
 - `resolution_strategy` (String)
 
 
+<a id="nestedatt--config--consent_management--unity"></a>
+### Nested Schema for `config.consent_management.unity`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
 <a id="nestedatt--config--consent_management--warehouse"></a>
 ### Nested Schema for `config.consent_management.warehouse`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--web"></a>
+### Nested Schema for `config.consent_management.web`
 
 Optional:
 

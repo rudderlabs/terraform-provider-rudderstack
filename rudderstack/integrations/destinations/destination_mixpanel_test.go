@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceMixpanel(t *testing.T) {
-	cmt.AssertDestination(t, "mixpanel", []c.TestConfig{
-		{
-			TerraformCreate: `
+var mixpanelTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				token = "..."
 				identity_merge_api = "simplified"
 				data_residency = "us"
@@ -19,7 +19,7 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 					web = "cloud"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"token": "...",
 				"dataResidency": "us",
 				"connectionMode": {
@@ -34,9 +34,10 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				"userDefinedScreenEventTemplate":  "Viewed {{ category }} {{ name }} screen",
 				"dropTraitsInTrackEvent": false,
 				"strictMode": false,
-				"userDeletionApi": "engage"
+				"userDeletionApi": "engage",
+				"persistenceType": "cookie"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				token = "..."
 				data_residency = "eu"
 				connection_mode {
@@ -157,7 +158,7 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 				user_deletion_api = "task"
 				gdpr_api_token = "..."
 			`,
-			APIUpdate: `
+		APIUpdate: `
 			{
 				"token": "...",
 				"dataResidency": "eu",
@@ -507,9 +508,17 @@ func TestDestinationResourceMixpanel(t *testing.T) {
 					}
 				],
 				"userDeletionApi": "task",
-				"gdprApiToken": "..."
+				"gdprApiToken": "...",
+				"persistenceType": "cookie"
 			}
 			`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceMixpanel(t *testing.T) {
+	cmt.AssertDestination(t, "mixpanel", mixpanelTestConfigs)
+}
+
+func TestAccDestinationMixpanel(t *testing.T) {
+	acc.AccAssertDestination(t, "mixpanel", mixpanelTestConfigs)
 }

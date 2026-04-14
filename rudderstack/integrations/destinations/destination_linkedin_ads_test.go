@@ -3,22 +3,22 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceLinkedinAds(t *testing.T) {
-	cmt.AssertDestination(t, "linkedin_ads", []c.TestConfig{
-		{
-			TerraformCreate: `
+var linkedinAdsTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				rudder_account_id = "account-id-1"
 				hash_data         = true
 			`,
-			APICreate: `{
+		APICreate: `{
 				"rudderAccountId": "account-id-1",
 				"hashData": true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				rudder_account_id  = "account-id-1"
 				hash_data          = true
 				ad_account_id      = "123456789"
@@ -128,7 +128,7 @@ func TestDestinationResourceLinkedinAds(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"rudderAccountId": "account-id-1",
 				"hashData": true,
 				"adAccountId": "123456789",
@@ -316,6 +316,16 @@ func TestDestinationResourceLinkedinAds(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceLinkedinAds(t *testing.T) {
+	cmt.AssertDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
+}
+
+func TestAccDestinationLinkedinAds(t *testing.T) {
+	if !acc.PlanOnly() {
+		t.Skip("skipping: requires valid OAuth account in workspace")
+	}
+	acc.AccAssertDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
 }

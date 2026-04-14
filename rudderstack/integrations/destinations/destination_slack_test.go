@@ -3,20 +3,20 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceSlack(t *testing.T) {
-	cmt.AssertDestination(t, "slack", []c.TestConfig{
-		{
-			TerraformCreate: `
+var slackTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				webhook_url = "https://some-url"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"webhookUrl": "https://some-url"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				webhook_url = "https://some-url"
 				identify_template = "it"
 
@@ -107,7 +107,7 @@ func TestDestinationResourceSlack(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"webhookUrl": "https://some-url",
 				"identifyTemplate": "it",
 				"eventChannelSettings": [
@@ -349,6 +349,13 @@ func TestDestinationResourceSlack(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceSlack(t *testing.T) {
+	cmt.AssertDestination(t, "slack", slackTestConfigs)
+}
+
+func TestAccDestinationSlack(t *testing.T) {
+	acc.AccAssertDestination(t, "slack", slackTestConfigs)
 }

@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceBigQuery(t *testing.T) {
-	cmt.AssertDestination(t, "bigquery", []c.TestConfig{
-		{
-			TerraformCreate: `
+var bigqueryTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				project     = "project"
 				bucket_name = "bucket"
 				credentials = "..."
@@ -21,7 +21,7 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 					frequency = "30"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"project": "project",
 				"bucketName": "bucket",
 				"credentials": "...",
@@ -32,14 +32,15 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 				"partitionType": "hour",
 				"syncFrequency": "30"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				project     = "project"
 				bucket_name = "bucket"
 				credentials = "..."
-			
+				partition_column = "loaded_at"
+				partition_type = "hour"
+
 				location  = "us-east1"
 				prefix    = "prefix"
-				namespace = "namespace"
 				skip_tracks_table = true
 				skip_users_table = false
 				skip_views = false
@@ -135,18 +136,17 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 					cloud_source = "cloud"
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"project": "project",
 				"bucketName": "bucket",
 				"credentials": "...",
 				"skipTracksTable": true,
 				"skipViews": false,
 				"skipUsersTable": false,
-				"partitionColumn": "_PARTITIONTIME",
-				"partitionType": "day",
+				"partitionColumn": "loaded_at",
+				"partitionType": "hour",
 				"location": "us-east1",
 				"prefix": "prefix",
-				"namespace": "namespace",
 				"syncFrequency": "30",
 				"syncStartAt": "10:00",
 				"excludeWindow": {
@@ -388,6 +388,13 @@ func TestDestinationResourceBigQuery(t *testing.T) {
 					"cloudSource": "cloud"
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceBigQuery(t *testing.T) {
+	cmt.AssertDestination(t, "bigquery", bigqueryTestConfigs)
+}
+
+func TestAccDestinationBigQuery(t *testing.T) {
+	acc.AccAssertDestination(t, "bigquery", bigqueryTestConfigs)
 }

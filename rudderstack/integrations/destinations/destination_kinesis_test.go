@@ -3,27 +3,27 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceKinesis(t *testing.T) {
-	cmt.AssertDestination(t, "kinesis", []c.TestConfig{
-		{
-			TerraformCreate: `
+var kinesisTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				region = "usa-east"
 				stream = "test"
 				role_based_authentication {
                   i_am_role_arn = "arn"
 				}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"region":"usa-east",
 				"stream":"test",
 				"roleBasedAuth":true,
 				"iamRoleARN":"arn"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				region = "usa-east"
 				stream = "test"
 				key_based_authentication {
@@ -101,7 +101,7 @@ func TestDestinationResourceKinesis(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"region": "usa-east",
 				"stream": "test",
 				"roleBasedAuth": false,
@@ -328,6 +328,13 @@ func TestDestinationResourceKinesis(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceKinesis(t *testing.T) {
+	cmt.AssertDestination(t, "kinesis", kinesisTestConfigs)
+}
+
+func TestAccDestinationKinesis(t *testing.T) {
+	acc.AccAssertDestination(t, "kinesis", kinesisTestConfigs)
 }

@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceBraze(t *testing.T) {
-	cmt.AssertDestination(t, "braze", []c.TestConfig{
-		{
-			TerraformCreate: `
+var brazeTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 			connection_mode {
 				web = "cloud"
 				ios = "cloud"
@@ -21,7 +21,7 @@ func TestDestinationResourceBraze(t *testing.T) {
 				web = true
 			}
 			`,
-			APICreate: `{
+		APICreate: `{
 				"connectionMode": {
 					"web": "cloud",
 					"ios": "cloud"
@@ -32,7 +32,7 @@ func TestDestinationResourceBraze(t *testing.T) {
 					"web": true
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 			connection_mode {
 				web = "cloud"
 				ios = "cloud"
@@ -118,7 +118,7 @@ func TestDestinationResourceBraze(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"connectionMode": {
 					"web": "cloud",
 					"ios": "cloud",
@@ -354,6 +354,13 @@ func TestDestinationResourceBraze(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceBraze(t *testing.T) {
+	cmt.AssertDestination(t, "braze", brazeTestConfigs)
+}
+
+func TestAccDestinationBraze(t *testing.T) {
+	acc.AccAssertDestination(t, "braze", brazeTestConfigs)
 }

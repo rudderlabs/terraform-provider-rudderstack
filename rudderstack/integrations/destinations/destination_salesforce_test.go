@@ -3,25 +3,25 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceSalesforce(t *testing.T) {
-	cmt.AssertDestination(t, "salesforce", []c.TestConfig{
-		{
-			TerraformCreate: `
+var salesforceTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				user_name = "user"
 				password = "pwd"
 				initial_access_token = "token"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"userName": "user",
 				"password": "pwd",
 				"initialAccessToken": "token",
 				"mapProperties":true
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				user_name = "bucket"
 				password = "pwd"
 				initial_access_token = "token"
@@ -97,7 +97,7 @@ func TestDestinationResourceSalesforce(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"userName": "bucket",
 				"password": "pwd",
 				"initialAccessToken": "token",
@@ -323,6 +323,13 @@ func TestDestinationResourceSalesforce(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceSalesforce(t *testing.T) {
+	cmt.AssertDestination(t, "salesforce", salesforceTestConfigs)
+}
+
+func TestAccDestinationSalesforce(t *testing.T) {
+	acc.AccAssertDestination(t, "salesforce", salesforceTestConfigs)
 }

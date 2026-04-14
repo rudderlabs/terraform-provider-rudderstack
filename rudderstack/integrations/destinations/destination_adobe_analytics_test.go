@@ -3,17 +3,17 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceAdobeAnalytics(t *testing.T) {
-	cmt.AssertDestination(t, "adobe_analytics", []c.TestConfig{
-		{
-			TerraformCreate: `
+var adobeAnalyticsTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				report_suite_ids = "id001, id002"
 							`,
-			APICreate: `{
+		APICreate: `{
 				"reportSuiteIds": "id001, id002",
   				"sslHeartbeat": true,
   				"useUtf8Charset": true,
@@ -25,9 +25,11 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
   				"trackPageName": true,
   				"useLegacyLinkName": true,
   				"pageNameFallbackTostring": true,
-  				"sendFalseValues": true
+  				"sendFalseValues": true,
+  				"timestampOption": "disabled",
+  				"productIdentifier": "name"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				report_suite_ids = "id003, id004"
 				events_to_types = [{
 					from = "video start"
@@ -160,7 +162,7 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 					}]
 				}
 			  `,
-			APIUpdate: `{
+		APIUpdate: `{
 				"reportSuiteIds": "id003, id004",
 				"sslHeartbeat": true,
 				"useUtf8Charset": true,
@@ -491,8 +493,17 @@ func TestDestinationResourceAdobeAnalytics(t *testing.T) {
 						}
 					]
 				},
-				"eventFilteringOption": "blacklistedEvents"
+				"eventFilteringOption": "blacklistedEvents",
+				"timestampOption": "disabled",
+				"productIdentifier": "name"
 			  }`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceAdobeAnalytics(t *testing.T) {
+	cmt.AssertDestination(t, "adobe_analytics", adobeAnalyticsTestConfigs)
+}
+
+func TestAccDestinationAdobeAnalytics(t *testing.T) {
+	acc.AccAssertDestination(t, "adobe_analytics", adobeAnalyticsTestConfigs)
 }

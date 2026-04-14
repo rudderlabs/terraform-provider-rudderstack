@@ -178,9 +178,7 @@ Optional:
 - `access_token` (String, Sensitive) Enter your Facebook business access token required to send the events via the cloud mode.
 - `advanced_mapping` (Boolean) With this setting, you can enable the advanced mapping feature.
 - `blacklist_pii_properties` (List of Object) Enter the PII properties to be denylisted. (see [below for nested schema](#nestedatt--config--blacklist_pii_properties))
-- `category_to_content` (List of Object) This option lets you specify the category fields to specific Facebook content type. (see [below for nested schema](#nestedatt--config--category_to_content))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
-- `event_custom_properties` (List of String) For the standard events, some predefined properties are taken by Facebook. If you want to send more properties for your events, mention those properties in this field.
 - `event_filtering` (Block List, Max: 1) This setting lets you determine which events are blocked or allowed to flowed through to Facebook Pixel. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `events_to_events` (List of Object) You can map your events to standard Facebook events using this setting. (see [below for nested schema](#nestedatt--config--events_to_events))
 - `legacy_conversion_pixel_id` (Block List, Max: 1) With this setting, you can send specific events to a legacy conversion Pixel by specifying the event-Pixel ID mapping. Note that this option is available only when sending events via the device mode. (see [below for nested schema](#nestedblock--config--legacy_conversion_pixel_id))
@@ -198,15 +196,6 @@ Optional:
 
 - `hash` (Boolean)
 - `property` (String)
-
-
-<a id="nestedatt--config--category_to_content"></a>
-### Nested Schema for `config.category_to_content`
-
-Optional:
-
-- `from` (String)
-- `to` (String)
 
 
 <a id="nestedblock--config--consent_management"></a>

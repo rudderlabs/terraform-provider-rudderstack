@@ -3,20 +3,23 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceFacebookPixel(t *testing.T) {
-	cmt.AssertDestination(t, "facebook_pixel", []c.TestConfig{
-		{
-			TerraformCreate: `
-				pixel_id = "abc123"
+var facebookPixelTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
+				pixel_id     = "abc123"
+				access_token = "placeholder-access-token"
 			`,
-			APICreate: `{
-				"pixelId": "abc123"
+		APICreate: `{
+				"pixelId": "abc123",
+				"accessToken": "placeholder-access-token",
+				"valueFieldIdentifier": "properties.price"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				pixel_id = "facebook pixel id"
 
 				access_token = "facebook access token"
@@ -28,15 +31,13 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 				test_event_code        = "..."
 			
 				events_to_events = [{
-					from = "a1"
-					to   = "b1"
+					from = "Order Completed"
+					to   = "Purchase"
 				}, {
-					from = "a2"
-					to   = "b2"
+					from = "Product Added"
+					to   = "AddToCart"
 				}]
-			
-				event_custom_properties = ["one", "two", "three"]
-			
+
 				blacklist_pii_properties = [
 					{ 
 						property = "one"
@@ -49,19 +50,14 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 				]
 
 				whitelist_pii_properties = [
-					{ 
+					{
 						property = "one"
 					},
-					{ 
+					{
 						property = "two"
 					}
 				]
-			
-				category_to_content = [{
-				  from = "from"
-				  to   = "to"
-				}]
-			
+
 				legacy_conversion_pixel_id {
 				  from = "from"
 				  to   = "to"
@@ -145,7 +141,7 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"pixelId": "facebook pixel id",
 				"accessToken": "facebook access token",
 				"standardPageCall": true,
@@ -154,13 +150,8 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 				"testDestination": true,
 				"testEventCode": "...",
 				"eventsToEvents": [
-				  { "from": "a1", "to": "b1" },
-				  { "from": "a2", "to": "b2" }
-				],
-				"eventCustomProperties": [
-					{ "eventCustomProperties": "one" },
-					{ "eventCustomProperties": "two" },
-					{ "eventCustomProperties": "three" }
+				  { "from": "Order Completed", "to": "Purchase" },
+				  { "from": "Product Added", "to": "AddToCart" }
 				],
 				"blacklistPiiProperties": [
 				  { "blacklistPiiProperties": "one", "blacklistPiiHash": false },
@@ -170,7 +161,6 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 				  { "whitelistPiiProperties": "one" },
 				  { "whitelistPiiProperties": "two" }
 				],
-				"categoryToContent": [{ "from": "from", "to": "to" }],
 				"legacyConversionPixelId": { "from": "from", "to": "to" },
 				"useNativeSDK": { "web": true },
 				"consentManagement": {
@@ -399,6 +389,13 @@ func TestDestinationResourceFacebookPixel(t *testing.T) {
 				],
 				"eventFilteringOption": "blacklistedEvents"
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceFacebookPixel(t *testing.T) {
+	cmt.AssertDestination(t, "facebook_pixel", facebookPixelTestConfigs)
+}
+
+func TestAccDestinationFacebookPixel(t *testing.T) {
+	acc.AccAssertDestination(t, "facebook_pixel", facebookPixelTestConfigs)
 }

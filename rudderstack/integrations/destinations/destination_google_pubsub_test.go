@@ -3,14 +3,14 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceGooglePubSub(t *testing.T) {
-	cmt.AssertDestination(t, "google_pubsub", []c.TestConfig{
-		{
-			TerraformCreate: `
+var googlePubsubTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				connection_mode {
 					web = "cloud"
 					ios = "cloud"
@@ -18,7 +18,7 @@ func TestDestinationResourceGooglePubSub(t *testing.T) {
 				project_id = "project-id"
                 credentials = "..."
 			`,
-			APICreate: `{
+		APICreate: `{
 				"projectId": "project-id",
 				"credentials": "...",
 				"connectionMode": {
@@ -26,7 +26,7 @@ func TestDestinationResourceGooglePubSub(t *testing.T) {
 					"ios": "cloud"
 				}
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 			  connection_mode {
 				web = "cloud"
 				ios = "cloud"
@@ -124,7 +124,7 @@ func TestDestinationResourceGooglePubSub(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"connectionMode": {
 					"web": "cloud",
 					"ios": "cloud",
@@ -372,6 +372,13 @@ func TestDestinationResourceGooglePubSub(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceGooglePubSub(t *testing.T) {
+	cmt.AssertDestination(t, "google_pubsub", googlePubsubTestConfigs)
+}
+
+func TestAccDestinationGooglePubSub(t *testing.T) {
+	acc.AccAssertDestination(t, "google_pubsub", googlePubsubTestConfigs)
 }

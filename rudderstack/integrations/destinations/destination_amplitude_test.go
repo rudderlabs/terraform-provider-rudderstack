@@ -3,22 +3,25 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceAmplitude(t *testing.T) {
-	cmt.AssertDestination(t, "amplitude", []c.TestConfig{
-		{
-			TerraformCreate: `
+var amplitudeTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				api_key = "123abc"
 				api_secret = "abc123"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"apiKey": "123abc",
-				"apiSecret": "abc123"
+				"apiSecret": "abc123",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				api_key = "123abc"
 				api_secret = "abc123"
 
@@ -194,7 +197,7 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 
 				residency_server = "EU"
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"apiKey": "123abc",
 				"apiSecret": "abc123",
 				"groupTypeTrait": "type",
@@ -484,6 +487,13 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 				},
 				"residencyServer": "EU"
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceAmplitude(t *testing.T) {
+	cmt.AssertDestination(t, "amplitude", amplitudeTestConfigs)
+}
+
+func TestAccDestinationAmplitude(t *testing.T) {
+	acc.AccAssertDestination(t, "amplitude", amplitudeTestConfigs)
 }
