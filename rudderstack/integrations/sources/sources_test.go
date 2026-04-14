@@ -295,3 +295,119 @@ func TestAccSourceAdjust(t *testing.T) {
 func TestAccSourceRust(t *testing.T) {
 	acc.AccAssertSource(t, "rust", emptyTestConfigs)
 }
+
+func TestAccSourceAMP(t *testing.T) {
+	acc.AccAssertSource(t, "amp", emptyTestConfigs)
+}
+
+func TestAccSourceAndroidKotlin(t *testing.T) {
+	acc.AccAssertSource(t, "android_kotlin", emptyTestConfigs)
+}
+
+func TestAccSourceIOSSwift(t *testing.T) {
+	acc.AccAssertSource(t, "ios_swift", emptyTestConfigs)
+}
+
+func TestAccSourceUnity(t *testing.T) {
+	acc.AccAssertSource(t, "unity", emptyTestConfigs)
+}
+
+func TestAccSourceAppcenter(t *testing.T) {
+	acc.AccAssertSource(t, "appcenter", emptyTestConfigs)
+}
+
+func TestAccSourceAppsflyer(t *testing.T) {
+	acc.AccAssertSource(t, "appsflyer", emptyTestConfigs)
+}
+
+func TestAccSourceAuth0(t *testing.T) {
+	acc.AccAssertSource(t, "auth0", emptyTestConfigs)
+}
+
+func TestAccSourceCanny(t *testing.T) {
+	acc.AccAssertSource(t, "canny", emptyTestConfigs)
+}
+
+func TestAccSourceCloseCRM(t *testing.T) {
+	acc.AccAssertSource(t, "close_crm", emptyTestConfigs)
+}
+
+func TestAccSourceCordial(t *testing.T) {
+	acc.AccAssertSource(t, "cordial", emptyTestConfigs)
+}
+
+func TestAccSourceExtole(t *testing.T) {
+	acc.AccAssertSource(t, "extole", emptyTestConfigs)
+}
+
+func TestAccSourceFormsort(t *testing.T) {
+	acc.AccAssertSource(t, "formsort", emptyTestConfigs)
+}
+
+func TestAccSourceGainsightPX(t *testing.T) {
+	acc.AccAssertSource(t, "gainsightpx", emptyTestConfigs)
+}
+
+func TestAccSourceIterable(t *testing.T) {
+	acc.AccAssertSource(t, "iterable", emptyTestConfigs)
+}
+
+func TestAccSourceLooker(t *testing.T) {
+	acc.AccAssertSource(t, "looker", emptyTestConfigs)
+}
+
+func TestAccSourceMailjet(t *testing.T) {
+	acc.AccAssertSource(t, "mailjet", emptyTestConfigs)
+}
+
+func TestAccSourceMailmodo(t *testing.T) {
+	acc.AccAssertSource(t, "mailmodo", emptyTestConfigs)
+}
+
+func TestAccSourceMoEngage(t *testing.T) {
+	acc.AccAssertSource(t, "moengage", emptyTestConfigs)
+}
+
+func TestAccSourceMonday(t *testing.T) {
+	acc.AccAssertSource(t, "monday", emptyTestConfigs)
+}
+
+func TestAccSourceOlark(t *testing.T) {
+	acc.AccAssertSource(t, "olark", emptyTestConfigs)
+}
+
+func TestAccSourceOrtto(t *testing.T) {
+	acc.AccAssertSource(t, "ortto", emptyTestConfigs)
+}
+
+func TestAccSourcePagerDuty(t *testing.T) {
+	acc.AccAssertSource(t, "pagerduty", emptyTestConfigs)
+}
+
+func TestAccSourcePipedream(t *testing.T) {
+	acc.AccAssertSource(t, "pipedream", emptyTestConfigs)
+}
+
+func TestAccSourceRefiner(t *testing.T) {
+	acc.AccAssertSource(t, "refiner", emptyTestConfigs)
+}
+
+func TestAccSourceRevenuecat(t *testing.T) {
+	acc.AccAssertSource(t, "revenuecat", emptyTestConfigs)
+}
+
+func TestAccSourceSatisMeter(t *testing.T) {
+	acc.AccAssertSource(t, "satismeter", emptyTestConfigs)
+}
+
+func TestAccSourceSegment(t *testing.T) {
+	acc.AccAssertSource(t, "segment", emptyTestConfigs)
+}
+
+func TestAccSourceSIGNL4(t *testing.T) {
+	acc.AccAssertSource(t, "signl4", emptyTestConfigs)
+}
+
+func TestAccSourceSlack(t *testing.T) {
+	acc.AccAssertSource(t, "slack", emptyTestConfigs)
+}

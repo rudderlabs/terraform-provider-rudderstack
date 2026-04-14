@@ -3,26 +3,26 @@ package destinations_test
 import (
 	"testing"
 
+	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-func TestDestinationResourceCustomerioAudience(t *testing.T) {
-	cmt.AssertDestination(t, "customerio_audience", []c.TestConfig{
-		{
-			TerraformCreate: `
+var customerioAudienceTestConfigs = []c.TestConfig{
+	{
+		TerraformCreate: `
 				site_id     = "site-id-1"
 				api_key     = "api-key-1"
 				app_api_key = "app-api-key-1"
 				region      = "US"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"siteId":    "site-id-1",
 				"apiKey":    "api-key-1",
 				"appApiKey": "app-api-key-1",
 				"region":    "US"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				site_id     = "site-id-1"
 				api_key     = "api-key-1"
 				app_api_key = "app-api-key-1"
@@ -38,7 +38,7 @@ func TestDestinationResourceCustomerioAudience(t *testing.T) {
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"siteId":    "site-id-1",
 				"apiKey":    "api-key-1",
 				"appApiKey": "app-api-key-1",
@@ -60,6 +60,13 @@ func TestDestinationResourceCustomerioAudience(t *testing.T) {
 					]
 				}
 			}`,
-		},
-	})
+	},
+}
+
+func TestDestinationResourceCustomerioAudience(t *testing.T) {
+	cmt.AssertDestination(t, "customerio_audience", customerioAudienceTestConfigs)
+}
+
+func TestAccDestinationCustomerioAudience(t *testing.T) {
+	acc.AccAssertDestination(t, "customerio_audience", customerioAudienceTestConfigs)
 }
