@@ -9,7 +9,7 @@ HOSTNAME=rudderstack.com
 NAMESPACE=rudderlabs
 NAME=rudderstack
 BINARY=terraform-provider-${NAME}
-VERSION=4.3.1
+VERSION=4.4.0
 OS_ARCH=$(shell go env GOOS)_$(shell go env GOARCH)
 
 default: install
