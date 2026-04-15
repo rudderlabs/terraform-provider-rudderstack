@@ -115,6 +115,11 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269ef065 # v3.1.2
+        with:
+          terraform_wrapper: false
+
       - name: Run plan-only validation
         env:
           TF_ACC: "1"
