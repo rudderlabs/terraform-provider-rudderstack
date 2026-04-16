@@ -23,7 +23,7 @@ terraform {
 }
 
 provider "rudderstack" {
-  # api_url      = "https://api.rudderstack.com/v2"
+  # api_url      = "https://api.rudderstack.com"
   # access_token = ""
 }
 ```
@@ -42,4 +42,4 @@ provider "rudderstack" {
 ### Optional
 
 - `access_token` (String) The Rudderstack API access token used to authenticate you Rudderstack account. If not set, the provider will look for that value in the `RUDDERSTACK_ACCESS_TOKEN` environmental value, and fail with an error if that is missing.
-- `api_url` (String) The base URL of Rudderstack API. If not set, the provider will first look for a value in the `RUDDERSTACK_API_URL` environmental value, and finally default to `https://api.rudderstack.com/v2` if that is missing.
+- `api_url` (String) The base URL of Rudderstack API. If not set, the provider will first look for a value in the `RUDDERSTACK_API_URL` environmental value, and finally default to `https://api.rudderstack.com` if that is missing.

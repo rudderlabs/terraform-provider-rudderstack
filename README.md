@@ -168,12 +168,12 @@ Create a `.env` file at the repo root (git-ignored):
 
 ```
 RUDDERSTACK_ACCESS_TOKEN=your-access-token
-RUDDERSTACK_API_URL=https://api.rudderstack.com/v2
+RUDDERSTACK_API_URL=https://api.rudderstack.com
 ```
 
 The Makefile auto-loads `.env` via `-include .env` + `export`.
 
-> **Note:** `RUDDERSTACK_API_URL` must include `/v2` — the API client uses it as the complete base URL.
+> **Note:** `RUDDERSTACK_API_URL` should be the base URL without `/v2`. For backward compatibility, a trailing `/v2` is stripped automatically.
 
 ## Running Locally
 

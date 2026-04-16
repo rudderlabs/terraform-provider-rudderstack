@@ -69,8 +69,9 @@ func setupClient() (*client.Client, error) {
 	if baseURL == "" {
 		baseURL = client.BASE_URL
 	}
-	// Strip trailing /v2 for backward compatibility — the new client includes /v2 in service paths.
-	baseURL = strings.TrimSuffix(baseURL, "/v2")
+	// Strip trailing /v2 (with or without trailing slash) for backward compatibility —
+	// the new client includes /v2 in service paths.
+	baseURL = strings.TrimSuffix(strings.TrimRight(baseURL, "/"), "/v2")
 
 	return client.New(accessToken, client.WithBaseURL(baseURL))
 }

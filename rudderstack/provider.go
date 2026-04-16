@@ -74,9 +74,9 @@ func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag
 	apiUrl := d.Get("api_url").(string)
 	accessToken := d.Get("access_token").(string)
 
-	// Strip trailing /v2 for backward compatibility with users who have the old URL set.
-	// The new rudder-iac client includes /v2 in its service paths.
-	apiUrl = strings.TrimSuffix(apiUrl, "/v2")
+	// Strip trailing /v2 (with or without trailing slash) for backward compatibility
+	// with users who have the old URL set. The new rudder-iac client includes /v2 in its service paths.
+	apiUrl = strings.TrimSuffix(strings.TrimRight(apiUrl, "/"), "/v2")
 
 	c, err := NewAPIClient(accessToken,
 		client.WithBaseURL(apiUrl),
