@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -187,6 +188,8 @@ func newTestAPIClient() (*client.Client, error) {
 	accessToken := os.Getenv("RUDDERSTACK_ACCESS_TOKEN")
 	var opts []client.Option
 	if v := os.Getenv("RUDDERSTACK_API_URL"); v != "" {
+		// Strip trailing /v2 for backward compatibility — the new client includes /v2 in service paths.
+		v = strings.TrimSuffix(v, "/v2")
 		opts = append(opts, client.WithBaseURL(v))
 	}
 	return client.New(accessToken, opts...)
