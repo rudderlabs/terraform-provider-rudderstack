@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"

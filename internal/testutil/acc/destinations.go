@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 

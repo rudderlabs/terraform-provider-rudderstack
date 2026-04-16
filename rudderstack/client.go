@@ -3,7 +3,7 @@ package rudderstack
 import (
 	"context"
 
-	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/rudder-iac/api/client"
 )
 
 type Client struct {
