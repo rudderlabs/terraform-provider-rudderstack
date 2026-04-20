@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -187,6 +188,9 @@ func newTestAPIClient() (*client.Client, error) {
 	accessToken := os.Getenv("RUDDERSTACK_ACCESS_TOKEN")
 	var opts []client.Option
 	if v := os.Getenv("RUDDERSTACK_API_URL"); v != "" {
+		// Strip trailing /v2 (with or without trailing slash) for backward compatibility —
+		// the new client includes /v2 in service paths.
+		v = strings.TrimSuffix(strings.TrimRight(v, "/"), "/v2")
 		opts = append(opts, client.WithBaseURL(v))
 	}
 	return client.New(accessToken, opts...)

@@ -5,8 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/rudderlabs/rudder-api-go/client"
+	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/cmd/generatetf/generator"
 )
 
@@ -66,8 +67,11 @@ func setupClient() (*client.Client, error) {
 
 	baseURL := os.Getenv("RUDDERSTACK_API_URL")
 	if baseURL == "" {
-		baseURL = client.BASE_URL_V2
+		baseURL = client.BASE_URL
 	}
+	// Strip trailing /v2 (with or without trailing slash) for backward compatibility —
+	// the new client includes /v2 in service paths.
+	baseURL = strings.TrimSuffix(strings.TrimRight(baseURL, "/"), "/v2")
 
 	return client.New(accessToken, client.WithBaseURL(baseURL))
 }
