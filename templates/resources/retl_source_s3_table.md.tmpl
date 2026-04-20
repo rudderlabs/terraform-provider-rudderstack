@@ -1,0 +1,18 @@
+---
+page_title: "rudderstack_retl_source_s3_table Resource - terraform-provider-rudderstack"
+subcategory: ""
+description: |-
+
+---
+
+# rudderstack_retl_source_s3_table (Resource)
+
+A RETL (Reverse ETL) source backed by an S3 bucket. RudderStack reads objects under the (optional) `object_prefix` from the configured bucket and syncs the resulting records to the connected destinations.
+
+`primary_key` is optional for S3 sources. If supplied, it is used to track row-level changes between syncs.
+
+## Example Usage
+
+{{tffile "examples/retl_source_s3_table.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

@@ -10,6 +10,7 @@ import (
 
 	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/retl"
 )
 
 func init() {
@@ -53,7 +54,10 @@ func New() *schema.Provider {
 
 func resourcesMap() map[string]*schema.Resource {
 	resources := map[string]*schema.Resource{
-		"rudderstack_connection": resourceConnection(),
+		"rudderstack_connection":           resourceConnection(),
+		"rudderstack_retl_source_model":    retl.ResourceModel(),
+		"rudderstack_retl_source_table":    retl.ResourceTable(),
+		"rudderstack_retl_source_s3_table": retl.ResourceS3Table(),
 	}
 
 	// append sources and destinations from integration registries

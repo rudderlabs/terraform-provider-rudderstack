@@ -4,12 +4,23 @@ import (
 	"context"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
+	iacretl "github.com/rudderlabs/rudder-iac/api/client/retl"
+
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/retl"
 )
 
 type Client struct {
 	Sources      SourcesService
 	Destinations DestinationsService
 	Connections  ConnectionsService
+	RETLSources  retl.Service
+}
+
+// RETLSourcesClient satisfies retl.ClientProvider so the RETL resources in the
+// retl subpackage can reach the configured service without importing this
+// package (which would create a circular dependency).
+func (c *Client) RETLSourcesClient() retl.Service {
+	return c.RETLSources
 }
 
 type SourcesService interface {
@@ -43,5 +54,6 @@ func NewAPIClient(accessToken string, options ...client.Option) (*Client, error)
 		Sources:      api.Sources,
 		Destinations: api.Destinations,
 		Connections:  api.Connections,
+		RETLSources:  iacretl.NewRudderRETLStore(api),
 	}, nil
 }
