@@ -25,7 +25,6 @@ type Service interface {
 	GetRetlSource(ctx context.Context, id string) (*retl.RETLSource, error)
 	UpdateRetlSource(ctx context.Context, id string, source *retl.RETLSourceUpdateRequest) (*retl.RETLSource, error)
 	DeleteRetlSource(ctx context.Context, id string) error
-	SetExternalId(ctx context.Context, id string, externalId string) error
 }
 
 // ClientProvider exposes the RETL service from the provider's configured
@@ -74,11 +73,6 @@ func buildResource(adapter typeAdapter, description string) *schema.Resource {
 			Optional:    true,
 			Default:     true,
 			Description: "Whether the source is enabled.",
-		},
-		"external_id": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Optional caller-supplied identifier used to track the resource externally.",
 		},
 		"config": {
 			Type:     schema.TypeList,
@@ -187,7 +181,6 @@ func makeCreate(adapter typeAdapter) schema.CreateContextFunc {
 			SourceDefinitionName: adapter.sourceDefinitionName(d),
 			AccountID:            d.Get("account_id").(string),
 			Enabled:              d.Get("enabled").(bool),
-			ExternalID:           d.Get("external_id").(string),
 		}
 
 		created, err := svc.CreateRetlSource(ctx, req)
@@ -228,36 +221,24 @@ func makeUpdate(adapter typeAdapter) schema.UpdateContextFunc {
 			return diags
 		}
 
-		// `external_id` is not part of the standard update payload; it has
-		// its own endpoint. Apply it first so a failure surfaces before we
-		// mutate anything else.
-		if d.HasChange("external_id") {
-			if err := svc.SetExternalId(ctx, d.Id(), d.Get("external_id").(string)); err != nil {
-				return diag.FromErr(fmt.Errorf("could not update external_id: %w", err))
-			}
+		cfgBlock, err := configBlock(d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		cfgJSON, err := adapter.marshalConfig(cfgBlock)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("could not marshal config: %w", err))
 		}
 
-		// If only external_id changed there's nothing else to update.
-		if d.HasChangeExcept("external_id") {
-			cfgBlock, err := configBlock(d)
-			if err != nil {
-				return diag.FromErr(err)
-			}
-			cfgJSON, err := adapter.marshalConfig(cfgBlock)
-			if err != nil {
-				return diag.FromErr(fmt.Errorf("could not marshal config: %w", err))
-			}
+		req := &retl.RETLSourceUpdateRequest{
+			Name:      d.Get("name").(string),
+			Config:    cfgJSON,
+			IsEnabled: d.Get("enabled").(bool),
+			AccountID: d.Get("account_id").(string),
+		}
 
-			req := &retl.RETLSourceUpdateRequest{
-				Name:      d.Get("name").(string),
-				Config:    cfgJSON,
-				IsEnabled: d.Get("enabled").(bool),
-				AccountID: d.Get("account_id").(string),
-			}
-
-			if _, err := svc.UpdateRetlSource(ctx, d.Id(), req); err != nil {
-				return diag.FromErr(fmt.Errorf("could not update RETL source: %w", err))
-			}
+		if _, err := svc.UpdateRetlSource(ctx, d.Id(), req); err != nil {
+			return diag.FromErr(fmt.Errorf("could not update RETL source: %w", err))
 		}
 
 		return makeRead(adapter)(ctx, d, m)
@@ -295,9 +276,6 @@ func storeToState(adapter typeAdapter, d *schema.ResourceData, source *retl.RETL
 		return err
 	}
 	if err := d.Set("enabled", source.IsEnabled); err != nil {
-		return err
-	}
-	if err := d.Set("external_id", source.ExternalID); err != nil {
 		return err
 	}
 

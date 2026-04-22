@@ -42,8 +42,3 @@ func (m *mockService) DeleteRetlSource(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
-
-func (m *mockService) SetExternalId(ctx context.Context, id string, externalId string) error {
-	args := m.Called(ctx, id, externalId)
-	return args.Error(0)
-}

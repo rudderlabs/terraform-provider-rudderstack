@@ -30,7 +30,6 @@ func TestResourceModel(t *testing.T) {
 		SourceDefinitionName: "snowflake",
 		AccountID:            "acc-1",
 		Enabled:              true,
-		ExternalID:           "ext-1",
 	}
 	created := &iacretl.RETLSource{
 		ID:                   "src-1",
@@ -40,7 +39,6 @@ func TestResourceModel(t *testing.T) {
 		SourceType:           iacretl.ModelSourceType,
 		SourceDefinitionName: "snowflake",
 		AccountID:            "acc-1",
-		ExternalID:           "ext-1",
 		CreatedAt:            testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt:            testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}
@@ -62,11 +60,9 @@ func TestResourceModel(t *testing.T) {
 		SourceType:           iacretl.ModelSourceType,
 		SourceDefinitionName: "snowflake",
 		AccountID:            "acc-1",
-		ExternalID:           "ext-2",
 		CreatedAt:            created.CreatedAt,
 		UpdatedAt:            testutil.TimePtr(time.Date(2024, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}
-	svc.On("SetExternalId", mock.Anything, "src-1", "ext-2").Return(nil).Once()
 	svc.On("UpdateRetlSource", mock.Anything, "src-1", updateReq).Return(updated, nil).Once()
 	svc.On("GetRetlSource", mock.Anything, "src-1").Return(updated, nil).Times(2)
 	svc.On("DeleteRetlSource", mock.Anything, "src-1").Return(nil).Once()
@@ -83,7 +79,6 @@ func TestResourceModel(t *testing.T) {
 						name                   = "my-model"
 						source_definition_name = "snowflake"
 						account_id             = "acc-1"
-						external_id            = "ext-1"
 						config {
 							primary_key = "id"
 							sql         = "select * from users"
@@ -101,7 +96,6 @@ func TestResourceModel(t *testing.T) {
 						"source_definition_name": "snowflake",
 						"account_id":             "acc-1",
 						"enabled":                "true",
-						"external_id":            "ext-1",
 						"config.0.primary_key":   "id",
 						"config.0.sql":           "select * from users",
 						"created_at":             "2024-01-02T03:04:05Z",
@@ -118,7 +112,6 @@ func TestResourceModel(t *testing.T) {
 						source_definition_name = "snowflake"
 						account_id             = "acc-1"
 						enabled                = false
-						external_id            = "ext-2"
 						config {
 							primary_key = "id"
 							sql         = "select id, name from users"
@@ -134,7 +127,6 @@ func TestResourceModel(t *testing.T) {
 					return checkAll(map[string]string{
 						"name":                 "my-model-v2",
 						"enabled":              "false",
-						"external_id":          "ext-2",
 						"config.0.description": "v2",
 						"config.0.sql":         "select id, name from users",
 						"updated_at":           "2024-02-02T03:04:05Z",
