@@ -293,11 +293,14 @@ func storeSettingsToState(cm configs.ConfigMeta, source *client.Source, d *schem
 	}
 
 	existing := d.Get("settings").([]interface{})
-	apiHasSettings := source.GeoEnrichmentEnabled != nil || source.Transient != nil
 
-	// Skip when the user has no settings block AND the API returned nothing.
-	// When the API does return values (e.g. during import with empty state), always write them.
-	if len(existing) == 0 && !apiHasSettings {
+	// Skip when the user has no settings block AND the API only returned default values.
+	// The API always echoes geoEnrichmentEnabled=false and transient=true even when never set,
+	// so we must not write these defaults into state — they would cause perpetual drift.
+	// geo default = false, transient default = false (transient=false means temporarily_store_events_for_retries=true)
+	apiGeoIsDefault := source.GeoEnrichmentEnabled == nil || !*source.GeoEnrichmentEnabled
+	apiTransientIsDefault := source.Transient == nil || !*source.Transient
+	if len(existing) == 0 && apiGeoIsDefault && apiTransientIsDefault {
 		return nil
 	}
 
