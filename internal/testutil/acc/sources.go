@@ -47,13 +47,7 @@ func AccAssertSource(t *testing.T, source string, testConfigs []configs.TestConf
 	}
 
 	createSettingsJSON := cfg.APICreateSettings
-	if createSettingsJSON == "" {
-		createSettingsJSON = cfg.APICreate
-	}
 	updateSettingsJSON := cfg.APIUpdateSettings
-	if updateSettingsJSON == "" {
-		updateSettingsJSON = cfg.APIUpdate
-	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { TestAccPreCheck(t) },
