@@ -2,7 +2,9 @@ package acc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -16,7 +18,7 @@ import (
 //
 // In plan-only mode (TF_ACC_PLAN_ONLY=1): validates HCL + provider schema (zero API calls).
 // In full mode (TF_ACC=1): runs Create → Update → Import → Destroy against the real API,
-// and verifies the API config matches the expected JSON from test configs.
+// and verifies source.Config matches the expected JSON from test configs.
 func AccAssertSource(t *testing.T, source string, testConfigs []configs.TestConfig) {
 	t.Helper()
 
@@ -44,6 +46,15 @@ func AccAssertSource(t *testing.T, source string, testConfigs []configs.TestConf
 		return
 	}
 
+	createSettingsJSON := cfg.APICreateSettings
+	if createSettingsJSON == "" {
+		createSettingsJSON = cfg.APICreate
+	}
+	updateSettingsJSON := cfg.APIUpdateSettings
+	if updateSettingsJSON == "" {
+		updateSettingsJSON = cfg.APIUpdate
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { TestAccPreCheck(t) },
 		ProviderFactories: TestAccProviderFactories,
@@ -58,6 +69,7 @@ func AccAssertSource(t *testing.T, source string, testConfigs []configs.TestConf
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
 					testAccCheckSourceAPIConfig(resourceName, cfg.APICreate),
+					testAccCheckSourceSettingsAPI(resourceName, createSettingsJSON),
 				),
 			},
 			{
@@ -66,6 +78,7 @@ func AccAssertSource(t *testing.T, source string, testConfigs []configs.TestConf
 					testAccCheckSourceExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
 					testAccCheckSourceAPIConfig(resourceName, cfg.APIUpdate),
+					testAccCheckSourceSettingsAPI(resourceName, updateSettingsJSON),
 				),
 			},
 			{
@@ -80,8 +93,10 @@ func AccAssertSource(t *testing.T, source string, testConfigs []configs.TestConf
 }
 
 // testAccSourceConfig generates the Terraform HCL for a source resource.
+// configBlock is embedded raw in the resource body — the caller is responsible
+// for passing a well-formed block such as "settings { … }" or an empty string.
 func testAccSourceConfig(source, name, configBlock string) string {
-	if configBlock == "" {
+	if strings.TrimSpace(configBlock) == "" {
 		return fmt.Sprintf(`
 resource "rudderstack_source_%s" "test" {
   name = %q
@@ -91,9 +106,7 @@ resource "rudderstack_source_%s" "test" {
 	return fmt.Sprintf(`
 resource "rudderstack_source_%s" "test" {
   name = %q
-  config {
-    %s
-  }
+  %s
 }
 `, source, name, configBlock)
 }
@@ -145,6 +158,61 @@ func testAccCheckSourceAPIConfig(resourceName, expectedJSON string) resource.Tes
 		}
 
 		return compareConfig(src.Config, expectedJSON)
+	}
+}
+
+// testAccCheckSourceSettingsAPI fetches the source from the API and verifies
+// GeoEnrichmentEnabled and Transient match the values in expectedJSON.
+// expectedJSON uses terraform-facing names: "geoEnrichmentEnabled" maps directly to
+// source.GeoEnrichmentEnabled; "transient" equals temporarily_store_events_for_retries
+// (= !source.Transient) and is inverted before comparison.
+func testAccCheckSourceSettingsAPI(resourceName, expectedJSON string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		expectedJSON = strings.TrimSpace(expectedJSON)
+		if expectedJSON == "" || expectedJSON == "{}" {
+			return nil
+		}
+
+		var m map[string]any
+		if err := json.Unmarshal([]byte(expectedJSON), &m); err != nil {
+			return nil // not a settings JSON, nothing to check
+		}
+		_, hasGeo := m["geoEnrichmentEnabled"]
+		_, hasTrans := m["transient"]
+		if !hasGeo && !hasTrans {
+			return nil
+		}
+
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		cl, err := newTestAPIClient()
+		if err != nil {
+			return err
+		}
+
+		src, err := cl.Sources.Get(context.Background(), rs.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get source from API: %w", err)
+		}
+
+		if v, ok := m["geoEnrichmentEnabled"].(bool); ok && (src.GeoEnrichmentEnabled == nil || *src.GeoEnrichmentEnabled != v) {
+			got := "<nil>"
+			if src.GeoEnrichmentEnabled != nil {
+				got = fmt.Sprintf("%v", *src.GeoEnrichmentEnabled)
+			}
+			return fmt.Errorf("API GeoEnrichmentEnabled: expected %v, got %s", v, got)
+		}
+		if v, ok := m["transient"].(bool); ok && (src.Transient == nil || *src.Transient != v) {
+			got := "<nil>"
+			if src.Transient != nil {
+				got = fmt.Sprintf("%v", *src.Transient)
+			}
+			return fmt.Errorf("API Transient: expected %v, got %s", v, got)
+		}
+		return nil
 	}
 }
 

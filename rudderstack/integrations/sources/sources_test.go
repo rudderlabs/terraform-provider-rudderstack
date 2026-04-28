@@ -10,6 +10,33 @@ import (
 
 var emptyTestConfigs = []configs.TestConfig{configs.EmptyTestConfig}
 
+var testConfigSettings = []configs.TestConfig{
+	{
+		TerraformCreate: `
+			settings {
+				geo_enrichment_enabled = true
+				temporarily_store_events_for_retries = true
+			}
+		`,
+		APICreate: `{}`,
+		APICreateSettings: `{
+			"geoEnrichmentEnabled": true,
+			"transient": false
+		}`,
+		TerraformUpdate: `
+			settings {
+				geo_enrichment_enabled = false
+				temporarily_store_events_for_retries = false
+			}
+		`,
+		APIUpdate: `{}`,
+		APIUpdateSettings: `{
+			"geoEnrichmentEnabled": false,
+			"transient": true
+		}`,
+	},
+}
+
 func TestSourceResourceBraze(t *testing.T) {
 	cmt.AssertSource(t, "braze", []configs.TestConfig{configs.EmptyTestConfig})
 }
@@ -40,6 +67,35 @@ func TestSourceResourceJava(t *testing.T) {
 
 func TestSourceResourceJavascript(t *testing.T) {
 	cmt.AssertSource(t, "javascript", []configs.TestConfig{configs.EmptyTestConfig})
+}
+
+func TestSourceResourceJavascriptWithSettings(t *testing.T) {
+	cmt.AssertSource(t, "javascript", []configs.TestConfig{
+		{
+			TerraformCreate: `
+				settings {
+					geo_enrichment_enabled               = true
+					temporarily_store_events_for_retries = true
+				}
+			`,
+			// transient = !temporarily_store_events_for_retries = !true = false
+			APICreate: `{
+				"geoEnrichmentEnabled": true,
+				"transient": false
+			}`,
+			TerraformUpdate: `
+				settings {
+					geo_enrichment_enabled               = false
+					temporarily_store_events_for_retries = true
+				}
+			`,
+			// transient = !temporarily_store_events_for_retries = !true = false
+			APIUpdate: `{
+				"geoEnrichmentEnabled": false,
+				"transient": false
+			}`,
+		},
+	})
 }
 
 func TestSourceResourceNode(t *testing.T) {
@@ -210,7 +266,72 @@ func TestSourceResourceSlack(t *testing.T) {
 	cmt.AssertSource(t, "slack", []configs.TestConfig{configs.EmptyTestConfig})
 }
 
+func TestSourceResourceSettings(t *testing.T) {
+	cmt.AssertSource(t, "javascript", testConfigSettings)
+}
+
+// TestSourceResourceSettingsGeoOnly verifies that omitting temporarily_store_events_for_retries
+// sends its schema default (true), which means transient=false in the API.
+func TestSourceResourceSettingsGeoOnly(t *testing.T) {
+	cmt.AssertSource(t, "javascript", []configs.TestConfig{
+		{
+			TerraformCreate: `
+				settings {
+					geo_enrichment_enabled = true
+				}
+			`,
+			// temporarily_store_events_for_retries defaults to true → transient = !true = false
+			APICreate: `{
+				"geoEnrichmentEnabled": true,
+				"transient": false
+			}`,
+			TerraformUpdate: `
+				settings {
+					geo_enrichment_enabled = false
+				}
+			`,
+			APIUpdate: `{
+				"geoEnrichmentEnabled": false,
+				"transient": false
+			}`,
+		},
+	})
+}
+
+// TestSourceResourceSettingsTransientOnly verifies that omitting geo_enrichment_enabled
+// sends its schema default (false), and temporarily_store_events_for_retries is inverted to transient.
+func TestSourceResourceSettingsTransientOnly(t *testing.T) {
+	cmt.AssertSource(t, "javascript", []configs.TestConfig{
+		{
+			TerraformCreate: `
+				settings {
+					temporarily_store_events_for_retries = true
+				}
+			`,
+			// geo_enrichment_enabled defaults to false; transient = !true = false
+			APICreate: `{
+				"geoEnrichmentEnabled": false,
+				"transient": false
+			}`,
+			TerraformUpdate: `
+				settings {
+					temporarily_store_events_for_retries = false
+				}
+			`,
+			// geo_enrichment_enabled defaults to false; transient = !false = true
+			APIUpdate: `{
+				"geoEnrichmentEnabled": false,
+				"transient": true
+			}`,
+		},
+	})
+}
+
 // E2E acceptance tests — reuse the same empty test configs from unit tests.
+
+func TestAccSourceJavascriptWithSettings(t *testing.T) {
+	acc.AccAssertSource(t, "javascript", testConfigSettings)
+}
 
 func TestAccSourceBraze(t *testing.T) {
 	acc.AccAssertSource(t, "braze", emptyTestConfigs)

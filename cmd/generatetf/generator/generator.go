@@ -156,7 +156,51 @@ func generateSource(source client.Source, terraformType string, cm *configs.Conf
 		body.AppendBlock(configBlock)
 	}
 
+	if cm.SettingsSchema != nil && (source.GeoEnrichmentEnabled != nil || source.Transient != nil) {
+		settingsBlock, err := generateSettingsBlock(source, cm)
+		if err != nil {
+			return nil, fmt.Errorf("could not generate settings block for source '%s': %w", source.ID, err)
+		}
+		if settingsBlock != nil {
+			body.AppendBlock(settingsBlock)
+		}
+	}
+
 	return block, nil
+}
+
+// generateSettingsBlock generates a settings block from source-level settings fields.
+func generateSettingsBlock(source client.Source, cm *configs.ConfigMeta) (*hclwrite.Block, error) {
+	settingsAPIMap := map[string]interface{}{}
+	if source.GeoEnrichmentEnabled != nil {
+		settingsAPIMap["geoEnrichmentEnabled"] = *source.GeoEnrichmentEnabled
+	}
+	if source.Transient != nil {
+		// c.Simple("transient", "temporarily_store_events_for_retries") is a direct copy,
+		// so negate here to produce the correct TF value.
+		settingsAPIMap["transient"] = !*source.Transient
+	}
+
+	settingsAPIJSON, err := json.Marshal(settingsAPIMap)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshal settings: %w", err)
+	}
+
+	settingsState, err := cm.SettingsAPIToState(string(settingsAPIJSON))
+	if err != nil {
+		return nil, fmt.Errorf("could not convert settings API to state: %w", err)
+	}
+
+	var stateMap map[string]interface{}
+	if err := json.Unmarshal([]byte(settingsState), &stateMap); err != nil {
+		return nil, err
+	}
+
+	if len(stateMap) == 0 {
+		return nil, nil
+	}
+
+	return generateBlock("settings", stateMap, cm.SettingsSchema)
 }
 
 func sourceType(terraformType string) string {
