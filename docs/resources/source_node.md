@@ -28,6 +28,7 @@ resource "rudderstack_source_node" "example" {
 ### Optional
 
 - `enabled` (Boolean) An enabled source allows data to be read from it. For event stream sources this controls wether events can be sent to that source by various SDKs.
+- `settings` (Block List, Max: 1) Source settings for geo enrichment and event retry storage. (see [below for nested schema](#nestedblock--settings))
 
 ### Read-Only
 
@@ -35,3 +36,11 @@ resource "rudderstack_source_node" "example" {
 - `id` (String) The ID of this resource.
 - `updated_at` (String) Time when the resource was last updated, in ISO 8601 format.
 - `write_key` (String) The write key that identifies the source in RudderStack data plane.
+
+<a id="nestedblock--settings"></a>
+### Nested Schema for `settings`
+
+Optional:
+
+- `geo_enrichment_enabled` (Boolean) Enable geolocation enrichment on events from this source. Requires a paid plan.
+- `temporarily_store_events_for_retries` (Boolean) Temporarily store events in the gateway staging area to enable retry on failure. Requires a paid plan.
