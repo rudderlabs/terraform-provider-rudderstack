@@ -205,7 +205,6 @@ func populateSourceFromState(cm configs.ConfigMeta, source *client.Source, d *sc
 		}
 		source.Config = json.RawMessage(apiConfig)
 	}
-
 	if s := d.Get("settings").([]interface{}); len(s) > 0 {
 		state, err := json.Marshal(s[0])
 		if err != nil {
