@@ -45,8 +45,8 @@ type typeAdapter struct {
 	// `source_definition_name` (used by the s3_table resource).
 	fixedSourceDefinitionName string
 	configSchema              func() map[string]*schema.Schema
-	marshalConfig             func(map[string]interface{}) ([]byte, error)
-	unmarshalConfig           func([]byte) ([]map[string]interface{}, error)
+	marshalConfig             func(map[string]any) (retl.RETLConfig, error)
+	unmarshalConfig           func(retl.RETLConfig) ([]map[string]interface{}, error)
 }
 
 // buildResource constructs a *schema.Resource for one of the RETL source
@@ -169,14 +169,14 @@ func makeCreate(adapter typeAdapter) schema.CreateContextFunc {
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		cfgJSON, err := adapter.marshalConfig(cfgBlock)
+		cfg, err := adapter.marshalConfig(cfgBlock)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("could not marshal config: %w", err))
 		}
 
 		req := &retl.RETLSourceCreateRequest{
 			Name:                 d.Get("name").(string),
-			Config:               cfgJSON,
+			Config:               cfg,
 			SourceType:           adapter.sourceType,
 			SourceDefinitionName: adapter.sourceDefinitionName(d),
 			AccountID:            d.Get("account_id").(string),
@@ -225,14 +225,14 @@ func makeUpdate(adapter typeAdapter) schema.UpdateContextFunc {
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		cfgJSON, err := adapter.marshalConfig(cfgBlock)
+		cfg, err := adapter.marshalConfig(cfgBlock)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("could not marshal config: %w", err))
 		}
 
 		req := &retl.RETLSourceUpdateRequest{
 			Name:      d.Get("name").(string),
-			Config:    cfgJSON,
+			Config:    cfg,
 			IsEnabled: d.Get("enabled").(bool),
 			AccountID: d.Get("account_id").(string),
 		}

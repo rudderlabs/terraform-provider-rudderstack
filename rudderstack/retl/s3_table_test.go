@@ -24,7 +24,7 @@ func TestResourceS3Table(t *testing.T) {
 	// and is not part of the resource schema — verify both behaviors.
 	createReq := &iacretl.RETLSourceCreateRequest{
 		Name:                 "s3-events",
-		Config:               mustJSON(t, iacretl.RETLS3TableConfig{BucketName: "my-bucket", ObjectPrefix: "events/"}),
+		Config:               iacretl.RETLS3TableConfig{BucketName: "my-bucket", ObjectPrefix: "events/"},
 		SourceType:           iacretl.TableSourceType,
 		SourceDefinitionName: "s3",
 		AccountID:            "acc-1",

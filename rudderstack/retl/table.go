@@ -1,8 +1,6 @@
 package retl
 
 import (
-	"encoding/json"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/rudderlabs/rudder-iac/api/client/retl"
@@ -38,20 +36,18 @@ func tableConfigSchema() map[string]*schema.Schema {
 	}
 }
 
-func tableMarshalConfig(cfg map[string]interface{}) ([]byte, error) {
-	return json.Marshal(retl.RETLTableConfig{
+func tableMarshalConfig(cfg map[string]any) (retl.RETLConfig, error) {
+	return retl.RETLTableConfig{
 		PrimaryKey: stringField(cfg, "primary_key"),
 		Schema:     stringField(cfg, "schema"),
 		Table:      stringField(cfg, "table"),
-	})
+	}, nil
 }
 
-func tableUnmarshalConfig(raw []byte) ([]map[string]interface{}, error) {
-	var cfg retl.RETLTableConfig
-	if len(raw) > 0 {
-		if err := json.Unmarshal(raw, &cfg); err != nil {
-			return nil, err
-		}
+func tableUnmarshalConfig(raw retl.RETLConfig) ([]map[string]interface{}, error) {
+	cfg, err := retl.DecodeConfig[retl.RETLTableConfig](raw)
+	if err != nil {
+		return nil, err
 	}
 	return []map[string]interface{}{{
 		"primary_key": cfg.PrimaryKey,

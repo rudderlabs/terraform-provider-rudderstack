@@ -6,14 +6,12 @@ require (
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
-	github.com/rudderlabs/rudder-iac v0.14.1-0.20260422102337-e6ca5ab4c522
+	github.com/rudderlabs/rudder-iac v0.14.1-0.20260428101717-0a1ff9a32c99
 	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
 	github.com/zclconf/go-cty v1.17.0
 )
-
-replace github.com/rudderlabs/rudder-iac v0.14.0 => ../rudder-iac
 
 require (
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect

@@ -2,7 +2,6 @@ package retl_test
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -25,7 +24,7 @@ func TestResourceModel(t *testing.T) {
 
 	createReq := &iacretl.RETLSourceCreateRequest{
 		Name:                 "my-model",
-		Config:               mustJSON(t, iacretl.RETLSQLModelConfig{PrimaryKey: "id", Sql: "select * from users"}),
+		Config:               iacretl.RETLSQLModelConfig{PrimaryKey: "id", Sql: "select * from users"},
 		SourceType:           iacretl.ModelSourceType,
 		SourceDefinitionName: "snowflake",
 		AccountID:            "acc-1",
@@ -45,7 +44,7 @@ func TestResourceModel(t *testing.T) {
 	svc.On("CreateRetlSource", mock.Anything, createReq).Return(created, nil).Once()
 	svc.On("GetRetlSource", mock.Anything, "src-1").Return(created, nil).Times(3)
 
-	updatedConfig := mustJSON(t, iacretl.RETLSQLModelConfig{PrimaryKey: "id", Sql: "select id, name from users", Description: "v2"})
+	updatedConfig := iacretl.RETLSQLModelConfig{PrimaryKey: "id", Sql: "select id, name from users", Description: "v2"}
 	updateReq := &iacretl.RETLSourceUpdateRequest{
 		Name:      "my-model-v2",
 		Config:    updatedConfig,
@@ -187,11 +186,3 @@ func checkAll(want, got map[string]string) error {
 	return nil
 }
 
-func mustJSON(t *testing.T, v interface{}) json.RawMessage {
-	t.Helper()
-	raw, err := json.Marshal(v)
-	if err != nil {
-		t.Fatalf("marshal: %v", err)
-	}
-	return raw
-}

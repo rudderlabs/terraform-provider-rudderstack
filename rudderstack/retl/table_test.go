@@ -21,7 +21,7 @@ func TestResourceTable(t *testing.T) {
 
 	createReq := &iacretl.RETLSourceCreateRequest{
 		Name:                 "users-table",
-		Config:               mustJSON(t, iacretl.RETLTableConfig{PrimaryKey: "id", Schema: "public", Table: "users"}),
+		Config:               iacretl.RETLTableConfig{PrimaryKey: "id", Schema: "public", Table: "users"},
 		SourceType:           iacretl.TableSourceType,
 		SourceDefinitionName: "snowflake",
 		AccountID:            "acc-1",
