@@ -1,0 +1,16 @@
+---
+page_title: "rudderstack_retl_source_model Resource - terraform-provider-rudderstack"
+subcategory: ""
+description: |-
+
+---
+
+# rudderstack_retl_source_model (Resource)
+
+A RETL (Reverse ETL) source backed by a SQL model. The provided SQL query is executed periodically against the warehouse identified by `account_id`, and the result set is synced to the connected destinations.
+
+## Example Usage
+
+{{tffile "examples/retl_source_model.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

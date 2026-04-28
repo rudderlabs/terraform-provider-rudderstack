@@ -1,0 +1,18 @@
+---
+page_title: "rudderstack_retl_source_table Resource - terraform-provider-rudderstack"
+subcategory: ""
+description: |-
+
+---
+
+# rudderstack_retl_source_table (Resource)
+
+A RETL (Reverse ETL) source backed by a single warehouse table. RudderStack syncs rows from the configured `schema.table` to the connected destinations, using `primary_key` to track changes.
+
+For S3-backed sources, use [`rudderstack_retl_source_s3_table`](retl_source_s3_table.md) instead.
+
+## Example Usage
+
+{{tffile "examples/retl_source_table.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
