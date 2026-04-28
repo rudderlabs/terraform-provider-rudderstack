@@ -36,7 +36,7 @@ func modelConfigSchema() map[string]*schema.Schema {
 	}
 }
 
-func modelMarshalConfig(cfg map[string]any) (retl.ConfigType, error) {
+func modelMarshalConfig(cfg map[string]any) (retl.RETLConfig, error) {
 	return retl.RETLSQLModelConfig{
 		PrimaryKey:  stringField(cfg, "primary_key"),
 		Sql:         stringField(cfg, "sql"),

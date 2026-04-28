@@ -54,10 +54,9 @@ func New() *schema.Provider {
 
 func resourcesMap() map[string]*schema.Resource {
 	resources := map[string]*schema.Resource{
-		"rudderstack_connection":           resourceConnection(),
-		"rudderstack_retl_source_model":    retl.ResourceModel(),
-		"rudderstack_retl_source_table":    retl.ResourceTable(),
-		"rudderstack_retl_source_s3_table": retl.ResourceS3Table(),
+		"rudderstack_connection":        resourceConnection(),
+		"rudderstack_retl_source_model": retl.ResourceModel(),
+		"rudderstack_retl_source_table": retl.ResourceTable(),
 	}
 
 	// append sources and destinations from integration registries
