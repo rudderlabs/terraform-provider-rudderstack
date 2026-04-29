@@ -1,0 +1,308 @@
+package retl_test
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+
+	"github.com/rudderlabs/rudder-iac/api/client"
+	iacretl "github.com/rudderlabs/rudder-iac/api/client/retl"
+	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/retl"
+)
+
+// jsonMapperConnection returns a fully-populated JSON Mapper connection
+// shared by several tests below.
+func jsonMapperConnection(id string) *iacretl.RETLConnection {
+	enabled := true
+	every := 60
+	return &iacretl.RETLConnection{
+		ID:            id,
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-1",
+		Enabled:       enabled,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeBasic, EveryMinutes: &every},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
+		Mappings:      []iacretl.Mapping{{From: "name", To: "first_name"}},
+		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
+		CreatedAt:     testutil.TimePtr(time.Date(2026, 4, 20, 12, 0, 0, 0, time.UTC)),
+		UpdatedAt:     testutil.TimePtr(time.Date(2026, 4, 20, 12, 0, 0, 0, time.UTC)),
+	}
+}
+
+func TestResourceConnection_JSONMapper_CreateReadUpdateDelete(t *testing.T) {
+	svc := &mockService{}
+	enabled := true
+	every60 := 60
+
+	createReq := &iacretl.CreateRETLConnectionRequest{
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-1",
+		Enabled:       &enabled,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeBasic, EveryMinutes: &every60},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
+		Mappings:      []iacretl.Mapping{{From: "name", To: "first_name"}},
+		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
+	}
+	created := jsonMapperConnection("conn-1")
+	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-1").Return(created, nil).Times(3)
+
+	every120 := 120
+	updateReq := &iacretl.UpdateRETLConnectionRequest{
+		Enabled:  &enabled,
+		Schedule: iacretl.Schedule{Type: iacretl.ScheduleTypeBasic, EveryMinutes: &every120},
+		Mappings: &[]iacretl.Mapping{
+			{From: "name", To: "first_name"},
+			{From: "phone", To: "phone_number"},
+		},
+		Constants: &[]iacretl.Constant{{Key: "properties.source", Value: "warehouse"}},
+	}
+	updated := *created
+	updated.Schedule.EveryMinutes = &every120
+	updated.Mappings = *updateReq.Mappings
+	updated.Constants = *updateReq.Constants
+	updated.UpdatedAt = testutil.TimePtr(time.Date(2026, 4, 21, 12, 0, 0, 0, time.UTC))
+	svc.On("UpdateConnection", mock.Anything, "conn-1", updateReq).Return(&updated, nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-1").Return(&updated, nil).Times(2)
+	svc.On("DeleteConnection", mock.Anything, "conn-1").Return(nil).Once()
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-1"
+						sync_behaviour = "upsert"
+						schedule {
+							type          = "basic"
+							every_minutes = 60
+						}
+						identifiers {
+							from = "email"
+							to   = "user_id"
+						}
+						mappings {
+							from = "name"
+							to   = "first_name"
+						}
+						event {
+							type = "identify"
+						}
+					}
+				`,
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
+					if err != nil {
+						return err
+					}
+					return checkAll(map[string]string{
+						"id":                       "conn-1",
+						"source_id":                "retl-src-1",
+						"destination_id":           "dest-1",
+						"enabled":                  "true",
+						"sync_behaviour":           "upsert",
+						"schedule.0.type":          "basic",
+						"schedule.0.every_minutes": "60",
+						"identifiers.0.from":       "email",
+						"identifiers.0.to":         "user_id",
+						"mappings.0.from":          "name",
+						"mappings.0.to":            "first_name",
+						"event.0.type":             "identify",
+						"created_at":               "2026-04-20T12:00:00Z",
+					}, attrs)
+				},
+			},
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-1"
+						sync_behaviour = "upsert"
+						schedule {
+							type          = "basic"
+							every_minutes = 120
+						}
+						identifiers {
+							from = "email"
+							to   = "user_id"
+						}
+						mappings {
+							from = "name"
+							to   = "first_name"
+						}
+						mappings {
+							from = "phone"
+							to   = "phone_number"
+						}
+						event {
+							type = "identify"
+						}
+						constants {
+							key   = "properties.source"
+							value = "warehouse"
+						}
+					}
+				`,
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
+					if err != nil {
+						return err
+					}
+					return checkAll(map[string]string{
+						"schedule.0.every_minutes": "120",
+						"mappings.#":               "2",
+						"mappings.1.from":          "phone",
+						"constants.0.key":          "properties.source",
+						"constants.0.value":        "warehouse",
+						"updated_at":               "2026-04-21T12:00:00Z",
+					}, attrs)
+				},
+			},
+		},
+	})
+
+	svc.AssertExpectations(t)
+}
+
+func TestResourceConnection_404RemovesFromState(t *testing.T) {
+	svc := &mockService{}
+	svc.On("GetConnection", mock.Anything, "conn-gone").
+		Return(nil, &client.APIError{HTTPStatusCode: 404}).Once()
+
+	r := retl.ResourceConnection()
+	d := r.TestResourceData()
+	d.SetId("conn-gone")
+
+	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+	require.False(t, diags.HasError())
+	require.Empty(t, d.Id())
+	svc.AssertExpectations(t)
+}
+
+func TestResourceConnection_Delete404IsTreatedAsAlreadyGone(t *testing.T) {
+	svc := &mockService{}
+	svc.On("DeleteConnection", mock.Anything, "conn-gone").
+		Return(&client.APIError{HTTPStatusCode: 404}).Once()
+
+	r := retl.ResourceConnection()
+	d := r.TestResourceData()
+	d.SetId("conn-gone")
+
+	diags := r.DeleteContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+	require.False(t, diags.HasError())
+	require.Empty(t, d.Id())
+	svc.AssertExpectations(t)
+}
+
+func TestResourceConnection_ExternalIDChangeRoundTrip(t *testing.T) {
+	svc := &mockService{}
+	enabled := true
+	every := 60
+
+	createReq := &iacretl.CreateRETLConnectionRequest{
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-1",
+		Enabled:       &enabled,
+		ExternalID:    "ext-old",
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeBasic, EveryMinutes: &every},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
+		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
+	}
+	created := jsonMapperConnection("conn-1")
+	created.ExternalID = "ext-old"
+	created.Mappings = nil
+	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-1").Return(created, nil).Times(3)
+
+	updatedConn := *created
+	updatedConn.ExternalID = "ext-new"
+	svc.On("SetConnectionExternalId", mock.Anything, &iacretl.SetRETLConnectionExternalIDRequest{
+		ID:         "conn-1",
+		ExternalID: "ext-new",
+	}).Return(nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-1").Return(&updatedConn, nil).Times(2)
+	svc.On("DeleteConnection", mock.Anything, "conn-1").Return(nil).Once()
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-1"
+						external_id    = "ext-old"
+						sync_behaviour = "upsert"
+						schedule {
+							type          = "basic"
+							every_minutes = 60
+						}
+						identifiers {
+							from = "email"
+							to   = "user_id"
+						}
+						event {
+							type = "identify"
+						}
+					}
+				`,
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
+					if err != nil {
+						return err
+					}
+					return checkAll(map[string]string{"external_id": "ext-old"}, attrs)
+				},
+			},
+			{
+				// Only external_id changes — should hit SetConnectionExternalId,
+				// not the main UpdateConnection endpoint.
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-1"
+						external_id    = "ext-new"
+						sync_behaviour = "upsert"
+						schedule {
+							type          = "basic"
+							every_minutes = 60
+						}
+						identifiers {
+							from = "email"
+							to   = "user_id"
+						}
+						event {
+							type = "identify"
+						}
+					}
+				`,
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
+					if err != nil {
+						return err
+					}
+					return checkAll(map[string]string{"external_id": "ext-new"}, attrs)
+				},
+			},
+		},
+	})
+
+	svc.AssertExpectations(t)
+	svc.AssertNotCalled(t, "UpdateConnection", mock.Anything, mock.Anything, mock.Anything)
+}
