@@ -461,8 +461,13 @@ func buildUpdateRequest(d *schema.ResourceData) (*retl.UpdateRETLConnectionReque
 		Enabled:  &enabled,
 		Schedule: schedule,
 	}
-	if ss, ok := syncSettingsFromState(d); ok {
-		req.SyncSettings = ss
+	// Only forward sync_settings when the user actually changed the block.
+	// Otherwise the Optional+Computed field can carry server-computed values
+	// in state and we'd echo them back as if the user had set them.
+	if d.HasChange("sync_settings") {
+		if ss, ok := syncSettingsFromState(d); ok {
+			req.SyncSettings = ss
+		}
 	}
 	if d.HasChange("mappings") {
 		mappings := mappingsFromState(d, "mappings")
@@ -580,6 +585,11 @@ func syncSettingsFromState(d *schema.ResourceData) (*retl.SyncSettings, bool) {
 			cfg.EnableFailedKeysRetry = &v
 		}
 		ss.FailedKeysConfig = cfg
+	}
+	// Empty sync_settings {} block (or one with empty sub-blocks) carries
+	// nothing useful — treat it as "not set" so callers can omit the field.
+	if ss.SyncLogsConfig == nil && ss.FailedKeysConfig == nil {
+		return nil, false
 	}
 	return ss, true
 }
