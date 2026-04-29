@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -238,11 +239,13 @@ func connectionSchema() map[string]*schema.Schema {
 			Description: "Destination entity for Object Mapping flows (e.g. `Contact`, `Lead`).",
 		},
 		"destination_config": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			ForceNew:     true,
-			ValidateFunc: validation.StringIsJSON,
-			Description:  "Destination-specific configuration as a JSON-encoded string.",
+			Type:             schema.TypeString,
+			Optional:         true,
+			ForceNew:         true,
+			ValidateFunc:     validation.StringIsJSON,
+			StateFunc:        normalizeJSON,
+			DiffSuppressFunc: suppressEquivalentJSON,
+			Description:      "Destination-specific configuration as a JSON-encoded string.",
 		},
 		"created_at": {
 			Type:     schema.TypeString,
@@ -644,6 +647,42 @@ func constantsToState(cs []retl.Constant) []map[string]interface{} {
 		out = append(out, map[string]interface{}{"key": c.Key, "value": c.Value})
 	}
 	return out
+}
+
+// normalizeJSON returns a canonical encoding of the input JSON (sorted keys,
+// no extraneous whitespace). Returns the input unchanged if it isn't valid
+// JSON — validation.StringIsJSON catches that path separately.
+func normalizeJSON(v interface{}) string {
+	s, ok := v.(string)
+	if !ok || s == "" {
+		return ""
+	}
+	var parsed interface{}
+	if err := json.Unmarshal([]byte(s), &parsed); err != nil {
+		return s
+	}
+	out, err := json.Marshal(parsed)
+	if err != nil {
+		return s
+	}
+	return string(out)
+}
+
+// suppressEquivalentJSON returns true when two JSON strings are semantically
+// equal, so reformatting from the API (key ordering, whitespace, null vs "")
+// does not produce a perpetual diff.
+func suppressEquivalentJSON(_, oldVal, newVal string, _ *schema.ResourceData) bool {
+	if oldVal == newVal {
+		return true
+	}
+	var o, n interface{}
+	if err := json.Unmarshal([]byte(oldVal), &o); err != nil {
+		return false
+	}
+	if err := json.Unmarshal([]byte(newVal), &n); err != nil {
+		return false
+	}
+	return reflect.DeepEqual(o, n)
 }
 
 func eventFromState(d *schema.ResourceData) (*retl.Event, bool) {
