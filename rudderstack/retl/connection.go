@@ -355,7 +355,10 @@ func updateConnection(ctx context.Context, d *schema.ResourceData, m interface{}
 	// external_id change applied server-side. external_id is touched only after
 	// the main update succeeds.
 	if hasConnectionUpdatePayload(d) {
-		req := buildUpdateRequest(d)
+		req, err := buildUpdateRequest(d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 		if _, err := svc.UpdateConnection(ctx, d.Id(), req); err != nil {
 			return diag.FromErr(fmt.Errorf("could not update RETL connection: %w", err))
 		}
@@ -447,9 +450,12 @@ func buildCreateRequest(d *schema.ResourceData) (*retl.CreateRETLConnectionReque
 	return req, nil
 }
 
-func buildUpdateRequest(d *schema.ResourceData) *retl.UpdateRETLConnectionRequest {
+func buildUpdateRequest(d *schema.ResourceData) (*retl.UpdateRETLConnectionRequest, error) {
+	schedule, err := scheduleFromState(d)
+	if err != nil {
+		return nil, err
+	}
 	enabled := d.Get("enabled").(bool)
-	schedule, _ := scheduleFromState(d)
 
 	req := &retl.UpdateRETLConnectionRequest{
 		Enabled:  &enabled,
@@ -469,7 +475,7 @@ func buildUpdateRequest(d *schema.ResourceData) *retl.UpdateRETLConnectionReques
 	if d.HasChange("identifiers") {
 		req.Identifiers = mappingsFromState(d, "identifiers")
 	}
-	return req
+	return req, nil
 }
 
 func storeConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) error {
