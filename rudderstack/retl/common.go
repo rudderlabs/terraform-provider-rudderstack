@@ -18,13 +18,18 @@ import (
 	"github.com/rudderlabs/rudder-iac/api/client/retl"
 )
 
-// Service is the subset of the upstream retl.RETLStore the RETL source
-// resources need. Kept narrow so tests can mock it cheaply.
+// Service is the subset of the upstream retl.RETLStore the RETL source and
+// connection resources need. Kept narrow so tests can mock it cheaply.
 type Service interface {
 	CreateRetlSource(ctx context.Context, source *retl.RETLSourceCreateRequest) (*retl.RETLSource, error)
 	GetRetlSource(ctx context.Context, id string) (*retl.RETLSource, error)
 	UpdateRetlSource(ctx context.Context, id string, source *retl.RETLSourceUpdateRequest) (*retl.RETLSource, error)
 	DeleteRetlSource(ctx context.Context, id string) error
+
+	CreateConnection(ctx context.Context, req *retl.CreateRETLConnectionRequest) (*retl.RETLConnection, error)
+	GetConnection(ctx context.Context, id string) (*retl.RETLConnection, error)
+	UpdateConnection(ctx context.Context, id string, req *retl.UpdateRETLConnectionRequest) (*retl.RETLConnection, error)
+	DeleteConnection(ctx context.Context, id string) error
 }
 
 // ClientProvider exposes the RETL service from the provider's configured

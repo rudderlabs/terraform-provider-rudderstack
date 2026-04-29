@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
-	github.com/rudderlabs/rudder-iac v0.14.1-0.20260428101717-0a1ff9a32c99
+	github.com/rudderlabs/rudder-iac v0.14.1-0.20260429105858-9db95c241060
 	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
