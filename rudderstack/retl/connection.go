@@ -204,7 +204,8 @@ func connectionSchema() map[string]*schema.Schema {
 					},
 				},
 			},
-			Description: "CDP event configuration. Required for JSON Mapper, must be absent for other flows.",
+			Description: "CDP event configuration. Optional in the Terraform schema; flow-specific " +
+				"requirements (required for JSON Mapper, absent for other flows) are enforced by the API.",
 		},
 		"constants": {
 			Type:     schema.TypeList,
@@ -255,10 +256,20 @@ func connectionSchema() map[string]*schema.Schema {
 }
 
 // customizeConnectionDiff applies flow-dependent ForceNew on `identifiers` and
-// `constants`. Flow is inferred from the same signals the server uses:
-// `object` set => Object Mapping, `destination_config` set => Destination-
-// specific, otherwise => JSON Mapper.
+// `constants`, and rejects locally-detectable invalid combinations (cursor_column
+// only with sync_behaviour=upsert) so users see the error at plan time instead
+// of on apply.
+//
+// Flow is inferred from the same signals the server uses: `object` set =>
+// Object Mapping, `destination_config` set => Destination-specific, otherwise
+// => JSON Mapper.
 func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if cursor := d.Get("cursor_column").(string); cursor != "" {
+		if sb := d.Get("sync_behaviour").(string); sb != "" && sb != "upsert" {
+			return fmt.Errorf("cursor_column is only valid when sync_behaviour is %q, got %q", "upsert", sb)
+		}
+	}
+
 	if d.Id() == "" {
 		// Brand-new resource — ForceNew is irrelevant on create.
 		return nil
@@ -340,7 +351,16 @@ func updateConnection(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diags
 	}
 
-	// external_id is set via a dedicated endpoint, not the main update payload.
+	// Apply the main payload first so a failure there does not leave a partial
+	// external_id change applied server-side. external_id is touched only after
+	// the main update succeeds.
+	if hasConnectionUpdatePayload(d) {
+		req := buildUpdateRequest(d)
+		if _, err := svc.UpdateConnection(ctx, d.Id(), req); err != nil {
+			return diag.FromErr(fmt.Errorf("could not update RETL connection: %w", err))
+		}
+	}
+
 	if d.HasChange("external_id") {
 		extID := d.Get("external_id").(string)
 		if err := svc.SetConnectionExternalId(ctx, &retl.SetRETLConnectionExternalIDRequest{
@@ -348,13 +368,6 @@ func updateConnection(ctx context.Context, d *schema.ResourceData, m interface{}
 			ExternalID: extID,
 		}); err != nil {
 			return diag.FromErr(fmt.Errorf("could not set RETL connection external id: %w", err))
-		}
-	}
-
-	if hasConnectionUpdatePayload(d) {
-		req := buildUpdateRequest(d)
-		if _, err := svc.UpdateConnection(ctx, d.Id(), req); err != nil {
-			return diag.FromErr(fmt.Errorf("could not update RETL connection: %w", err))
 		}
 	}
 
@@ -484,15 +497,14 @@ func storeConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) erro
 		}
 	}
 
-	if c.ExternalID != "" {
-		if err := d.Set("external_id", c.ExternalID); err != nil {
-			return err
-		}
+	// Always set, even when empty, so state can be cleared if the server
+	// returns an empty value (otherwise Terraform would see perpetual diffs
+	// against the stale local value).
+	if err := d.Set("external_id", c.ExternalID); err != nil {
+		return err
 	}
-	if len(c.DestinationConfig) > 0 {
-		if err := d.Set("destination_config", string(c.DestinationConfig)); err != nil {
-			return err
-		}
+	if err := d.Set("destination_config", string(c.DestinationConfig)); err != nil {
+		return err
 	}
 	if c.CreatedAt != nil {
 		if err := d.Set("created_at", c.CreatedAt.Format(time.RFC3339)); err != nil {
@@ -518,6 +530,9 @@ func scheduleFromState(d *schema.ResourceData) (retl.Schedule, error) {
 	s := retl.Schedule{Type: retl.ScheduleType(m["type"].(string))}
 	if v, ok := m["every_minutes"].(int); ok && v > 0 {
 		s.EveryMinutes = &v
+	}
+	if s.Type == retl.ScheduleTypeBasic && s.EveryMinutes == nil {
+		return retl.Schedule{}, fmt.Errorf("schedule.every_minutes is required when schedule.type is %q", s.Type)
 	}
 	return s, nil
 }

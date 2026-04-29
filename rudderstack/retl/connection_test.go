@@ -2,6 +2,7 @@ package retl_test
 
 import (
 	"context"
+	"regexp"
 	"testing"
 	"time"
 
@@ -16,6 +17,8 @@ import (
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/retl"
 )
+
+func regexpMatches(pattern string) *regexp.Regexp { return regexp.MustCompile(pattern) }
 
 // jsonMapperConnection returns a fully-populated JSON Mapper connection
 // shared by several tests below.
@@ -190,6 +193,63 @@ func TestResourceConnection_404RemovesFromState(t *testing.T) {
 	require.False(t, diags.HasError())
 	require.Empty(t, d.Id())
 	svc.AssertExpectations(t)
+}
+
+func TestResourceConnection_CursorColumnRequiresUpsert(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-1"
+						sync_behaviour = "mirror"
+						cursor_column  = "updated_at"
+						schedule {
+							type = "manual"
+						}
+						identifiers {
+							from = "email"
+							to   = "user_id"
+						}
+					}
+				`,
+				ExpectError: regexpMatches(`cursor_column is only valid when sync_behaviour is "upsert"`),
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
+}
+
+func TestResourceConnection_BasicScheduleRequiresEveryMinutes(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-1"
+						sync_behaviour = "upsert"
+						schedule {
+							type = "basic"
+						}
+						identifiers {
+							from = "email"
+							to   = "user_id"
+						}
+					}
+				`,
+				ExpectError: regexpMatches(`schedule\.every_minutes is required when schedule\.type is "basic"`),
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
 func TestResourceConnection_Delete404IsTreatedAsAlreadyGone(t *testing.T) {
