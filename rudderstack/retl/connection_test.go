@@ -224,6 +224,34 @@ func TestResourceConnection_CursorColumnRequiresUpsert(t *testing.T) {
 	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
+func TestResourceConnection_CronScheduleRequiresExpression(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-1"
+						sync_behaviour = "upsert"
+						schedule {
+							type = "cron"
+						}
+						identifiers {
+							from = "email"
+							to   = "user_id"
+						}
+					}
+				`,
+				ExpectError: regexpMatches(`schedule\.cron_expression is required when schedule\.type is "cron"`),
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
+}
+
 func TestResourceConnection_BasicScheduleRequiresEveryMinutes(t *testing.T) {
 	svc := &mockService{}
 	resource.UnitTest(t, resource.TestCase{
@@ -267,102 +295,3 @@ func TestResourceConnection_Delete404IsTreatedAsAlreadyGone(t *testing.T) {
 	svc.AssertExpectations(t)
 }
 
-func TestResourceConnection_ExternalIDChangeRoundTrip(t *testing.T) {
-	svc := &mockService{}
-	enabled := true
-	every := 60
-
-	createReq := &iacretl.CreateRETLConnectionRequest{
-		SourceID:      "retl-src-1",
-		DestinationID: "dest-1",
-		Enabled:       &enabled,
-		ExternalID:    "ext-old",
-		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeBasic, EveryMinutes: &every},
-		SyncBehaviour: iacretl.SyncBehaviourUpsert,
-		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
-		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
-	}
-	created := jsonMapperConnection("conn-1")
-	created.ExternalID = "ext-old"
-	created.Mappings = nil
-	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
-	svc.On("GetConnection", mock.Anything, "conn-1").Return(created, nil).Times(3)
-
-	updatedConn := *created
-	updatedConn.ExternalID = "ext-new"
-	svc.On("SetConnectionExternalId", mock.Anything, &iacretl.SetRETLConnectionExternalIDRequest{
-		ID:         "conn-1",
-		ExternalID: "ext-new",
-	}).Return(nil).Once()
-	svc.On("GetConnection", mock.Anything, "conn-1").Return(&updatedConn, nil).Times(2)
-	svc.On("DeleteConnection", mock.Anything, "conn-1").Return(nil).Once()
-
-	resource.UnitTest(t, resource.TestCase{
-		ProviderFactories: providerFactories(svc),
-		Steps: []resource.TestStep{
-			{
-				Config: `
-					provider "rudderstack" { access_token = "tok" }
-					resource "rudderstack_retl_connection" "example" {
-						source_id      = "retl-src-1"
-						destination_id = "dest-1"
-						external_id    = "ext-old"
-						sync_behaviour = "upsert"
-						schedule {
-							type          = "basic"
-							every_minutes = 60
-						}
-						identifiers {
-							from = "email"
-							to   = "user_id"
-						}
-						event {
-							type = "identify"
-						}
-					}
-				`,
-				Check: func(s *terraform.State) error {
-					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
-					if err != nil {
-						return err
-					}
-					return checkAll(map[string]string{"external_id": "ext-old"}, attrs)
-				},
-			},
-			{
-				// Only external_id changes — should hit SetConnectionExternalId,
-				// not the main UpdateConnection endpoint.
-				Config: `
-					provider "rudderstack" { access_token = "tok" }
-					resource "rudderstack_retl_connection" "example" {
-						source_id      = "retl-src-1"
-						destination_id = "dest-1"
-						external_id    = "ext-new"
-						sync_behaviour = "upsert"
-						schedule {
-							type          = "basic"
-							every_minutes = 60
-						}
-						identifiers {
-							from = "email"
-							to   = "user_id"
-						}
-						event {
-							type = "identify"
-						}
-					}
-				`,
-				Check: func(s *terraform.State) error {
-					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
-					if err != nil {
-						return err
-					}
-					return checkAll(map[string]string{"external_id": "ext-new"}, attrs)
-				},
-			},
-		},
-	})
-
-	svc.AssertExpectations(t)
-	svc.AssertNotCalled(t, "UpdateConnection", mock.Anything, mock.Anything, mock.Anything)
-}

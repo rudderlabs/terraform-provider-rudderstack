@@ -71,8 +71,3 @@ func (m *mockService) DeleteConnection(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
-
-func (m *mockService) SetConnectionExternalId(ctx context.Context, req *retl.SetRETLConnectionExternalIDRequest) error {
-	args := m.Called(ctx, req)
-	return args.Error(0)
-}

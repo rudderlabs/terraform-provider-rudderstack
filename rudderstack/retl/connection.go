@@ -63,11 +63,6 @@ func connectionSchema() map[string]*schema.Schema {
 			Default:     true,
 			Description: "Whether the connection is enabled.",
 		},
-		"external_id": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Optional external identifier for CLI/IaC state tracking.",
-		},
 		"schedule": {
 			Type:     schema.TypeList,
 			Required: true,
@@ -85,6 +80,11 @@ func connectionSchema() map[string]*schema.Schema {
 						Optional:     true,
 						ValidateFunc: validation.IntAtLeast(5),
 						Description:  "Sync interval in minutes. Required when `type` is `basic`.",
+					},
+					"cron_expression": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "Cron expression. Required when `type` is `cron`.",
 					},
 				},
 			},
@@ -351,27 +351,12 @@ func updateConnection(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diags
 	}
 
-	// Apply the main payload first so a failure there does not leave a partial
-	// external_id change applied server-side. external_id is touched only after
-	// the main update succeeds.
-	if hasConnectionUpdatePayload(d) {
-		req, err := buildUpdateRequest(d)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		if _, err := svc.UpdateConnection(ctx, d.Id(), req); err != nil {
-			return diag.FromErr(fmt.Errorf("could not update RETL connection: %w", err))
-		}
+	req, err := buildUpdateRequest(d)
+	if err != nil {
+		return diag.FromErr(err)
 	}
-
-	if d.HasChange("external_id") {
-		extID := d.Get("external_id").(string)
-		if err := svc.SetConnectionExternalId(ctx, &retl.SetRETLConnectionExternalIDRequest{
-			ID:         d.Id(),
-			ExternalID: extID,
-		}); err != nil {
-			return diag.FromErr(fmt.Errorf("could not set RETL connection external id: %w", err))
-		}
+	if _, err := svc.UpdateConnection(ctx, d.Id(), req); err != nil {
+		return diag.FromErr(fmt.Errorf("could not update RETL connection: %w", err))
 	}
 
 	return readConnection(ctx, d, m)
@@ -395,18 +380,6 @@ func deleteConnection(ctx context.Context, d *schema.ResourceData, m interface{}
 	return nil
 }
 
-// hasConnectionUpdatePayload returns true when at least one field in the main
-// PUT payload changed (i.e. an actual update endpoint call is needed). When
-// only external_id changed, the dedicated set-external-id endpoint suffices.
-func hasConnectionUpdatePayload(d *schema.ResourceData) bool {
-	for _, k := range []string{"enabled", "schedule", "sync_settings", "mappings", "constants", "identifiers"} {
-		if d.HasChange(k) {
-			return true
-		}
-	}
-	return false
-}
-
 func buildCreateRequest(d *schema.ResourceData) (*retl.CreateRETLConnectionRequest, error) {
 	schedule, err := scheduleFromState(d)
 	if err != nil {
@@ -423,9 +396,6 @@ func buildCreateRequest(d *schema.ResourceData) (*retl.CreateRETLConnectionReque
 		Identifiers:   mappingsFromState(d, "identifiers"),
 	}
 
-	if v := d.Get("external_id").(string); v != "" {
-		req.ExternalID = v
-	}
 	if ss, ok := syncSettingsFromState(d); ok {
 		req.SyncSettings = ss
 	}
@@ -511,9 +481,6 @@ func storeConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) erro
 	// Always set, even when empty, so state can be cleared if the server
 	// returns an empty value (otherwise Terraform would see perpetual diffs
 	// against the stale local value).
-	if err := d.Set("external_id", c.ExternalID); err != nil {
-		return err
-	}
 	if err := d.Set("destination_config", string(c.DestinationConfig)); err != nil {
 		return err
 	}
@@ -542,8 +509,14 @@ func scheduleFromState(d *schema.ResourceData) (retl.Schedule, error) {
 	if v, ok := m["every_minutes"].(int); ok && v > 0 {
 		s.EveryMinutes = &v
 	}
+	if v, _ := m["cron_expression"].(string); v != "" {
+		s.CronExpression = &v
+	}
 	if s.Type == retl.ScheduleTypeBasic && s.EveryMinutes == nil {
 		return retl.Schedule{}, fmt.Errorf("schedule.every_minutes is required when schedule.type is %q", s.Type)
+	}
+	if s.Type == retl.ScheduleTypeCron && s.CronExpression == nil {
+		return retl.Schedule{}, fmt.Errorf("schedule.cron_expression is required when schedule.type is %q", s.Type)
 	}
 	return s, nil
 }
@@ -552,6 +525,9 @@ func scheduleToState(s retl.Schedule) []map[string]interface{} {
 	m := map[string]interface{}{"type": string(s.Type)}
 	if s.EveryMinutes != nil {
 		m["every_minutes"] = *s.EveryMinutes
+	}
+	if s.CronExpression != nil {
+		m["cron_expression"] = *s.CronExpression
 	}
 	return []map[string]interface{}{m}
 }

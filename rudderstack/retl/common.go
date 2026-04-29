@@ -30,7 +30,6 @@ type Service interface {
 	GetConnection(ctx context.Context, id string) (*retl.RETLConnection, error)
 	UpdateConnection(ctx context.Context, id string, req *retl.UpdateRETLConnectionRequest) (*retl.RETLConnection, error)
 	DeleteConnection(ctx context.Context, id string) error
-	SetConnectionExternalId(ctx context.Context, req *retl.SetRETLConnectionExternalIDRequest) error
 }
 
 // ClientProvider exposes the RETL service from the provider's configured
