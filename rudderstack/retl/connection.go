@@ -17,7 +17,7 @@ import (
 
 // ResourceConnection returns the schema for `rudderstack_retl_connection`.
 //
-// Flow detection (JSON Mapper / Object mapping / Destination-specific) happens
+// Flow detection (JSON Mapper / Object Mapping / Destination-specific) happens
 // server-side based on the destination definition; this resource only sends
 // the flat schema and lets the API assemble the internal config. ForceNew on
 // `identifiers` and `constants` is conditional on the detected flow and is
