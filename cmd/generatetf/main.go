@@ -8,10 +8,17 @@ import (
 	"strings"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
+	"github.com/rudderlabs/rudder-iac/api/client/retl"
 	"github.com/rudderlabs/terraform-provider-rudderstack/cmd/generatetf/generator"
 )
 
-var cl *client.Client
+var (
+	cl      *client.Client
+	retlSvc retl.RETLStore
+)
+
+// retlListPageSize is the page size used when paginating RETL connections.
+const retlListPageSize = 50
 
 func main() {
 	importFlag := flag.Bool("import", false, "generate terraform import commands")
@@ -23,6 +30,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "could not create API client: %s\n", err.Error())
 		os.Exit(1)
 	}
+	retlSvc = retl.NewRudderRETLStore(cl)
 
 	sources, err := getAPISources()
 	if err != nil {
@@ -42,15 +50,27 @@ func main() {
 		os.Exit(1)
 	}
 
+	retlSources, err := getAPIRetlSources()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not get list of RETL sources: %s\n", err.Error())
+		os.Exit(1)
+	}
+
+	retlConnections, err := getAPIRetlConnections()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not get list of RETL connections: %s\n", err.Error())
+		os.Exit(1)
+	}
+
 	if *importFlag {
-		bytes, err := generator.GenerateImportScript(sources, destinations, connections)
+		bytes, err := generator.GenerateImportScript(sources, destinations, connections, retlSources, retlConnections)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not generate terraform import script: %s\n", err.Error())
 			os.Exit(1)
 		}
 		fmt.Println(string(bytes))
 	} else {
-		bytes, err := generator.GenerateTerraform(sources, destinations, connections)
+		bytes, err := generator.GenerateTerraform(sources, destinations, connections, retlSources, retlConnections)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "could not generate terraform HCL: %s\n", err.Error())
 			os.Exit(1)
@@ -128,4 +148,37 @@ func getAPIConnections() ([]client.Connection, error) {
 	}
 
 	return connections, nil
+}
+
+func getAPIRetlSources() ([]retl.RETLSource, error) {
+	retlSources := []retl.RETLSource{}
+	resp, err := retlSvc.ListRetlSources(context.Background(), retl.WithSourceType(string(retl.ModelSourceType)))
+	if err != nil {
+		return nil, err
+	}
+	retlSources = append(retlSources, resp.Data...)
+	resp, err = retlSvc.ListRetlSources(context.Background(), retl.WithSourceType(string(retl.TableSourceType)))
+	if err != nil {
+		return nil, err
+	}
+	retlSources = append(retlSources, resp.Data...)
+	return retlSources, nil
+}
+
+func getAPIRetlConnections() ([]retl.RETLConnection, error) {
+	var out []retl.RETLConnection
+	for page := 1; ; page++ {
+		resp, err := retlSvc.ListConnections(context.Background(), &retl.ListRETLConnectionsRequest{
+			Page:     page,
+			PageSize: retlListPageSize,
+		})
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, resp.Data...)
+		if len(resp.Data) < retlListPageSize {
+			break
+		}
+	}
+	return out, nil
 }
