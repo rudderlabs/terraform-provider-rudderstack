@@ -716,10 +716,12 @@ func retlEventBlock(e *retl.Event) *hclwrite.Block {
 
 // destinationConfigJsonencodeTokens renders an opaque destinationConfig blob as
 // a `jsonencode({...})` call so the generated HCL stays readable. Returns an
-// error (so the connection is skipped) when the payload is JSON null, or when
-// the top-level value isn't a JSON object — both are valid JSON but neither
-// produces useful HCL (jsonencode(null) / jsonencode("foo") would round-trip
-// the wrong shape through the resource's destination_config string field).
+// error when the payload is JSON null, or when the top-level value isn't a
+// JSON object — both are valid JSON but neither produces useful HCL
+// (jsonencode(null) / jsonencode("foo") would round-trip the wrong shape
+// through the resource's destination_config string field). The caller is
+// expected to log the error and omit the attribute; the rest of the
+// connection block is still emitted.
 func destinationConfigJsonencodeTokens(raw json.RawMessage) (hclwrite.Tokens, error) {
 	var parsed interface{}
 	if err := json.Unmarshal(raw, &parsed); err != nil {

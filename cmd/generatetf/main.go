@@ -81,7 +81,7 @@ func main() {
 func setupClient() (*client.Client, retl.RETLStore, error) {
 	accessToken := os.Getenv("RUDDERSTACK_ACCESS_TOKEN")
 	if accessToken == "" {
-		return nil, nil, fmt.Errorf("no access token in specified. Please provide one through the RUDDERSTACK_ACCESS_TOKEN environmental variable")
+		return nil, nil, fmt.Errorf("no access token is specified. Please provide one through the RUDDERSTACK_ACCESS_TOKEN environmental variable")
 	}
 
 	baseURL := os.Getenv("RUDDERSTACK_API_URL")
@@ -179,9 +179,12 @@ func getAPIRetlConnections() ([]retl.RETLConnection, error) {
 			return nil, err
 		}
 		out = append(out, resp.Data...)
-		// Stop when the server says we have everything, or as a defensive fallback
-		// when an empty page comes back (in case Total is missing/zero).
-		if len(resp.Data) == 0 || len(out) >= resp.Paging.Total {
+		// Stop when an empty page comes back, or when the server-reported Total
+		// is populated and we've fetched it all. We only consult Total when
+		// it's > 0 — a zero Total can mean either "really empty" (handled by
+		// the empty-data check) or "server didn't populate it", and in the
+		// latter case treating 0 as the stop condition would prematurely break.
+		if len(resp.Data) == 0 || (resp.Paging.Total > 0 && len(out) >= resp.Paging.Total) {
 			break
 		}
 	}
