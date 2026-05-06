@@ -201,6 +201,9 @@ func GenerateTerraform(
 		}
 		b, err := generateRetlConnection(cnxn, src, dst)
 		if err != nil {
+			// Connection-block errors are fatal (mirroring event-streaming
+			// generateConnection): a half-emitted connection block produces
+			// invalid HCL, so failing fast is better than corrupt output.
 			return nil, fmt.Errorf("could not generate resource block for RETL connection '%s': %w", cnxn.ID, err)
 		}
 		body.AppendBlock(b)
@@ -551,6 +554,11 @@ func generateRetlSource(s retl.RETLSource, terraformType string) (block *hclwrit
 	configBlock := hclwrite.NewBlock("config", nil)
 	cfgBody := configBlock.Body()
 	switch cfg := s.Config.(type) {
+	case nil:
+		// retl.RETLSource.UnmarshalJSON leaves Config nil when the API returns
+		// a null/empty config payload. We can't generate a valid HCL block
+		// without it — bail out so the source is logged-and-skipped upstream.
+		return nil, fmt.Errorf("RETL source has no config (API returned null) — cannot generate")
 	case retl.RETLSQLModelConfig:
 		cfgBody.SetAttributeValue("primary_key", cty.StringVal(cfg.PrimaryKey))
 		cfgBody.SetAttributeValue("sql", cty.StringVal(cfg.Sql))
@@ -632,9 +640,12 @@ func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *de
 	if len(c.DestinationConfig) > 0 {
 		tokens, err := destinationConfigJsonencodeTokens(c.DestinationConfig)
 		if err != nil {
-			return nil, fmt.Errorf("could not render destination_config: %w", err)
+			// Log and omit the attribute — the rest of the connection is still
+			// usable. Don't fail the whole generation over an opaque blob.
+			logger.Printf("RETL connection '%s': skipping destination_config (%v)", c.ID, err)
+		} else {
+			body.SetAttributeRaw("destination_config", tokens)
 		}
-		body.SetAttributeRaw("destination_config", tokens)
 	}
 
 	return block, nil
@@ -705,13 +716,20 @@ func retlEventBlock(e *retl.Event) *hclwrite.Block {
 
 // destinationConfigJsonencodeTokens renders an opaque destinationConfig blob as
 // a `jsonencode({...})` call so the generated HCL stays readable. Returns an
-// error if the input isn't valid JSON (it always should be — the API is the
-// source — but emitting a string literal of garbage would silently break
-// terraform validate later).
+// error (so the connection is skipped) when the payload is JSON null, or when
+// the top-level value isn't a JSON object — both are valid JSON but neither
+// produces useful HCL (jsonencode(null) / jsonencode("foo") would round-trip
+// the wrong shape through the resource's destination_config string field).
 func destinationConfigJsonencodeTokens(raw json.RawMessage) (hclwrite.Tokens, error) {
 	var parsed interface{}
 	if err := json.Unmarshal(raw, &parsed); err != nil {
 		return nil, fmt.Errorf("destinationConfig is not valid JSON: %w", err)
+	}
+	if parsed == nil {
+		return nil, fmt.Errorf("destinationConfig is JSON null")
+	}
+	if _, ok := parsed.(map[string]interface{}); !ok {
+		return nil, fmt.Errorf("destinationConfig top-level value is %T, expected JSON object", parsed)
 	}
 	inner := hclwrite.TokensForValue(ctyValue(parsed))
 	// Suppress the leading whitespace hclwrite would otherwise insert before
@@ -721,8 +739,8 @@ func destinationConfigJsonencodeTokens(raw json.RawMessage) (hclwrite.Tokens, er
 		inner[0].SpacesBefore = 0
 	}
 	out := hclwrite.Tokens{
-		{Type: hclsyntax.TokenIdent, Bytes: []byte("jsonencode")},
-		{Type: hclsyntax.TokenOParen, Bytes: []byte("(")},
+		&hclwrite.Token{Type: hclsyntax.TokenIdent, Bytes: []byte("jsonencode")},
+		&hclwrite.Token{Type: hclsyntax.TokenOParen, Bytes: []byte("(")},
 	}
 	out = append(out, inner...)
 	out = append(out, &hclwrite.Token{Type: hclsyntax.TokenCParen, Bytes: []byte(")")})

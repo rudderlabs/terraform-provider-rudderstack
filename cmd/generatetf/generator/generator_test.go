@@ -409,7 +409,6 @@ terraform import "rudderstack_connection.cnxn_id-connection-2" "id-connection-2"
 	expected = strings.Trim(expected, "\n")
 
 	data, err := generator.GenerateImportScript(sources, destinations, connections, nil, nil)
-	fmt.Println(string(data))
 	require.NoError(t, err)
 	assert.Equal(t, expected, string(data))
 }
@@ -625,26 +624,62 @@ func TestGeneratorImportScript_RETL(t *testing.T) {
 	esSources, esDestinations := retlEventStreamingFixtures()
 	retlSources, retlConnections := retlFixtures()
 
-	data, err := generator.GenerateImportScript(esSources, esDestinations, nil, retlSources, retlConnections)
-	require.NoError(t, err)
-	got := string(data)
-
-	expectedLines := []string{
+	// Full golden-string assertion (matching the style of
+	// TestGeneratorImportScript): order is event-streaming first, then RETL
+	// sources, then RETL connections. Skipped resources (s3 source,
+	// unsupported source-type, connections referencing them) must not appear.
+	expected := strings.Join([]string{
 		`terraform import "rudderstack_destination_redshift.dst_id-redshift" "id-redshift"`,
 		`terraform import "rudderstack_destination_facebook_pixel.dst_id-facebook-pixel" "id-facebook-pixel"`,
 		`terraform import "rudderstack_retl_source_model.retl_src_src-model-1" "src-model-1"`,
 		`terraform import "rudderstack_retl_source_table.retl_src_src-table-1" "src-table-1"`,
 		`terraform import "rudderstack_retl_connection.retl_cnxn_cnxn-jm-1" "cnxn-jm-1"`,
 		`terraform import "rudderstack_retl_connection.retl_cnxn_cnxn-ds-1" "cnxn-ds-1"`,
+	}, "\n")
+
+	data, err := generator.GenerateImportScript(esSources, esDestinations, nil, retlSources, retlConnections)
+	require.NoError(t, err)
+	assert.Equal(t, expected, string(data))
+}
+
+// TestGeneratorTerraform_RETL_DestinationConfigEdgeCases verifies that
+// connections whose `destinationConfig` is JSON null or a non-object (string,
+// number, array) are still emitted but with the `destination_config` attribute
+// suppressed — the rest of the connection is usable. This guards the loose
+// API contract where the field is an opaque blob.
+func TestGeneratorTerraform_RETL_DestinationConfigEdgeCases(t *testing.T) {
+	_, esDestinations := retlEventStreamingFixtures()
+	retlSources := []retl.RETLSource{
+		{
+			ID: "src-1", Name: "src-1", IsEnabled: true,
+			SourceType: retl.ModelSourceType, SourceDefinitionName: "snowflake",
+			AccountID: "acc-1",
+			Config:    retl.RETLSQLModelConfig{PrimaryKey: "id", Sql: "SELECT 1"},
+		},
 	}
-	for _, line := range expectedLines {
-		assert.Contains(t, got, line)
+	mkConn := func(id string, destCfg json.RawMessage) retl.RETLConnection {
+		return retl.RETLConnection{
+			ID: id, SourceID: "src-1", DestinationID: "id-redshift", Enabled: true,
+			Schedule:          retl.Schedule{Type: retl.ScheduleTypeManual},
+			SyncBehaviour:     retl.SyncBehaviourUpsert,
+			Identifiers:       []retl.Mapping{{From: "x", To: "y"}},
+			DestinationConfig: destCfg,
+		}
+	}
+	retlConnections := []retl.RETLConnection{
+		mkConn("cnxn-null", json.RawMessage(`null`)),
+		mkConn("cnxn-string", json.RawMessage(`"opaque-token"`)),
+		mkConn("cnxn-array", json.RawMessage(`[1,2,3]`)),
 	}
 
-	// skipped resources do not appear
-	assert.NotContains(t, got, "src-s3-1")
-	assert.NotContains(t, got, "src-unsupported-1")
-	assert.NotContains(t, got, "cnxn-skip-source")
-	assert.NotContains(t, got, "cnxn-skip-dest")
-	assert.NotContains(t, got, "rudderstack_retl_source_s3_table")
+	data, err := generator.GenerateTerraform(nil, esDestinations, nil, retlSources, retlConnections)
+	require.NoError(t, err)
+	output := string(data)
+
+	// All three connection blocks should still be present, with their other fields intact.
+	assert.Contains(t, output, `"retl_cnxn_cnxn-null"`)
+	assert.Contains(t, output, `"retl_cnxn_cnxn-string"`)
+	assert.Contains(t, output, `"retl_cnxn_cnxn-array"`)
+	// But destination_config must NOT have been emitted for any of them.
+	assert.NotContains(t, output, "destination_config")
 }

@@ -25,12 +25,11 @@ func main() {
 	flag.Parse()
 
 	var err error
-	cl, err = setupClient()
+	cl, retlSvc, err = setupClient()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not create API client: %s\n", err.Error())
 		os.Exit(1)
 	}
-	retlSvc = retl.NewRudderRETLStore(cl)
 
 	sources, err := getAPISources()
 	if err != nil {
@@ -79,10 +78,10 @@ func main() {
 	}
 }
 
-func setupClient() (*client.Client, error) {
+func setupClient() (*client.Client, retl.RETLStore, error) {
 	accessToken := os.Getenv("RUDDERSTACK_ACCESS_TOKEN")
 	if accessToken == "" {
-		return nil, fmt.Errorf("no access token in specified. Please provide one through the RUDDERSTACK_ACCESS_TOKEN environmental variable")
+		return nil, nil, fmt.Errorf("no access token in specified. Please provide one through the RUDDERSTACK_ACCESS_TOKEN environmental variable")
 	}
 
 	baseURL := os.Getenv("RUDDERSTACK_API_URL")
@@ -93,7 +92,11 @@ func setupClient() (*client.Client, error) {
 	// the new client includes /v2 in service paths.
 	baseURL = strings.TrimSuffix(strings.TrimRight(baseURL, "/"), "/v2")
 
-	return client.New(accessToken, client.WithBaseURL(baseURL))
+	c, err := client.New(accessToken, client.WithBaseURL(baseURL))
+	if err != nil {
+		return nil, nil, err
+	}
+	return c, retl.NewRudderRETLStore(c), nil
 }
 
 func getAPISources() ([]client.Source, error) {
@@ -176,7 +179,9 @@ func getAPIRetlConnections() ([]retl.RETLConnection, error) {
 			return nil, err
 		}
 		out = append(out, resp.Data...)
-		if len(resp.Data) < retlListPageSize {
+		// Stop when the server says we have everything, or as a defensive fallback
+		// when an empty page comes back (in case Total is missing/zero).
+		if len(resp.Data) == 0 || len(out) >= resp.Paging.Total {
 			break
 		}
 	}
