@@ -192,25 +192,21 @@ func getAPIConnections() ([]client.Connection, error) {
 }
 
 func getAPIRetlSources() ([]retl.RETLSource, error) {
-	// Two filtered calls — one per supported sourceType — even though the SDK
-	// doc claims "Pass an empty sourceType to return sources of all types".
-	// In practice the server treats sourceType as required: omitting it
-	// silently returns only `model` sources and drops tables entirely. Until
-	// the API contract is fixed, we must paginate per type and concatenate.
+	// Single unfiltered call. The API now honours the SDK's documented
+	// contract — "Pass an empty sourceType to return sources of all types"
+	// — and returns both `model` and `table` sources in one response while
+	// excluding non-supported types (audience, profiles-table, etc.) at the
+	// gateway. See PRO-5675.
 	//
 	// TODO: ListRetlSources is not paginated in the SDK today (RETLSources
 	// has no Paging field). Once the upstream SDK adds pagination, switch
-	// each branch to a paged loop — otherwise large workspaces will silently
+	// this to a paged loop — otherwise large workspaces will silently
 	// truncate at whatever limit the server applies.
-	var sources []retl.RETLSource
-	for _, st := range []retl.SourceType{retl.ModelSourceType, retl.TableSourceType} {
-		resp, err := retlSvc.ListRetlSources(context.Background(), retl.WithSourceType(string(st)))
-		if err != nil {
-			return nil, fmt.Errorf("listing RETL sources of type %q: %w", st, err)
-		}
-		sources = append(sources, resp.Data...)
+	resp, err := retlSvc.ListRetlSources(context.Background())
+	if err != nil {
+		return nil, err
 	}
-	return sources, nil
+	return resp.Data, nil
 }
 
 func getAPIRetlConnections() ([]retl.RETLConnection, error) {
