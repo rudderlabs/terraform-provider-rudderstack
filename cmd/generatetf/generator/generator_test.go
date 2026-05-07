@@ -670,16 +670,100 @@ func TestGeneratorTerraform_RETL_DestinationConfigEdgeCases(t *testing.T) {
 		mkConn("cnxn-null", json.RawMessage(`null`)),
 		mkConn("cnxn-string", json.RawMessage(`"opaque-token"`)),
 		mkConn("cnxn-array", json.RawMessage(`[1,2,3]`)),
+		mkConn("cnxn-empty-obj", json.RawMessage(`{}`)),
 	}
 
 	data, err := generator.GenerateTerraform(nil, esDestinations, nil, retlSources, retlConnections)
 	require.NoError(t, err)
 	output := string(data)
 
-	// All three connection blocks should still be present, with their other fields intact.
+	// All four connection blocks should still be present, with their other fields intact.
 	assert.Contains(t, output, `"retl_cnxn_cnxn-null"`)
 	assert.Contains(t, output, `"retl_cnxn_cnxn-string"`)
 	assert.Contains(t, output, `"retl_cnxn_cnxn-array"`)
+	assert.Contains(t, output, `"retl_cnxn_cnxn-empty-obj"`)
 	// But destination_config must NOT have been emitted for any of them.
 	assert.NotContains(t, output, "destination_config")
+}
+
+// TestGeneratorTerraform_RETL_NilSourceConfig verifies that a RETL source with
+// a nil Config (API returned null/empty config payload) is filtered out of
+// both the HCL output AND the import script — preventing drift between the
+// two outputs that would cause `terraform import` to reference a non-existent
+// resource block.
+func TestGeneratorTerraform_RETL_NilSourceConfig(t *testing.T) {
+	retlSources := []retl.RETLSource{
+		{
+			ID: "src-good", Name: "good", IsEnabled: true,
+			SourceType: retl.ModelSourceType, SourceDefinitionName: "snowflake",
+			AccountID: "acc-1",
+			Config:    retl.RETLSQLModelConfig{PrimaryKey: "id", Sql: "SELECT 1"},
+		},
+		{
+			// Config is nil — must be skipped by both code paths.
+			ID: "src-nil-config", Name: "broken", IsEnabled: true,
+			SourceType: retl.ModelSourceType, SourceDefinitionName: "snowflake",
+			AccountID: "acc-1",
+			Config:    nil,
+		},
+		{
+			// Config concrete type doesn't match SourceType — also a skip.
+			ID: "src-wrong-config", Name: "mismatched", IsEnabled: true,
+			SourceType: retl.ModelSourceType, SourceDefinitionName: "snowflake",
+			AccountID: "acc-1",
+			Config:    retl.RETLTableConfig{PrimaryKey: "id", Schema: "x", Table: "y"},
+		},
+	}
+
+	hcl, err := generator.GenerateTerraform(nil, nil, nil, retlSources, nil)
+	require.NoError(t, err)
+	hclOut := string(hcl)
+	imp, err := generator.GenerateImportScript(nil, nil, nil, retlSources, nil)
+	require.NoError(t, err)
+	impOut := string(imp)
+
+	// Good source appears in both outputs.
+	assert.Contains(t, hclOut, `"retl_src_src-good"`)
+	assert.Contains(t, impOut, `"rudderstack_retl_source_model.retl_src_src-good"`)
+	// The two malformed sources are excluded from both — critically including
+	// the import script, otherwise terraform import would fail with no matching
+	// resource block in the .tf file.
+	assert.NotContains(t, hclOut, `retl_src_src-nil-config`)
+	assert.NotContains(t, impOut, `retl_src_src-nil-config`)
+	assert.NotContains(t, hclOut, `retl_src_src-wrong-config`)
+	assert.NotContains(t, impOut, `retl_src_src-wrong-config`)
+}
+
+// TestGeneratorTerraform_RETL_CronSchedule covers the third branch of
+// retlScheduleBlock — `type = "cron"` with `cron_expression` populated. The
+// other branches (basic + manual) are exercised by retlFixtures.
+func TestGeneratorTerraform_RETL_CronSchedule(t *testing.T) {
+	_, esDestinations := retlEventStreamingFixtures()
+	cron := "30 13 * * *"
+	retlSources := []retl.RETLSource{
+		{
+			ID: "src-1", Name: "src-1", IsEnabled: true,
+			SourceType: retl.ModelSourceType, SourceDefinitionName: "snowflake",
+			AccountID: "acc-1",
+			Config:    retl.RETLSQLModelConfig{PrimaryKey: "id", Sql: "SELECT 1"},
+		},
+	}
+	retlConnections := []retl.RETLConnection{{
+		ID: "cnxn-cron", SourceID: "src-1", DestinationID: "id-redshift", Enabled: true,
+		Schedule: retl.Schedule{
+			Type:           retl.ScheduleTypeCron,
+			CronExpression: &cron,
+		},
+		SyncBehaviour: retl.SyncBehaviourUpsert,
+		Identifiers:   []retl.Mapping{{From: "x", To: "y"}},
+	}}
+
+	data, err := generator.GenerateTerraform(nil, esDestinations, nil, retlSources, retlConnections)
+	require.NoError(t, err)
+	output := string(data)
+
+	assert.Contains(t, output, `type            = "cron"`)
+	assert.Contains(t, output, `cron_expression = "30 13 * * *"`)
+	// Basic-only field must not leak into a cron schedule block.
+	assert.NotContains(t, output, "every_minutes")
 }

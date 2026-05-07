@@ -15,7 +15,31 @@ import (
 var (
 	cl      *client.Client
 	retlSvc retl.RETLStore
+
+	// retlSourceIDsSeenViaLegacyEndpoint collects IDs of warehouse-backed
+	// RETL sources that the legacy /v2/sources endpoint also returns. We
+	// drop them from the event-streaming source list (no rudderstack_source_*
+	// resource exists for them — they're emitted via the RETL path instead)
+	// and use the set to silence connection warnings for connections that
+	// reference them in /v2/connections.
+	retlSourceIDsSeenViaLegacyEndpoint = map[string]bool{}
 )
+
+// retlWarehouseSourceTypes is the set of `type` values returned by the legacy
+// /v2/sources endpoint for sources that are actually RETL warehouse sources.
+// The bootstrap tool emits them via the typed /v2/retl-sources path instead
+// — silencing them here avoids "type X not supported" noise for every RETL
+// source in the workspace.
+var retlWarehouseSourceTypes = map[string]bool{
+	"redshift":   true,
+	"snowflake":  true,
+	"bigquery":   true,
+	"postgres":   true,
+	"mysql":      true,
+	"databricks": true,
+	"trino":      true,
+	"s3":         true,
+}
 
 // retlListPageSize is the page size used when paginating RETL connections.
 const retlListPageSize = 50
@@ -107,7 +131,13 @@ func getAPISources() ([]client.Source, error) {
 	}
 
 	for sourcesPage != nil {
-		sources = append(sources, sourcesPage.Sources...)
+		for _, src := range sourcesPage.Sources {
+			if retlWarehouseSourceTypes[strings.ToLower(src.Type)] {
+				retlSourceIDsSeenViaLegacyEndpoint[src.ID] = true
+				continue
+			}
+			sources = append(sources, src)
+		}
 		sourcesPage, err = cl.Sources.Next(context.Background(), sourcesPage.Paging)
 		if err != nil {
 			return nil, err
@@ -143,7 +173,15 @@ func getAPIConnections() ([]client.Connection, error) {
 	}
 
 	for connectionsPage != nil {
-		connections = append(connections, connectionsPage.Connections...)
+		for _, cnxn := range connectionsPage.Connections {
+			// Drop connections whose source was filtered out as a RETL
+			// warehouse source — those are emitted via rudderstack_retl_connection
+			// (or their RETL connection equivalent) on the RETL path.
+			if retlSourceIDsSeenViaLegacyEndpoint[cnxn.SourceID] {
+				continue
+			}
+			connections = append(connections, cnxn)
+		}
 		connectionsPage, err = cl.Connections.Next(context.Background(), connectionsPage.Paging)
 		if err != nil {
 			return nil, err
@@ -154,18 +192,25 @@ func getAPIConnections() ([]client.Connection, error) {
 }
 
 func getAPIRetlSources() ([]retl.RETLSource, error) {
-	retlSources := []retl.RETLSource{}
-	resp, err := retlSvc.ListRetlSources(context.Background(), retl.WithSourceType(string(retl.ModelSourceType)))
-	if err != nil {
-		return nil, err
+	// Two filtered calls — one per supported sourceType — even though the SDK
+	// doc claims "Pass an empty sourceType to return sources of all types".
+	// In practice the server treats sourceType as required: omitting it
+	// silently returns only `model` sources and drops tables entirely. Until
+	// the API contract is fixed, we must paginate per type and concatenate.
+	//
+	// TODO: ListRetlSources is not paginated in the SDK today (RETLSources
+	// has no Paging field). Once the upstream SDK adds pagination, switch
+	// each branch to a paged loop — otherwise large workspaces will silently
+	// truncate at whatever limit the server applies.
+	var sources []retl.RETLSource
+	for _, st := range []retl.SourceType{retl.ModelSourceType, retl.TableSourceType} {
+		resp, err := retlSvc.ListRetlSources(context.Background(), retl.WithSourceType(string(st)))
+		if err != nil {
+			return nil, fmt.Errorf("listing RETL sources of type %q: %w", st, err)
+		}
+		sources = append(sources, resp.Data...)
 	}
-	retlSources = append(retlSources, resp.Data...)
-	resp, err = retlSvc.ListRetlSources(context.Background(), retl.WithSourceType(string(retl.TableSourceType)))
-	if err != nil {
-		return nil, err
-	}
-	retlSources = append(retlSources, resp.Data...)
-	return retlSources, nil
+	return sources, nil
 }
 
 func getAPIRetlConnections() ([]retl.RETLConnection, error) {

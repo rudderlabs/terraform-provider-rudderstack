@@ -78,9 +78,9 @@ func GenerateImportScript(
 	}
 
 	for _, src := range retlSources {
-		tType, ok := retlSourceTerraformType(src)
+		tType, reason, ok := retlSourceTerraformType(src)
 		if !ok {
-			logger.Printf("skipping RETL source '%s': sourceType '%s' / sourceDefinitionName '%s' is not supported", src.ID, src.SourceType, src.SourceDefinitionName)
+			logger.Printf("skipping RETL source '%s': %s", src.ID, reason)
 			continue
 		}
 		foundRetlSources[src.ID] = true
@@ -172,9 +172,9 @@ func GenerateTerraform(
 	// generate RETL source blocks for supported types (model + non-s3 table)
 	generatedRetlSources := map[string]*retlSourceEntry{}
 	for _, src := range retlSources {
-		tType, ok := retlSourceTerraformType(src)
+		tType, reason, ok := retlSourceTerraformType(src)
 		if !ok {
-			logger.Printf("could not generate resource block for RETL source '%s': sourceType '%s' / sourceDefinitionName '%s' is not supported", src.ID, src.SourceType, src.SourceDefinitionName)
+			logger.Printf("could not generate resource block for RETL source '%s': %s", src.ID, reason)
 			continue
 		}
 		b, err := generateRetlSource(src, tType)
@@ -201,9 +201,10 @@ func GenerateTerraform(
 		}
 		b, err := generateRetlConnection(cnxn, src, dst)
 		if err != nil {
-			// Connection-block errors are fatal (mirroring event-streaming
-			// generateConnection): a half-emitted connection block produces
-			// invalid HCL, so failing fast is better than corrupt output.
+			// generateRetlConnection only returns an error from its panic
+			// recovery (defensive against an unforeseen hclwrite bug). If we
+			// ever hit it the file is half-built — fail fast rather than
+			// emit corrupt HCL.
 			return nil, fmt.Errorf("could not generate resource block for RETL connection '%s': %w", cnxn.ID, err)
 		}
 		body.AppendBlock(b)
@@ -508,23 +509,46 @@ func connectionName(connection client.Connection) string {
 	return fmt.Sprintf("cnxn_%s", connection.ID)
 }
 
-// retlSourceTerraformType returns the terraform resource type for a RETL source,
-// or ("", false) when the source type isn't supported by this tool. S3 table
-// sources are intentionally skipped (no rudderstack_retl_source_s3_table generator).
-func retlSourceTerraformType(s retl.RETLSource) (string, bool) {
+// retlSourceTerraformType reports whether a RETL source can be emitted as a
+// rudderstack_retl_source_* resource. Returns the terraform type, a reason
+// string (populated on rejection so the caller can produce a useful warning),
+// and an ok flag. Both `GenerateImportScript` and `GenerateTerraform` route
+// every source through this single check so the two outputs can never
+// disagree on which sources to include.
+//
+// A source is eligible iff:
+//   - sourceType is `model` or `table` (S3 tables and audience/profiles types
+//     are intentionally skipped — no matching resource exists in this PR),
+//   - the API returned a config payload of the matching concrete type
+//     (`RETLSQLModelConfig` or `RETLTableConfig`). RETLSource.UnmarshalJSON
+//     leaves `Config` nil when the API returns null/empty config — those
+//     sources can't be generated and must be filtered upstream of any HCL
+//     emission, otherwise the import script would reference a non-existent
+//     resource block.
+func retlSourceTerraformType(s retl.RETLSource) (terraformType string, reason string, ok bool) {
 	switch s.SourceType {
 	case retl.ModelSourceType:
-		return "rudderstack_retl_source_model", true
+		if _, ok := s.Config.(retl.RETLSQLModelConfig); !ok {
+			return "", fmt.Sprintf("sourceType 'model' but config is %T (expected RETLSQLModelConfig)", s.Config), false
+		}
+		return "rudderstack_retl_source_model", "", true
 	case retl.TableSourceType:
 		if s.SourceDefinitionName == "s3" {
-			return "", false
+			return "", "S3 table sources are not supported by this tool", false
 		}
-		return "rudderstack_retl_source_table", true
+		if _, ok := s.Config.(retl.RETLTableConfig); !ok {
+			return "", fmt.Sprintf("sourceType 'table' but config is %T (expected RETLTableConfig)", s.Config), false
+		}
+		return "rudderstack_retl_source_table", "", true
 	default:
-		return "", false
+		return "", fmt.Sprintf("unsupported sourceType '%s'", s.SourceType), false
 	}
 }
 
+// retlSourceName / retlConnectionName prefix the API ID with `retl_src_` /
+// `retl_cnxn_` so the generated terraform identifiers are always valid even
+// when the API ID starts with a digit (RudderStack IDs frequently do, and
+// HCL identifiers must start with a letter or underscore).
 func retlSourceName(s retl.RETLSource) string {
 	return fmt.Sprintf("retl_src_%s", s.ID)
 }
@@ -730,8 +754,16 @@ func destinationConfigJsonencodeTokens(raw json.RawMessage) (hclwrite.Tokens, er
 	if parsed == nil {
 		return nil, fmt.Errorf("destinationConfig is JSON null")
 	}
-	if _, ok := parsed.(map[string]interface{}); !ok {
+	m, ok := parsed.(map[string]interface{})
+	if !ok {
 		return nil, fmt.Errorf("destinationConfig top-level value is %T, expected JSON object", parsed)
+	}
+	if len(m) == 0 {
+		// {} is technically a valid object, but emitting `jsonencode({})` is
+		// noise — the resource would set the field to a literal empty JSON
+		// string, which the schema's StateFunc already normalises away. Treat
+		// it the same as null and omit the attribute.
+		return nil, fmt.Errorf("destinationConfig is an empty object")
 	}
 	inner := hclwrite.TokensForValue(ctyValue(parsed))
 	// Suppress the leading whitespace hclwrite would otherwise insert before
