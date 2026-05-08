@@ -281,13 +281,19 @@ jobs:
           terraform_wrapper: false
 
       - name: Run E2E RETL CRUD tests
-        # Phase 1: tests t.Skip when RUDDERSTACK_RETL_TEST_ACCOUNT_ID is unset.
-        # Phase 2: add `RUDDERSTACK_RETL_TEST_ACCOUNT_ID: ${{ secrets.RUDDERSTACK_RETL_TEST_ACCOUNT_ID }}`
-        # to this env block once the warehouse-account fixture exists in the e2e workspace.
+        # RUDDERSTACK_RETL_TEST_ACCOUNT_ID is an opaque warehouse-account
+        # identifier (not a secret) and is sourced from the `e2e` GitHub
+        # Environment as a variable — same pattern as RUDDERSTACK_ACC_TEST_API_URL.
+        # Until the variable is set, the expression renders empty, the helpers
+        # t.Skip the live tests, and this job passes as a no-op. When the
+        # variable is added (Phase 2: a Snowflake account ID in the test
+        # workspace), live Create/Update/Import/Destroy starts running with no
+        # further code change.
         env:
           TF_ACC: "1"
           RUDDERSTACK_ACCESS_TOKEN: ${{ secrets.RUDDERSTACK_ACC_TEST_TOKEN }}
           RUDDERSTACK_API_URL: ${{ vars.RUDDERSTACK_ACC_TEST_API_URL }}
+          RUDDERSTACK_RETL_TEST_ACCOUNT_ID: ${{ vars.RUDDERSTACK_RETL_TEST_ACCOUNT_ID }}
         run: |
           go test \
             ./rudderstack/retl/ \
