@@ -17,7 +17,10 @@ import (
 // retlAccountIDEnv names the env var that supplies a real warehouse account ID
 // for live RETL acceptance tests. When unset (and the test is not running in
 // plan-only mode) the helpers t.Skip — local runs without a workspace fixture
-// shouldn't fail. CI sets this from a GitHub Environment secret in the live phase.
+// shouldn't fail. The e2e-tests.yml workflow forwards `vars.RUDDERSTACK_RETL_TEST_ACCOUNT_ID`
+// (a GitHub Environment variable, not a secret — the ID is opaque, not credentials)
+// to this env var; until that variable is added, the expression renders empty
+// in CI and the live RETL tests skip.
 const retlAccountIDEnv = "RUDDERSTACK_RETL_TEST_ACCOUNT_ID"
 
 // planOnlyAccountID is a placeholder used in plan-only mode where no API call
@@ -43,9 +46,9 @@ type RETLConnectionTestConfig struct {
 
 	SyncBehaviour string // "upsert" | "mirror" | "full"
 	Schedule      string // HCL fragment for the schedule { } block body
-	Identifiers   string // HCL fragment for one or more identifiers { } blocks
-	Mappings      string // HCL fragment for mappings { } blocks (optional)
-	Event         string // HCL fragment for event { } block (optional)
+	Identifiers   string // HCL fragment for one or more raw identifiers { } blocks (required, ≥1)
+	Mappings      string // HCL fragment for one or more raw mappings { } blocks (optional)
+	Event         string // HCL fragment for event { } block body (optional)
 	CursorColumn  string // value for cursor_column (optional, requires upsert)
 
 	// UpdateMappings, when non-empty, runs an Update step replacing the
@@ -249,8 +252,9 @@ resource %q "test" {
 }
 
 // retlConnectionHCL builds the HCL for the source + webhook destination +
-// connection pipeline. Identifier/mapping/event/cursor blocks are interpolated
-// raw — callers supply the inner HCL.
+// connection pipeline. Identifiers / Mappings are full block fragments
+// (e.g. `identifiers { from = "..." to = "..." }`) so callers can pass
+// multiple of each. Event and cursor_column are inlined when non-empty.
 func retlConnectionHCL(srcName, dstName, accountID string, cfg RETLConnectionTestConfig) string {
 	mappingsBlock := ""
 	if cfg.Mappings != "" {
@@ -272,7 +276,7 @@ resource "rudderstack_retl_source_model" "test" {
   account_id             = %q
   config {
     primary_key = "id"
-    sql         = "select 1"
+    sql         = "select 1 as id"
   }
 }
 
@@ -291,9 +295,7 @@ resource "rudderstack_retl_connection" "test" {
   schedule {
     %s
   }
-  identifiers {
-    %s
-  }%s%s
+  %s%s%s
 }
 `, srcName, accountID, dstName, cfg.SyncBehaviour, cursorAttr, cfg.Schedule, cfg.Identifiers, mappingsBlock, eventBlock)
 }

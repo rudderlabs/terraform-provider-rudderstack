@@ -53,8 +53,10 @@ func TestAccRETLConnection_JSONMapperBasicSchedule(t *testing.T) {
 			every_minutes = 60
 		`,
 		Identifiers: `
-			from = "email"
-			to   = "user_id"
+			identifiers {
+				from = "email"
+				to   = "user_id"
+			}
 		`,
 		Mappings: `
 			mappings {
@@ -86,8 +88,10 @@ func TestAccRETLConnection_CronSchedule(t *testing.T) {
 			cron_expression = "30 13 * * *"
 		`,
 		Identifiers: `
-			from = "email"
-			to   = "user_id"
+			identifiers {
+				from = "email"
+				to   = "user_id"
+			}
 		`,
 		Event: `type = "identify"`,
 	})
@@ -101,8 +105,10 @@ func TestAccRETLConnection_ManualSchedule(t *testing.T) {
 		SyncBehaviour: "mirror",
 		Schedule:      `type = "manual"`,
 		Identifiers: `
-			from = "email"
-			to   = "user_id"
+			identifiers {
+				from = "email"
+				to   = "user_id"
+			}
 		`,
 		Event: `type = "identify"`,
 	})
