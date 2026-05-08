@@ -48,6 +48,33 @@ func TestAllSourcesHaveAcceptanceTests(t *testing.T) {
 	}
 }
 
+// retlResources lists the RETL resources registered in rudderstack/provider.go.
+// They have no registry like configs.Sources/Destinations, so the coverage gate
+// hard-codes the set. Update this list when adding a new RETL resource.
+var retlResources = []string{
+	"retl_source_model",
+	"retl_source_table",
+	"retl_connection",
+}
+
+// TestAllRETLResourcesHaveAcceptanceTests verifies that every RETL resource
+// has a corresponding TestAccRETL* function in rudderstack/retl/.
+func TestAllRETLResourcesHaveAcceptanceTests(t *testing.T) {
+	testFuncs, err := collectTestFunctions("rudderstack/retl")
+	if err != nil {
+		t.Fatalf("failed to scan test functions: %v", err)
+	}
+
+	for _, name := range retlResources {
+		// Drop the leading "retl_" so "retl_source_model" matches
+		// TestAccRETLSourceModel*.
+		key := normalizeKey(strings.TrimPrefix(name, "retl_"))
+		if !hasMatchingFuncPrefix(testFuncs, "TestAccRETL", key) {
+			t.Errorf("RETL resource %q has no acceptance test matching TestAccRETL<Name>*", name)
+		}
+	}
+}
+
 // collectTestFunctions parses *_test.go files in the given directory and returns
 // a set of all top-level test function names.
 func collectTestFunctions(relDir string) (map[string]bool, error) {
@@ -121,6 +148,25 @@ func hasMatchingFunc(funcs map[string]bool, prefix, normalizedKey string) bool {
 		}
 		rest := lower[len(lowerPrefix):]
 		if rest == normalizedKey {
+			return true
+		}
+	}
+	return false
+}
+
+// hasMatchingFuncPrefix is the prefix-matching variant of hasMatchingFunc:
+// after stripping `prefix`, the remainder need only START with `normalizedKey`.
+// Used for RETL acceptance tests which name variants with suffixes
+// (e.g. TestAccRETLSourceModel_Snowflake matches key "sourcemodel").
+func hasMatchingFuncPrefix(funcs map[string]bool, prefix, normalizedKey string) bool {
+	lowerPrefix := strings.ToLower(prefix)
+	for fn := range funcs {
+		lower := strings.ToLower(fn)
+		if !strings.HasPrefix(lower, lowerPrefix) {
+			continue
+		}
+		rest := lower[len(lowerPrefix):]
+		if strings.HasPrefix(rest, normalizedKey) {
 			return true
 		}
 	}
