@@ -157,9 +157,9 @@ func testAccCheckSourceAPIConfig(resourceName, expectedJSON string) resource.Tes
 
 // testAccCheckSourceSettingsAPI fetches the source from the API and verifies
 // GeoEnrichmentEnabled and Transient match the values in expectedJSON.
-// expectedJSON uses terraform-facing names: "geoEnrichmentEnabled" maps directly to
-// source.GeoEnrichmentEnabled; "transient" equals temporarily_store_events_for_retries
-// (= !source.Transient) and is inverted before comparison.
+// expectedJSON uses API wire values: "geoEnrichmentEnabled" maps directly to
+// source.GeoEnrichmentEnabled; "transient" maps directly to source.Transient
+// (both compared without inversion).
 func testAccCheckSourceSettingsAPI(resourceName, expectedJSON string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		expectedJSON = strings.TrimSpace(expectedJSON)

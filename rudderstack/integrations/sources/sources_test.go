@@ -78,8 +78,8 @@ func TestSourceResourceJavascriptWithSettings(t *testing.T) {
 					temporarily_store_events_for_retries = true
 				}
 			`,
-			// transient = !temporarily_store_events_for_retries = !true = false
-			APICreate: `{
+			APICreate: `{}`,
+			APICreateSettings: `{
 				"geoEnrichmentEnabled": true,
 				"transient": false
 			}`,
@@ -89,8 +89,8 @@ func TestSourceResourceJavascriptWithSettings(t *testing.T) {
 					temporarily_store_events_for_retries = true
 				}
 			`,
-			// transient = !temporarily_store_events_for_retries = !true = false
-			APIUpdate: `{
+			APIUpdate: `{}`,
+			APIUpdateSettings: `{
 				"geoEnrichmentEnabled": false,
 				"transient": false
 			}`,
@@ -264,10 +264,6 @@ func TestSourceResourceSIGNL4(t *testing.T) {
 
 func TestSourceResourceSlack(t *testing.T) {
 	cmt.AssertSource(t, "slack", []configs.TestConfig{configs.EmptyTestConfig})
-}
-
-func TestSourceResourceSettings(t *testing.T) {
-	cmt.AssertSource(t, "javascript", testConfigSettings)
 }
 
 // TestSourceResourceSettingsGeoOnly verifies that omitting temporarily_store_events_for_retries

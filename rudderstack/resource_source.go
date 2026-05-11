@@ -205,26 +205,28 @@ func populateSourceFromState(cm configs.ConfigMeta, source *client.Source, d *sc
 		}
 		source.Config = json.RawMessage(apiConfig)
 	}
-	if s := d.Get("settings").([]interface{}); len(s) > 0 {
-		state, err := json.Marshal(s[0])
-		if err != nil {
-			return err
-		}
-		apiSettings, err := cm.SettingsStateToAPI(string(state))
-		if err != nil {
-			return err
-		}
-		var settingsMap map[string]interface{}
-		if err := json.Unmarshal([]byte(apiSettings), &settingsMap); err != nil {
-			return err
-		}
-		if v, ok := settingsMap["geoEnrichmentEnabled"]; ok {
-			geo := v.(bool)
-			source.GeoEnrichmentEnabled = &geo
-		}
-		if v, ok := settingsMap["transient"]; ok {
-			transient := !v.(bool)
-			source.Transient = &transient
+	if cm.SettingsSchema != nil {
+		if s, _ := d.Get("settings").([]interface{}); len(s) > 0 {
+			state, err := json.Marshal(s[0])
+			if err != nil {
+				return err
+			}
+			apiSettings, err := cm.SettingsStateToAPI(string(state))
+			if err != nil {
+				return err
+			}
+			var settingsMap map[string]interface{}
+			if err := json.Unmarshal([]byte(apiSettings), &settingsMap); err != nil {
+				return err
+			}
+			if v, ok := settingsMap["geoEnrichmentEnabled"]; ok {
+				geo := v.(bool)
+				source.GeoEnrichmentEnabled = &geo
+			}
+			if v, ok := settingsMap["transient"]; ok {
+				transient := !v.(bool)
+				source.Transient = &transient
+			}
 		}
 	}
 
@@ -294,17 +296,17 @@ func storeSettingsToState(cm configs.ConfigMeta, source *client.Source, d *schem
 	existing := d.Get("settings").([]interface{})
 
 	// Skip when the user has no settings block AND the API only returned default values.
-	// The API always echoes geoEnrichmentEnabled=false and transient=true even when never set,
+	// The API always echoes geoEnrichmentEnabled=false and transient=false even when never set,
 	// so we must not write these defaults into state — they would cause perpetual drift.
-	// geo default = false, transient default = false (transient=false means temporarily_store_events_for_retries=true)
+	// API defaults: GeoEnrichmentEnabled=false, Transient=false (Transient=false → temporarily_store_events_for_retries=true).
 	apiGeoIsDefault := source.GeoEnrichmentEnabled == nil || !*source.GeoEnrichmentEnabled
 	apiTransientIsDefault := source.Transient == nil || !*source.Transient
 	if len(existing) == 0 && apiGeoIsDefault && apiTransientIsDefault {
 		return nil
 	}
 
-	// transient is inverted relative to temporarily_store_events_for_retries (c.Simple does a direct
-	// copy, so we negate here so that SettingsAPIToState produces the correct TF value).
+	// API Transient=true means "don't store for retries", the inverse of temporarily_store_events_for_retries,
+	// so negate before passing to SettingsAPIToState which does a direct field copy.
 	settingsAPIMap := map[string]interface{}{}
 	if source.GeoEnrichmentEnabled != nil {
 		settingsAPIMap["geoEnrichmentEnabled"] = *source.GeoEnrichmentEnabled

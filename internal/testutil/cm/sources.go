@@ -111,9 +111,6 @@ func AssertSource(t *testing.T, source string, testConfigs []configs.TestConfig)
 	}, nil)
 
 	updateName := "example-updated"
-	if cfg.TerraformUpdate == cfg.TerraformCreate {
-		updateName = "example-updated"
-	}
 
 	sources.On("Update", mock.Anything, &client.Source{
 		ID:                   "some-id",
