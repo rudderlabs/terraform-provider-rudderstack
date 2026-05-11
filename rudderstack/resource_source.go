@@ -75,6 +75,18 @@ func resourceSourceSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
 		}
 	}
 
+	if cm.SettingsSchema != nil {
+		s["settings"] = &schema.Schema{
+			Type:        schema.TypeList,
+			Optional:    true,
+			MaxItems:    1,
+			Description: "Source settings for geo enrichment and event retry storage.",
+			Elem: &schema.Resource{
+				Schema: cm.SettingsSchema,
+			},
+		}
+	}
+
 	return s
 }
 
@@ -193,6 +205,30 @@ func populateSourceFromState(cm configs.ConfigMeta, source *client.Source, d *sc
 		}
 		source.Config = json.RawMessage(apiConfig)
 	}
+	if cm.SettingsSchema != nil {
+		if s, _ := d.Get("settings").([]interface{}); len(s) > 0 {
+			state, err := json.Marshal(s[0])
+			if err != nil {
+				return err
+			}
+			apiSettings, err := cm.SettingsStateToAPI(string(state))
+			if err != nil {
+				return err
+			}
+			var settingsMap map[string]interface{}
+			if err := json.Unmarshal([]byte(apiSettings), &settingsMap); err != nil {
+				return err
+			}
+			if v, ok := settingsMap["geoEnrichmentEnabled"]; ok {
+				geo := v.(bool)
+				source.GeoEnrichmentEnabled = &geo
+			}
+			if v, ok := settingsMap["transient"]; ok {
+				transient := v.(bool)
+				source.Transient = &transient
+			}
+		}
+	}
 
 	return nil
 }
@@ -231,6 +267,10 @@ func storeSourceToState(cm configs.ConfigMeta, source *client.Source, d *schema.
 		return err
 	}
 
+	if err := storeSettingsToState(cm, source, d); err != nil {
+		return err
+	}
+
 	if cm.SkipConfig {
 		return nil
 	}
@@ -246,4 +286,46 @@ func storeSourceToState(cm configs.ConfigMeta, source *client.Source, d *schema.
 	}
 
 	return nil
+}
+
+func storeSettingsToState(cm configs.ConfigMeta, source *client.Source, d *schema.ResourceData) error {
+	if cm.SettingsSchema == nil {
+		return nil
+	}
+
+	existing := d.Get("settings").([]interface{})
+
+	// Skip when the user has no settings block AND the API only returned default values.
+	// The API always echoes geoEnrichmentEnabled=false and transient=false even when never set,
+	// so we must not write these defaults into state — they would cause perpetual drift.
+	// API defaults: GeoEnrichmentEnabled=false, Transient=false (Transient=false → temporarily_store_events_for_retries=true).
+	apiGeoIsDefault := source.GeoEnrichmentEnabled == nil || !*source.GeoEnrichmentEnabled
+	apiTransientIsDefault := source.Transient == nil || !*source.Transient
+	if len(existing) == 0 && apiGeoIsDefault && apiTransientIsDefault {
+		return nil
+	}
+
+	settingsAPIMap := map[string]interface{}{}
+	if source.GeoEnrichmentEnabled != nil {
+		settingsAPIMap["geoEnrichmentEnabled"] = *source.GeoEnrichmentEnabled
+	}
+	if source.Transient != nil {
+		settingsAPIMap["transient"] = *source.Transient
+	}
+	settingsJSON, err := json.Marshal(settingsAPIMap)
+	if err != nil {
+		return err
+	}
+	settingsState, err := cm.SettingsAPIToState(string(settingsJSON))
+	if err != nil {
+		return err
+	}
+	var settingsProperties map[string]interface{}
+	if err := json.Unmarshal([]byte(settingsState), &settingsProperties); err != nil {
+		return err
+	}
+	if len(settingsProperties) > 0 {
+		return d.Set("settings", []interface{}{settingsProperties})
+	}
+	return d.Set("settings", []interface{}{})
 }
