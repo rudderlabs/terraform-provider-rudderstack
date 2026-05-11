@@ -5,12 +5,12 @@ import (
 )
 
 type ConfigMeta struct {
-	APIType            string
-	SkipConfig         bool
-	ConfigSchema       map[string]*schema.Schema
-	Properties         []ConfigProperty
-	SettingsSchema     map[string]*schema.Schema
-	SettingsProperties []ConfigProperty
+	APIType        string
+	SkipConfig     bool
+	ConfigSchema   map[string]*schema.Schema
+	Properties     []ConfigProperty
+	SettingsSchema map[string]*schema.Schema
+	Settings       []ConfigProperty
 }
 
 func (cm *ConfigMeta) StateToAPI(state string) (string, error) {
@@ -42,7 +42,7 @@ func (cm *ConfigMeta) APIToState(api string) (string, error) {
 
 func (cm *ConfigMeta) SettingsStateToAPI(state string) (string, error) {
 	api := "{}"
-	for _, p := range cm.SettingsProperties {
+	for _, p := range cm.Settings {
 		r, err := p.FromStateFunc(api, state)
 		if err != nil {
 			return api, err
@@ -54,7 +54,7 @@ func (cm *ConfigMeta) SettingsStateToAPI(state string) (string, error) {
 
 func (cm *ConfigMeta) SettingsAPIToState(api string) (string, error) {
 	state := "{}"
-	for _, p := range cm.SettingsProperties {
+	for _, p := range cm.Settings {
 		s, err := p.ToStateFunc(state, api)
 		if err != nil {
 			return state, err
