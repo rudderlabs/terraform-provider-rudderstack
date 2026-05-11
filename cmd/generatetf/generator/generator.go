@@ -257,9 +257,7 @@ func generateSettingsBlock(source client.Source, cm *configs.ConfigMeta) (*hclwr
 		settingsAPIMap["geoEnrichmentEnabled"] = *source.GeoEnrichmentEnabled
 	}
 	if source.Transient != nil {
-		// c.Simple("transient", "temporarily_store_events_for_retries") is a direct copy,
-		// so negate here to produce the correct TF value.
-		settingsAPIMap["transient"] = !*source.Transient
+		settingsAPIMap["transient"] = *source.Transient
 	}
 
 	settingsAPIJSON, err := json.Marshal(settingsAPIMap)

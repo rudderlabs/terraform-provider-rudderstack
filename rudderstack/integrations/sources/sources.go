@@ -23,7 +23,7 @@ var defaultSettingsSchema = map[string]*schema.Schema{
 
 var defaultSettingsProperties = []c.ConfigProperty{
 	c.Simple("geoEnrichmentEnabled", "geo_enrichment_enabled"),
-	c.Simple("transient", "temporarily_store_events_for_retries"),
+	c.Negated("transient", "temporarily_store_events_for_retries"),
 }
 
 func init() {

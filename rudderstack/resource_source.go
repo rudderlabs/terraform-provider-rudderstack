@@ -224,7 +224,7 @@ func populateSourceFromState(cm configs.ConfigMeta, source *client.Source, d *sc
 				source.GeoEnrichmentEnabled = &geo
 			}
 			if v, ok := settingsMap["transient"]; ok {
-				transient := !v.(bool)
+				transient := v.(bool)
 				source.Transient = &transient
 			}
 		}
@@ -305,14 +305,12 @@ func storeSettingsToState(cm configs.ConfigMeta, source *client.Source, d *schem
 		return nil
 	}
 
-	// API Transient=true means "don't store for retries", the inverse of temporarily_store_events_for_retries,
-	// so negate before passing to SettingsAPIToState which does a direct field copy.
 	settingsAPIMap := map[string]interface{}{}
 	if source.GeoEnrichmentEnabled != nil {
 		settingsAPIMap["geoEnrichmentEnabled"] = *source.GeoEnrichmentEnabled
 	}
 	if source.Transient != nil {
-		settingsAPIMap["transient"] = !*source.Transient
+		settingsAPIMap["transient"] = *source.Transient
 	}
 	settingsJSON, err := json.Marshal(settingsAPIMap)
 	if err != nil {

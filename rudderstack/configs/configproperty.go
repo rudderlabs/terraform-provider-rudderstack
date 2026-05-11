@@ -203,6 +203,28 @@ func ArrayWithObjects(rootAPIKey, terraformKey string, fields map[string]interfa
 	}
 }
 
+// Negated returns a ConfigProperty that maps an API config key to a terraform config key
+// with boolean inversion in both directions. Use when the API and TF fields are semantic
+// inverses of each other (e.g. API transient=true means TF temporarily_store=false).
+func Negated(apiKey, terraformKey string) ConfigProperty {
+	return ConfigProperty{
+		FromStateFunc: func(config, state string) (string, error) {
+			v := gjson.Get(state, terraformKey)
+			if v.Exists() {
+				return sjson.Set(config, apiKey, !v.Bool())
+			}
+			return config, nil
+		},
+		ToStateFunc: func(state, config string) (string, error) {
+			v := gjson.Get(config, apiKey)
+			if v.Exists() {
+				return sjson.Set(state, terraformKey, !v.Bool())
+			}
+			return state, nil
+		},
+	}
+}
+
 func GetTerraformValue(configValue []interface{}, fields map[string]interface{}) []interface{} {
 	contents := []interface{}{}
 	for _, i := range configValue {
