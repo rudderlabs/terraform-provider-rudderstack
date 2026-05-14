@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"sort"
 	"strings"
@@ -813,6 +814,9 @@ func customerIOAudienceConfigBlock(raw json.RawMessage) (*hclwrite.Block, error)
 	n, ok := v.(float64) // json.Unmarshal decodes numbers as float64
 	if !ok {
 		return nil, fmt.Errorf("customerio_audience audienceId is %T, expected number", v)
+	}
+	if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n {
+		return nil, fmt.Errorf("customerio_audience audienceId %v is not an integer", n)
 	}
 	b := hclwrite.NewBlock("customerio_audience_config", nil)
 	b.Body().SetAttributeValue("audience_id", cty.NumberIntVal(int64(n)))

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -729,8 +730,12 @@ func customerIOAudienceToState(raw json.RawMessage) ([]map[string]interface{}, e
 	if !ok {
 		return nil, fmt.Errorf("destinationConfig audienceId is %T, expected number", v)
 	}
-	// int64(n) is exact for |n| < 2^53 (float64 mantissa). Customer.io audience
-	// IDs are well below that bound in practice.
+	if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n {
+		return nil, fmt.Errorf("destinationConfig audienceId %v is not an integer", n)
+	}
+	// int(n) is exact for |n| < 2^53 (float64 mantissa). Customer.io audience
+	// IDs are well below that bound in practice; the integrality check above
+	// rejects fractional values like 42.5 that would otherwise truncate silently.
 	return []map[string]interface{}{{"audience_id": int(n)}}, nil
 }
 

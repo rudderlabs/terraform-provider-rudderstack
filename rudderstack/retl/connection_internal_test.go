@@ -23,6 +23,8 @@ func TestCustomerIOAudienceToState(t *testing.T) {
 		{name: "json null clears the typed block", in: `null`, wantEmpty: true},
 		{name: "missing audienceId is unsupported", in: `{}`, wantErr: true},
 		{name: "non-numeric audienceId is unsupported", in: `{"audienceId": "abc"}`, wantErr: true},
+		// Reject fractional audienceId — int(42.5) would silently truncate to 42.
+		{name: "fractional audienceId is rejected", in: `{"audienceId": 42.5}`, wantErr: true},
 		{name: "invalid JSON", in: `not json`, wantErr: true},
 	}
 	for _, tc := range cases {
