@@ -103,6 +103,13 @@ func GenerateImportScript(
 		if len(cnxn.DestinationConfig) > 0 && destinationTerraformTypes[cnxn.DestinationID] != "customerio_audience" {
 			continue
 		}
+		// For customerio_audience, mirror the HCL generator's hard-skip when
+		// the typed block can't be decoded.
+		if destinationTerraformTypes[cnxn.DestinationID] == "customerio_audience" && len(cnxn.DestinationConfig) > 0 {
+			if _, err := customerIOAudienceConfigBlock(cnxn.DestinationConfig); err != nil {
+				continue
+			}
+		}
 		lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_retl_connection.%s" "%s"`, retlConnectionName(cnxn), cnxn.ID))
 	}
 
@@ -215,6 +222,15 @@ func GenerateTerraform(
 		if len(cnxn.DestinationConfig) > 0 && dst.terraformType != "customerio_audience" {
 			logger.Printf("skipping RETL connection '%s': destination-specific flow for '%s' is not supported", cnxn.ID, dst.terraformType)
 			continue
+		}
+		// For customerio_audience, the typed block is mandatory: emitting the
+		// connection without it would produce HCL that can't roundtrip on
+		// import. Skip the whole connection if decoding fails.
+		if dst.terraformType == "customerio_audience" && len(cnxn.DestinationConfig) > 0 {
+			if _, err := customerIOAudienceConfigBlock(cnxn.DestinationConfig); err != nil {
+				logger.Printf("skipping RETL connection '%s': cannot decode customerio_audience destinationConfig (%v)", cnxn.ID, err)
+				continue
+			}
 		}
 		b, err := generateRetlConnection(cnxn, src, dst)
 		if err != nil {
@@ -721,15 +737,17 @@ func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *de
 		body.SetAttributeValue("object", cty.StringVal(c.Object))
 	}
 	// The caller has already filtered out destination-specific flows that
-	// aren't Customer.io Audience, so any non-empty destinationConfig here
-	// belongs to a customerio_audience destination.
+	// aren't Customer.io Audience and pre-validated the typed block, so any
+	// non-empty destinationConfig here belongs to a customerio_audience
+	// destination and decodes cleanly. The error path is unreachable in
+	// normal flow; treat it as fail-fast so a future refactor that drops
+	// the pre-check can't silently emit unimportable HCL.
 	if len(c.DestinationConfig) > 0 {
 		b, err := customerIOAudienceConfigBlock(c.DestinationConfig)
 		if err != nil {
-			logger.Printf("RETL connection '%s': skipping customerio_audience_config (%v)", c.ID, err)
-		} else {
-			body.AppendBlock(b)
+			return nil, fmt.Errorf("decode customerio_audience destinationConfig: %w", err)
 		}
+		body.AppendBlock(b)
 	}
 
 	return block, nil

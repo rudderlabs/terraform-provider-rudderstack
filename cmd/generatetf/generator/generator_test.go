@@ -549,6 +549,19 @@ func retlFixtures() ([]retl.RETLSource, []retl.RETLConnection) {
 			SyncBehaviour: retl.SyncBehaviourUpsert,
 			Identifiers:   []retl.Mapping{{From: "x", To: "y"}},
 		},
+		{
+			// Customer.io Audience destination with a malformed destinationConfig
+			// (missing audienceId) — must be hard-skipped rather than emitting an
+			// unimportable connection without the typed block.
+			ID:            "cnxn-skip-cio-malformed",
+			SourceID:      "src-model-1",
+			DestinationID: "id-cio-audience",
+			Schedule:      retl.Schedule{Type: retl.ScheduleTypeManual},
+			SyncBehaviour: retl.SyncBehaviourMirror,
+			Identifiers:   []retl.Mapping{{From: "email", To: "email"}},
+			// audienceId is fractional — caught by the integrality check.
+			DestinationConfig: json.RawMessage(`{"audienceId":42.5}`),
+		},
 	}
 	return sources, connections
 }
@@ -649,6 +662,7 @@ func TestGeneratorTerraform_RETL(t *testing.T) {
 	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-source`)
 	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-dest`)
 	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-unsupported-ds`)
+	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-cio-malformed`)
 }
 
 func TestGeneratorImportScript_RETL(t *testing.T) {

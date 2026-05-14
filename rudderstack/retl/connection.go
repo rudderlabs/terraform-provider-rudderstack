@@ -248,9 +248,11 @@ func connectionSchema() map[string]*schema.Schema {
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"audience_id": {
-						Type:        schema.TypeInt,
-						Required:    true,
-						Description: "Customer.io audience ID.",
+						Type:         schema.TypeInt,
+						Required:     true,
+						ForceNew:     true,
+						ValidateFunc: validation.IntAtLeast(1),
+						Description:  "Customer.io audience ID (positive integer).",
 					},
 				},
 			},
