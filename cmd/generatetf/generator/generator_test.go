@@ -420,8 +420,8 @@ terraform import "rudderstack_connection.cnxn_id-connection-2" "id-connection-2"
 //   - one S3 table source (must be skipped — no _s3_table generator)
 //   - one source with an unsupported sourceType (must be skipped)
 //   - one JSON-Mapper connection wired to the model source + redshift destination
-//   - one destination-specific connection (with destination_config) wired to the
-//     table source + facebook-pixel destination
+//   - one unsupported destination-specific connection (Facebook Pixel — must be skipped)
+//   - one Customer.io Audience connection (typed customerio_audience_config block)
 //   - one connection whose RETL source is the unsupported one (must be skipped)
 //   - one connection whose destination doesn't exist in the generated set (must be skipped)
 func retlFixtures() ([]retl.RETLSource, []retl.RETLConnection) {
@@ -501,7 +501,9 @@ func retlFixtures() ([]retl.RETLSource, []retl.RETLConnection) {
 			CursorColumn: "updated_at",
 		},
 		{
-			ID:            "cnxn-ds-1",
+			// Facebook Pixel (destination-specific flow) — must be skipped:
+			// only Customer.io Audience is supported among destination-specific flows.
+			ID:            "cnxn-skip-unsupported-ds",
 			SourceID:      "src-table-1",
 			DestinationID: "id-facebook-pixel",
 			Enabled:       true,
@@ -514,6 +516,20 @@ func retlFixtures() ([]retl.RETLSource, []retl.RETLConnection) {
 				{From: "email_col", To: "EMAIL"},
 			},
 			DestinationConfig: json.RawMessage(`{"audienceId":"segment_abc123"}`),
+		},
+		{
+			// Customer.io Audience — destinationConfig must be emitted as the
+			// typed customerio_audience_config block, not jsonencode.
+			ID:            "cnxn-cio-1",
+			SourceID:      "src-model-1",
+			DestinationID: "id-cio-audience",
+			Enabled:       true,
+			Schedule:      retl.Schedule{Type: retl.ScheduleTypeManual},
+			SyncBehaviour: retl.SyncBehaviourMirror,
+			Identifiers: []retl.Mapping{
+				{From: "email", To: "email"},
+			},
+			DestinationConfig: json.RawMessage(`{"audienceId":42}`),
 		},
 		{
 			// Connection whose RETL source is the unsupported one — must be skipped.
@@ -553,6 +569,19 @@ func retlEventStreamingFixtures() ([]client.Source, []client.Destination) {
 				Name:   "name-facebook-pixel",
 				Type:   "FACEBOOK_PIXEL",
 				Config: json.RawMessage(`{}`),
+			},
+			{
+				ID:   "id-cio-audience",
+				Name: "name-cio-audience",
+				Type: "CUSTOMERIO_AUDIENCE",
+				// Minimal valid config for the destination_customerio_audience
+				// resource — generator only needs enough to emit *something*.
+				Config: json.RawMessage(`{
+					"siteId":    "site-1",
+					"apiKey":    "k",
+					"appApiKey": "ak",
+					"region":    "US"
+				}`),
 			},
 		}
 }
@@ -606,18 +635,20 @@ func TestGeneratorTerraform_RETL(t *testing.T) {
 	assert.Contains(t, output, `value = "rudderstack"`)
 	assert.Contains(t, output, `type = "identify"`)
 
-	// destination-specific connection: destination_config rendered as jsonencode(...)
-	assert.Contains(t, output, `resource "rudderstack_retl_connection" "retl_cnxn_cnxn-ds-1"`)
-	assert.Contains(t, output, `destination_id = rudderstack_destination_facebook_pixel.dst_id-facebook-pixel.id`)
-	// destination_config sits in its own attribute group after the blocks, so
-	// sync_behaviour is aligned with the top group (destination_id, 14 chars).
-	assert.Contains(t, output, `sync_behaviour = "mirror"`)
-	assert.Contains(t, output, `destination_config = jsonencode({`)
-	assert.Contains(t, output, `audienceId = "segment_abc123"`)
+	// Customer.io Audience connection: typed customerio_audience_config block.
+	assert.Contains(t, output, `resource "rudderstack_retl_connection" "retl_cnxn_cnxn-cio-1"`)
+	assert.Contains(t, output, `destination_id = rudderstack_destination_customerio_audience.dst_id-cio-audience.id`)
+	assert.Contains(t, output, `customerio_audience_config {`)
+	assert.Contains(t, output, `audience_id = 42`)
+	// Raw destination_config / jsonencode must not appear anywhere — the
+	// schema no longer supports it.
+	assert.NotContains(t, output, `destination_config`)
+	assert.NotContains(t, output, `jsonencode`)
 
 	// skipped connections aren't emitted
 	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-source`)
 	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-dest`)
+	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-unsupported-ds`)
 }
 
 func TestGeneratorImportScript_RETL(t *testing.T) {
@@ -631,59 +662,16 @@ func TestGeneratorImportScript_RETL(t *testing.T) {
 	expected := strings.Join([]string{
 		`terraform import "rudderstack_destination_redshift.dst_id-redshift" "id-redshift"`,
 		`terraform import "rudderstack_destination_facebook_pixel.dst_id-facebook-pixel" "id-facebook-pixel"`,
+		`terraform import "rudderstack_destination_customerio_audience.dst_id-cio-audience" "id-cio-audience"`,
 		`terraform import "rudderstack_retl_source_model.retl_src_src-model-1" "src-model-1"`,
 		`terraform import "rudderstack_retl_source_table.retl_src_src-table-1" "src-table-1"`,
 		`terraform import "rudderstack_retl_connection.retl_cnxn_cnxn-jm-1" "cnxn-jm-1"`,
-		`terraform import "rudderstack_retl_connection.retl_cnxn_cnxn-ds-1" "cnxn-ds-1"`,
+		`terraform import "rudderstack_retl_connection.retl_cnxn_cnxn-cio-1" "cnxn-cio-1"`,
 	}, "\n")
 
 	data, err := generator.GenerateImportScript(esSources, esDestinations, nil, retlSources, retlConnections)
 	require.NoError(t, err)
 	assert.Equal(t, expected, string(data))
-}
-
-// TestGeneratorTerraform_RETL_DestinationConfigEdgeCases verifies that
-// connections whose `destinationConfig` is JSON null or a non-object (string,
-// number, array) are still emitted but with the `destination_config` attribute
-// suppressed — the rest of the connection is usable. This guards the loose
-// API contract where the field is an opaque blob.
-func TestGeneratorTerraform_RETL_DestinationConfigEdgeCases(t *testing.T) {
-	_, esDestinations := retlEventStreamingFixtures()
-	retlSources := []retl.RETLSource{
-		{
-			ID: "src-1", Name: "src-1", IsEnabled: true,
-			SourceType: retl.ModelSourceType, SourceDefinitionName: "snowflake",
-			AccountID: "acc-1",
-			Config:    retl.RETLSQLModelConfig{PrimaryKey: "id", Sql: "SELECT 1"},
-		},
-	}
-	mkConn := func(id string, destCfg json.RawMessage) retl.RETLConnection {
-		return retl.RETLConnection{
-			ID: id, SourceID: "src-1", DestinationID: "id-redshift", Enabled: true,
-			Schedule:          retl.Schedule{Type: retl.ScheduleTypeManual},
-			SyncBehaviour:     retl.SyncBehaviourUpsert,
-			Identifiers:       []retl.Mapping{{From: "x", To: "y"}},
-			DestinationConfig: destCfg,
-		}
-	}
-	retlConnections := []retl.RETLConnection{
-		mkConn("cnxn-null", json.RawMessage(`null`)),
-		mkConn("cnxn-string", json.RawMessage(`"opaque-token"`)),
-		mkConn("cnxn-array", json.RawMessage(`[1,2,3]`)),
-		mkConn("cnxn-empty-obj", json.RawMessage(`{}`)),
-	}
-
-	data, err := generator.GenerateTerraform(nil, esDestinations, nil, retlSources, retlConnections)
-	require.NoError(t, err)
-	output := string(data)
-
-	// All four connection blocks should still be present, with their other fields intact.
-	assert.Contains(t, output, `"retl_cnxn_cnxn-null"`)
-	assert.Contains(t, output, `"retl_cnxn_cnxn-string"`)
-	assert.Contains(t, output, `"retl_cnxn_cnxn-array"`)
-	assert.Contains(t, output, `"retl_cnxn_cnxn-empty-obj"`)
-	// But destination_config must NOT have been emitted for any of them.
-	assert.NotContains(t, output, "destination_config")
 }
 
 // TestGeneratorTerraform_RETL_NilSourceConfig verifies that a RETL source with

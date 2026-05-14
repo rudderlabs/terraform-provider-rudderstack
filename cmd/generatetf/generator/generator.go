@@ -51,6 +51,7 @@ func GenerateImportScript(
 
 	foundSources := map[string]bool{}
 	foundDestinations := map[string]bool{}
+	destinationTerraformTypes := map[string]string{} // destination ID -> terraform type
 	foundRetlSources := map[string]bool{}
 
 	for _, src := range sources {
@@ -65,6 +66,7 @@ func GenerateImportScript(
 		t, cm := configMeta(destinationConfigs, dst.Type)
 		if cm != nil {
 			foundDestinations[dst.ID] = true
+			destinationTerraformTypes[dst.ID] = t
 			lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_destination_%s.%s" "%s"`, t, destinationName(dst), dst.ID))
 		}
 	}
@@ -92,6 +94,12 @@ func GenerateImportScript(
 			continue
 		}
 		if !foundDestinations[cnxn.DestinationID] {
+			continue
+		}
+		// Skip unsupported destination-specific flows — these are skipped in
+		// the HCL generator too, so we mustn't emit an import line for a
+		// resource that doesn't exist.
+		if len(cnxn.DestinationConfig) > 0 && destinationTerraformTypes[cnxn.DestinationID] != "customerio_audience" {
 			continue
 		}
 		lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_retl_connection.%s" "%s"`, retlConnectionName(cnxn), cnxn.ID))
@@ -197,6 +205,14 @@ func GenerateTerraform(
 		}
 		if !okd {
 			logger.Printf("could not generate resource block for RETL connection '%s': destination '%s' is not supported", cnxn.ID, cnxn.DestinationID)
+			continue
+		}
+		// Customer.io Audience is the only destination-specific flow this
+		// resource exposes as a typed block. Any other destination with a
+		// non-empty destinationConfig is a VDM-next flow we don't support —
+		// skip rather than emit a connection we can't represent.
+		if len(cnxn.DestinationConfig) > 0 && dst.terraformType != "customerio_audience" {
+			logger.Printf("skipping RETL connection '%s': destination-specific flow for '%s' is not supported", cnxn.ID, dst.terraformType)
 			continue
 		}
 		b, err := generateRetlConnection(cnxn, src, dst)
@@ -703,14 +719,15 @@ func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *de
 	if c.Object != "" {
 		body.SetAttributeValue("object", cty.StringVal(c.Object))
 	}
+	// The caller has already filtered out destination-specific flows that
+	// aren't Customer.io Audience, so any non-empty destinationConfig here
+	// belongs to a customerio_audience destination.
 	if len(c.DestinationConfig) > 0 {
-		tokens, err := destinationConfigJsonencodeTokens(c.DestinationConfig)
+		b, err := customerIOAudienceConfigBlock(c.DestinationConfig)
 		if err != nil {
-			// Log and omit the attribute — the rest of the connection is still
-			// usable. Don't fail the whole generation over an opaque blob.
-			logger.Printf("RETL connection '%s': skipping destination_config (%v)", c.ID, err)
+			logger.Printf("RETL connection '%s': skipping customerio_audience_config (%v)", c.ID, err)
 		} else {
-			body.SetAttributeRaw("destination_config", tokens)
+			body.AppendBlock(b)
 		}
 	}
 
@@ -780,45 +797,24 @@ func retlEventBlock(e *retl.Event) *hclwrite.Block {
 	return b
 }
 
-// destinationConfigJsonencodeTokens renders an opaque destinationConfig blob as
-// a `jsonencode({...})` call so the generated HCL stays readable. Returns an
-// error when the payload is JSON null, or when the top-level value isn't a
-// JSON object — both are valid JSON but neither produces useful HCL
-// (jsonencode(null) / jsonencode("foo") would round-trip the wrong shape
-// through the resource's destination_config string field). The caller is
-// expected to log the error and omit the attribute; the rest of the
-// connection block is still emitted.
-func destinationConfigJsonencodeTokens(raw json.RawMessage) (hclwrite.Tokens, error) {
-	var parsed interface{}
+// customerIOAudienceConfigBlock builds a `customerio_audience_config` block
+// from the connection's destinationConfig JSON. Returns an error if the JSON
+// is missing/invalid or audienceId is absent or not a number — the caller
+// logs and skips the block in that case.
+func customerIOAudienceConfigBlock(raw json.RawMessage) (*hclwrite.Block, error) {
+	var parsed map[string]interface{}
 	if err := json.Unmarshal(raw, &parsed); err != nil {
 		return nil, fmt.Errorf("destinationConfig is not valid JSON: %w", err)
 	}
-	if parsed == nil {
-		return nil, fmt.Errorf("destinationConfig is JSON null")
-	}
-	m, ok := parsed.(map[string]interface{})
+	v, ok := parsed["audienceId"]
 	if !ok {
-		return nil, fmt.Errorf("destinationConfig top-level value is %T, expected JSON object", parsed)
+		return nil, fmt.Errorf("customerio_audience destinationConfig missing audienceId")
 	}
-	if len(m) == 0 {
-		// {} is technically a valid object, but emitting `jsonencode({})` is
-		// noise — the resource would set the field to a literal empty JSON
-		// string, which the schema's StateFunc already normalises away. Treat
-		// it the same as null and omit the attribute.
-		return nil, fmt.Errorf("destinationConfig is an empty object")
+	n, ok := v.(float64) // json.Unmarshal decodes numbers as float64
+	if !ok {
+		return nil, fmt.Errorf("customerio_audience audienceId is %T, expected number", v)
 	}
-	inner := hclwrite.TokensForValue(ctyValue(parsed))
-	// Suppress the leading whitespace hclwrite would otherwise insert before
-	// the opening brace of the inner value, so the output reads `jsonencode({`
-	// and not `jsonencode( {`.
-	if len(inner) > 0 {
-		inner[0].SpacesBefore = 0
-	}
-	out := hclwrite.Tokens{
-		&hclwrite.Token{Type: hclsyntax.TokenIdent, Bytes: []byte("jsonencode")},
-		&hclwrite.Token{Type: hclsyntax.TokenOParen, Bytes: []byte("(")},
-	}
-	out = append(out, inner...)
-	out = append(out, &hclwrite.Token{Type: hclsyntax.TokenCParen, Bytes: []byte(")")})
-	return out, nil
+	b := hclwrite.NewBlock("customerio_audience_config", nil)
+	b.Body().SetAttributeValue("audience_id", cty.NumberIntVal(int64(n)))
+	return b, nil
 }

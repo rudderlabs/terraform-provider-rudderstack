@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -18,15 +17,17 @@ import (
 
 // ResourceConnection returns the schema for `rudderstack_retl_connection`.
 //
-// Flow detection (JSON Mapper / Object Mapping / Destination-specific) happens
+// Flow detection (JSON Mapper / Object Mapping / Customer.io Audience) happens
 // server-side based on the destination definition; this resource only sends
 // the flat schema and lets the API assemble the internal config. ForceNew on
 // `identifiers` and `constants` is conditional on the detected flow and is
 // applied via CustomizeDiff using the same field-presence signals the API uses.
+// Customer.io Audience is the only destination-specific flow currently exposed
+// as a typed block; other destination-specific flows are not supported.
 func ResourceConnection() *schema.Resource {
 	return &schema.Resource{
 		Description: "A RETL connection between a RETL source and a destination. " +
-			"Flow type (JSON Mapper, Object mapping, Destination-specific) is " +
+			"Flow type (JSON Mapper, Object mapping, Customer.io Audience) is " +
 			"determined by the destination definition.",
 		Schema:        connectionSchema(),
 		CreateContext: createConnection,
@@ -238,14 +239,21 @@ func connectionSchema() map[string]*schema.Schema {
 			ForceNew:    true,
 			Description: "Destination entity for Object Mapping flows (e.g. `Contact`, `Lead`).",
 		},
-		"destination_config": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			ForceNew:         true,
-			ValidateFunc:     validation.StringIsJSON,
-			StateFunc:        normalizeJSON,
-			DiffSuppressFunc: suppressEquivalentJSON,
-			Description:      "Destination-specific configuration as a JSON-encoded string.",
+		"customerio_audience_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			ForceNew: true,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"audience_id": {
+						Type:        schema.TypeInt,
+						Required:    true,
+						Description: "Customer.io audience ID.",
+					},
+				},
+			},
+			Description: "Typed configuration for Customer.io Audience destinations.",
 		},
 		"created_at": {
 			Type:     schema.TypeString,
@@ -264,8 +272,8 @@ func connectionSchema() map[string]*schema.Schema {
 // of on apply.
 //
 // Flow is inferred from the same signals the server uses: `object` set =>
-// Object Mapping, `destination_config` set => Destination-specific, otherwise
-// => JSON Mapper.
+// Object Mapping, `customerio_audience_config` set => Customer.io Audience
+// (destination-specific), otherwise => JSON Mapper.
 func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	if cursor := d.Get("cursor_column").(string); cursor != "" {
 		if sb := d.Get("sync_behaviour").(string); sb != "" && sb != "upsert" {
@@ -279,9 +287,9 @@ func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interf
 	}
 
 	objectSet := d.Get("object").(string) != ""
-	destConfigSet := d.Get("destination_config").(string) != ""
+	destSpecific := hasCustomerIOAudienceConfig(d)
 
-	identifiersForceNew, constantsForceNew := flowForceNewRules(objectSet, destConfigSet)
+	identifiersForceNew, constantsForceNew := flowForceNewRules(objectSet, destSpecific)
 
 	if identifiersForceNew && d.HasChange("identifiers") {
 		if err := d.ForceNew("identifiers"); err != nil {
@@ -298,12 +306,12 @@ func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interf
 
 // flowForceNewRules returns (identifiersForceNew, constantsForceNew) for the
 // detected flow.
-func flowForceNewRules(objectSet, destConfigSet bool) (identifiers, constants bool) {
+func flowForceNewRules(objectSet, destSpecific bool) (identifiers, constants bool) {
 	switch {
 	case objectSet:
 		return true, true // Object Mapping
-	case destConfigSet:
-		return false, true // Destination-specific
+	case destSpecific:
+		return false, true // Destination-specific (Customer.io Audience)
 	default:
 		return true, false // JSON Mapper
 	}
@@ -417,8 +425,12 @@ func buildCreateRequest(d *schema.ResourceData) (*retl.CreateRETLConnectionReque
 	if v := d.Get("object").(string); v != "" {
 		req.Object = v
 	}
-	if v := d.Get("destination_config").(string); v != "" {
-		req.DestinationConfig = json.RawMessage(v)
+	if hasCustomerIOAudienceConfig(d) {
+		cfg, err := customerIOAudienceConfigJSON(d)
+		if err != nil {
+			return nil, err
+		}
+		req.DestinationConfig = cfg
 	}
 	return req, nil
 }
@@ -481,10 +493,19 @@ func storeConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) erro
 		}
 	}
 
-	// Always set, even when empty, so state can be cleared if the server
-	// returns an empty value (otherwise Terraform would see perpetual diffs
-	// against the stale local value).
-	if err := d.Set("destination_config", string(c.DestinationConfig)); err != nil {
+	// The API returns destinationConfig as JSON for destination-specific flows.
+	// Customer.io Audience is the only typed flow we support; an unsupported
+	// destination-specific connection (imported from elsewhere) surfaces as a
+	// decode error so the user sees a clear "not supported" signal at refresh.
+	if len(c.DestinationConfig) > 0 {
+		typed, err := customerIOAudienceToState(c.DestinationConfig)
+		if err != nil {
+			return err
+		}
+		if err := d.Set("customerio_audience_config", typed); err != nil {
+			return err
+		}
+	} else if err := d.Set("customerio_audience_config", nil); err != nil {
 		return err
 	}
 	if c.CreatedAt != nil {
@@ -649,40 +670,68 @@ func constantsToState(cs []retl.Constant) []map[string]interface{} {
 	return out
 }
 
-// normalizeJSON returns a canonical encoding of the input JSON (sorted keys,
-// no extraneous whitespace). Returns the input unchanged if it isn't valid
-// JSON — validation.StringIsJSON catches that path separately.
-func normalizeJSON(v interface{}) string {
-	s, ok := v.(string)
-	if !ok || s == "" {
-		return ""
-	}
-	var parsed interface{}
-	if err := json.Unmarshal([]byte(s), &parsed); err != nil {
-		return s
-	}
-	out, err := json.Marshal(parsed)
-	if err != nil {
-		return s
-	}
-	return string(out)
+// hasCustomerIOAudienceConfig reports whether the `customerio_audience_config`
+// block is populated in state. Used both by flow detection in CustomizeDiff
+// and by the read path to decide where to route the server's destinationConfig.
+func hasCustomerIOAudienceConfig(d resourceGetter) bool {
+	raw, ok := d.Get("customerio_audience_config").([]interface{})
+	return ok && len(raw) > 0 && raw[0] != nil
 }
 
-// suppressEquivalentJSON returns true when two JSON strings are semantically
-// equal, so reformatting from the API (key ordering, whitespace, null vs "")
-// does not produce a perpetual diff.
-func suppressEquivalentJSON(_, oldVal, newVal string, _ *schema.ResourceData) bool {
-	if oldVal == newVal {
-		return true
+// resourceGetter is the subset of *schema.ResourceData / *schema.ResourceDiff
+// used by helpers that need to read state without caring which one they got.
+type resourceGetter interface {
+	Get(string) interface{}
+}
+
+// customerIOAudienceConfigJSON packs the typed customerio_audience_config
+// block into the destinationConfig JSON shape the API expects.
+// Caller must check hasCustomerIOAudienceConfig(d) first.
+func customerIOAudienceConfigJSON(d *schema.ResourceData) (json.RawMessage, error) {
+	raw := d.Get("customerio_audience_config").([]interface{})
+	m := raw[0].(map[string]interface{})
+	audienceID, ok := m["audience_id"].(int)
+	if !ok {
+		// Defensive: schema declares audience_id as TypeInt so the SDK should
+		// always hand us an int. Surface the divergence loudly rather than
+		// silently POST `{"audienceId": 0}`.
+		return nil, fmt.Errorf("customerio_audience_config.audience_id has unexpected type %T", m["audience_id"])
 	}
-	var o, n interface{}
-	if err := json.Unmarshal([]byte(oldVal), &o); err != nil {
-		return false
+	out, err := json.Marshal(map[string]any{"audienceId": audienceID})
+	if err != nil {
+		return nil, fmt.Errorf("encode customerio_audience_config: %w", err)
 	}
-	if err := json.Unmarshal([]byte(newVal), &n); err != nil {
-		return false
+	return out, nil
+}
+
+// customerIOAudienceToState decodes a Customer.io Audience destinationConfig
+// JSON blob into the typed block shape expected by d.Set. Returns (nil, nil)
+// when the payload is JSON null — that's the server's way of saying "no
+// destination-specific config", not an error. Returns an error when the blob
+// is a non-null shape without a numeric `audienceId` — that signals an
+// unsupported destination-specific connection (e.g. imported from a
+// destination that isn't Customer.io Audience), which this resource does not
+// represent.
+func customerIOAudienceToState(raw json.RawMessage) ([]map[string]interface{}, error) {
+	var parsed map[string]interface{}
+	if err := json.Unmarshal(raw, &parsed); err != nil {
+		return nil, fmt.Errorf("decode customerio_audience destinationConfig: %w", err)
 	}
-	return reflect.DeepEqual(o, n)
+	if parsed == nil {
+		// JSON `null` unmarshalls into a nil map — treat as "no typed block".
+		return nil, nil
+	}
+	v, ok := parsed["audienceId"]
+	if !ok {
+		return nil, fmt.Errorf("destinationConfig has no audienceId — only Customer.io Audience destination-specific connections are supported")
+	}
+	n, ok := v.(float64) // json.Unmarshal decodes JSON numbers as float64
+	if !ok {
+		return nil, fmt.Errorf("destinationConfig audienceId is %T, expected number", v)
+	}
+	// int64(n) is exact for |n| < 2^53 (float64 mantissa). Customer.io audience
+	// IDs are well below that bound in practice.
+	return []map[string]interface{}{{"audience_id": int(n)}}, nil
 }
 
 func eventFromState(d *schema.ResourceData) (*retl.Event, bool) {
