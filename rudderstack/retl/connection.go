@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -190,20 +192,29 @@ func connectionSchema() map[string]*schema.Schema {
 			Optional: true,
 			ForceNew: true,
 			MaxItems: 1,
+			// terraform-plugin-sdk v2: ForceNew on a TypeList parent only fires when the
+			// list's element count changes — nested-field edits (e.g. event.0.type
+			// flipping from "identify" to "track") plan as in-place updates and are
+			// silently dropped because `event` is excluded from buildUpdateRequest.
+			// Mirror ForceNew onto every inner field to force destroy+create on any
+			// change.
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"type": {
 						Type:         schema.TypeString,
 						Required:     true,
+						ForceNew:     true,
 						ValidateFunc: validation.StringInSlice([]string{"identify", "track"}, false),
 					},
 					"name": {
 						Type:     schema.TypeString,
 						Optional: true,
+						ForceNew: true,
 					},
 					"name_column": {
 						Type:     schema.TypeString,
 						Optional: true,
+						ForceNew: true,
 					},
 				},
 			},
@@ -271,8 +282,8 @@ func connectionSchema() map[string]*schema.Schema {
 
 // customizeConnectionDiff applies flow-dependent ForceNew on `identifiers` and
 // `constants`, and rejects locally-detectable invalid combinations (cursor_column
-// only with sync_behaviour=upsert) so users see the error at plan time instead
-// of on apply.
+// only with sync_behaviour=upsert, JSON Mapper identifier targets) so users see
+// the error at plan time instead of on apply.
 //
 // Flow is inferred from the same signals the server uses: `object` set =>
 // Object Mapping, `customerio_audience_config` set => Customer.io Audience
@@ -284,13 +295,23 @@ func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interf
 		}
 	}
 
+	objectSet := d.Get("object").(string) != ""
+	destSpecific := hasCustomerIOAudienceConfig(d)
+
+	// JSON Mapper restricts identifiers[*].to to {user_id, anonymous_id}. The
+	// server rejects other values with a confusing generic error at apply time;
+	// surface the same rule at plan time so users can fix the .tf without an
+	// API round-trip. Runs on both create and update.
+	if !objectSet && !destSpecific {
+		if err := validateJSONMapperIdentifierTargets(d); err != nil {
+			return err
+		}
+	}
+
 	if d.Id() == "" {
 		// Brand-new resource — ForceNew is irrelevant on create.
 		return nil
 	}
-
-	objectSet := d.Get("object").(string) != ""
-	destSpecific := hasCustomerIOAudienceConfig(d)
 
 	identifiersForceNew, constantsForceNew := flowForceNewRules(objectSet, destSpecific)
 
@@ -302,6 +323,38 @@ func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interf
 	if constantsForceNew && d.HasChange("constants") {
 		if err := d.ForceNew("constants"); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+// validJSONMapperIdentifierTargets enumerates the only `identifiers[*].to`
+// values the server accepts for JSON Mapper. Kept in sync with the server-side
+// IDENTIFIER_TARGETS constant in
+// rudder-config-backend/.../api-gateway/connection-config/constants.ts.
+var validJSONMapperIdentifierTargets = []string{"user_id", "anonymous_id"}
+
+// validateJSONMapperIdentifierTargets enforces the JSON Mapper rule at plan
+// time. Caller must already have determined this is the JSON Mapper flow
+// (`object` unset, no customerio_audience_config). Accepts resourceGetter so
+// the helper is usable from both schema.ResourceDiff and schema.ResourceData,
+// and trivially testable with TestResourceData.
+func validateJSONMapperIdentifierTargets(d resourceGetter) error {
+	raw, ok := d.Get("identifiers").([]interface{})
+	if !ok {
+		return nil
+	}
+	for i, item := range raw {
+		m, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		to, _ := m["to"].(string)
+		if !slices.Contains(validJSONMapperIdentifierTargets, to) {
+			return fmt.Errorf(
+				`identifiers[%d].to must be one of [%s] for JSON Mapper flow (got %q); set "object" to use Object Mapping or change identifiers[%d].to to a valid value`,
+				i, strings.Join(validJSONMapperIdentifierTargets, ", "), to, i,
+			)
 		}
 	}
 	return nil

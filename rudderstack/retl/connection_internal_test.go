@@ -2,8 +2,15 @@ package retl
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 )
+
+// stubGetter satisfies the resourceGetter interface for unit-testing helpers
+// that don't need a full *schema.ResourceData / *schema.ResourceDiff.
+type stubGetter map[string]interface{}
+
+func (s stubGetter) Get(key string) interface{} { return s[key] }
 
 func TestCustomerIOAudienceToState(t *testing.T) {
 	cases := []struct {
@@ -47,6 +54,76 @@ func TestCustomerIOAudienceToState(t *testing.T) {
 			}
 			if v, _ := got[0]["audience_id"].(int); v != tc.wantID {
 				t.Errorf("audience_id = %v, want %v", v, tc.wantID)
+			}
+		})
+	}
+}
+
+func TestValidateJSONMapperIdentifierTargets(t *testing.T) {
+	cases := []struct {
+		name           string
+		identifiers    []interface{}
+		wantErr        bool
+		wantSubstrings []string
+	}{
+		{
+			name: "user_id is accepted",
+			identifiers: []interface{}{
+				map[string]interface{}{"from": "email", "to": "user_id"},
+			},
+		},
+		{
+			name: "anonymous_id is accepted",
+			identifiers: []interface{}{
+				map[string]interface{}{"from": "anon", "to": "anonymous_id"},
+			},
+		},
+		{
+			name: "mixed valid targets accepted",
+			identifiers: []interface{}{
+				map[string]interface{}{"from": "a", "to": "user_id"},
+				map[string]interface{}{"from": "b", "to": "anonymous_id"},
+			},
+		},
+		{
+			name: "destination column rejected with both valid values in message",
+			identifiers: []interface{}{
+				map[string]interface{}{"from": "email", "to": "email"},
+			},
+			wantErr:        true,
+			wantSubstrings: []string{`identifiers[0].to`, "user_id", "anonymous_id", `got "email"`, "JSON Mapper"},
+		},
+		{
+			name: "error reports the index of the offending entry",
+			identifiers: []interface{}{
+				map[string]interface{}{"from": "a", "to": "user_id"},
+				map[string]interface{}{"from": "b", "to": "external_id"},
+			},
+			wantErr:        true,
+			wantSubstrings: []string{`identifiers[1].to`, `got "external_id"`},
+		},
+		{
+			name:        "empty identifiers list passes (presence is enforced elsewhere by MinItems)",
+			identifiers: []interface{}{},
+		},
+		{
+			name:        "nil identifiers passes (presence is enforced elsewhere)",
+			identifiers: nil,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := validateJSONMapperIdentifierTargets(stubGetter{"identifiers": tc.identifiers})
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("err=%v, wantErr=%v", err, tc.wantErr)
+			}
+			if !tc.wantErr {
+				return
+			}
+			for _, sub := range tc.wantSubstrings {
+				if !strings.Contains(err.Error(), sub) {
+					t.Errorf("error %q missing expected substring %q", err.Error(), sub)
+				}
 			}
 		})
 	}

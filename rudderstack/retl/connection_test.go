@@ -197,6 +197,197 @@ func TestResourceConnection_404RemovesFromState(t *testing.T) {
 	svc.AssertExpectations(t)
 }
 
+// JSON Mapper (no object, no customerio_audience_config) restricts
+// identifiers[*].to to user_id / anonymous_id. The server enforces the rule
+// with a generic apply-time error; customizeConnectionDiff surfaces it at plan
+// time so users never hit the API for an obviously-invalid value.
+func TestResourceConnection_JSONMapperRejectsInvalidIdentifierTarget(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-1"
+						sync_behaviour = "upsert"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
+					}
+				`,
+				ExpectError: regexpMatches(
+					`identifiers\[0\]\.to must be one of \[user_id, anonymous_id\] for JSON Mapper flow \(got "email"\)`,
+				),
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
+}
+
+// Object Mapping (object set) accepts arbitrary identifier targets — the
+// JSON Mapper rule must not apply to this flow.
+func TestResourceConnection_ObjectMappingAcceptsArbitraryIdentifierTarget(t *testing.T) {
+	svc := &mockService{}
+	enabled := true
+	createReq := &iacretl.CreateRETLConnectionRequest{
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-1",
+		Enabled:       &enabled,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers:   []iacretl.Mapping{{From: "email", To: "email"}},
+		Object:        "Contact",
+	}
+	created := &iacretl.RETLConnection{
+		ID:            "conn-om",
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-1",
+		Enabled:       true,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers:   []iacretl.Mapping{{From: "email", To: "email"}},
+		Object:        "Contact",
+	}
+	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-om").Return(created, nil)
+	svc.On("DeleteConnection", mock.Anything, "conn-om").Return(nil).Once()
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-1"
+						sync_behaviour = "upsert"
+						object         = "Contact"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
+					}
+				`,
+			},
+		},
+	})
+	svc.AssertExpectations(t)
+}
+
+// Changing event.type must force destroy+create. Parent-block ForceNew alone
+// doesn't catch this in terraform-plugin-sdk v2 — each nested field needs its
+// own ForceNew. Different IDs across the two steps prove the resource was
+// recreated rather than updated in place.
+func TestResourceConnection_EventNestedFieldsAreForceNew(t *testing.T) {
+	svc := &mockService{}
+	enabled := true
+
+	firstReq := &iacretl.CreateRETLConnectionRequest{
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-1",
+		Enabled:       &enabled,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
+		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
+	}
+	firstCreated := &iacretl.RETLConnection{
+		ID:            "conn-ev-1",
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-1",
+		Enabled:       true,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
+		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
+	}
+	secondReq := &iacretl.CreateRETLConnectionRequest{
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-1",
+		Enabled:       &enabled,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
+		Event:         &iacretl.Event{Type: iacretl.EventTypeTrack, Name: "user_synced"},
+	}
+	secondCreated := &iacretl.RETLConnection{
+		ID:            "conn-ev-2",
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-1",
+		Enabled:       true,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
+		Event:         &iacretl.Event{Type: iacretl.EventTypeTrack, Name: "user_synced"},
+	}
+	svc.On("CreateConnection", mock.Anything, firstReq).Return(firstCreated, nil).Once()
+	svc.On("CreateConnection", mock.Anything, secondReq).Return(secondCreated, nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-ev-1").Return(firstCreated, nil)
+	svc.On("GetConnection", mock.Anything, "conn-ev-2").Return(secondCreated, nil)
+	svc.On("DeleteConnection", mock.Anything, "conn-ev-1").Return(nil).Once()
+	svc.On("DeleteConnection", mock.Anything, "conn-ev-2").Return(nil).Once()
+
+	cfg := func(eventBlock string) string {
+		return fmt.Sprintf(`
+			provider "rudderstack" { access_token = "tok" }
+			resource "rudderstack_retl_connection" "example" {
+				source_id      = "retl-src-1"
+				destination_id = "dest-1"
+				sync_behaviour = "upsert"
+				schedule { type = "manual" }
+				identifiers {
+					from = "email"
+					to   = "user_id"
+				}
+				%s
+			}
+		`, eventBlock)
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: cfg("event {\n  type = \"identify\"\n}"),
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
+					if err != nil {
+						return err
+					}
+					return checkAll(map[string]string{
+						"id":           "conn-ev-1",
+						"event.0.type": "identify",
+					}, attrs)
+				},
+			},
+			{
+				Config: cfg("event {\n  type = \"track\"\n  name = \"user_synced\"\n}"),
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
+					if err != nil {
+						return err
+					}
+					// New ID proves destroy+create: nested-field ForceNew
+					// promoted the in-place update to a replacement.
+					return checkAll(map[string]string{
+						"id":           "conn-ev-2",
+						"event.0.type": "track",
+						"event.0.name": "user_synced",
+					}, attrs)
+				},
+			},
+		},
+	})
+	svc.AssertExpectations(t)
+}
+
 func TestResourceConnection_CursorColumnRequiresUpsert(t *testing.T) {
 	svc := &mockService{}
 	resource.UnitTest(t, resource.TestCase{
