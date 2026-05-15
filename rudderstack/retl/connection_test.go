@@ -280,6 +280,63 @@ func TestResourceConnection_BasicScheduleRequiresEveryMinutes(t *testing.T) {
 	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
+// Refresh against an API response that has destination-specific config must
+// fail loudly on the generic resource — otherwise users with an existing
+// customerio_audience connection imported under the generic type would silently
+// lose their audience config from state.
+func TestResourceConnection_RefusesDestinationSpecificConfig(t *testing.T) {
+	svc := &mockService{}
+	conn := &iacretl.RETLConnection{
+		ID:                "conn-bad",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourMirror,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		DestinationConfig: []byte(`{"audienceId":42}`),
+	}
+	svc.On("GetConnection", mock.Anything, "conn-bad").Return(conn, nil).Once()
+
+	r := retl.ResourceConnection()
+	d := r.TestResourceData()
+	d.SetId("conn-bad")
+
+	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+	require.True(t, diags.HasError(), "expected refresh to error on destination-specific config")
+	require.Regexp(t,
+		`rudderstack_retl_connection_customerio_audience`,
+		diags[0].Summary,
+	)
+	svc.AssertExpectations(t)
+}
+
+// Regression: JSON-`null` destinationConfig in the API response must NOT error
+// on the generic resource — `null` is the server's "no destination-specific
+// config" signal and should be treated as a no-op.
+func TestResourceConnection_NullDestinationConfigOnRead(t *testing.T) {
+	svc := &mockService{}
+	conn := &iacretl.RETLConnection{
+		ID:                "conn-null",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-1",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourFull,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "user_id"}},
+		DestinationConfig: []byte(`null`),
+	}
+	svc.On("GetConnection", mock.Anything, "conn-null").Return(conn, nil).Once()
+
+	r := retl.ResourceConnection()
+	d := r.TestResourceData()
+	d.SetId("conn-null")
+
+	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+	require.False(t, diags.HasError(), "diags=%v", diags)
+	svc.AssertExpectations(t)
+}
+
 func TestResourceConnection_Delete404IsTreatedAsAlreadyGone(t *testing.T) {
 	svc := &mockService{}
 	svc.On("DeleteConnection", mock.Anything, "conn-gone").
