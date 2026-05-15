@@ -124,6 +124,12 @@ func readCustomerIOAudienceConnection(ctx context.Context, d *schema.ResourceDat
 // comes back without a usable destinationConfig. Returns a Warning (not an
 // Error) so refresh still succeeds — silently zeroing audience_id would
 // produce a never-reconcilable plan (ForceNew + IntAtLeast(1)).
+//
+// The "prior value preserved" framing in the message is accurate after a
+// successful Create / Update / earlier Read populated state. On a fresh
+// `terraform import` of a corrupted connection, the prior value is the SDK
+// zero (audience_id=0) and the next plan will compute a destroy+create
+// against the user's config — which is the correct recovery action.
 func warnMissingCustomerIOAudienceConfig(connID, reason string) diag.Diagnostic {
 	return diag.Diagnostic{
 		Severity: diag.Warning,
@@ -131,8 +137,9 @@ func warnMissingCustomerIOAudienceConfig(connID, reason string) diag.Diagnostic 
 		Detail: fmt.Sprintf(
 			"The server returned a connection with no audienceId (%s). "+
 				"This is an inconsistent server state — audienceId is mandatory for Customer.io Audience destinations. "+
-				"Terraform left the prior audience_id value in state untouched. "+
-				"Verify the connection in the RudderStack UI or recreate it with a valid audience_id.",
+				"Terraform left audience_id in state at its prior value (0 if this is a fresh import). "+
+				"The next plan will reconcile against your configuration; for a freshly imported corrupted connection that means a destroy+create. "+
+				"Verify the connection in the RudderStack UI before applying.",
 			reason,
 		),
 	}

@@ -496,39 +496,62 @@ func TestResourceConnection_RefusesDestinationSpecificConfig(t *testing.T) {
 
 	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
 	require.True(t, diags.HasError(), "expected refresh to error on destination-specific config")
+	// Match the stable pattern in the message rather than a specific example
+	// destination — the example roster will grow as we add typed resources.
 	require.Regexp(t,
-		`rudderstack_retl_connection_customerio_audience`,
+		`rudderstack_retl_connection_<destination>`,
 		diags[0].Summary,
 	)
 	svc.AssertExpectations(t)
 }
 
-// Malformed JSON in destinationConfig must surface a clear decode error
-// rather than being silently treated as "no destination-specific config".
-// A null check that swallowed unmarshal errors would let bogus payloads slip
-// through and silently drop the API state from terraform's view.
-func TestResourceConnection_MalformedDestinationConfigOnRead(t *testing.T) {
-	svc := &mockService{}
-	conn := &iacretl.RETLConnection{
-		ID:                "conn-broken",
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-1",
-		Enabled:           true,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourFull,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "user_id"}},
-		DestinationConfig: []byte(`{"broken`),
+// Non-null, non-empty destinationConfig must never silently slip through the
+// generic resource. Any payload that decodes to a non-nil value is a
+// destination-specific flow that this resource can't represent; any payload
+// that fails to decode is a malformed signal worth surfacing loudly. Both
+// cases produce an error diagnostic, but with different shapes so the user
+// sees the underlying cause.
+func TestResourceConnection_DestinationConfigOnRead_NonNullAndMalformed(t *testing.T) {
+	cases := []struct {
+		name              string
+		destinationConfig []byte
+		wantRegex         string
+	}{
+		// Malformed payloads — surface a decode error.
+		{name: "truncated object", destinationConfig: []byte(`{"broken`), wantRegex: `decode destinationConfig`},
+		{name: "whitespace only", destinationConfig: []byte(`   `), wantRegex: `decode destinationConfig`},
+		// Well-formed but non-null payloads of any shape — typed-resource signal.
+		{name: "empty object", destinationConfig: []byte(`{}`), wantRegex: `rudderstack_retl_connection_<destination>`},
+		{name: "array", destinationConfig: []byte(`[]`), wantRegex: `rudderstack_retl_connection_<destination>`},
+		{name: "scalar number", destinationConfig: []byte(`42`), wantRegex: `rudderstack_retl_connection_<destination>`},
+		{name: "scalar string", destinationConfig: []byte(`"hello"`), wantRegex: `rudderstack_retl_connection_<destination>`},
+		{name: "scalar bool", destinationConfig: []byte(`true`), wantRegex: `rudderstack_retl_connection_<destination>`},
 	}
-	svc.On("GetConnection", mock.Anything, "conn-broken").Return(conn, nil).Once()
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			svc := &mockService{}
+			conn := &iacretl.RETLConnection{
+				ID:                "conn-x",
+				SourceID:          "retl-src-1",
+				DestinationID:     "dest-1",
+				Enabled:           true,
+				Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+				SyncBehaviour:     iacretl.SyncBehaviourFull,
+				Identifiers:       []iacretl.Mapping{{From: "email", To: "user_id"}},
+				DestinationConfig: tc.destinationConfig,
+			}
+			svc.On("GetConnection", mock.Anything, "conn-x").Return(conn, nil).Once()
 
-	r := retl.ResourceConnection()
-	d := r.TestResourceData()
-	d.SetId("conn-broken")
+			r := retl.ResourceConnection()
+			d := r.TestResourceData()
+			d.SetId("conn-x")
 
-	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
-	require.True(t, diags.HasError(), "expected refresh to error on malformed destinationConfig")
-	require.Regexp(t, `decode destinationConfig`, diags[0].Summary)
-	svc.AssertExpectations(t)
+			diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+			require.True(t, diags.HasError(), "expected refresh to error on destinationConfig=%s", string(tc.destinationConfig))
+			require.Regexp(t, tc.wantRegex, diags[0].Summary)
+			svc.AssertExpectations(t)
+		})
+	}
 }
 
 // Regression: JSON-`null` destinationConfig in the API response must NOT error
