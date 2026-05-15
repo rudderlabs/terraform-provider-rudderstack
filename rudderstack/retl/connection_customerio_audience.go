@@ -96,24 +96,20 @@ func readCustomerIOAudienceConnection(ctx context.Context, d *schema.ResourceDat
 	if err := storeBaseConnectionToState(d, conn); err != nil {
 		return diag.FromErr(err)
 	}
+	// Empty or JSON-`null` destinationConfig on a Customer.io Audience
+	// connection is a server-side inconsistency — the connection MUST carry an
+	// audienceId. Don't zero the field in state: audience_id is ForceNew with
+	// IntAtLeast(1), so a zero would produce a plan that can never reconcile
+	// (the user's config says e.g. 42, state says 0, terraform plans an update
+	// that's blocked by ForceNew + validation). Leave the prior state value
+	// intact and surface a warning so the user knows to investigate.
 	if len(conn.DestinationConfig) == 0 {
-		// No destinationConfig on a typed Customer.io Audience resource is a
-		// server-side inconsistency — clear the field so the next plan shows
-		// the gap rather than silently keeping a stale audience_id.
-		if err := d.Set("audience_id", 0); err != nil {
-			return diag.FromErr(fmt.Errorf("set audience_id: %w", err))
-		}
-		return nil
+		return diag.Diagnostics{warnMissingCustomerIOAudienceConfig(conn.ID, "destinationConfig is empty")}
 	}
 	id, err := decodeCustomerIOAudienceID(conn.DestinationConfig)
 	if err != nil {
 		if errors.Is(err, errCustomerIOAudienceNullConfig) {
-			// JSON `null` carries the same "no typed config" meaning as an empty
-			// payload — clear the field for the same reason.
-			if err := d.Set("audience_id", 0); err != nil {
-				return diag.FromErr(fmt.Errorf("set audience_id: %w", err))
-			}
-			return nil
+			return diag.Diagnostics{warnMissingCustomerIOAudienceConfig(conn.ID, "destinationConfig is JSON null")}
 		}
 		return diag.FromErr(err)
 	}
@@ -121,6 +117,37 @@ func readCustomerIOAudienceConnection(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(fmt.Errorf("set audience_id: %w", err))
 	}
 	return nil
+}
+
+// warnMissingCustomerIOAudienceConfig formats a warning diagnostic for the
+// inconsistent-server-state case where a Customer.io Audience connection
+// comes back without a usable destinationConfig. Returns a Warning (not an
+// Error) so refresh still succeeds — silently zeroing audience_id would
+// produce a never-reconcilable plan (ForceNew + IntAtLeast(1)).
+//
+// Terraform does NOT automatically recover from this. The warning preserves
+// the prior state value; if the user's config still matches that prior
+// value, the next plan is a no-op and the missing server-side audienceId
+// stays unreconciled. The user must intervene manually — either fix the
+// connection in the RudderStack UI or force replacement via
+// `terraform taint` / `terraform apply -replace=...`. We don't auto-force
+// replacement here because the empty destinationConfig could be a transient
+// API glitch, and a no-warning recreate on every refresh would be far worse
+// than a noisy-but-recoverable warning.
+func warnMissingCustomerIOAudienceConfig(connID, reason string) diag.Diagnostic {
+	return diag.Diagnostic{
+		Severity: diag.Warning,
+		Summary:  fmt.Sprintf("Customer.io Audience connection %q is missing audienceId", connID),
+		Detail: fmt.Sprintf(
+			"The server returned a connection with no audienceId (%s). "+
+				"This is an inconsistent server state — audienceId is mandatory for Customer.io Audience destinations. "+
+				"Terraform preserved the prior audience_id value in state and will NOT automatically reconcile this. "+
+				"If your configuration still matches the prior value, the next plan will be a no-op and the server-side connection remains broken. "+
+				"To recover: fix the connection in the RudderStack UI, or force a replacement with "+
+				"`terraform apply -replace=<resource address>` (which will destroy and recreate the connection).",
+			reason,
+		),
+	}
 }
 
 func updateCustomerIOAudienceConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
