@@ -473,242 +473,61 @@ func TestResourceConnection_BasicScheduleRequiresEveryMinutes(t *testing.T) {
 	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
-func TestResourceConnection_CustomerIOAudienceConfig_TypedBlock(t *testing.T) {
-	svc := &mockService{}
-	enabled := true
-
-	// The typed block must be packed into destinationConfig as
-	// {"audienceId": <int>} so the API sees the same shape jsonencode would have
-	// produced.
-	createReq := &iacretl.CreateRETLConnectionRequest{
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           &enabled,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
-	}
-	created := &iacretl.RETLConnection{
-		ID:                "conn-cio",
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           true,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
-	}
-	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
-	svc.On("GetConnection", mock.Anything, "conn-cio").Return(created, nil).Times(2)
-	svc.On("DeleteConnection", mock.Anything, "conn-cio").Return(nil).Once()
-
-	resource.UnitTest(t, resource.TestCase{
-		ProviderFactories: providerFactories(svc),
-		Steps: []resource.TestStep{
-			{
-				Config: `
-					provider "rudderstack" { access_token = "tok" }
-					resource "rudderstack_retl_connection" "example" {
-						source_id      = "retl-src-1"
-						destination_id = "dest-cio"
-						sync_behaviour = "mirror"
-						schedule { type = "manual" }
-						identifiers {
-							from = "email"
-							to   = "email"
-						}
-						customerio_audience_config {
-							audience_id = 42
-						}
-					}
-				`,
-				Check: func(s *terraform.State) error {
-					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
-					if err != nil {
-						return err
-					}
-					return checkAll(map[string]string{
-						"id":                                       "conn-cio",
-						"customerio_audience_config.#":             "1",
-						"customerio_audience_config.0.audience_id": "42",
-					}, attrs)
-				},
-			},
-		},
-	})
-
-	svc.AssertExpectations(t)
-}
-
-// Regression: a JSON-`null` destinationConfig in the API response must not
-// turn a real Customer.io Audience connection into a refresh-time error. The
-// resource calls customerIOAudienceToState, which returns (nil, nil) for the
-// literal bytes `null`; storeConnectionToState then clears the typed block in
-// state without erroring.
-func TestResourceConnection_CustomerIOAudienceConfig_NullDestinationConfigOnRead(t *testing.T) {
+// Refresh against an API response that has destination-specific config must
+// fail loudly on the generic resource — otherwise users with an existing
+// customerio_audience connection imported under the generic type would silently
+// lose their audience config from state.
+func TestResourceConnection_RefusesDestinationSpecificConfig(t *testing.T) {
 	svc := &mockService{}
 	conn := &iacretl.RETLConnection{
-		ID:                "conn-cio-null",
+		ID:                "conn-bad",
 		SourceID:          "retl-src-1",
 		DestinationID:     "dest-cio",
 		Enabled:           true,
 		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
 		SyncBehaviour:     iacretl.SyncBehaviourMirror,
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`null`),
+		DestinationConfig: []byte(`{"audienceId":42}`),
 	}
-	svc.On("GetConnection", mock.Anything, "conn-cio-null").Return(conn, nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-bad").Return(conn, nil).Once()
 
 	r := retl.ResourceConnection()
 	d := r.TestResourceData()
-	d.SetId("conn-cio-null")
+	d.SetId("conn-bad")
+
+	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+	require.True(t, diags.HasError(), "expected refresh to error on destination-specific config")
+	require.Regexp(t,
+		`rudderstack_retl_connection_customerio_audience`,
+		diags[0].Summary,
+	)
+	svc.AssertExpectations(t)
+}
+
+// Regression: JSON-`null` destinationConfig in the API response must NOT error
+// on the generic resource — `null` is the server's "no destination-specific
+// config" signal and should be treated as a no-op.
+func TestResourceConnection_NullDestinationConfigOnRead(t *testing.T) {
+	svc := &mockService{}
+	conn := &iacretl.RETLConnection{
+		ID:                "conn-null",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-1",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourFull,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "user_id"}},
+		DestinationConfig: []byte(`null`),
+	}
+	svc.On("GetConnection", mock.Anything, "conn-null").Return(conn, nil).Once()
+
+	r := retl.ResourceConnection()
+	d := r.TestResourceData()
+	d.SetId("conn-null")
 
 	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
 	require.False(t, diags.HasError(), "diags=%v", diags)
-	require.Equal(t, 0, d.Get("customerio_audience_config.#"))
 	svc.AssertExpectations(t)
-}
-
-// Changing `audience_id` must recreate the connection. The Customer.io
-// Audience API rejects destinationConfig changes on update, so the field
-// carries `ForceNew: true` (in addition to the parent block's ForceNew, which
-// is defense-in-depth against the parent block being relaxed in the future).
-func TestResourceConnection_CustomerIOAudienceConfig_AudienceIDIsForceNew(t *testing.T) {
-	svc := &mockService{}
-	enabled := true
-
-	firstReq := &iacretl.CreateRETLConnectionRequest{
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           &enabled,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
-	}
-	firstCreated := &iacretl.RETLConnection{
-		ID:                "conn-cio-1",
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           true,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
-	}
-	secondReq := &iacretl.CreateRETLConnectionRequest{
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           &enabled,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`{"audienceId":99}`),
-	}
-	secondCreated := &iacretl.RETLConnection{
-		ID:                "conn-cio-2",
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           true,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`{"audienceId":99}`),
-	}
-	svc.On("CreateConnection", mock.Anything, firstReq).Return(firstCreated, nil).Once()
-	svc.On("CreateConnection", mock.Anything, secondReq).Return(secondCreated, nil).Once()
-	svc.On("GetConnection", mock.Anything, "conn-cio-1").Return(firstCreated, nil)
-	svc.On("GetConnection", mock.Anything, "conn-cio-2").Return(secondCreated, nil)
-	svc.On("DeleteConnection", mock.Anything, "conn-cio-1").Return(nil).Once()
-	svc.On("DeleteConnection", mock.Anything, "conn-cio-2").Return(nil).Once()
-
-	cfg := func(audienceID int) string {
-		return fmt.Sprintf(`
-			provider "rudderstack" { access_token = "tok" }
-			resource "rudderstack_retl_connection" "example" {
-				source_id      = "retl-src-1"
-				destination_id = "dest-cio"
-				sync_behaviour = "mirror"
-				schedule { type = "manual" }
-				identifiers {
-					from = "email"
-					to   = "email"
-				}
-				customerio_audience_config {
-					audience_id = %d
-				}
-			}
-		`, audienceID)
-	}
-
-	resource.UnitTest(t, resource.TestCase{
-		ProviderFactories: providerFactories(svc),
-		Steps: []resource.TestStep{
-			{
-				Config: cfg(42),
-				Check: func(s *terraform.State) error {
-					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
-					if err != nil {
-						return err
-					}
-					return checkAll(map[string]string{
-						"id": "conn-cio-1",
-						"customerio_audience_config.0.audience_id": "42",
-					}, attrs)
-				},
-			},
-			{
-				Config: cfg(99),
-				Check: func(s *terraform.State) error {
-					attrs, err := resourceAttrs(s, "rudderstack_retl_connection.example")
-					if err != nil {
-						return err
-					}
-					// New ID proves the resource was destroyed and recreated
-					// rather than updated in place — i.e. ForceNew kicked in.
-					return checkAll(map[string]string{
-						"id": "conn-cio-2",
-						"customerio_audience_config.0.audience_id": "99",
-					}, attrs)
-				},
-			},
-		},
-	})
-
-	svc.AssertExpectations(t)
-}
-
-// Customer.io audience IDs are always positive — plan-time validation must
-// reject values < 1 so users see a clear error in `terraform plan` rather
-// than a generic API rejection at apply time.
-func TestResourceConnection_CustomerIOAudienceConfig_RejectsNonPositiveID(t *testing.T) {
-	svc := &mockService{}
-	resource.UnitTest(t, resource.TestCase{
-		ProviderFactories: providerFactories(svc),
-		Steps: []resource.TestStep{
-			{
-				Config: `
-					provider "rudderstack" { access_token = "tok" }
-					resource "rudderstack_retl_connection" "example" {
-						source_id      = "retl-src-1"
-						destination_id = "dest-cio"
-						sync_behaviour = "mirror"
-						schedule { type = "manual" }
-						identifiers {
-							from = "email"
-							to   = "email"
-						}
-						customerio_audience_config {
-							audience_id = 0
-						}
-					}
-				`,
-				ExpectError: regexpMatches(`expected customerio_audience_config\.0\.audience_id to be at least \(1\)`),
-			},
-		},
-	})
-	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
 func TestResourceConnection_Delete404IsTreatedAsAlreadyGone(t *testing.T) {

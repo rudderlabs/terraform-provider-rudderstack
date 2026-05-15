@@ -103,12 +103,20 @@ func GenerateImportScript(
 		if len(cnxn.DestinationConfig) > 0 && destinationTerraformTypes[cnxn.DestinationID] != "customerio_audience" {
 			continue
 		}
-		// For customerio_audience, mirror the HCL generator's hard-skip when
-		// the typed block can't be decoded.
-		if destinationTerraformTypes[cnxn.DestinationID] == "customerio_audience" && len(cnxn.DestinationConfig) > 0 {
-			if _, err := customerIOAudienceConfigBlock(cnxn.DestinationConfig); err != nil {
+		// customerio_audience destinations always import into the typed
+		// resource rudderstack_retl_connection_customerio_audience. Hard-skip
+		// when destinationConfig is missing or undecodable so the import
+		// script never diverges from the HCL generator (the typed resource
+		// schema requires audience_id, so HCL without it would be invalid).
+		if destinationTerraformTypes[cnxn.DestinationID] == "customerio_audience" {
+			if len(cnxn.DestinationConfig) == 0 {
 				continue
 			}
+			if _, err := decodeCustomerIOAudienceID(cnxn.DestinationConfig); err != nil {
+				continue
+			}
+			lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_retl_connection_customerio_audience.%s" "%s"`, retlConnectionName(cnxn), cnxn.ID))
+			continue
 		}
 		lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_retl_connection.%s" "%s"`, retlConnectionName(cnxn), cnxn.ID))
 	}
@@ -216,18 +224,24 @@ func GenerateTerraform(
 			continue
 		}
 		// Customer.io Audience is the only destination-specific flow this
-		// resource exposes as a typed block. Any other destination with a
-		// non-empty destinationConfig is a VDM-next flow we don't support —
-		// skip rather than emit a connection we can't represent.
+		// generator currently emits as a typed resource. Any other destination
+		// with a non-empty destinationConfig is a VDM-next flow we don't
+		// support — skip rather than emit a connection we can't represent.
 		if len(cnxn.DestinationConfig) > 0 && dst.terraformType != "customerio_audience" {
 			logger.Printf("skipping RETL connection '%s': destination-specific flow for '%s' is not supported", cnxn.ID, dst.terraformType)
 			continue
 		}
-		// For customerio_audience, the typed block is mandatory: emitting the
-		// connection without it would produce HCL that can't roundtrip on
-		// import. Skip the whole connection if decoding fails.
-		if dst.terraformType == "customerio_audience" && len(cnxn.DestinationConfig) > 0 {
-			if _, err := customerIOAudienceConfigBlock(cnxn.DestinationConfig); err != nil {
+		// For customerio_audience, audience_id is required by the typed
+		// schema. Emitting the resource without it would produce HCL that
+		// can't roundtrip on import, and emitting the generic resource for a
+		// typed destination would diverge from the import script. Hard-skip
+		// in both these cases so the two outputs stay aligned.
+		if dst.terraformType == "customerio_audience" {
+			if len(cnxn.DestinationConfig) == 0 {
+				logger.Printf("skipping RETL connection '%s': customerio_audience destination without destinationConfig (audience_id required)", cnxn.ID)
+				continue
+			}
+			if _, err := decodeCustomerIOAudienceID(cnxn.DestinationConfig); err != nil {
 				logger.Printf("skipping RETL connection '%s': cannot decode customerio_audience destinationConfig (%v)", cnxn.ID, err)
 				continue
 			}
@@ -680,6 +694,16 @@ func generateRetlSource(s retl.RETLSource, terraformType string) (block *hclwrit
 // references (so terraform can manage the dependency graph), and the rest of
 // the flat API response is split back into the nested HCL blocks the resource
 // schema expects.
+//
+// For customerio_audience destinations the function emits the typed
+// `rudderstack_retl_connection_customerio_audience` resource with the
+// audience ID as a top-level attribute; all other destinations get the
+// generic `rudderstack_retl_connection`. The caller has already filtered
+// out unsupported destination-specific flows and pre-validated the typed
+// audience config, so any non-empty destinationConfig here belongs to a
+// customerio_audience destination and decodes cleanly. The error path on
+// decode is treated as fail-fast — defense-in-depth against a future
+// refactor that drops the pre-check.
 func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *destinationEntry) (block *hclwrite.Block, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -687,7 +711,11 @@ func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *de
 		}
 	}()
 
-	block = hclwrite.NewBlock("resource", []string{"rudderstack_retl_connection", retlConnectionName(c)})
+	resourceType := "rudderstack_retl_connection"
+	if dst.terraformType == "customerio_audience" {
+		resourceType = "rudderstack_retl_connection_customerio_audience"
+	}
+	block = hclwrite.NewBlock("resource", []string{resourceType, retlConnectionName(c)})
 	body := block.Body()
 
 	body.SetAttributeRaw("source_id", hclwrite.Tokens{
@@ -719,6 +747,20 @@ func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *de
 		body.AppendBlock(retlMappingBlock("mappings", m))
 	}
 
+	// Generic resource: event / constants / cursor_column / object apply.
+	// Typed customerio_audience resource: audience_id is the only flow-specific
+	// field; the rest don't apply.
+	if dst.terraformType == "customerio_audience" {
+		if len(c.DestinationConfig) > 0 {
+			id, err := decodeCustomerIOAudienceID(c.DestinationConfig)
+			if err != nil {
+				return nil, fmt.Errorf("decode customerio_audience destinationConfig: %w", err)
+			}
+			body.SetAttributeValue("audience_id", cty.NumberIntVal(id))
+		}
+		return block, nil
+	}
+
 	if c.Event != nil {
 		body.AppendBlock(retlEventBlock(c.Event))
 	}
@@ -736,20 +778,6 @@ func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *de
 	if c.Object != "" {
 		body.SetAttributeValue("object", cty.StringVal(c.Object))
 	}
-	// The caller has already filtered out destination-specific flows that
-	// aren't Customer.io Audience and pre-validated the typed block, so any
-	// non-empty destinationConfig here belongs to a customerio_audience
-	// destination and decodes cleanly. The error path is unreachable in
-	// normal flow; treat it as fail-fast so a future refactor that drops
-	// the pre-check can't silently emit unimportable HCL.
-	if len(c.DestinationConfig) > 0 {
-		b, err := customerIOAudienceConfigBlock(c.DestinationConfig)
-		if err != nil {
-			return nil, fmt.Errorf("decode customerio_audience destinationConfig: %w", err)
-		}
-		body.AppendBlock(b)
-	}
-
 	return block, nil
 }
 
@@ -816,27 +844,25 @@ func retlEventBlock(e *retl.Event) *hclwrite.Block {
 	return b
 }
 
-// customerIOAudienceConfigBlock builds a `customerio_audience_config` block
-// from the connection's destinationConfig JSON. Returns an error if the JSON
-// is missing/invalid or audienceId is absent or not a number — the caller
-// logs and skips the block in that case.
-func customerIOAudienceConfigBlock(raw json.RawMessage) (*hclwrite.Block, error) {
+// decodeCustomerIOAudienceID extracts the integer audienceId from a
+// customerio_audience destinationConfig JSON blob. Returns an error if the
+// payload is invalid, missing audienceId, or non-integer — the caller logs
+// and skips the connection in that case.
+func decodeCustomerIOAudienceID(raw json.RawMessage) (int64, error) {
 	var parsed map[string]interface{}
 	if err := json.Unmarshal(raw, &parsed); err != nil {
-		return nil, fmt.Errorf("destinationConfig is not valid JSON: %w", err)
+		return 0, fmt.Errorf("destinationConfig is not valid JSON: %w", err)
 	}
 	v, ok := parsed["audienceId"]
 	if !ok {
-		return nil, fmt.Errorf("customerio_audience destinationConfig missing audienceId")
+		return 0, fmt.Errorf("customerio_audience destinationConfig missing audienceId")
 	}
 	n, ok := v.(float64) // json.Unmarshal decodes numbers as float64
 	if !ok {
-		return nil, fmt.Errorf("customerio_audience audienceId is %T, expected number", v)
+		return 0, fmt.Errorf("customerio_audience audienceId is %T, expected number", v)
 	}
 	if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n {
-		return nil, fmt.Errorf("customerio_audience audienceId %v is not an integer", n)
+		return 0, fmt.Errorf("customerio_audience audienceId %v is not an integer", n)
 	}
-	b := hclwrite.NewBlock("customerio_audience_config", nil)
-	b.Body().SetAttributeValue("audience_id", cty.NumberIntVal(int64(n)))
-	return b, nil
+	return int64(n), nil
 }
