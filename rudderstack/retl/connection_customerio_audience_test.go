@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/mock"
@@ -331,29 +332,48 @@ func TestResourceConnectionCustomerIOAudience_IdentifiersAreForceNew(t *testing.
 	svc.AssertExpectations(t)
 }
 
-// Regression: a JSON-`null` destinationConfig in the API response must NOT
-// error on the typed resource. The read path treats `null` as "no typed
-// config" and clears audience_id from state instead of failing refresh.
+// A JSON-`null` destinationConfig is a server-side inconsistency for a
+// Customer.io Audience connection (audienceId is mandatory). Refresh must
+// emit a Warning diagnostic and NOT zero audience_id — zeroing would
+// produce a never-reconcilable plan because audience_id is ForceNew with
+// IntAtLeast(1) validation. Same expectation for an empty payload.
 func TestResourceConnectionCustomerIOAudience_NullDestinationConfigOnRead(t *testing.T) {
-	svc := &mockService{}
-	conn := &iacretl.RETLConnection{
-		ID:                "conn-cio-null",
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           true,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`null`),
+	cases := []struct {
+		name              string
+		destinationConfig json.RawMessage
+	}{
+		{name: "json null", destinationConfig: json.RawMessage(`null`)},
+		{name: "empty payload", destinationConfig: nil},
 	}
-	svc.On("GetConnection", mock.Anything, "conn-cio-null").Return(conn, nil).Once()
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			svc := &mockService{}
+			conn := &iacretl.RETLConnection{
+				ID:                "conn-cio-null",
+				SourceID:          "retl-src-1",
+				DestinationID:     "dest-cio",
+				Enabled:           true,
+				Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+				SyncBehaviour:     iacretl.SyncBehaviourMirror,
+				Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+				DestinationConfig: tc.destinationConfig,
+			}
+			svc.On("GetConnection", mock.Anything, "conn-cio-null").Return(conn, nil).Once()
 
-	r := retl.ResourceConnectionCustomerIOAudience()
-	d := r.TestResourceData()
-	d.SetId("conn-cio-null")
+			r := retl.ResourceConnectionCustomerIOAudience()
+			d := r.TestResourceData()
+			d.SetId("conn-cio-null")
+			// Seed prior audience_id so we can prove refresh leaves it untouched.
+			require.NoError(t, d.Set("audience_id", 42))
 
-	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
-	require.False(t, diags.HasError(), "diags=%v", diags)
-	require.Equal(t, 0, d.Get("audience_id"))
-	svc.AssertExpectations(t)
+			diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+			require.False(t, diags.HasError(), "diags=%v", diags)
+			require.Len(t, diags, 1, "expected one warning diagnostic")
+			require.Equal(t, diag.Warning, diags[0].Severity)
+			require.Regexp(t, `missing audienceId`, diags[0].Summary)
+			require.Equal(t, 42, d.Get("audience_id"),
+				"prior audience_id must be preserved to avoid a never-reconcilable plan")
+			svc.AssertExpectations(t)
+		})
+	}
 }

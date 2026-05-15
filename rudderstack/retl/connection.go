@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -13,6 +15,44 @@ import (
 	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/rudder-iac/api/client/retl"
 )
+
+// resourceGetter is the subset of *schema.ResourceData / *schema.ResourceDiff
+// used by helpers that need to read state without caring which one they got.
+type resourceGetter interface {
+	Get(string) interface{}
+}
+
+// validJSONMapperIdentifierTargets enumerates the only `identifiers[*].to`
+// values the server accepts for JSON Mapper. Kept in sync with the server-side
+// IDENTIFIER_TARGETS constant in
+// rudder-config-backend/.../api-gateway/connection-config/constants.ts.
+var validJSONMapperIdentifierTargets = []string{"user_id", "anonymous_id"}
+
+// validateJSONMapperIdentifierTargets enforces the JSON Mapper rule at plan
+// time. Caller must already have determined this is the JSON Mapper flow
+// (`object` unset). Accepts resourceGetter so the helper is usable from both
+// schema.ResourceDiff and schema.ResourceData, and trivially testable with
+// TestResourceData.
+func validateJSONMapperIdentifierTargets(d resourceGetter) error {
+	raw, ok := d.Get("identifiers").([]interface{})
+	if !ok {
+		return nil
+	}
+	for i, item := range raw {
+		m, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		to, _ := m["to"].(string)
+		if !slices.Contains(validJSONMapperIdentifierTargets, to) {
+			return fmt.Errorf(
+				`identifiers[%d].to must be one of [%s] for JSON Mapper flow (got %q); set "object" to use Object Mapping or change identifiers[%d].to to a valid value`,
+				i, strings.Join(validJSONMapperIdentifierTargets, ", "), to, i,
+			)
+		}
+	}
+	return nil
+}
 
 // ResourceConnection returns the schema for `rudderstack_retl_connection` —
 // the generic resource covering JSON Mapper and Object Mapping flows.
@@ -119,14 +159,16 @@ func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interf
 		}
 	}
 
-	objectSet := d.Get("object").(string) != ""
-	destSpecific := hasCustomerIOAudienceConfig(d)
-
 	// JSON Mapper restricts identifiers[*].to to {user_id, anonymous_id}. The
 	// server rejects other values with a confusing generic error at apply time;
 	// surface the same rule at plan time so users can fix the .tf without an
 	// API round-trip. Runs on both create and update.
-	if !objectSet && !destSpecific {
+	//
+	// In the typed-resource design, the generic resource only covers JSON Mapper
+	// and Object Mapping — destination-specific flows live in their own typed
+	// resources (e.g. rudderstack_retl_connection_customerio_audience), so the
+	// JSON Mapper check fires whenever `object` is unset.
+	if d.Get("object").(string) == "" {
 		if err := validateJSONMapperIdentifierTargets(d); err != nil {
 			return err
 		}
@@ -291,7 +333,8 @@ func storeGenericConnectionToState(d *schema.ResourceData, c *retl.RETLConnectio
 			return fmt.Errorf(
 				"connection %q has destination-specific configuration (destinationConfig is %d bytes); "+
 					"the generic rudderstack_retl_connection resource does not represent destination-specific flows. "+
-					"Use a typed resource such as rudderstack_retl_connection_customerio_audience instead.",
+					"Use the typed rudderstack_retl_connection_<destination> resource that matches this connection's destination "+
+					"(e.g. rudderstack_retl_connection_customerio_audience for Customer.io Audience).",
 				c.ID, len(c.DestinationConfig),
 			)
 		}

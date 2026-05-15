@@ -2,7 +2,6 @@ package retl_test
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"testing"
@@ -501,6 +500,34 @@ func TestResourceConnection_RefusesDestinationSpecificConfig(t *testing.T) {
 		`rudderstack_retl_connection_customerio_audience`,
 		diags[0].Summary,
 	)
+	svc.AssertExpectations(t)
+}
+
+// Malformed JSON in destinationConfig must surface a clear decode error
+// rather than being silently treated as "no destination-specific config".
+// A null check that swallowed unmarshal errors would let bogus payloads slip
+// through and silently drop the API state from terraform's view.
+func TestResourceConnection_MalformedDestinationConfigOnRead(t *testing.T) {
+	svc := &mockService{}
+	conn := &iacretl.RETLConnection{
+		ID:                "conn-broken",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-1",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourFull,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "user_id"}},
+		DestinationConfig: []byte(`{"broken`),
+	}
+	svc.On("GetConnection", mock.Anything, "conn-broken").Return(conn, nil).Once()
+
+	r := retl.ResourceConnection()
+	d := r.TestResourceData()
+	d.SetId("conn-broken")
+
+	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+	require.True(t, diags.HasError(), "expected refresh to error on malformed destinationConfig")
+	require.Regexp(t, `decode destinationConfig`, diags[0].Summary)
 	svc.AssertExpectations(t)
 }
 
