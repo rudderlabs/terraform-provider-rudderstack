@@ -125,11 +125,15 @@ func readCustomerIOAudienceConnection(ctx context.Context, d *schema.ResourceDat
 // Error) so refresh still succeeds — silently zeroing audience_id would
 // produce a never-reconcilable plan (ForceNew + IntAtLeast(1)).
 //
-// The "prior value preserved" framing in the message is accurate after a
-// successful Create / Update / earlier Read populated state. On a fresh
-// `terraform import` of a corrupted connection, the prior value is the SDK
-// zero (audience_id=0) and the next plan will compute a destroy+create
-// against the user's config — which is the correct recovery action.
+// Terraform does NOT automatically recover from this. The warning preserves
+// the prior state value; if the user's config still matches that prior
+// value, the next plan is a no-op and the missing server-side audienceId
+// stays unreconciled. The user must intervene manually — either fix the
+// connection in the RudderStack UI or force replacement via
+// `terraform taint` / `terraform apply -replace=...`. We don't auto-force
+// replacement here because the empty destinationConfig could be a transient
+// API glitch, and a no-warning recreate on every refresh would be far worse
+// than a noisy-but-recoverable warning.
 func warnMissingCustomerIOAudienceConfig(connID, reason string) diag.Diagnostic {
 	return diag.Diagnostic{
 		Severity: diag.Warning,
@@ -137,9 +141,10 @@ func warnMissingCustomerIOAudienceConfig(connID, reason string) diag.Diagnostic 
 		Detail: fmt.Sprintf(
 			"The server returned a connection with no audienceId (%s). "+
 				"This is an inconsistent server state — audienceId is mandatory for Customer.io Audience destinations. "+
-				"Terraform left audience_id in state at its prior value (0 if this is a fresh import). "+
-				"The next plan will reconcile against your configuration; for a freshly imported corrupted connection that means a destroy+create. "+
-				"Verify the connection in the RudderStack UI before applying.",
+				"Terraform preserved the prior audience_id value in state and will NOT automatically reconcile this. "+
+				"If your configuration still matches the prior value, the next plan will be a no-op and the server-side connection remains broken. "+
+				"To recover: fix the connection in the RudderStack UI, or force a replacement with "+
+				"`terraform apply -replace=<resource address>` (which will destroy and recreate the connection).",
 			reason,
 		),
 	}
