@@ -49,26 +49,13 @@ func ResourceConnection() *schema.Resource {
 
 // genericConnectionSchema composes the base RETL connection schema with the
 // generic-flow-only fields: `event` (JSON Mapper), `constants`, `cursor_column`,
-// `object` (Object Mapping). The base `identifiers` field is overridden to
-// add ForceNew because JSON Mapper and Object Mapping both treat identifier
-// changes as breaking. `constants` ForceNew is conditional on Object Mapping
-// and is applied in CustomizeDiff (Object Mapping = ForceNew; JSON Mapper =
-// mutable), so the schema declares it without ForceNew.
+// `object` (Object Mapping). Identifiers ForceNew lives in the base schema
+// because every flow treats identifier changes as breaking.
+// `constants` ForceNew is conditional on Object Mapping and is applied in
+// CustomizeDiff (Object Mapping = ForceNew; JSON Mapper = mutable), so the
+// schema declares it without ForceNew.
 func genericConnectionSchema() map[string]*schema.Schema {
 	return mergeSchemas(baseConnectionSchema(), map[string]*schema.Schema{
-		"identifiers": {
-			Type:     schema.TypeList,
-			Required: true,
-			ForceNew: true,
-			MinItems: 1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"from": {Type: schema.TypeString, ForceNew: true, Required: true},
-					"to":   {Type: schema.TypeString, ForceNew: true, Required: true},
-				},
-			},
-			Description: "Source-to-destination identifier mappings. ForceNew: changes recreate the connection.",
-		},
 		"event": {
 			Type:     schema.TypeList,
 			Optional: true,
@@ -272,6 +259,10 @@ func storeGenericConnectionToState(d *schema.ResourceData, c *retl.RETLConnectio
 	// rather than silently dropping config from state. JSON `null` is the
 	// server's way of saying "no destination-specific config" — treat it as a
 	// no-op.
+	//
+	// The payload itself is not echoed into the error: destinationConfig can
+	// carry credentials for destination-specific flows we haven't yet typed
+	// (e.g. API keys), and Terraform diagnostics surface in CI logs.
 	if len(c.DestinationConfig) > 0 {
 		var parsed any
 		if err := json.Unmarshal(c.DestinationConfig, &parsed); err != nil {
@@ -279,10 +270,10 @@ func storeGenericConnectionToState(d *schema.ResourceData, c *retl.RETLConnectio
 		}
 		if parsed != nil {
 			return fmt.Errorf(
-				"connection has destination-specific configuration (destinationConfig=%s); "+
+				"connection %q has destination-specific configuration (destinationConfig is %d bytes); "+
 					"the generic rudderstack_retl_connection resource does not represent destination-specific flows. "+
 					"Use a typed resource such as rudderstack_retl_connection_customerio_audience instead.",
-				c.DestinationConfig,
+				c.ID, len(c.DestinationConfig),
 			)
 		}
 	}

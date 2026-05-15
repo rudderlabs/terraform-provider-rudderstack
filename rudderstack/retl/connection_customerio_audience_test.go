@@ -220,6 +220,117 @@ func TestResourceConnectionCustomerIOAudience_RejectsNonPositiveID(t *testing.T)
 	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
+// Identifier changes must recreate the typed resource (ForceNew is set at
+// both the top level and the nested from/to in baseConnectionSchema). A new
+// ID after the value change proves destroy + create — terraform would have
+// called UpdateConnection (which the mock does not register) if the schema
+// had allowed in-place updates.
+func TestResourceConnectionCustomerIOAudience_IdentifiersAreForceNew(t *testing.T) {
+	svc := &mockService{}
+	enabled := true
+
+	firstReq := &iacretl.CreateRETLConnectionRequest{
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           &enabled,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourMirror,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
+	}
+	firstCreated := &iacretl.RETLConnection{
+		ID:                "conn-cio-ids-1",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourMirror,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
+	}
+	secondReq := &iacretl.CreateRETLConnectionRequest{
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           &enabled,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourMirror,
+		Identifiers:       []iacretl.Mapping{{From: "user_id", To: "external_id"}},
+		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
+	}
+	secondCreated := &iacretl.RETLConnection{
+		ID:                "conn-cio-ids-2",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourMirror,
+		Identifiers:       []iacretl.Mapping{{From: "user_id", To: "external_id"}},
+		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
+	}
+	svc.On("CreateConnection", mock.Anything, firstReq).Return(firstCreated, nil).Once()
+	svc.On("CreateConnection", mock.Anything, secondReq).Return(secondCreated, nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-cio-ids-1").Return(firstCreated, nil)
+	svc.On("GetConnection", mock.Anything, "conn-cio-ids-2").Return(secondCreated, nil)
+	svc.On("DeleteConnection", mock.Anything, "conn-cio-ids-1").Return(nil).Once()
+	svc.On("DeleteConnection", mock.Anything, "conn-cio-ids-2").Return(nil).Once()
+
+	cfg := func(from, to string) string {
+		return fmt.Sprintf(`
+			provider "rudderstack" { access_token = "tok" }
+			resource "rudderstack_retl_connection_customerio_audience" "example" {
+				source_id      = "retl-src-1"
+				destination_id = "dest-cio"
+				sync_behaviour = "mirror"
+				schedule { type = "manual" }
+				identifiers {
+					from = "%s"
+					to   = "%s"
+				}
+				audience_id = 42
+			}
+		`, from, to)
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: cfg("email", "email"),
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection_customerio_audience.example")
+					if err != nil {
+						return err
+					}
+					return checkAll(map[string]string{
+						"id":                 "conn-cio-ids-1",
+						"identifiers.0.from": "email",
+						"identifiers.0.to":   "email",
+					}, attrs)
+				},
+			},
+			{
+				Config: cfg("user_id", "external_id"),
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection_customerio_audience.example")
+					if err != nil {
+						return err
+					}
+					// New ID proves destroy + create — ForceNew fired. The
+					// mock also expects two distinct CreateConnection calls
+					// (one per identifier value).
+					return checkAll(map[string]string{
+						"id":                 "conn-cio-ids-2",
+						"identifiers.0.from": "user_id",
+						"identifiers.0.to":   "external_id",
+					}, attrs)
+				},
+			},
+		},
+	})
+
+	svc.AssertExpectations(t)
+}
+
 // Regression: a JSON-`null` destinationConfig in the API response must NOT
 // error on the typed resource. The read path treats `null` as "no typed
 // config" and clears audience_id from state instead of failing refresh.

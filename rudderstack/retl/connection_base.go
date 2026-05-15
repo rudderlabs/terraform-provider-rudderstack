@@ -19,10 +19,10 @@ import (
 // rudderstack_retl_connection_customerio_audience) merges its own
 // destination-specific fields onto this base via mergeSchemas.
 //
-// Identifiers are declared here without ForceNew because whether identifiers
-// trigger a recreate depends on the destination flow — JSON Mapper / Object
-// Mapping treats them as immutable, destination-specific flows let them
-// change. Per-resource schemas tighten or relax this in their own mergeSchemas.
+// Identifiers are ForceNew at both the top level (catches list-size changes)
+// and the nested from/to attributes (catches in-place value mutations). This
+// applies uniformly across all flows — every RETL flow treats identifier
+// changes as breaking and requires a new connection.
 func baseConnectionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"id": {
@@ -133,16 +133,19 @@ func baseConnectionSchema() map[string]*schema.Schema {
 		"identifiers": {
 			Type:     schema.TypeList,
 			Required: true,
+			ForceNew: true,
 			MinItems: 1,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
+					// Nested ForceNew is required: the top-level ForceNew on a
+					// TypeList triggers replacement only on list-size changes
+					// (add/remove), not when an existing element's value
+					// mutates in place.
 					"from": {Type: schema.TypeString, Required: true, ForceNew: true},
 					"to":   {Type: schema.TypeString, Required: true, ForceNew: true},
 				},
 			},
-			Description: "Source-to-destination identifier mappings. Each per-flow resource " +
-				"decides whether changes recreate the connection (JSON Mapper / Object Mapping) " +
-				"or update in place (destination-specific flows).",
+			Description: "Source-to-destination identifier mappings. ForceNew: any change recreates the connection.",
 		},
 		"mappings": {
 			Type:     schema.TypeList,
@@ -230,9 +233,9 @@ func applyBaseToUpdateRequest(d *schema.ResourceData, req *retl.UpdateRETLConnec
 		mappings := mappingsFromState(d, "mappings")
 		req.Mappings = &mappings
 	}
-	if d.HasChange("identifiers") {
-		req.Identifiers = mappingsFromState(d, "identifiers")
-	}
+	// Identifiers are ForceNew across all flows (see baseConnectionSchema),
+	// so HasChange("identifiers") never fires on Update — terraform routes
+	// identifier changes through destroy + create instead.
 	return nil
 }
 

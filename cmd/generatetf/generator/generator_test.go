@@ -562,6 +562,20 @@ func retlFixtures() ([]retl.RETLSource, []retl.RETLConnection) {
 			// audienceId is fractional — caught by the integrality check.
 			DestinationConfig: json.RawMessage(`{"audienceId":42.5}`),
 		},
+		{
+			// Customer.io Audience destination with NO destinationConfig at all
+			// — must be hard-skipped in both HCL and import-script outputs.
+			// Otherwise the HCL generator would emit a typed resource with no
+			// audience_id (schema-Required, so invalid HCL) and the import
+			// script would diverge by emitting a generic-resource import line.
+			ID:            "cnxn-skip-cio-empty-config",
+			SourceID:      "src-model-1",
+			DestinationID: "id-cio-audience",
+			Schedule:      retl.Schedule{Type: retl.ScheduleTypeManual},
+			SyncBehaviour: retl.SyncBehaviourMirror,
+			Identifiers:   []retl.Mapping{{From: "email", To: "email"}},
+			// DestinationConfig intentionally empty.
+		},
 	}
 	return sources, connections
 }
@@ -667,6 +681,7 @@ func TestGeneratorTerraform_RETL(t *testing.T) {
 	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-dest`)
 	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-unsupported-ds`)
 	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-cio-malformed`)
+	assert.NotContains(t, output, `retl_cnxn_cnxn-skip-cio-empty-config`)
 }
 
 func TestGeneratorImportScript_RETL(t *testing.T) {

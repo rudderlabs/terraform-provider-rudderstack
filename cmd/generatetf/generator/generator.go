@@ -103,10 +103,15 @@ func GenerateImportScript(
 		if len(cnxn.DestinationConfig) > 0 && destinationTerraformTypes[cnxn.DestinationID] != "customerio_audience" {
 			continue
 		}
-		// customerio_audience connections import into the typed resource
-		// rudderstack_retl_connection_customerio_audience; mirror the HCL
-		// generator's hard-skip when the typed config can't be decoded.
-		if destinationTerraformTypes[cnxn.DestinationID] == "customerio_audience" && len(cnxn.DestinationConfig) > 0 {
+		// customerio_audience destinations always import into the typed
+		// resource rudderstack_retl_connection_customerio_audience. Hard-skip
+		// when destinationConfig is missing or undecodable so the import
+		// script never diverges from the HCL generator (the typed resource
+		// schema requires audience_id, so HCL without it would be invalid).
+		if destinationTerraformTypes[cnxn.DestinationID] == "customerio_audience" {
+			if len(cnxn.DestinationConfig) == 0 {
+				continue
+			}
 			if _, err := decodeCustomerIOAudienceID(cnxn.DestinationConfig); err != nil {
 				continue
 			}
@@ -226,10 +231,16 @@ func GenerateTerraform(
 			logger.Printf("skipping RETL connection '%s': destination-specific flow for '%s' is not supported", cnxn.ID, dst.terraformType)
 			continue
 		}
-		// For customerio_audience, the typed audience_id is mandatory: emitting
-		// the connection without it would produce HCL that can't roundtrip on
-		// import. Skip the whole connection if decoding fails.
-		if dst.terraformType == "customerio_audience" && len(cnxn.DestinationConfig) > 0 {
+		// For customerio_audience, audience_id is required by the typed
+		// schema. Emitting the resource without it would produce HCL that
+		// can't roundtrip on import, and emitting the generic resource for a
+		// typed destination would diverge from the import script. Hard-skip
+		// in both these cases so the two outputs stay aligned.
+		if dst.terraformType == "customerio_audience" {
+			if len(cnxn.DestinationConfig) == 0 {
+				logger.Printf("skipping RETL connection '%s': customerio_audience destination without destinationConfig (audience_id required)", cnxn.ID)
+				continue
+			}
 			if _, err := decodeCustomerIOAudienceID(cnxn.DestinationConfig); err != nil {
 				logger.Printf("skipping RETL connection '%s': cannot decode customerio_audience destinationConfig (%v)", cnxn.ID, err)
 				continue
