@@ -1,0 +1,16 @@
+---
+page_title: "rudderstack_retl_connection_customerio_audience Resource - terraform-provider-rudderstack"
+subcategory: ""
+description: |-
+
+---
+
+# rudderstack_retl_connection_customerio_audience (Resource)
+
+A RETL (Reverse ETL) connection to a Customer.io Audience destination. The audience ID is exposed as a typed top-level field. The resource is `ForceNew` because the Customer.io Audience API does not accept `destinationConfig` changes on update — modifying the audience triggers replacement.
+
+## Example Usage
+
+{{tffile "examples/retl_connection_customerio_audience.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
