@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,21 +14,28 @@ import (
 	"github.com/rudderlabs/rudder-iac/api/client/retl"
 )
 
-// ResourceConnection returns the schema for `rudderstack_retl_connection`.
+// ResourceConnection returns the schema for `rudderstack_retl_connection` —
+// the generic resource covering JSON Mapper and Object Mapping flows.
 //
-// Flow detection (JSON Mapper / Object Mapping / Customer.io Audience) happens
-// server-side based on the destination definition; this resource only sends
-// the flat schema and lets the API assemble the internal config. ForceNew on
-// `identifiers` and `constants` is conditional on the detected flow and is
-// applied via CustomizeDiff using the same field-presence signals the API uses.
-// Customer.io Audience is the only destination-specific flow currently exposed
-// as a typed block; other destination-specific flows are not supported.
+// Flow detection (JSON Mapper vs Object Mapping) happens server-side from the
+// destination definition. This resource only sends the flat schema and lets
+// the API assemble the internal config. The `object` attribute distinguishes
+// Object Mapping (set) from JSON Mapper (absent).
+//
+// Destination-specific flows (Customer.io Audience etc.) are intentionally
+// out of scope here. Each destination-specific flow gets its own typed
+// resource (e.g. `rudderstack_retl_connection_customerio_audience`) that
+// exposes the destination's required fields as first-class schema attributes
+// instead of stuffing them into a generic destination_config blob. The
+// generic resource refuses to refresh a connection whose destinationConfig
+// has been populated by a destination-specific flow so users get a clear
+// signal at refresh time to switch to the typed resource.
 func ResourceConnection() *schema.Resource {
 	return &schema.Resource{
-		Description: "A RETL connection between a RETL source and a destination. " +
-			"Flow type (JSON Mapper, Object mapping, Customer.io Audience) is " +
-			"determined by the destination definition.",
-		Schema:        connectionSchema(),
+		Description: "A generic RETL connection between a RETL source and a destination, " +
+			"covering JSON Mapper and Object Mapping flows. Destination-specific flows " +
+			"(e.g. Customer.io Audience) have their own typed resources.",
+		Schema:        genericConnectionSchema(),
 		CreateContext: createConnection,
 		ReadContext:   readConnection,
 		UpdateContext: updateConnection,
@@ -42,148 +47,27 @@ func ResourceConnection() *schema.Resource {
 	}
 }
 
-func connectionSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"id": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"source_id": {
-			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
-			Description: "ID of the RETL source.",
-		},
-		"destination_id": {
-			Type:        schema.TypeString,
-			Required:    true,
-			ForceNew:    true,
-			Description: "ID of the destination.",
-		},
-		"enabled": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     true,
-			Description: "Whether the connection is enabled.",
-		},
-		"schedule": {
-			Type:     schema.TypeList,
-			Required: true,
-			MaxItems: 1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"type": {
-						Type:         schema.TypeString,
-						Required:     true,
-						ValidateFunc: validation.StringInSlice([]string{"basic", "manual", "cron"}, false),
-						Description:  "Schedule type: `basic`, `manual`, or `cron`.",
-					},
-					"every_minutes": {
-						Type:         schema.TypeInt,
-						Optional:     true,
-						ValidateFunc: validation.IntAtLeast(5),
-						Description:  "Sync interval in minutes. Required when `type` is `basic`.",
-					},
-					"cron_expression": {
-						Type:        schema.TypeString,
-						Optional:    true,
-						Description: "Cron expression. Required when `type` is `cron`.",
-					},
-				},
-			},
-		},
-		"sync_settings": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Computed: true,
-			MaxItems: 1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"sync_logs_config": {
-						Type:     schema.TypeList,
-						Optional: true,
-						Computed: true,
-						MaxItems: 1,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"enabled": {
-									Type:     schema.TypeBool,
-									Optional: true,
-									Default:  true,
-								},
-								"log_retention_in_days": {
-									Type:     schema.TypeInt,
-									Optional: true,
-									Default:  30,
-								},
-								"snapshots_to_retain": {
-									Type:     schema.TypeInt,
-									Optional: true,
-									Default:  5,
-								},
-							},
-						},
-					},
-					"failed_keys_config": {
-						Type:     schema.TypeList,
-						Optional: true,
-						Computed: true,
-						MaxItems: 1,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"enable_failed_keys_retry": {
-									Type:     schema.TypeBool,
-									Optional: true,
-									Default:  true,
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		"sync_behaviour": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ForceNew:     true,
-			ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror", "full"}, false),
-			Description:  "How records are synced to the destination: `upsert`, `mirror`, or `full`.",
-		},
+// genericConnectionSchema composes the base RETL connection schema with the
+// generic-flow-only fields: `event` (JSON Mapper), `constants`, `cursor_column`,
+// `object` (Object Mapping). The base `identifiers` field is overridden to
+// add ForceNew because JSON Mapper and Object Mapping both treat identifier
+// changes as breaking. `constants` ForceNew is conditional on Object Mapping
+// and is applied in CustomizeDiff (Object Mapping = ForceNew; JSON Mapper =
+// mutable), so the schema declares it without ForceNew.
+func genericConnectionSchema() map[string]*schema.Schema {
+	return mergeSchemas(baseConnectionSchema(), map[string]*schema.Schema{
 		"identifiers": {
 			Type:     schema.TypeList,
 			Required: true,
+			ForceNew: true,
 			MinItems: 1,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"from": {
-						Type:     schema.TypeString,
-						Required: true,
-					},
-					"to": {
-						Type:     schema.TypeString,
-						Required: true,
-					},
+					"from": {Type: schema.TypeString, ForceNew: true, Required: true},
+					"to":   {Type: schema.TypeString, ForceNew: true, Required: true},
 				},
 			},
-			Description: "Source-to-destination identifier mappings. ForceNew for JSON Mapper " +
-				"and Object Mapping flows; mutable for destination-specific flows.",
-		},
-		"mappings": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"from": {
-						Type:     schema.TypeString,
-						Required: true,
-					},
-					"to": {
-						Type:     schema.TypeString,
-						Required: true,
-					},
-				},
-			},
-			Description: "Source-to-destination field mappings (mutable for all flows).",
+			Description: "Source-to-destination identifier mappings. ForceNew: changes recreate the connection.",
 		},
 		"event": {
 			Type:     schema.TypeList,
@@ -195,38 +79,26 @@ func connectionSchema() map[string]*schema.Schema {
 					"type": {
 						Type:         schema.TypeString,
 						Required:     true,
+						ForceNew:     true,
 						ValidateFunc: validation.StringInSlice([]string{"identify", "track"}, false),
 					},
-					"name": {
-						Type:     schema.TypeString,
-						Optional: true,
-					},
-					"name_column": {
-						Type:     schema.TypeString,
-						Optional: true,
-					},
+					"name":        {Type: schema.TypeString, Optional: true, ForceNew: true},
+					"name_column": {Type: schema.TypeString, Optional: true, ForceNew: true},
 				},
 			},
 			Description: "CDP event configuration. Optional in the Terraform schema; flow-specific " +
-				"requirements (required for JSON Mapper, absent for other flows) are enforced by the API.",
+				"requirements (required for JSON Mapper, absent for Object Mapping) are enforced by the API.",
 		},
 		"constants": {
 			Type:     schema.TypeList,
 			Optional: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"key": {
-						Type:     schema.TypeString,
-						Required: true,
-					},
-					"value": {
-						Type:     schema.TypeString,
-						Required: true,
-					},
+					"key":   {Type: schema.TypeString, Required: true},
+					"value": {Type: schema.TypeString, Required: true},
 				},
 			},
-			Description: "User-defined constants. Mutable for JSON Mapper; ForceNew for Object Mapping " +
-				"and destination-specific flows.",
+			Description: "User-defined constants. Mutable for JSON Mapper; ForceNew for Object Mapping.",
 		},
 		"cursor_column": {
 			Type:        schema.TypeString,
@@ -240,43 +112,13 @@ func connectionSchema() map[string]*schema.Schema {
 			ForceNew:    true,
 			Description: "Destination entity for Object Mapping flows (e.g. `Contact`, `Lead`).",
 		},
-		"customerio_audience_config": {
-			Type:     schema.TypeList,
-			Optional: true,
-			ForceNew: true,
-			MaxItems: 1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"audience_id": {
-						Type:         schema.TypeInt,
-						Required:     true,
-						ForceNew:     true,
-						ValidateFunc: validation.IntAtLeast(1),
-						Description:  "Customer.io audience ID (positive integer).",
-					},
-				},
-			},
-			Description: "Typed configuration for Customer.io Audience destinations.",
-		},
-		"created_at": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-		"updated_at": {
-			Type:     schema.TypeString,
-			Computed: true,
-		},
-	}
+	})
 }
 
-// customizeConnectionDiff applies flow-dependent ForceNew on `identifiers` and
-// `constants`, and rejects locally-detectable invalid combinations (cursor_column
-// only with sync_behaviour=upsert) so users see the error at plan time instead
-// of on apply.
-//
-// Flow is inferred from the same signals the server uses: `object` set =>
-// Object Mapping, `customerio_audience_config` set => Customer.io Audience
-// (destination-specific), otherwise => JSON Mapper.
+// customizeConnectionDiff applies the Object-Mapping-only `constants` ForceNew
+// and rejects locally-detectable invalid combinations (cursor_column only with
+// sync_behaviour=upsert) so users see the error at plan time instead of on
+// apply.
 func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	if cursor := d.Get("cursor_column").(string); cursor != "" {
 		if sb := d.Get("sync_behaviour").(string); sb != "" && sb != "upsert" {
@@ -289,35 +131,14 @@ func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interf
 		return nil
 	}
 
-	objectSet := d.Get("object").(string) != ""
-	destSpecific := hasCustomerIOAudienceConfig(d)
-
-	identifiersForceNew, constantsForceNew := flowForceNewRules(objectSet, destSpecific)
-
-	if identifiersForceNew && d.HasChange("identifiers") {
-		if err := d.ForceNew("identifiers"); err != nil {
-			return err
-		}
-	}
-	if constantsForceNew && d.HasChange("constants") {
+	// Object Mapping (object set) treats `constants` as immutable; JSON Mapper
+	// allows in-place updates.
+	if d.Get("object").(string) != "" && d.HasChange("constants") {
 		if err := d.ForceNew("constants"); err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-// flowForceNewRules returns (identifiersForceNew, constantsForceNew) for the
-// detected flow.
-func flowForceNewRules(objectSet, destSpecific bool) (identifiers, constants bool) {
-	switch {
-	case objectSet:
-		return true, true // Object Mapping
-	case destSpecific:
-		return false, true // Destination-specific (Customer.io Audience)
-	default:
-		return true, false // JSON Mapper
-	}
 }
 
 func createConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -356,7 +177,7 @@ func readConnection(ctx context.Context, d *schema.ResourceData, m interface{}) 
 		return diag.FromErr(fmt.Errorf("could not read RETL connection: %w", err))
 	}
 
-	return diag.FromErr(storeConnectionToState(d, conn))
+	return diag.FromErr(storeGenericConnectionToState(d, conn))
 }
 
 func updateConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -376,6 +197,8 @@ func updateConnection(ctx context.Context, d *schema.ResourceData, m interface{}
 	return readConnection(ctx, d, m)
 }
 
+// deleteConnection deletes any RETL connection (by ID). Shared between the
+// generic and per-destination resources — delete has no flow-specific logic.
 func deleteConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	svc, diags := service(m)
 	if diags.HasError() {
@@ -395,26 +218,9 @@ func deleteConnection(ctx context.Context, d *schema.ResourceData, m interface{}
 }
 
 func buildCreateRequest(d *schema.ResourceData) (*retl.CreateRETLConnectionRequest, error) {
-	schedule, err := scheduleFromState(d)
-	if err != nil {
+	req := &retl.CreateRETLConnectionRequest{}
+	if err := applyBaseToCreateRequest(d, req); err != nil {
 		return nil, err
-	}
-
-	enabled := d.Get("enabled").(bool)
-	req := &retl.CreateRETLConnectionRequest{
-		SourceID:      d.Get("source_id").(string),
-		DestinationID: d.Get("destination_id").(string),
-		Enabled:       &enabled,
-		Schedule:      schedule,
-		SyncBehaviour: retl.SyncBehaviour(d.Get("sync_behaviour").(string)),
-		Identifiers:   mappingsFromState(d, "identifiers"),
-	}
-
-	if ss, ok := syncSettingsFromState(d); ok {
-		req.SyncSettings = ss
-	}
-	if mappings := mappingsFromState(d, "mappings"); len(mappings) > 0 {
-		req.Mappings = mappings
 	}
 	if event, ok := eventFromState(d); ok {
 		req.Event = event
@@ -428,318 +234,62 @@ func buildCreateRequest(d *schema.ResourceData) (*retl.CreateRETLConnectionReque
 	if v := d.Get("object").(string); v != "" {
 		req.Object = v
 	}
-	if hasCustomerIOAudienceConfig(d) {
-		cfg, err := customerIOAudienceConfigJSON(d)
-		if err != nil {
-			return nil, err
-		}
-		req.DestinationConfig = cfg
-	}
 	return req, nil
 }
 
 func buildUpdateRequest(d *schema.ResourceData) (*retl.UpdateRETLConnectionRequest, error) {
-	schedule, err := scheduleFromState(d)
-	if err != nil {
+	req := &retl.UpdateRETLConnectionRequest{}
+	if err := applyBaseToUpdateRequest(d, req); err != nil {
 		return nil, err
-	}
-	enabled := d.Get("enabled").(bool)
-
-	req := &retl.UpdateRETLConnectionRequest{
-		Enabled:  &enabled,
-		Schedule: schedule,
-	}
-	// Only forward sync_settings when the user actually changed the block.
-	// Otherwise the Optional+Computed field can carry server-computed values
-	// in state and we'd echo them back as if the user had set them.
-	if d.HasChange("sync_settings") {
-		if ss, ok := syncSettingsFromState(d); ok {
-			req.SyncSettings = ss
-		}
-	}
-	if d.HasChange("mappings") {
-		mappings := mappingsFromState(d, "mappings")
-		req.Mappings = &mappings
 	}
 	if d.HasChange("constants") {
 		constants := constantsFromState(d)
 		req.Constants = &constants
 	}
-	if d.HasChange("identifiers") {
-		req.Identifiers = mappingsFromState(d, "identifiers")
-	}
 	return req, nil
 }
 
-func storeConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) error {
-	d.SetId(c.ID)
-	setters := []struct {
-		k string
-		v interface{}
-	}{
-		{"source_id", c.SourceID},
-		{"destination_id", c.DestinationID},
-		{"enabled", c.Enabled},
-		{"sync_behaviour", string(c.SyncBehaviour)},
-		{"schedule", scheduleToState(c.Schedule)},
-		{"sync_settings", syncSettingsToState(c.SyncSettings)},
-		{"identifiers", mappingsToState(c.Identifiers)},
-		{"mappings", mappingsToState(c.Mappings)},
-		{"event", eventToState(c.Event)},
-		{"constants", constantsToState(c.Constants)},
-		{"cursor_column", c.CursorColumn},
-		{"object", c.Object},
-	}
-	for _, s := range setters {
-		if err := d.Set(s.k, s.v); err != nil {
-			return fmt.Errorf("set %s: %w", s.k, err)
-		}
-	}
-
-	// The API returns destinationConfig as JSON for destination-specific flows.
-	// Customer.io Audience is the only typed flow we support; an unsupported
-	// destination-specific connection (imported from elsewhere) surfaces as a
-	// decode error so the user sees a clear "not supported" signal at refresh.
-	if len(c.DestinationConfig) > 0 {
-		typed, err := customerIOAudienceToState(c.DestinationConfig)
-		if err != nil {
-			return err
-		}
-		if err := d.Set("customerio_audience_config", typed); err != nil {
-			return err
-		}
-	} else if err := d.Set("customerio_audience_config", nil); err != nil {
+func storeGenericConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) error {
+	if err := storeBaseConnectionToState(d, c); err != nil {
 		return err
 	}
-	if c.CreatedAt != nil {
-		if err := d.Set("created_at", c.CreatedAt.Format(time.RFC3339)); err != nil {
-			return err
-		}
+	if err := d.Set("event", eventToState(c.Event)); err != nil {
+		return fmt.Errorf("set event: %w", err)
 	}
-	if c.UpdatedAt != nil {
-		if err := d.Set("updated_at", c.UpdatedAt.Format(time.RFC3339)); err != nil {
-			return err
+	if err := d.Set("constants", constantsToState(c.Constants)); err != nil {
+		return fmt.Errorf("set constants: %w", err)
+	}
+	if err := d.Set("cursor_column", c.CursorColumn); err != nil {
+		return fmt.Errorf("set cursor_column: %w", err)
+	}
+	if err := d.Set("object", c.Object); err != nil {
+		return fmt.Errorf("set object: %w", err)
+	}
+
+	// The API returns destinationConfig as a non-empty JSON payload only for
+	// destination-specific flows. The generic resource does not represent
+	// those — fail loudly at refresh so the user knows to switch resources
+	// rather than silently dropping config from state. JSON `null` is the
+	// server's way of saying "no destination-specific config" — treat it as a
+	// no-op.
+	if len(c.DestinationConfig) > 0 {
+		var parsed any
+		if err := json.Unmarshal(c.DestinationConfig, &parsed); err != nil {
+			return fmt.Errorf("decode destinationConfig: %w", err)
+		}
+		if parsed != nil {
+			return fmt.Errorf(
+				"connection has destination-specific configuration (destinationConfig=%s); "+
+					"the generic rudderstack_retl_connection resource does not represent destination-specific flows. "+
+					"Use a typed resource such as rudderstack_retl_connection_customerio_audience instead.",
+				c.DestinationConfig,
+			)
 		}
 	}
 	return nil
 }
 
-// --- per-block helpers ---
-
-func scheduleFromState(d *schema.ResourceData) (retl.Schedule, error) {
-	raw, ok := d.Get("schedule").([]interface{})
-	if !ok || len(raw) == 0 || raw[0] == nil {
-		return retl.Schedule{}, fmt.Errorf("schedule block is required")
-	}
-	m := raw[0].(map[string]interface{})
-	s := retl.Schedule{Type: retl.ScheduleType(m["type"].(string))}
-	if v, ok := m["every_minutes"].(int); ok && v > 0 {
-		s.EveryMinutes = &v
-	}
-	if v, _ := m["cron_expression"].(string); v != "" {
-		s.CronExpression = &v
-	}
-	if s.Type == retl.ScheduleTypeBasic && s.EveryMinutes == nil {
-		return retl.Schedule{}, fmt.Errorf("schedule.every_minutes is required when schedule.type is %q", s.Type)
-	}
-	if s.Type == retl.ScheduleTypeCron && s.CronExpression == nil {
-		return retl.Schedule{}, fmt.Errorf("schedule.cron_expression is required when schedule.type is %q", s.Type)
-	}
-	return s, nil
-}
-
-func scheduleToState(s retl.Schedule) []map[string]interface{} {
-	m := map[string]interface{}{"type": string(s.Type)}
-	if s.EveryMinutes != nil {
-		m["every_minutes"] = *s.EveryMinutes
-	}
-	if s.CronExpression != nil {
-		m["cron_expression"] = *s.CronExpression
-	}
-	return []map[string]interface{}{m}
-}
-
-func syncSettingsFromState(d *schema.ResourceData) (*retl.SyncSettings, bool) {
-	raw, ok := d.Get("sync_settings").([]interface{})
-	if !ok || len(raw) == 0 || raw[0] == nil {
-		return nil, false
-	}
-	m := raw[0].(map[string]interface{})
-	ss := &retl.SyncSettings{}
-
-	if logs, ok := m["sync_logs_config"].([]interface{}); ok && len(logs) > 0 && logs[0] != nil {
-		lm := logs[0].(map[string]interface{})
-		cfg := &retl.SyncLogsConfig{}
-		if v, ok := lm["enabled"].(bool); ok {
-			cfg.Enabled = &v
-		}
-		if v, ok := lm["log_retention_in_days"].(int); ok && v > 0 {
-			cfg.LogRetentionInDays = &v
-		}
-		if v, ok := lm["snapshots_to_retain"].(int); ok && v > 0 {
-			cfg.SnapshotsToRetain = &v
-		}
-		ss.SyncLogsConfig = cfg
-	}
-	if fk, ok := m["failed_keys_config"].([]interface{}); ok && len(fk) > 0 && fk[0] != nil {
-		fkm := fk[0].(map[string]interface{})
-		cfg := &retl.FailedKeysConfig{}
-		if v, ok := fkm["enable_failed_keys_retry"].(bool); ok {
-			cfg.EnableFailedKeysRetry = &v
-		}
-		ss.FailedKeysConfig = cfg
-	}
-	// Empty sync_settings {} block (or one with empty sub-blocks) carries
-	// nothing useful — treat it as "not set" so callers can omit the field.
-	if ss.SyncLogsConfig == nil && ss.FailedKeysConfig == nil {
-		return nil, false
-	}
-	return ss, true
-}
-
-func syncSettingsToState(ss *retl.SyncSettings) []map[string]interface{} {
-	if ss == nil {
-		return nil
-	}
-	out := map[string]interface{}{}
-	if ss.SyncLogsConfig != nil {
-		lm := map[string]interface{}{}
-		if ss.SyncLogsConfig.Enabled != nil {
-			lm["enabled"] = *ss.SyncLogsConfig.Enabled
-		}
-		if ss.SyncLogsConfig.LogRetentionInDays != nil {
-			lm["log_retention_in_days"] = *ss.SyncLogsConfig.LogRetentionInDays
-		}
-		if ss.SyncLogsConfig.SnapshotsToRetain != nil {
-			lm["snapshots_to_retain"] = *ss.SyncLogsConfig.SnapshotsToRetain
-		}
-		out["sync_logs_config"] = []map[string]interface{}{lm}
-	}
-	if ss.FailedKeysConfig != nil {
-		fkm := map[string]interface{}{}
-		if ss.FailedKeysConfig.EnableFailedKeysRetry != nil {
-			fkm["enable_failed_keys_retry"] = *ss.FailedKeysConfig.EnableFailedKeysRetry
-		}
-		out["failed_keys_config"] = []map[string]interface{}{fkm}
-	}
-	return []map[string]interface{}{out}
-}
-
-func mappingsFromState(d *schema.ResourceData, key string) []retl.Mapping {
-	raw, _ := d.Get(key).([]interface{})
-	out := make([]retl.Mapping, 0, len(raw))
-	for _, item := range raw {
-		m := item.(map[string]interface{})
-		out = append(out, retl.Mapping{
-			From: m["from"].(string),
-			To:   m["to"].(string),
-		})
-	}
-	return out
-}
-
-func mappingsToState(ms []retl.Mapping) []map[string]interface{} {
-	if len(ms) == 0 {
-		return nil
-	}
-	out := make([]map[string]interface{}, 0, len(ms))
-	for _, m := range ms {
-		out = append(out, map[string]interface{}{"from": m.From, "to": m.To})
-	}
-	return out
-}
-
-func constantsFromState(d *schema.ResourceData) []retl.Constant {
-	raw, _ := d.Get("constants").([]interface{})
-	out := make([]retl.Constant, 0, len(raw))
-	for _, item := range raw {
-		m := item.(map[string]interface{})
-		out = append(out, retl.Constant{
-			Key:   m["key"].(string),
-			Value: m["value"].(string),
-		})
-	}
-	return out
-}
-
-func constantsToState(cs []retl.Constant) []map[string]interface{} {
-	if len(cs) == 0 {
-		return nil
-	}
-	out := make([]map[string]interface{}, 0, len(cs))
-	for _, c := range cs {
-		out = append(out, map[string]interface{}{"key": c.Key, "value": c.Value})
-	}
-	return out
-}
-
-// hasCustomerIOAudienceConfig reports whether the `customerio_audience_config`
-// block is populated in state. Used both by flow detection in CustomizeDiff
-// and by the read path to decide where to route the server's destinationConfig.
-func hasCustomerIOAudienceConfig(d resourceGetter) bool {
-	raw, ok := d.Get("customerio_audience_config").([]interface{})
-	return ok && len(raw) > 0 && raw[0] != nil
-}
-
-// resourceGetter is the subset of *schema.ResourceData / *schema.ResourceDiff
-// used by helpers that need to read state without caring which one they got.
-type resourceGetter interface {
-	Get(string) interface{}
-}
-
-// customerIOAudienceConfigJSON packs the typed customerio_audience_config
-// block into the destinationConfig JSON shape the API expects.
-// Caller must check hasCustomerIOAudienceConfig(d) first.
-func customerIOAudienceConfigJSON(d *schema.ResourceData) (json.RawMessage, error) {
-	raw := d.Get("customerio_audience_config").([]interface{})
-	m := raw[0].(map[string]interface{})
-	audienceID, ok := m["audience_id"].(int)
-	if !ok {
-		// Defensive: schema declares audience_id as TypeInt so the SDK should
-		// always hand us an int. Surface the divergence loudly rather than
-		// silently POST `{"audienceId": 0}`.
-		return nil, fmt.Errorf("customerio_audience_config.audience_id has unexpected type %T", m["audience_id"])
-	}
-	out, err := json.Marshal(map[string]any{"audienceId": audienceID})
-	if err != nil {
-		return nil, fmt.Errorf("encode customerio_audience_config: %w", err)
-	}
-	return out, nil
-}
-
-// customerIOAudienceToState decodes a Customer.io Audience destinationConfig
-// JSON blob into the typed block shape expected by d.Set. Returns (nil, nil)
-// when the payload is JSON null — that's the server's way of saying "no
-// destination-specific config", not an error. Returns an error when the blob
-// is a non-null shape without a numeric `audienceId` — that signals an
-// unsupported destination-specific connection (e.g. imported from a
-// destination that isn't Customer.io Audience), which this resource does not
-// represent.
-func customerIOAudienceToState(raw json.RawMessage) ([]map[string]interface{}, error) {
-	var parsed map[string]interface{}
-	if err := json.Unmarshal(raw, &parsed); err != nil {
-		return nil, fmt.Errorf("decode customerio_audience destinationConfig: %w", err)
-	}
-	if parsed == nil {
-		// JSON `null` unmarshalls into a nil map — treat as "no typed block".
-		return nil, nil
-	}
-	v, ok := parsed["audienceId"]
-	if !ok {
-		return nil, fmt.Errorf("destinationConfig has no audienceId — only Customer.io Audience destination-specific connections are supported")
-	}
-	n, ok := v.(float64) // json.Unmarshal decodes JSON numbers as float64
-	if !ok {
-		return nil, fmt.Errorf("destinationConfig audienceId is %T, expected number", v)
-	}
-	if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n {
-		return nil, fmt.Errorf("destinationConfig audienceId %v is not an integer", n)
-	}
-	// int(n) is exact for |n| < 2^53 (float64 mantissa). Customer.io audience
-	// IDs are well below that bound in practice; the integrality check above
-	// rejects fractional values like 42.5 that would otherwise truncate silently.
-	return []map[string]interface{}{{"audience_id": int(n)}}, nil
-}
+// --- per-block helpers specific to the generic resource ---
 
 func eventFromState(d *schema.ResourceData) (*retl.Event, bool) {
 	raw, ok := d.Get("event").([]interface{})
@@ -769,4 +319,28 @@ func eventToState(e *retl.Event) []map[string]interface{} {
 		m["name_column"] = e.NameColumn
 	}
 	return []map[string]interface{}{m}
+}
+
+func constantsFromState(d *schema.ResourceData) []retl.Constant {
+	raw, _ := d.Get("constants").([]interface{})
+	out := make([]retl.Constant, 0, len(raw))
+	for _, item := range raw {
+		m := item.(map[string]interface{})
+		out = append(out, retl.Constant{
+			Key:   m["key"].(string),
+			Value: m["value"].(string),
+		})
+	}
+	return out
+}
+
+func constantsToState(cs []retl.Constant) []map[string]interface{} {
+	if len(cs) == 0 {
+		return nil
+	}
+	out := make([]map[string]interface{}, 0, len(cs))
+	for _, c := range cs {
+		out = append(out, map[string]interface{}{"key": c.Key, "value": c.Value})
+	}
+	return out
 }

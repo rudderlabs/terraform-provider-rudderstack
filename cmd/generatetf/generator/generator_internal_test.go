@@ -5,14 +5,15 @@ import (
 	"testing"
 )
 
-func TestCustomerIOAudienceConfigBlock(t *testing.T) {
+func TestDecodeCustomerIOAudienceID(t *testing.T) {
 	cases := []struct {
 		name    string
 		in      string
+		wantID  int64
 		wantErr bool
 	}{
-		{name: "valid int audienceId", in: `{"audienceId": 16}`, wantErr: false},
-		{name: "zero audienceId", in: `{"audienceId": 0}`, wantErr: false},
+		{name: "valid int audienceId", in: `{"audienceId": 16}`, wantID: 16},
+		{name: "zero audienceId", in: `{"audienceId": 0}`, wantID: 0},
 		{name: "missing audienceId", in: `{}`, wantErr: true},
 		{name: "string audienceId", in: `{"audienceId": "abc"}`, wantErr: true},
 		// Reject fractional audienceId — int64(42.5) would silently truncate.
@@ -21,15 +22,15 @@ func TestCustomerIOAudienceConfigBlock(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			b, err := customerIOAudienceConfigBlock(json.RawMessage(tc.in))
+			got, err := decodeCustomerIOAudienceID(json.RawMessage(tc.in))
 			if (err != nil) != tc.wantErr {
 				t.Fatalf("err=%v, wantErr=%v", err, tc.wantErr)
 			}
 			if tc.wantErr {
 				return
 			}
-			if b == nil {
-				t.Fatal("expected non-nil block")
+			if got != tc.wantID {
+				t.Errorf("audienceId = %d, want %d", got, tc.wantID)
 			}
 		})
 	}

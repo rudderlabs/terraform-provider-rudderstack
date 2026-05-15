@@ -648,13 +648,17 @@ func TestGeneratorTerraform_RETL(t *testing.T) {
 	assert.Contains(t, output, `value = "rudderstack"`)
 	assert.Contains(t, output, `type = "identify"`)
 
-	// Customer.io Audience connection: typed customerio_audience_config block.
-	assert.Contains(t, output, `resource "rudderstack_retl_connection" "retl_cnxn_cnxn-cio-1"`)
+	// Customer.io Audience connection is emitted as the typed resource with
+	// audience_id as a top-level attribute.
+	assert.Contains(t, output, `resource "rudderstack_retl_connection_customerio_audience" "retl_cnxn_cnxn-cio-1"`)
 	assert.Contains(t, output, `destination_id = rudderstack_destination_customerio_audience.dst_id-cio-audience.id`)
-	assert.Contains(t, output, `customerio_audience_config {`)
 	assert.Contains(t, output, `audience_id = 42`)
-	// Raw destination_config / jsonencode must not appear anywhere — the
-	// schema no longer supports it.
+	// The customerio_audience connection must NOT be emitted as the generic
+	// resource — that would silently drop audience_id from the imported state.
+	assert.NotContains(t, output, `resource "rudderstack_retl_connection" "retl_cnxn_cnxn-cio-1"`)
+	// The legacy nested block and raw destination_config / jsonencode must not
+	// appear anywhere — the typed resource exposes audience_id at top level.
+	assert.NotContains(t, output, `customerio_audience_config {`)
 	assert.NotContains(t, output, `destination_config`)
 	assert.NotContains(t, output, `jsonencode`)
 
@@ -680,7 +684,7 @@ func TestGeneratorImportScript_RETL(t *testing.T) {
 		`terraform import "rudderstack_retl_source_model.retl_src_src-model-1" "src-model-1"`,
 		`terraform import "rudderstack_retl_source_table.retl_src_src-table-1" "src-table-1"`,
 		`terraform import "rudderstack_retl_connection.retl_cnxn_cnxn-jm-1" "cnxn-jm-1"`,
-		`terraform import "rudderstack_retl_connection.retl_cnxn_cnxn-cio-1" "cnxn-cio-1"`,
+		`terraform import "rudderstack_retl_connection_customerio_audience.retl_cnxn_cnxn-cio-1" "cnxn-cio-1"`,
 	}, "\n")
 
 	data, err := generator.GenerateImportScript(esSources, esDestinations, nil, retlSources, retlConnections)

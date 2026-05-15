@@ -1,7 +1,8 @@
-# JSON Mapper flow — identifiers + per-field mappings, no `object`, no
-# `customerio_audience_config`. `basic` schedule runs every N minutes.
-# `constants` adds static key/value pairs to every synced row (mutable in
-# JSON Mapper; ForceNew in Object Mapping and destination-specific flows).
+# JSON Mapper flow — identifiers + per-field mappings, no `object`.
+# `basic` schedule runs every N minutes. `constants` adds static key/value
+# pairs to every synced row (mutable in JSON Mapper; ForceNew in Object
+# Mapping). Destination-specific flows (e.g. Customer.io Audience) have their
+# own typed resources — see retl_connection_customerio_audience.tf.
 resource "rudderstack_retl_connection" "table_to_webhook" {
   source_id      = rudderstack_retl_source_table.users.id
   destination_id = rudderstack_destination_webhook.example.id
@@ -226,36 +227,3 @@ resource "rudderstack_retl_connection" "track_to_webhook_named_column" {
   }
 }
 
-# Customer.io Audience flow — typed `customerio_audience_config` block carries
-# the destination-specific `audience_id`. ForceNew: changes recreate the
-# connection because the API does not accept `destinationConfig` on update.
-# `manual` schedule only runs when triggered explicitly.
-resource "rudderstack_retl_connection" "model_to_customerio_audience" {
-  source_id      = rudderstack_retl_source_model.users_revenue.id
-  destination_id = rudderstack_destination_customerio_audience.example.id
-  sync_behaviour = "mirror"
-
-  schedule {
-    type = "manual"
-  }
-
-  identifiers {
-    from = "email"
-    to   = "email"
-  }
-
-  customerio_audience_config {
-    audience_id = 16
-  }
-
-  sync_settings {
-    sync_logs_config {
-      enabled               = true
-      log_retention_in_days = 30
-      snapshots_to_retain   = 5
-    }
-    failed_keys_config {
-      enable_failed_keys_retry = false
-    }
-  }
-}
