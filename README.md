@@ -77,18 +77,25 @@ $ terraform init && terraform apply
 
 ## Making a new release
 
-### Create a new tag with properly named version number
+Releases are fully automated through GitHub Actions — do not create tags or run
+GoReleaser locally.
 
-``` shell
-git tag vX.Y.Z
-git push
-```
+### 1. Create the release tag
 
-### Create new release
+Run the **Create Tag** workflow from the
+[Actions tab](../../actions/workflows/create-tag.yml) (`Run workflow`):
 
-``` shell
-goreleaser release --rm-dist
-``` 
+- **branch_name** — branch to tag from (default `main`)
+- **tag_name** — version to release, e.g. `vX.Y.Z` (must follow semver)
+
+The workflow verifies organization membership, validates the tag name, and
+creates an annotated `vX.Y.Z` tag.
+
+### 2. Release is published automatically
+
+Pushing a `v*` tag triggers the **release** workflow
+(`.github/workflows/release.yml`), which runs GoReleaser to build and publish
+the release assets. No manual step is required.
 
 # Onboarding New Integrations with Claude Code
 
