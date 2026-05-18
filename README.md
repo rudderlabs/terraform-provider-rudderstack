@@ -97,9 +97,10 @@ Release.
 
 ### 3. Artifacts are published automatically
 
-The tag push triggers the **release** workflow (`.github/workflows/release.yml`),
-which runs GoReleaser to build and GPG-sign the provider archives and append
-them to the release. The Terraform Registry ingests the release from there.
+Publishing that GitHub Release triggers the **release** workflow
+(`.github/workflows/release.yml`), which runs GoReleaser to build and GPG-sign
+the provider archives and append them to the release. The Terraform Registry
+ingests the release from there.
 
 # Onboarding New Integrations with Claude Code
 
