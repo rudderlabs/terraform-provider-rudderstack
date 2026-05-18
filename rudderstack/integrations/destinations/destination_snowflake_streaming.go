@@ -87,7 +87,7 @@ func init() {
 			Required:         true,
 			Sensitive:        true,
 			Description:      "Private key for Snowpipe Streaming auth. Accepts both PEM-formatted keys (with BEGIN/END headers) and raw base64-encoded key bodies. Raw keys are automatically wrapped with PEM headers before being sent to the API.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|.+"),
+			ValidateDiagFunc: c.StringMatchesRegexp(".+"),
 			DiffSuppressFunc: suppressPEMKeyDiff,
 		},
 		"private_key_passphrase": {
@@ -95,7 +95,7 @@ func init() {
 			Optional:         true,
 			Sensitive:        true,
 			Description:      "Passphrase for encrypted private key.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{0,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("^(.{0,100})$"),
 		},
 		"skip_tracks_table": {
 			Type:        schema.TypeBool,
@@ -119,7 +119,7 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "External volume name. Required when `enable_iceberg` is true.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("^(.{1,100})$"),
 		},
 		"underscore_divide_numbers": {
 			Type:        schema.TypeBool,
