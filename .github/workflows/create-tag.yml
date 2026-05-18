@@ -36,7 +36,7 @@ jobs:
         id: generate-token
         uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         with:
-          app-id: ${{ vars.RELEASE_APP_ID }}
+          client-id: ${{ vars.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_PRIVATE_KEY }}
           permission-contents: write # to create tags
           permission-members: read # to check org team membership
@@ -106,17 +106,19 @@ jobs:
           COMMIT_SHA=$(git rev-parse HEAD)
           echo "Creating tag '$TAG_NAME' at commit: $COMMIT_SHA"
 
-          # Create annotated tag via GitHub API
-          gh api "repos/${{ github.repository }}/git/tags" \
+          # Create annotated tag via GitHub API and capture the tag object SHA
+          TAG_SHA=$(gh api "repos/${{ github.repository }}/git/tags" \
             -f tag="$TAG_NAME" \
             -f message="$TAG_MESSAGE" \
             -f object="$COMMIT_SHA" \
-            -f type="commit"
+            -f type="commit" \
+            --jq '.sha')
 
-          # Create the tag reference
+          # Create the tag reference pointing at the annotated tag object,
+          # so GitHub records it as an annotated tag (type "tag"), not lightweight.
           gh api "repos/${{ github.repository }}/git/refs" \
             -f ref="refs/tags/$TAG_NAME" \
-            -f sha="$COMMIT_SHA"
+            -f sha="$TAG_SHA"
 
           echo "Successfully created tag '$TAG_NAME'"
 
