@@ -41,6 +41,22 @@ Detailed rules for extracting integration metadata from the 3 config JSON files.
 - `oneTrustCookieCategories`
 - `ketchConsentPurposes`
 
+**DO NOT** generate standalone `one_trust_cookie_categories` or `ketch_consent_purposes` schema blocks — even if `schema.json` defines them as top-level properties. The unified `consent_management` block from `GetCommonConfigMeta()` already supports `oneTrust`, `ketch`, `iubenda`, and `custom` as provider options, and emitting the legacy blocks creates an inconsistent Terraform API surface across destinations.
+
+## Regex Translation (JSON Schema → Go RE2)
+
+Go's `regexp` package uses RE2, which **does not support** lookarounds (`(?=...)`, `(?!...)`, `(?<=...)`, `(?<!...)`) or backreferences. When `schema.json` uses these, translate rather than paraphrase:
+
+- **Negative lookahead with an explicit alternation list** (`^(?!FOO|BAR|BAZ).*$`) → express it as a separate negative match combined with the positive pattern via `c.ValidateAll`:
+  ```go
+  ValidateDiagFunc: c.ValidateAll(
+      c.StringMatchesRegexp("<positive pattern>"),
+      c.StringNotMatchesRegexp("^(FOO|BAR|BAZ)"),
+  ),
+  ```
+- **Do NOT collapse an explicit case list to `(?i)`** — they are not equivalent. `(?!Foo|FOO|foo)` blocks 3 specific casings; `(?i)^foo` blocks all 8. Stay faithful to the API schema's intent, since the API will accept exactly what the schema lists.
+- **Positive lookahead** (`^(?=.*X).+$`) — has no clean RE2 equivalent. Preserve the literal alternatives from the schema rather than approximating.
+
 ## Source Type Specific Fields (NOT handled by `GetCommonConfigMeta`)
 
 Many config fields are **per-source-type** — in the config JSON they appear with dot-notation like `fieldName.web`, `fieldName.android`, etc. These are **not** handled by `GetCommonConfigMeta()` and must be added manually. Common examples:
