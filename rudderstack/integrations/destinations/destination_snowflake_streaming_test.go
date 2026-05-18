@@ -17,6 +17,8 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				user      = "example-user"
 				private_key = "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----"
 				namespace = "example_namespace"
+				enable_iceberg = true
+				external_volume = "EXT_VOLUME0"
 			`,
 		APICreate: `{
 				"account": "example-account",
@@ -26,7 +28,8 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----",
 				"namespace": "example_namespace",
 				"skipTracksTable": false,
-				"enableIceberg": false,
+				"enableIceberg": true,
+				"externalVolume": "EXT_VOLUME0",
 				"underscoreDivideNumbers": false,
 				"allowUsersContextTraits": false
 			}`,
@@ -38,11 +41,11 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				role      = "updated-role"
 				private_key = "-----BEGIN PRIVATE KEY-----\nupdated\n-----END PRIVATE KEY-----"
 				private_key_passphrase = "updated-passphrase"
-				namespace = "updated_namespace"
+				namespace = "example_namespace"
 				skip_tracks_table = true
 				json_paths = "event.properties.a,event.properties.b"
 				enable_iceberg = true
-				external_volume = "EXT_VOLUME"
+				external_volume = "EXT_VOLUME1"
 				underscore_divide_numbers = true
 				allow_users_context_traits = true
 				connection_mode {
@@ -59,14 +62,6 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 					flutter = "cloud"
 					cordova = "cloud"
 					shopify = "cloud"
-				}
-				one_trust_cookie_categories {
-					web = [{ one_trust_cookie_category = "ot_web" }]
-					cloud_source = [{ one_trust_cookie_category = "ot_cloud_source" }]
-				}
-				ketch_consent_purposes {
-					android = [{ purpose = "purpose_android" }]
-					shopify = [{ purpose = "purpose_shopify" }]
 				}
 				consent_management {
 					web = [{
@@ -89,11 +84,11 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				"role": "updated-role",
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nupdated\n-----END PRIVATE KEY-----",
 				"privateKeyPassphrase": "updated-passphrase",
-				"namespace": "updated_namespace",
+				"namespace": "example_namespace",
 				"skipTracksTable": true,
 				"jsonPaths": "event.properties.a,event.properties.b",
 				"enableIceberg": true,
-				"externalVolume": "EXT_VOLUME",
+				"externalVolume": "EXT_VOLUME1",
 				"underscoreDivideNumbers": true,
 				"allowUsersContextTraits": true,
 				"connectionMode": {
@@ -110,14 +105,6 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 					"flutter": "cloud",
 					"cordova": "cloud",
 					"shopify": "cloud"
-				},
-				"oneTrustCookieCategories": {
-					"web": [{"oneTrustCookieCategory": "ot_web"}],
-					"cloudSource": [{"oneTrustCookieCategory": "ot_cloud_source"}]
-				},
-				"ketchConsentPurposes": {
-					"android": [{"purpose": "purpose_android"}],
-					"shopify": [{"purpose": "purpose_shopify"}]
 				},
 				"consentManagement": {
 					"web": [

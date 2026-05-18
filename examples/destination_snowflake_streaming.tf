@@ -33,14 +33,6 @@ EOT
     #   cloud_source = "cloud"
     # }
 
-    # one_trust_cookie_categories {
-    #   web = [{ one_trust_cookie_category = "C0002" }]
-    # }
-
-    # ketch_consent_purposes {
-    #   web = [{ purpose = "marketing" }]
-    # }
-
     # consent_management {
     #   web = [{
     #     provider = "custom"

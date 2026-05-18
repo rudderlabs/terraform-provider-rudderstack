@@ -27,6 +27,34 @@ YOUR_PRIVATE_KEY
 -----END PRIVATE KEY-----
 EOT
     namespace = "your_namespace"
+
+    # role                    = "your_role"
+    # private_key_passphrase  = "your_passphrase"
+    # skip_tracks_table       = false
+    # json_paths              = "event.properties.key1,event.properties.key2"
+    # enable_iceberg          = false
+    # external_volume         = "EXTERNAL_VOLUME"
+    # underscore_divide_numbers = false
+    # allow_users_context_traits = false
+
+    # connection_mode {
+    #   web          = "cloud"
+    #   android      = "cloud"
+    #   android_kotlin = "cloud"
+    #   ios          = "cloud"
+    #   ios_swift    = "cloud"
+    #   reactnative  = "cloud"
+    #   cloud        = "cloud"
+    #   cloud_source = "cloud"
+    # }
+
+    # consent_management {
+    #   web = [{
+    #     provider = "custom"
+    #     resolution_strategy = "and"
+    #     consents = ["C0001", "C0002"]
+    #   }]
+    # }
   }
 }
 ```
@@ -36,42 +64,208 @@ EOT
 
 ### Required
 
-- `config` (Block List, Min: 1, Max: 1)
-- `name` (String)
+- `config` (Block List, Min: 1, Max: 1) Destination specific configuration. Check the nested block documenation for more information. (see [below for nested schema](#nestedblock--config))
+- `name` (String) Human readable name of the destination. The value has to be unique across all the destinations.
 
 ### Optional
 
-- `enabled` (Boolean)
+- `enabled` (Boolean) An enabled destination allows data to be sent to it.
 
 ### Read-Only
 
-- `created_at` (String)
-- `id` (String)
-- `updated_at` (String)
+- `created_at` (String) Time when the resource was created, in ISO 8601 format.
+- `id` (String) The ID of this resource.
+- `updated_at` (String) Time when the resource was last updated, in ISO 8601 format.
 
 <a id="nestedblock--config"></a>
 ### Nested Schema for `config`
 
 Required:
 
-- `account` (String)
-- `database` (String)
-- `warehouse` (String)
-- `user` (String)
-- `private_key` (String, Sensitive)
-- `namespace` (String)
+- `account` (String) Account ID of your Snowflake warehouse.
+- `database` (String) Name of the Snowflake database.
+- `namespace` (String) Schema name where tables are created.
+- `private_key` (String, Sensitive) Private key for Snowpipe Streaming auth.
+- `user` (String) Snowflake user name.
+- `warehouse` (String) Name of the Snowflake warehouse.
 
 Optional:
 
-- `role` (String)
-- `private_key_passphrase` (String, Sensitive)
-- `skip_tracks_table` (Boolean)
-- `json_paths` (String)
-- `enable_iceberg` (Boolean)
-- `external_volume` (String)
-- `underscore_divide_numbers` (Boolean)
-- `allow_users_context_traits` (Boolean)
-- `connection_mode` (Block List, Max: 1)
-- `one_trust_cookie_categories` (Block List, Max: 1)
-- `ketch_consent_purposes` (Block List, Max: 1)
-- `consent_management` (Block List, Max: 1)
+- `allow_users_context_traits` (Boolean) Allow users context traits.
+- `connection_mode` (Block List, Max: 1) Use this setting to set how you want to route events from your source to destination. (see [below for nested schema](#nestedblock--config--connection_mode))
+- `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
+- `enable_iceberg` (Boolean) Create Iceberg tables.
+- `external_volume` (String) External volume name. Required when `enable_iceberg` is true.
+- `json_paths` (String) JSON columns in dot notation separated by commas.
+- `private_key_passphrase` (String, Sensitive) Passphrase for encrypted private key.
+- `role` (String) Optional Snowflake role.
+- `skip_tracks_table` (Boolean) Skip writing events to tracks table.
+- `underscore_divide_numbers` (Boolean) Use underscores to split numeric segments.
+
+<a id="nestedblock--config--connection_mode"></a>
+### Nested Schema for `config.connection_mode`
+
+Optional:
+
+- `amp` (String)
+- `android` (String)
+- `android_kotlin` (String)
+- `cloud` (String)
+- `cloud_source` (String)
+- `cordova` (String)
+- `flutter` (String)
+- `ios` (String)
+- `ios_swift` (String)
+- `reactnative` (String)
+- `shopify` (String)
+- `unity` (String)
+- `web` (String)
+
+
+<a id="nestedblock--config--consent_management"></a>
+### Nested Schema for `config.consent_management`
+
+Optional:
+
+- `amp` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--amp))
+- `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `android_kotlin` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android_kotlin))
+- `cloud` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud))
+- `cloud_source` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud_source))
+- `cordova` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cordova))
+- `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
+- `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `ios_swift` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios_swift))
+- `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
+- `shopify` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--shopify))
+- `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
+- `web` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--web))
+
+<a id="nestedatt--config--consent_management--amp"></a>
+### Nested Schema for `config.consent_management.amp`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android"></a>
+### Nested Schema for `config.consent_management.android`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android_kotlin"></a>
+### Nested Schema for `config.consent_management.android_kotlin`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cloud"></a>
+### Nested Schema for `config.consent_management.cloud`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cloud_source"></a>
+### Nested Schema for `config.consent_management.cloud_source`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--cordova"></a>
+### Nested Schema for `config.consent_management.cordova`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--flutter"></a>
+### Nested Schema for `config.consent_management.flutter`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios"></a>
+### Nested Schema for `config.consent_management.ios`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios_swift"></a>
+### Nested Schema for `config.consent_management.ios_swift`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--reactnative"></a>
+### Nested Schema for `config.consent_management.reactnative`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--shopify"></a>
+### Nested Schema for `config.consent_management.shopify`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--unity"></a>
+### Nested Schema for `config.consent_management.unity`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--web"></a>
+### Nested Schema for `config.consent_management.web`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
