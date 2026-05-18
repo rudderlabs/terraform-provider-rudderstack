@@ -85,7 +85,7 @@ Required:
 - `account` (String) Account ID of your Snowflake warehouse.
 - `database` (String) Name of the Snowflake database.
 - `namespace` (String) Schema name where tables are created.
-- `private_key` (String, Sensitive) Private key for Snowpipe Streaming auth.
+- `private_key` (String, Sensitive) Private key for Snowpipe Streaming auth. Accepts both PEM-formatted keys (with BEGIN/END headers) and raw base64-encoded key bodies. Raw keys are automatically wrapped with PEM headers before being sent to the API.
 - `user` (String) Snowflake user name.
 - `warehouse` (String) Name of the Snowflake warehouse.
 
