@@ -77,25 +77,29 @@ $ terraform init && terraform apply
 
 ## Making a new release
 
-Releases are fully automated through GitHub Actions — do not create tags or run
-GoReleaser locally.
+Releases are automated with [release-please](https://github.com/googleapis/release-please)
+and GoReleaser — there is no manual tagging or local build step.
 
-### 1. Create the release tag
+### 1. Merge changes to `main`
 
-Run the **Create Tag** workflow from the
-[Actions tab](../../actions/workflows/create-tag.yml) (`Run workflow`):
+`release-please` watches `main` and, from the [Conventional Commits](https://www.conventionalcommits.org)
+history, maintains an open **release PR** that bumps the version everywhere
+(`Makefile`, `rudderstack/provider.go`, `examples/main.tf`, the docs) and
+updates `CHANGELOG.md`.
 
-- **branch_name** — branch to tag from (default `main`)
-- **tag_name** — version to release, e.g. `vX.Y.Z` (must follow semver)
+The next version is derived from the commit messages: `fix:` bumps the patch,
+`feat:` the minor, and `feat!:` / `BREAKING CHANGE:` the major.
 
-The workflow verifies organization membership, validates the tag name, and
-creates an annotated `vX.Y.Z` tag.
+### 2. Merge the release PR
 
-### 2. Release is published automatically
+Merging the `release-please` PR creates the `vX.Y.Z` tag and the GitHub
+Release.
 
-Pushing a `v*` tag triggers the **release** workflow
-(`.github/workflows/release.yml`), which runs GoReleaser to build and publish
-the release assets. No manual step is required.
+### 3. Artifacts are published automatically
+
+The tag push triggers the **release** workflow (`.github/workflows/release.yml`),
+which runs GoReleaser to build and GPG-sign the provider archives and append
+them to the release. The Terraform Registry ingests the release from there.
 
 # Onboarding New Integrations with Claude Code
 
