@@ -54,10 +54,11 @@ func New() *schema.Provider {
 
 func resourcesMap() map[string]*schema.Resource {
 	resources := map[string]*schema.Resource{
-		"rudderstack_connection":        resourceConnection(),
-		"rudderstack_retl_source_model": retl.ResourceModel(),
-		"rudderstack_retl_source_table": retl.ResourceTable(),
-		"rudderstack_retl_connection":   retl.ResourceConnection(),
+		"rudderstack_connection":                            resourceConnection(),
+		"rudderstack_retl_source_model":                     retl.ResourceModel(),
+		"rudderstack_retl_source_table":                     retl.ResourceTable(),
+		"rudderstack_retl_connection":                       retl.ResourceConnection(),
+		"rudderstack_retl_connection_customerio_audience":   retl.ResourceConnectionCustomerIOAudience(),
 	}
 
 	// append sources and destinations from integration registries
@@ -84,7 +85,7 @@ func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag
 
 	c, err := NewAPIClient(accessToken,
 		client.WithBaseURL(apiUrl),
-		client.WithUserAgent("terraform-provider-rudderstack/4.4.0"))
+		client.WithUserAgent("terraform-provider-rudderstack/4.5.0"))
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}

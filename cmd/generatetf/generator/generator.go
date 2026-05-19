@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"sort"
 	"strings"
@@ -51,6 +52,7 @@ func GenerateImportScript(
 
 	foundSources := map[string]bool{}
 	foundDestinations := map[string]bool{}
+	destinationTerraformTypes := map[string]string{} // destination ID -> terraform type
 	foundRetlSources := map[string]bool{}
 
 	for _, src := range sources {
@@ -65,6 +67,7 @@ func GenerateImportScript(
 		t, cm := configMeta(destinationConfigs, dst.Type)
 		if cm != nil {
 			foundDestinations[dst.ID] = true
+			destinationTerraformTypes[dst.ID] = t
 			lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_destination_%s.%s" "%s"`, t, destinationName(dst), dst.ID))
 		}
 	}
@@ -92,6 +95,27 @@ func GenerateImportScript(
 			continue
 		}
 		if !foundDestinations[cnxn.DestinationID] {
+			continue
+		}
+		// Skip unsupported destination-specific flows — these are skipped in
+		// the HCL generator too, so we mustn't emit an import line for a
+		// resource that doesn't exist.
+		if len(cnxn.DestinationConfig) > 0 && destinationTerraformTypes[cnxn.DestinationID] != "customerio_audience" {
+			continue
+		}
+		// customerio_audience destinations always import into the typed
+		// resource rudderstack_retl_connection_customerio_audience. Hard-skip
+		// when destinationConfig is missing or undecodable so the import
+		// script never diverges from the HCL generator (the typed resource
+		// schema requires audience_id, so HCL without it would be invalid).
+		if destinationTerraformTypes[cnxn.DestinationID] == "customerio_audience" {
+			if len(cnxn.DestinationConfig) == 0 {
+				continue
+			}
+			if _, err := decodeCustomerIOAudienceID(cnxn.DestinationConfig); err != nil {
+				continue
+			}
+			lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_retl_connection_customerio_audience.%s" "%s"`, retlConnectionName(cnxn), cnxn.ID))
 			continue
 		}
 		lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_retl_connection.%s" "%s"`, retlConnectionName(cnxn), cnxn.ID))
@@ -199,6 +223,29 @@ func GenerateTerraform(
 			logger.Printf("could not generate resource block for RETL connection '%s': destination '%s' is not supported", cnxn.ID, cnxn.DestinationID)
 			continue
 		}
+		// Customer.io Audience is the only destination-specific flow this
+		// generator currently emits as a typed resource. Any other destination
+		// with a non-empty destinationConfig is a VDM-next flow we don't
+		// support — skip rather than emit a connection we can't represent.
+		if len(cnxn.DestinationConfig) > 0 && dst.terraformType != "customerio_audience" {
+			logger.Printf("skipping RETL connection '%s': destination-specific flow for '%s' is not supported", cnxn.ID, dst.terraformType)
+			continue
+		}
+		// For customerio_audience, audience_id is required by the typed
+		// schema. Emitting the resource without it would produce HCL that
+		// can't roundtrip on import, and emitting the generic resource for a
+		// typed destination would diverge from the import script. Hard-skip
+		// in both these cases so the two outputs stay aligned.
+		if dst.terraformType == "customerio_audience" {
+			if len(cnxn.DestinationConfig) == 0 {
+				logger.Printf("skipping RETL connection '%s': customerio_audience destination without destinationConfig (audience_id required)", cnxn.ID)
+				continue
+			}
+			if _, err := decodeCustomerIOAudienceID(cnxn.DestinationConfig); err != nil {
+				logger.Printf("skipping RETL connection '%s': cannot decode customerio_audience destinationConfig (%v)", cnxn.ID, err)
+				continue
+			}
+		}
 		b, err := generateRetlConnection(cnxn, src, dst)
 		if err != nil {
 			// generateRetlConnection only returns an error from its panic
@@ -237,7 +284,49 @@ func generateSource(source client.Source, terraformType string, cm *configs.Conf
 		body.AppendBlock(configBlock)
 	}
 
+	if cm.SettingsSchema != nil && (source.GeoEnrichmentEnabled != nil || source.Transient != nil) {
+		settingsBlock, err := generateSettingsBlock(source, cm)
+		if err != nil {
+			return nil, fmt.Errorf("could not generate settings block for source '%s': %w", source.ID, err)
+		}
+		if settingsBlock != nil {
+			body.AppendBlock(settingsBlock)
+		}
+	}
+
 	return block, nil
+}
+
+// generateSettingsBlock generates a settings block from source-level settings fields.
+func generateSettingsBlock(source client.Source, cm *configs.ConfigMeta) (*hclwrite.Block, error) {
+	settingsAPIMap := map[string]interface{}{}
+	if source.GeoEnrichmentEnabled != nil {
+		settingsAPIMap["geoEnrichmentEnabled"] = *source.GeoEnrichmentEnabled
+	}
+	if source.Transient != nil {
+		settingsAPIMap["transient"] = *source.Transient
+	}
+
+	settingsAPIJSON, err := json.Marshal(settingsAPIMap)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshal settings: %w", err)
+	}
+
+	settingsState, err := cm.SettingsAPIToState(string(settingsAPIJSON))
+	if err != nil {
+		return nil, fmt.Errorf("could not convert settings API to state: %w", err)
+	}
+
+	var stateMap map[string]interface{}
+	if err := json.Unmarshal([]byte(settingsState), &stateMap); err != nil {
+		return nil, err
+	}
+
+	if len(stateMap) == 0 {
+		return nil, nil
+	}
+
+	return generateBlock("settings", stateMap, cm.SettingsSchema)
 }
 
 func sourceType(terraformType string) string {
@@ -605,6 +694,16 @@ func generateRetlSource(s retl.RETLSource, terraformType string) (block *hclwrit
 // references (so terraform can manage the dependency graph), and the rest of
 // the flat API response is split back into the nested HCL blocks the resource
 // schema expects.
+//
+// For customerio_audience destinations the function emits the typed
+// `rudderstack_retl_connection_customerio_audience` resource with the
+// audience ID as a top-level attribute; all other destinations get the
+// generic `rudderstack_retl_connection`. The caller has already filtered
+// out unsupported destination-specific flows and pre-validated the typed
+// audience config, so any non-empty destinationConfig here belongs to a
+// customerio_audience destination and decodes cleanly. The error path on
+// decode is treated as fail-fast — defense-in-depth against a future
+// refactor that drops the pre-check.
 func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *destinationEntry) (block *hclwrite.Block, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -612,7 +711,11 @@ func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *de
 		}
 	}()
 
-	block = hclwrite.NewBlock("resource", []string{"rudderstack_retl_connection", retlConnectionName(c)})
+	resourceType := "rudderstack_retl_connection"
+	if dst.terraformType == "customerio_audience" {
+		resourceType = "rudderstack_retl_connection_customerio_audience"
+	}
+	block = hclwrite.NewBlock("resource", []string{resourceType, retlConnectionName(c)})
 	body := block.Body()
 
 	body.SetAttributeRaw("source_id", hclwrite.Tokens{
@@ -644,6 +747,20 @@ func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *de
 		body.AppendBlock(retlMappingBlock("mappings", m))
 	}
 
+	// Generic resource: event / constants / cursor_column / object apply.
+	// Typed customerio_audience resource: audience_id is the only flow-specific
+	// field; the rest don't apply.
+	if dst.terraformType == "customerio_audience" {
+		if len(c.DestinationConfig) > 0 {
+			id, err := decodeCustomerIOAudienceID(c.DestinationConfig)
+			if err != nil {
+				return nil, fmt.Errorf("decode customerio_audience destinationConfig: %w", err)
+			}
+			body.SetAttributeValue("audience_id", cty.NumberIntVal(id))
+		}
+		return block, nil
+	}
+
 	if c.Event != nil {
 		body.AppendBlock(retlEventBlock(c.Event))
 	}
@@ -661,17 +778,6 @@ func generateRetlConnection(c retl.RETLConnection, src *retlSourceEntry, dst *de
 	if c.Object != "" {
 		body.SetAttributeValue("object", cty.StringVal(c.Object))
 	}
-	if len(c.DestinationConfig) > 0 {
-		tokens, err := destinationConfigJsonencodeTokens(c.DestinationConfig)
-		if err != nil {
-			// Log and omit the attribute — the rest of the connection is still
-			// usable. Don't fail the whole generation over an opaque blob.
-			logger.Printf("RETL connection '%s': skipping destination_config (%v)", c.ID, err)
-		} else {
-			body.SetAttributeRaw("destination_config", tokens)
-		}
-	}
-
 	return block, nil
 }
 
@@ -738,45 +844,25 @@ func retlEventBlock(e *retl.Event) *hclwrite.Block {
 	return b
 }
 
-// destinationConfigJsonencodeTokens renders an opaque destinationConfig blob as
-// a `jsonencode({...})` call so the generated HCL stays readable. Returns an
-// error when the payload is JSON null, or when the top-level value isn't a
-// JSON object — both are valid JSON but neither produces useful HCL
-// (jsonencode(null) / jsonencode("foo") would round-trip the wrong shape
-// through the resource's destination_config string field). The caller is
-// expected to log the error and omit the attribute; the rest of the
-// connection block is still emitted.
-func destinationConfigJsonencodeTokens(raw json.RawMessage) (hclwrite.Tokens, error) {
-	var parsed interface{}
+// decodeCustomerIOAudienceID extracts the integer audienceId from a
+// customerio_audience destinationConfig JSON blob. Returns an error if the
+// payload is invalid, missing audienceId, or non-integer — the caller logs
+// and skips the connection in that case.
+func decodeCustomerIOAudienceID(raw json.RawMessage) (int64, error) {
+	var parsed map[string]interface{}
 	if err := json.Unmarshal(raw, &parsed); err != nil {
-		return nil, fmt.Errorf("destinationConfig is not valid JSON: %w", err)
+		return 0, fmt.Errorf("destinationConfig is not valid JSON: %w", err)
 	}
-	if parsed == nil {
-		return nil, fmt.Errorf("destinationConfig is JSON null")
-	}
-	m, ok := parsed.(map[string]interface{})
+	v, ok := parsed["audienceId"]
 	if !ok {
-		return nil, fmt.Errorf("destinationConfig top-level value is %T, expected JSON object", parsed)
+		return 0, fmt.Errorf("customerio_audience destinationConfig missing audienceId")
 	}
-	if len(m) == 0 {
-		// {} is technically a valid object, but emitting `jsonencode({})` is
-		// noise — the resource would set the field to a literal empty JSON
-		// string, which the schema's StateFunc already normalises away. Treat
-		// it the same as null and omit the attribute.
-		return nil, fmt.Errorf("destinationConfig is an empty object")
+	n, ok := v.(float64) // json.Unmarshal decodes numbers as float64
+	if !ok {
+		return 0, fmt.Errorf("customerio_audience audienceId is %T, expected number", v)
 	}
-	inner := hclwrite.TokensForValue(ctyValue(parsed))
-	// Suppress the leading whitespace hclwrite would otherwise insert before
-	// the opening brace of the inner value, so the output reads `jsonencode({`
-	// and not `jsonencode( {`.
-	if len(inner) > 0 {
-		inner[0].SpacesBefore = 0
+	if math.IsNaN(n) || math.IsInf(n, 0) || math.Trunc(n) != n {
+		return 0, fmt.Errorf("customerio_audience audienceId %v is not an integer", n)
 	}
-	out := hclwrite.Tokens{
-		&hclwrite.Token{Type: hclsyntax.TokenIdent, Bytes: []byte("jsonencode")},
-		&hclwrite.Token{Type: hclsyntax.TokenOParen, Bytes: []byte("(")},
-	}
-	out = append(out, inner...)
-	out = append(out, &hclwrite.Token{Type: hclsyntax.TokenCParen, Bytes: []byte(")")})
-	return out, nil
+	return int64(n), nil
 }
