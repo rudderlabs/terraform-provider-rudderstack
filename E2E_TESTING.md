@@ -87,10 +87,6 @@ grep -h "^func TestAcc" rudderstack/integrations/**/*.go \
 - The CRUD jobs run inside the GitHub **Environment** `e2e` (`environment: e2e` in the workflow). The environment binds the test workspace's PAT and API URL; if you need a separate staging/prod target, add a second environment and a duplicate matrix job.
 - There is currently **one** environment (the dev control plane). No staging or prod target. Treat the dev workspace as the only source of truth for what these tests verify.
 
-### "First run fails by design" patterns
-
-None today. There are no DevOps PRs that must merge before a verify step passes — if a new PR's E2E run fails on the very first attempt without any infrastructure change, it is a real failure. Re-running without a code change should not turn it green; if it does, file a flake.
-
 ---
 
 ## 5. Test accounts & credentials
