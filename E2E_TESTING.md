@@ -92,15 +92,15 @@ Two-credential model:
 
 - **What it is:** A Personal Access Token minted in the RudderStack dev control plane.
 - **Used by:** The provider (`RUDDERSTACK_ACCESS_TOKEN`) when running E2E CRUD against the API.
-- **Source of truth:** Team vault, under the eng path for this provider's e2e PAT.
+- **Source of truth:** Team dev vault, under the eng path (`integrations_team/e2e_test/terraform-provider/rudderstack-account`) for this provider's e2e PAT.
 - **Mirrored to:** GitHub Actions secret `RUDDERSTACK_ACC_TEST_TOKEN` on the `e2e` environment of `rudderlabs/terraform-provider-rudderstack`.
 - **Mirroring direction:** Vault → GitHub (vault is the source of truth; never edit the GitHub secret directly except for emergency invalidation).
 
-### (b) Underlying test user account (per environment)
+### (b) Underlying test user account
 
 - **What it is:** The control-plane user the PAT is minted for — the shared e2e test user for the dev workspace.
 - **Used by:** Humans regenerating the PAT, or when debugging via the control-plane UI.
-- **Source of truth:** Team vault, under the eng path for this provider's e2e account (login email + password).
+- **Source of truth:** Team dev vault, under the eng path (`integrations_team/e2e_test/terraform-provider/rudderstack-account`) for this provider's e2e account (login email + password).
 - **Mirrored to:** Nothing — this credential is human-only. It is **not** synced to GitHub. CI never authenticates with the user/password; it only uses the PAT minted from this account.
 
 ### Per-environment table
@@ -113,46 +113,7 @@ Two-credential model:
 
 ---
 
-## 6. CI secrets mapping
-
-### Naming convention
-
-`{ENV}_{PROVIDER}_{PURPOSE}` for secrets/vars that need environment differentiation. The current PAT secret predates this convention and is named `RUDDERSTACK_ACC_TEST_TOKEN` (env-implied by the `e2e` GitHub Environment scope).
-
-### What CI reads
-
-| GitHub Actions name | Type | Scope | Vault path |
-|---|---|---|---|
-| `RUDDERSTACK_ACC_TEST_TOKEN` | secret | `environment: e2e` | eng vault: e2e PAT for this provider (see runbook) |
-| `RUDDERSTACK_ACC_TEST_API_URL` | variable | `environment: e2e` | n/a (public URL) |
-
-The workflow maps them onto the env vars the test code reads:
-
-```yaml
-env:
-  TF_ACC: "1"
-  RUDDERSTACK_ACCESS_TOKEN: ${{ secrets.RUDDERSTACK_ACC_TEST_TOKEN }}
-  RUDDERSTACK_API_URL: ${{ vars.RUDDERSTACK_ACC_TEST_API_URL }}
-```
-
-### Bundling rules
-
-- **Per provider, not per integration.** One PAT covers all sources, destinations, and connections in the workspace. Do not mint per-destination tokens — the workspace's existing scopes are sufficient.
-- **JSON-valued secrets** — none today. If a future destination requires a JSON service-account key (e.g. Google), store it base64-encoded in vault and decode in the test setup; do not paste raw JSON into GitHub secrets (newlines + quotes are fragile in matrix interpolation).
-
-### Rotation steps
-
-1. **Mint a new PAT** in the dev control plane while signed in as the shared e2e test user (credentials in the team vault — see the runbook). Give it the same scopes as the current token (read/write on sources, destinations, connections).
-2. **Write the new value to vault** at the same entry as the current PAT (overwrite — vault retains the previous version for rollback).
-3. **Update the GitHub Environment secret** `RUDDERSTACK_ACC_TEST_TOKEN` on `e2e` (Repo → Settings → Environments → e2e → Secrets). Paste the new token.
-4. **Trigger a test run** — push an empty commit on a throwaway PR or re-run the latest E2E workflow. If it succeeds, revoke the old PAT in the control plane.
-5. **Document the rotation** in the eng rotation log so the next operator knows when the current token was minted.
-
-If rotation fails partway through (new secret saved, tests fail with 401), the old PAT is still valid until step 4 — revert the GitHub secret to the prior vault version and investigate before retrying.
-
----
-
-## 7. Running locally
+## 6. Running locally
 
 Minimal commands. Full reference in the `Makefile`.
 
@@ -177,14 +138,14 @@ Create `.env` at the repo root (git-ignored). The Makefile auto-loads it via `-i
 
 ```
 RUDDERSTACK_ACCESS_TOKEN=<paste from vault>
-RUDDERSTACK_API_URL=https://api.dev.rudderlabs.com
+RUDDERSTACK_API_URL=https://api.dev.rudderlabs.com/v2
 ```
 
 The `-run` patterns use Go's `(?i)` case-insensitive regex, so `DEST=webhook` matches `TestAccDestinationWebhook` and `DEST=customer_io` matches `TestAccDestinationCustomerIO` (underscores become `.*`).
 
 ---
 
-## 8. Troubleshooting & debugging
+## 7. Troubleshooting & debugging
 
 ### What's captured
 
@@ -202,7 +163,7 @@ This is a Go-test suite against an HTTP API. There are no browser screenshots, D
 | Symptom | First check | Then |
 |---|---|---|
 | `RUDDERSTACK_ACCESS_TOKEN must be set for acceptance tests` | Local: `.env` exists at repo root and has the token. CI: `e2e` environment is selected on the job (`environment: e2e`) | Re-mint the PAT if the workspace was rebuilt |
-| `failed to get destination from API: 401` | PAT is expired or revoked | Rotate (see §6); update vault → GitHub secret |
+| `failed to get destination from API: 401` | PAT is expired or revoked | Rotate the PAT (mint a new one as the e2e test user, write to vault, update the `RUDDERSTACK_ACC_TEST_TOKEN` GitHub Environment secret on `e2e`, revoke the old PAT once a test run succeeds) |
 | `API config verification failed: missing field "<x>"` | The integration's `APICreate`/`APIUpdate` JSON expects `<x>` but the API didn't return it | Either the upstream control plane stopped persisting that field (legitimate change — update the expected JSON) or the provider isn't sending it (bug — fix the provider's `MarshalJSON`/`flatten` path) |
 | `ImportStateVerify` mismatch | A computed-only field is leaking into the state diff | Add the field to `ImportStateVerifyIgnore` in the helper (already done for `write_key` on sources) |
 | `destination <id> not found in API` after Create | The Create step thinks it succeeded but the resource isn't queryable | Check the job log for an earlier 4xx/5xx that the SDK swallowed; reproduce locally with `TF_LOG=DEBUG` |
