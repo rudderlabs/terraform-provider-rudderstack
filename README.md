@@ -208,7 +208,7 @@ make testacc-conn
 make testacc-all
 ```
 
-The `-run` patterns use `(?i)` for case-insensitive matching, so `DEST=webhook` matches `TestAccDestinationWebhook`.
+The single-integration targets (`testacc-dest`, `testacc-source`) use a `(?i)`-prefixed regex so `DEST=webhook` matches `TestAccDestinationWebhook`. The bulk targets (`testacc-plan`, `testacc-all`, `testacc-conn`) use a case-sensitive `TestAcc*` prefix instead — all generated function names start with `TestAcc` so case-folding isn't needed.
 
 ## Adding E2E Tests for New Integrations
 
