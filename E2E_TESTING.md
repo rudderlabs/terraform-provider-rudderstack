@@ -109,7 +109,7 @@ Two-credential model:
 |---|---|---|---|
 | dev | `https://api.dev.rudderlabs.com` | eng vault: e2e PAT for this provider | eng vault: e2e account for this provider |
 
-> Specific vault paths and the test user's email are intentionally not published here — get them from the platform team's runbook before rotating.
+> The test user's email is intentionally not published here — get it from the platform team's runbook before signing in to rotate.
 
 ---
 
