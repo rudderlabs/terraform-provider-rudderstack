@@ -1,6 +1,6 @@
 # E2E Testing — Operational Guide
 
-Operational reference for the team that owns the Terraform provider's E2E suite. If you're a contributor adding tests for a new integration, see the contributor section in [`README.md`](README.md#e2e-testing) and the templates in `.claude/skills/onboard-integration/reference/e2e-testing.md`. This document covers running and debugging the suite plus where the test credentials live (the step-by-step PAT rotation procedure lives in the platform team's runbook — see §5).
+Operational reference for the team that owns the Terraform provider's E2E suite. If you're a contributor adding tests for a new integration, see the contributor section in [`README.md`](README.md#e2e-testing) and the templates in `.claude/skills/onboard-integration/reference/e2e-testing.md`. This document covers running and debugging the suite plus the credentials model in §5; the step-by-step PAT rotation procedure lives in the platform team's runbook.
 
 ---
 
@@ -141,7 +141,7 @@ RUDDERSTACK_ACCESS_TOKEN=<paste from vault>
 RUDDERSTACK_API_URL=https://api.dev.rudderlabs.com
 ```
 
-The `-run` patterns use Go's `(?i)` case-insensitive regex, so `DEST=webhook` matches `TestAccDestinationWebhook` and `DEST=customer_io` matches `TestAccDestinationCustomerIO` (underscores become `.*`).
+The single-integration targets (`testacc-dest`, `testacc-source`) use a `(?i)`-prefixed Go regex so `DEST=webhook` matches `TestAccDestinationWebhook` and `DEST=customer_io` matches `TestAccDestinationCustomerIO` (underscores become `.*`). The bulk targets (`testacc-plan`, `testacc-all`, `testacc-conn`) and the CI workflow use a case-sensitive `TestAcc*` prefix instead, which works because every generated test name starts with `TestAcc`.
 
 ---
 

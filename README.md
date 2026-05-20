@@ -259,7 +259,7 @@ func TestAccConnectionExampleToWebhook(t *testing.T) {
 
 ## CI, secrets, and operations
 
-CI orchestration (affected-integration detection, matrix CRUD jobs, summary gate), the per-environment credentials model, and rotation steps live in [`E2E_TESTING.md`](E2E_TESTING.md). Read it before rotating the PAT or debugging a CI-only failure.
+CI orchestration (affected-integration detection, matrix CRUD jobs, summary gate) and the per-environment credentials model live in [`E2E_TESTING.md`](E2E_TESTING.md). The step-by-step PAT rotation procedure is in the platform team's runbook (the operational guide points to it). Read both before rotating the PAT or debugging a CI-only failure.
 
 Note: `make test-ci` enforces coverage — any registered integration missing its `TestAcc*` function will fail the build. Matching is case-insensitive (`TestAccDestinationCustomerIO` matches the registry key `customerio`).
 
