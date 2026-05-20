@@ -199,12 +199,12 @@ This is a Go-test suite against an HTTP API. There are no browser screenshots, D
 
 | Symptom | First check | Then |
 |---|---|---|
-| `RUDDERSTACK_ACCESS_TOKEN must be set` | Local: `.env` exists at repo root and has the token. CI: `e2e` environment is selected on the job (`environment: e2e`) | Re-mint the PAT if the workspace was rebuilt |
+| `RUDDERSTACK_ACCESS_TOKEN must be set for acceptance tests` | Local: `.env` exists at repo root and has the token. CI: `e2e` environment is selected on the job (`environment: e2e`) | Re-mint the PAT if the workspace was rebuilt |
 | `failed to get destination from API: 401` | PAT is expired or revoked | Rotate (see §6); update vault → GitHub secret |
 | `API config verification failed: missing field "<x>"` | The integration's `APICreate`/`APIUpdate` JSON expects `<x>` but the API didn't return it | Either the upstream control plane stopped persisting that field (legitimate change — update the expected JSON) or the provider isn't sending it (bug — fix the provider's `MarshalJSON`/`flatten` path) |
 | `ImportStateVerify` mismatch | A computed-only field is leaking into the state diff | Add the field to `ImportStateVerifyIgnore` in the helper (already done for `write_key` on sources) |
 | `destination <id> not found in API` after Create | The Create step thinks it succeeded but the resource isn't queryable | Check the job log for an earlier 4xx/5xx that the SDK swallowed; reproduce locally with `TF_LOG=DEBUG` |
-| Test passes locally, fails in CI | Different workspace, different feature flags, different rate limits | Run against the same `RUDDERSTACK_ACC_TEST_API_URL` locally; compare auth scopes |
+| Test passes locally, fails in CI | Different workspace, different feature flags, different rate limits | Set `RUDDERSTACK_API_URL` locally to the same value CI uses (the `vars.RUDDERSTACK_ACC_TEST_API_URL` GitHub variable); compare auth scopes |
 | Flake: random transient 5xx | Control plane was deploying | Re-run the job; if it recurs, file a control-plane issue with the request ID from the log |
 
 ### Cleaning up leftover resources
