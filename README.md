@@ -182,7 +182,7 @@ Create a `.env` file at the repo root (git-ignored):
 
 ```
 RUDDERSTACK_ACCESS_TOKEN=your-access-token
-RUDDERSTACK_API_URL=https://api.rudderstack.com
+RUDDERSTACK_API_URL=https://api.dev.rudderlabs.com  # same base URL CI uses; see E2E_TESTING.md
 ```
 
 The Makefile auto-loads `.env` via `-include .env` + `export`.

@@ -66,7 +66,7 @@ grep -rB1 -A2 --include='*_test.go' "acc.PlanOnly()" rudderstack/integrations
 
 - **PR to `main`** — `.github/workflows/e2e-tests.yml` runs `plan-only` for everything and `e2e-crud` / `e2e-source-crud` / `e2e-conn-crud` for affected integrations. Gated by `e2e-summary`.
 - **Push to `main`** — no E2E run on push. `release-please` opens/updates the release PR; release artifacts publish only when the release PR is merged and the GitHub Release is created.
-- **No nightly / scheduled run.** If a destination's API config drifts upstream (the control plane adds/removes a field), the next PR that touches that destination will catch it — not before. If you need wider coverage, trigger a no-op PR or rerun the workflow against `main`.
+- **No nightly / scheduled run.** If a destination's API config drifts upstream (the control plane adds/removes a field), the next PR that touches that destination will catch it — not before. The workflow only triggers on `pull_request` (no `push` or `workflow_dispatch`); to force a fresh run, open a no-op PR to `main` or run `make testacc-all` locally against the CI `RUDDERSTACK_API_URL` / PAT.
 
 ### Affected-integration detection
 
