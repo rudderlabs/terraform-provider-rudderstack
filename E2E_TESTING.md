@@ -167,7 +167,7 @@ make testacc-source SRC=http
 # Full CRUD — connections.
 make testacc-conn
 
-# Full CRUD — everything (60-minute timeout, hits the API ~250 times).
+# Full CRUD — everything (60-minute timeout, hundreds of API calls).
 make testacc-all
 ```
 
