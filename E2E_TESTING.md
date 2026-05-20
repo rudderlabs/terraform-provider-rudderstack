@@ -1,6 +1,6 @@
 # E2E Testing — Operational Guide
 
-Operational reference for the team that owns the Terraform provider's E2E suite. If you're a contributor adding tests for a new integration, see the contributor section in [`README.md`](README.md#e2e-testing) and the templates in `.claude/skills/onboard-integration/reference/e2e-testing.md`. This document covers running, debugging, and rotating credentials in CI.
+Operational reference for the team that owns the Terraform provider's E2E suite. If you're a contributor adding tests for a new integration, see the contributor section in [`README.md`](README.md#e2e-testing) and the templates in `.claude/skills/onboard-integration/reference/e2e-testing.md`. This document covers running and debugging the suite plus where the test credentials live (the step-by-step PAT rotation procedure lives in the platform team's runbook — see §5).
 
 ---
 
