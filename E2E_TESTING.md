@@ -33,13 +33,13 @@ Every registered destination and source has a `TestAcc*` function — enforced a
 
 To list the current coverage:
 ```bash
-grep -h "^func TestAcc" rudderstack/integrations/**/*.go \
+grep -rh --include='*.go' "^func TestAcc" rudderstack/integrations \
   | sed 's/func //; s/(t.*//' | sort
 ```
 
 **Plan-only exceptions.** A small number of tests `t.Skip` in full-CRUD mode because they need a vendor account that can't be provisioned generically. `TestAccDestinationLinkedinAds` is currently the only one (requires a valid LinkedIn OAuth account in the workspace) — it runs in `TF_ACC_PLAN_ONLY=1` mode but is skipped under `TF_ACC=1`. To find all such skips:
 ```bash
-grep -B1 -A2 "acc.PlanOnly()" rudderstack/integrations/**/*_test.go
+grep -rB1 -A2 --include='*_test.go' "acc.PlanOnly()" rudderstack/integrations
 ```
 
 ---
