@@ -105,7 +105,7 @@ Two-credential model:
 
 ### Per-environment table
 
-| Env | Workspace API URL (`RUDDERSTACK_ACC_TEST_API_URL`) | PAT vault entry | Account vault entry |
+| Env | Workspace API URL (`vars.RUDDERSTACK_ACC_TEST_API_URL` in CI; `RUDDERSTACK_API_URL` locally) | PAT vault entry | Account vault entry |
 |---|---|---|---|
 | dev | `https://api.dev.rudderlabs.com` | eng vault: e2e PAT for this provider | eng vault: e2e account for this provider |
 
@@ -141,7 +141,7 @@ RUDDERSTACK_ACCESS_TOKEN=<paste from vault>
 RUDDERSTACK_API_URL=https://api.dev.rudderlabs.com
 ```
 
-The single-integration targets (`testacc-dest`, `testacc-source`) use a `(?i)`-prefixed Go regex so `DEST=webhook` matches `TestAccDestinationWebhook` and `DEST=customer_io` matches `TestAccDestinationCustomerIO` (underscores become `.*`). The bulk targets (`testacc-plan`, `testacc-all`, `testacc-conn`) and the CI workflow use a case-sensitive `TestAcc*` prefix instead, which works because every generated test name starts with `TestAcc`.
+The single-integration targets (`testacc-dest`, `testacc-source`) — and the CI destination CRUD job — use a `(?i)`-prefixed Go regex, so `DEST=webhook` matches `TestAccDestinationWebhook` and `DEST=customer_io` matches `TestAccDestinationCustomerIO` (underscores become `.*`). The bulk targets (`testacc-plan`, `testacc-all`, `testacc-conn`) and the CI source/connection jobs use a case-sensitive `TestAcc*` prefix instead, which works because every generated test name starts with `TestAcc`.
 
 ---
 
