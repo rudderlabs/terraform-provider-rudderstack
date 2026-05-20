@@ -162,7 +162,9 @@ When you run the skill for an integration that already exists, it:
 <a id="e2e-testing"></a>
 # E2E Testing
 
-The provider includes an E2E acceptance test framework that validates integrations against the real RudderStack API. Every registered source and destination has a corresponding `TestAcc*` function.
+The provider includes an E2E acceptance test framework that validates integrations against the real RudderStack control-plane API. Every registered source and destination has a corresponding `TestAcc*` function.
+
+> Operating the suite (environments, CI secrets, rotation, debugging, what's actually verified) is covered in [`E2E_TESTING.md`](E2E_TESTING.md). The section below is the contributor cheatsheet: how to run tests and how to add one for a new integration.
 
 ## Two Modes
 
@@ -208,22 +210,9 @@ make testacc-all
 
 The `-run` patterns use `(?i)` for case-insensitive matching, so `DEST=webhook` matches `TestAccDestinationWebhook`.
 
-## Architecture
-
-The framework lives in `internal/testutil/acc/`:
-
-| File | Purpose |
-|---|---|
-| `provider.go` | Provider factory, `TestAccPreCheck()`, `PlanOnly()`, dummy token helper |
-| `destinations.go` | `AccAssertDestination()` — plan-only or full CRUD for destinations |
-| `sources.go` | `AccAssertSource()` — plan-only or full CRUD for sources |
-| `connections.go` | `AccAssertConnection()` — tests source→destination wiring |
-| `config_verify.go` | Shared API config comparison logic (subset check) |
-| `coverage_test.go` | CI enforcement — fails if any registered integration lacks a `TestAcc*` function |
-
-E2E tests reuse the same `[]configs.TestConfig` data as unit tests — no duplicated HCL.
-
 ## Adding E2E Tests for New Integrations
+
+E2E tests reuse the same `[]configs.TestConfig` data as unit tests — no duplicated HCL. The framework lives in `internal/testutil/acc/`; see [`E2E_TESTING.md`](E2E_TESTING.md#where-the-framework-lives) for a per-file breakdown.
 
 ### Destinations
 
@@ -268,20 +257,11 @@ func TestAccConnectionExampleToWebhook(t *testing.T) {
 }
 ```
 
-## CI Workflow
+## CI, secrets, and operations
 
-The GitHub Actions workflow (`.github/workflows/e2e-tests.yml`) runs on every PR:
+CI orchestration (affected-integration detection, matrix CRUD jobs, summary gate), the per-environment credentials model, and rotation steps live in [`E2E_TESTING.md`](E2E_TESTING.md). Read it before rotating the PAT or debugging a CI-only failure.
 
-1. **detect-changes** — Determines which integrations are affected by the PR
-2. **plan-only** — Validates all integration configs with zero API calls
-3. **e2e-crud** — Runs full CRUD tests only for affected integrations (matrix strategy, max 5 parallel)
-4. **e2e-summary** — Gates the PR on both plan-only and CRUD results
-
-Core file changes (provider, configs, client, acc helpers) trigger CRUD tests for **all** integrations.
-
-## CI Enforcement
-
-A coverage test (`internal/testutil/acc/coverage_test.go`) runs during `make test-ci` and fails if any registered integration is missing its `TestAcc*` function. This uses case-insensitive matching — exact PascalCase is not required.
+Note: `make test-ci` enforces coverage — any registered integration missing its `TestAcc*` function will fail the build. Matching is case-insensitive (`TestAccDestinationCustomerIO` matches the registry key `customerio`).
 
 # Related
 
