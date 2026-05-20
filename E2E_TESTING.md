@@ -138,7 +138,7 @@ Create `.env` at the repo root (git-ignored). The Makefile auto-loads it via `-i
 
 ```
 RUDDERSTACK_ACCESS_TOKEN=<paste from vault>
-RUDDERSTACK_API_URL=https://api.dev.rudderlabs.com/v2
+RUDDERSTACK_API_URL=https://api.dev.rudderlabs.com
 ```
 
 The `-run` patterns use Go's `(?i)` case-insensitive regex, so `DEST=webhook` matches `TestAccDestinationWebhook` and `DEST=customer_io` matches `TestAccDestinationCustomerIO` (underscores become `.*`).
