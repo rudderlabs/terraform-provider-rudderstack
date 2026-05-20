@@ -29,24 +29,17 @@ There are two run modes:
 
 ## 2. What's covered
 
-Verified by parsing `*_test.go` in this commit. The coverage test `internal/testutil/acc/coverage_test.go` (run as part of `make test-ci`) fails if any registered destination or source is missing its `TestAcc*` function.
+Every registered destination and source has a `TestAcc*` function — enforced at build time by `internal/testutil/acc/coverage_test.go` (run as part of `make test-ci`). Connection coverage is intentionally narrow (two source→destination wiring tests); per-integration behavior is covered by the source/destination tests.
 
-### Destinations (48)
-
-`ActiveCampaign`, `Adjust`, `AdobeAnalytics`, `Amplitude`, `AttentiveTag`, `BQStream`, `BigQuery`, `Braze`, `CustomerIO`, `CustomerioAudience`, `FacebookConversions`, `FacebookPixel`, `Firebase`, `GCS`, `GoogleAds`, `GoogleAnalytics`, `GoogleAnalytics4`, `GooglePubSub`, `GoogleSheets`, `GoogleTagManager`, `Hs`, `HsHubspotEvents`, `Http`, `Intercom`, `Iterable`, `Kafka`, `Kinesis`, `LinkedinAds`, `LinkedinInsightTag`, `Marketo`, `Mixpanel`, `Postgres`, `Posthog`, `Qualtrics`, `Redis`, `Redshift`, `S3`, `S3Datalake`, `Salesforce`, `Sentry`, `Slack`, `Snowflake`, `SnowflakeStreaming`, `StatSig`, `TiktokAds`, `VWO`, `Webhook`, `Zendesk`.
-
-### Sources (52)
-
-`AMP`, `Adjust`, `Android`, `AndroidKotlin`, `Appcenter`, `Appsflyer`, `Auth0`, `Braze`, `Canny`, `CloseCRM`, `Cordial`, `Cordova`, `Customerio`, `Dotnet`, `Extole`, `FacebookLeadAds`, `Flutter`, `Formsort`, `GainsightPX`, `Go`, `HTTP`, `IOS`, `IOSSwift`, `Iterable`, `Java`, `Javascript`, `JavascriptWithSettings`, `Looker`, `Mailjet`, `Mailmodo`, `MoEngage`, `Monday`, `Node`, `Olark`, `Ortto`, `PagerDuty`, `Php`, `Pipedream`, `Python`, `Reactnative`, `Refiner`, `Revenuecat`, `Ruby`, `Rust`, `SIGNL4`, `SatisMeter`, `Segment`, `Slack`, `Unity`, `Webhook`, `WebhookShopify`.
-
-### Connections (2)
-
-`HTTPToWebhook`, `JavascriptToWebhook`. Connection coverage is intentionally narrow — these confirm source→destination wiring; per-integration behavior is covered by the source/destination tests above.
-
-To regenerate this list:
+To list the current coverage:
 ```bash
 grep -h "^func TestAcc" rudderstack/integrations/**/*.go \
   | sed 's/func //; s/(t.*//' | sort
+```
+
+**Plan-only exceptions.** A small number of tests `t.Skip` in full-CRUD mode because they need a vendor account that can't be provisioned generically. `TestAccDestinationLinkedinAds` is currently the only one (requires a valid LinkedIn OAuth account in the workspace) — it runs in `TF_ACC_PLAN_ONLY=1` mode but is skipped under `TF_ACC=1`. To find all such skips:
+```bash
+grep -B1 -A2 "acc.PlanOnly()" rudderstack/integrations/**/*_test.go
 ```
 
 ---
