@@ -23,7 +23,7 @@ There are two run modes:
 | Mode | Env | What runs | API calls per integration |
 |---|---|---|---|
 | **Plan-only** | `TF_ACC=1 TF_ACC_PLAN_ONLY=1` | HCL parse + provider schema validation | 0 (dummy token auto-set) |
-| **Full CRUD** | `TF_ACC=1` | Create → Update → Import → Destroy + config-subset checks | ~5 |
+| **Full CRUD** | `TF_ACC=1` | Create → Update → Import → Destroy + config-subset checks | ~10 (Create/Update/Delete + 2 Gets per apply step + Import) |
 
 ---
 
@@ -90,24 +90,24 @@ Two-credential model:
 
 - **What it is:** A Personal Access Token minted in the RudderStack dev control plane.
 - **Used by:** The provider (`RUDDERSTACK_ACCESS_TOKEN`) when running E2E CRUD against the API.
-- **Source of truth:** Vault → `secret/eng/terraform-provider-rudderstack/e2e/dev/access_token`.
+- **Source of truth:** Team vault, under the eng path for this provider's e2e PAT.
 - **Mirrored to:** GitHub Actions secret `RUDDERSTACK_ACC_TEST_TOKEN` on the `e2e` environment of `rudderlabs/terraform-provider-rudderstack`.
 - **Mirroring direction:** Vault → GitHub (vault is the source of truth; never edit the GitHub secret directly except for emergency invalidation).
 
 ### (b) Underlying test user account (per environment)
 
-- **What it is:** The control-plane user the PAT is minted for. Currently `integration-accounts+terraform-provider-e2e@rudderstack.com` on the dev workspace.
+- **What it is:** The control-plane user the PAT is minted for — the shared e2e test user for the dev workspace.
 - **Used by:** Humans regenerating the PAT, or when debugging via the control-plane UI.
-- **Source of truth:** Vault → `secret/eng/terraform-provider-rudderstack/e2e/dev/account` (login email + password).
+- **Source of truth:** Team vault, under the eng path for this provider's e2e account (login email + password).
 - **Mirrored to:** Nothing — this credential is human-only. It is **not** synced to GitHub. CI never authenticates with the user/password; it only uses the PAT minted from this account.
 
 ### Per-environment table
 
-| Env | Workspace API URL (`RUDDERSTACK_ACC_TEST_API_URL`) | PAT vault path | Account vault path |
+| Env | Workspace API URL (`RUDDERSTACK_ACC_TEST_API_URL`) | PAT vault entry | Account vault entry |
 |---|---|---|---|
-| dev | `https://api.dev.rudderlabs.com` | `secret/eng/terraform-provider-rudderstack/e2e/dev/access_token` | `secret/eng/terraform-provider-rudderstack/e2e/dev/account` |
+| dev | `https://api.dev.rudderlabs.com` | eng vault: e2e PAT for this provider | eng vault: e2e account for this provider |
 
-> Confirm vault paths with the platform team before rotating — paths in the table follow the convention used elsewhere in the eng vault but should be validated against the actual entries.
+> Specific vault paths and the test user's email are intentionally not published here — get them from the platform team's runbook before rotating.
 
 ---
 
@@ -121,7 +121,7 @@ Two-credential model:
 
 | GitHub Actions name | Type | Scope | Vault path |
 |---|---|---|---|
-| `RUDDERSTACK_ACC_TEST_TOKEN` | secret | `environment: e2e` | `secret/eng/terraform-provider-rudderstack/e2e/dev/access_token` |
+| `RUDDERSTACK_ACC_TEST_TOKEN` | secret | `environment: e2e` | eng vault: e2e PAT for this provider (see runbook) |
 | `RUDDERSTACK_ACC_TEST_API_URL` | variable | `environment: e2e` | n/a (public URL) |
 
 The workflow maps them onto the env vars the test code reads:
@@ -140,8 +140,8 @@ env:
 
 ### Rotation steps
 
-1. **Mint a new PAT** in the dev control plane while signed in as `integration-accounts+terraform-provider-e2e@rudderstack.com`. Give it the same scopes as the current token (read/write on sources, destinations, connections).
-2. **Write the new value to vault** at the path above (overwrite — vault retains the previous version for rollback).
+1. **Mint a new PAT** in the dev control plane while signed in as the shared e2e test user (credentials in the team vault — see the runbook). Give it the same scopes as the current token (read/write on sources, destinations, connections).
+2. **Write the new value to vault** at the same entry as the current PAT (overwrite — vault retains the previous version for rollback).
 3. **Update the GitHub Environment secret** `RUDDERSTACK_ACC_TEST_TOKEN` on `e2e` (Repo → Settings → Environments → e2e → Secrets). Paste the new token.
 4. **Trigger a test run** — push an empty commit on a throwaway PR or re-run the latest E2E workflow. If it succeeds, revoke the old PAT in the control plane.
 5. **Document the rotation** in the eng rotation log so the next operator knows when the current token was minted.
