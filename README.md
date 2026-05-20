@@ -171,7 +171,7 @@ The provider includes an E2E acceptance test framework that validates integratio
 | Mode | Env vars | What it does | API calls |
 |---|---|---|---|
 | **Plan-only** | `TF_ACC=1 TF_ACC_PLAN_ONLY=1` | Validates HCL config + provider schema | Zero |
-| **Full CRUD** | `TF_ACC=1` | Create → Update → Import → Destroy | ~5 per integration |
+| **Full CRUD** | `TF_ACC=1` | Create → Update → Import → Destroy | ~10 per integration (Create/Update/Delete + 2 Gets per apply step + Import) |
 
 - **Plan-only** runs for all integrations on every PR. It sets a dummy token automatically — no credentials needed.
 - **Full CRUD** runs only for integrations affected by the PR, using real API credentials. After each Create and Update step, the test fetches the resource from the API and verifies its config matches the expected `APICreate`/`APIUpdate` JSON from the test configs.

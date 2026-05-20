@@ -73,7 +73,7 @@ grep -rB1 -A2 --include='*_test.go' "acc.PlanOnly()" rudderstack/integrations
 `detect-changes` (in `e2e-tests.yml`) decides which integrations are affected:
 
 - Touching any of `rudderstack/resource_destination.go`, `rudderstack/resource_source.go`, `rudderstack/client.go`, `rudderstack/provider.go`, `rudderstack/configs/`, `rudderstack/integrations/destinations/common_config_meta.go`, or `internal/testutil/acc/` ⇒ runs **all** destinations, sources, and connections.
-- Otherwise — only changed `destination_<name>*.go` files run CRUD; sources/connections only run CRUD if their respective directories are touched.
+- Otherwise — any changed file matching `rudderstack/integrations/destinations/destination_<name>...` (regardless of extension — `.go`, `.tf` examples, `.md` templates, test files) triggers CRUD for that destination. Sources and connections only run CRUD if their respective directories are touched.
 
 ### Environments
 
