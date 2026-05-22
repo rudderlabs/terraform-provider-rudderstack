@@ -133,7 +133,7 @@ func resourceDestinationUpdate(cm configs.ConfigMeta) schema.UpdateContextFunc {
 
 		destination, err = c.Destinations.Update(ctx, destination)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("could not create destination: %w", err))
+			return diag.FromErr(fmt.Errorf("could not update destination: %w", err))
 		}
 
 		d.SetId(destination.ID)

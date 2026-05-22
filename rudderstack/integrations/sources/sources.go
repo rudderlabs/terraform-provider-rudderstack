@@ -2,6 +2,7 @@ package sources
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 

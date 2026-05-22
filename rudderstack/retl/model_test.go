@@ -185,4 +185,3 @@ func checkAll(want, got map[string]string) error {
 	}
 	return nil
 }
-

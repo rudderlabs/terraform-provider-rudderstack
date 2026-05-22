@@ -92,20 +92,20 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 }
 
 var hsTestConfigs = []c.TestConfig{
-		{
-			TerraformCreate: `
+	{
+		TerraformCreate: `
 				authorization_type = "legacyApiKey"
 				api_version        = "newApi"
 				api_key            = "my-api-key"
 				lookup_field       = "email"
 			`,
-			APICreate: `{
+		APICreate: `{
 				"authorizationType": "legacyApiKey",
 				"apiVersion": "newApi",
 				"apiKey": "my-api-key",
 				"lookupField": "email"
 			}`,
-			TerraformUpdate: `
+		TerraformUpdate: `
 				authorization_type = "newPrivateAppApi"
 				api_version        = "newApi"
 				access_token       = "my-access-token"
@@ -227,7 +227,7 @@ var hsTestConfigs = []c.TestConfig{
 					}]
 				}
 			`,
-			APIUpdate: `{
+		APIUpdate: `{
 				"authorizationType": "newPrivateAppApi",
 				"apiVersion": "newApi",
 				"accessToken": "my-access-token",
@@ -420,7 +420,7 @@ var hsTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		},
+	},
 }
 
 func TestDestinationResourceHsHubspotEvents(t *testing.T) {
