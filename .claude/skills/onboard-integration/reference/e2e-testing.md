@@ -2,6 +2,8 @@
 
 When onboarding a new integration, add an E2E acceptance test alongside the unit test. The E2E framework reuses the same `TestConfig` data as unit tests.
 
+> For team-facing operational details (environments, CI secrets, rotation, debugging), see [`E2E_TESTING.md`](../../../../E2E_TESTING.md) at the repo root. This file is the integration-onboarding cheatsheet only.
+
 ## For Destinations
 
 The E2E test function is added to the same `_test.go` file as the unit test. It reuses the extracted `var` containing `[]c.TestConfig`.
@@ -60,4 +62,4 @@ make testacc-source SRC={name}
 
 ## CI enforcement
 
-A coverage test in `internal/testutil/acc/coverage_test.go` verifies every registered integration has a `TestAccDestination*` or `TestAccSource*` function. If you forget to add the E2E test, `make test-ci` will fail.
+A coverage test in `internal/testutil/acc/coverage_test.go` verifies every registered integration has a `TestAccDestination*` or `TestAccSource*` function. If you forget to add the E2E test, `make test-ci` will fail. Naming convention: `TestAccDestination<Name>` / `TestAccSource<Name>` (no `_basic` suffix). Matching is case-insensitive and ignores underscores in the registry key, so `customer_io` → `TestAccDestinationCustomerIO` works.
