@@ -614,7 +614,7 @@ func connectionName(connection client.Connection) string {
 //     sources can't be generated and must be filtered upstream of any HCL
 //     emission, otherwise the import script would reference a non-existent
 //     resource block.
-func retlSourceTerraformType(s retl.RETLSource) (terraformType string, reason string, ok bool) {
+func retlSourceTerraformType(s retl.RETLSource) (terraformType, reason string, ok bool) {
 	switch s.SourceType {
 	case retl.ModelSourceType:
 		if _, ok := s.Config.(retl.RETLSQLModelConfig); !ok {

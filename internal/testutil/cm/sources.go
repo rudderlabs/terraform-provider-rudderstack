@@ -25,7 +25,7 @@ import (
 // The JSON "transient" key holds the actual API wire value (source.Transient),
 // which is the inverse of the TF field temporarily_store_events_for_retries.
 // Returns nil pointers when the JSON is empty or has no settings keys.
-func sourceSettingsFromAPIJSON(apiJSON string) (geoEnabled *bool, apiTransient *bool) {
+func sourceSettingsFromAPIJSON(apiJSON string) (geoEnabled, apiTransient *bool) {
 	apiJSON = strings.TrimSpace(apiJSON)
 	if apiJSON == "" || apiJSON == "{}" {
 		return nil, nil

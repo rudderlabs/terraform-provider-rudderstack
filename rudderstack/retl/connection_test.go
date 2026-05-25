@@ -594,4 +594,3 @@ func TestResourceConnection_Delete404IsTreatedAsAlreadyGone(t *testing.T) {
 	require.Empty(t, d.Id())
 	svc.AssertExpectations(t)
 }
-
