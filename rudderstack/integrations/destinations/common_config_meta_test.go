@@ -294,3 +294,60 @@ func TestGetCommonConfigMeta(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateConsentManagementUniqueProviders(t *testing.T) {
+	testCases := []struct {
+		name              string
+		consentManagement interface{}
+		wantErr           string
+	}{
+		{
+			name: "duplicate provider in a single source type",
+			consentManagement: map[string]interface{}{
+				"web": []interface{}{
+					map[string]interface{}{
+						"provider": "oneTrust",
+					},
+					map[string]interface{}{
+						"provider": "oneTrust",
+					},
+				},
+			},
+			wantErr: `duplicate consent_management provider "oneTrust" configured for source type "web"`,
+		},
+		{
+			name: "same provider allowed across different source types",
+			consentManagement: map[string]interface{}{
+				"web": []interface{}{
+					map[string]interface{}{
+						"provider": "oneTrust",
+					},
+				},
+				"android": []interface{}{
+					map[string]interface{}{
+						"provider": "oneTrust",
+					},
+				},
+			},
+		},
+		{
+			name:              "nil consent management",
+			consentManagement: nil,
+		},
+		{
+			name:              "non map value",
+			consentManagement: []interface{}{},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := ValidateConsentManagementUniqueProviders(tc.consentManagement)
+			if tc.wantErr == "" {
+				require.NoError(t, err)
+				return
+			}
+			require.EqualError(t, err, tc.wantErr)
+		})
+	}
+}

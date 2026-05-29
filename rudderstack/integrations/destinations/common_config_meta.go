@@ -115,3 +115,38 @@ func GetCommonConfigMeta(supportedSourceTypes []string) ([]c.ConfigProperty, map
 
 	return commonProperties, commonSchema
 }
+
+// ValidateConsentManagementUniqueProviders ensures a consent_management source-type
+// array does not contain the same provider more than once.
+func ValidateConsentManagementUniqueProviders(consentManagement interface{}) error {
+	consentBySourceType, ok := consentManagement.(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	for sourceType, sourceTypeRaw := range consentBySourceType {
+		sourceTypeEntries, ok := sourceTypeRaw.([]interface{})
+		if !ok {
+			continue
+		}
+
+		seenProviders := map[string]bool{}
+		for _, entryRaw := range sourceTypeEntries {
+			entry, ok := entryRaw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			provider, _ := entry["provider"].(string)
+			if provider == "" {
+				continue
+			}
+			if seenProviders[provider] {
+				return fmt.Errorf("duplicate consent_management provider %q configured for source type %q", provider, sourceType)
+			}
+			seenProviders[provider] = true
+		}
+	}
+
+	return nil
+}

@@ -11,6 +11,7 @@ import (
 
 	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations/destinations"
 )
 
 func resourceDestination(cm configs.ConfigMeta) *schema.Resource {
@@ -20,9 +21,25 @@ func resourceDestination(cm configs.ConfigMeta) *schema.Resource {
 		ReadContext:   resourceDestinationRead(cm),
 		UpdateContext: resourceDestinationUpdate(cm),
 		DeleteContext: resourceDestinationDelete(cm),
+		CustomizeDiff: resourceDestinationCustomizeDiff(cm),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDestinationImportState(cm),
 		},
+	}
+}
+
+func resourceDestinationCustomizeDiff(cm configs.ConfigMeta) schema.CustomizeDiffFunc {
+	return func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+		if cm.SkipConfig {
+			return nil
+		}
+
+		consentManagement := d.Get("config.0.consent_management.0")
+		if consentManagement == nil {
+			return nil
+		}
+
+		return destinations.ValidateConsentManagementUniqueProviders(consentManagement)
 	}
 }
 
