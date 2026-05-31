@@ -47,10 +47,12 @@ func TestResourceDestinationConsentManagementDuplicateProvider(t *testing.T) {
 									{
 										provider = "oneTrust"
 										consents = ["a"]
+										resolution_strategy = ""
 									},
 									{
 										provider = "oneTrust"
 										consents = ["b"]
+										resolution_strategy = ""
 									}
 								]
 							}
@@ -97,22 +99,26 @@ func TestResourceDestinationConsentManagementAllowsDistinctAndPerSourceType(t *t
 									{
 										provider = "oneTrust"
 										consents = ["a"]
+										resolution_strategy = ""
 									},
 									{
 										provider = "ketch"
 										consents = ["b"]
+										resolution_strategy = ""
 									}
 								]
 								android = [
 									{
 										provider = "oneTrust"
 										consents = ["c"]
+										resolution_strategy = ""
 									}
 								]
 							}
 						}
 					}
 				`,
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
