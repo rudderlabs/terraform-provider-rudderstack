@@ -6,6 +6,7 @@ import (
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
+	"github.com/tidwall/gjson"
 )
 
 var amplitudeTestConfigs = []c.TestConfig{
@@ -17,6 +18,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 		APICreate: `{
 				"apiKey": "123abc",
 				"apiSecret": "abc123",
+				"apiVersion": "v1",
 				"trackCategorizedPages": true,
 				"trackNamedPages": true,
 				"residencyServer": "standard"
@@ -53,6 +55,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				}
 			
 				version_name = "name"
+				api_version  = "v2"
 			
 				traits_to_increment = ["one", "two", "three"]
 				traits_to_set_once  = ["one", "two", "three"]
@@ -208,6 +211,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"trackProductsOnce": true,
 				"trackRevenuePerProduct": true,
 				"versionName": "name",
+				"apiVersion": "v2",
 				"traitsToIncrement": [
 				  { "traits": "one" },
 				  { "traits": "two" },
@@ -496,4 +500,24 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 
 func TestAccDestinationAmplitude(t *testing.T) {
 	acc.AccAssertDestination(t, "amplitude", amplitudeTestConfigs)
+}
+
+func TestDestinationAmplitudeAPIVersionDefaultsToV1OnRead(t *testing.T) {
+	cm := c.Destinations.Entries()["amplitude"]
+
+	state, err := cm.APIToState(`{}`)
+	if err != nil {
+		t.Fatalf("APIToState failed: %v", err)
+	}
+	if v := gjson.Get(state, "api_version").String(); v != "v1" {
+		t.Fatalf("expected api_version to default to v1, got %q", v)
+	}
+
+	state, err = cm.APIToState(`{"apiVersion":"v2"}`)
+	if err != nil {
+		t.Fatalf("APIToState failed: %v", err)
+	}
+	if v := gjson.Get(state, "api_version").String(); v != "v2" {
+		t.Fatalf("expected api_version to round-trip v2, got %q", v)
+	}
 }

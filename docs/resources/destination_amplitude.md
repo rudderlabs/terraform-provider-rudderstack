@@ -10,6 +10,8 @@ description: |-
 This resource represents an Amplitude destination. For more information check 
 https://www.rudderstack.com/docs/destinations/analytics/amplitude
 
+`api_version` defaults to `v1` to preserve existing Amplitude destination behavior unless you explicitly opt into `v2`.
+
 ## Example Usage
 
 ```terraform
@@ -48,6 +50,7 @@ resource "rudderstack_destination_amplitude" "example" {
     # }
 
     # version_name = ""
+    # api_version  = "v1"
 
     # traits_to_increment = ["one", "two", "three"]
     # traits_to_set_once  = ["one", "two", "three"]
@@ -232,6 +235,7 @@ Required:
 Optional:
 
 - `api_secret` (String, Sensitive) Enter the Amplitude API Secret key required for user deletion.
+- `api_version` (String) Amplitude API version to use. Defaults to `v1`. Valid values are `v1` and `v2`.
 - `batch_events` (Block List, Max: 1) If this setting is enabled, the events are batched together and uploaded by the Amplitude SDK. (see [below for nested schema](#nestedblock--config--batch_events))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `device_id_from_url_param` (Block List, Max: 1) If this setting is enabled, the Amplitude SDK will parse the URL parameter and set the device ID from `amp_device_id`. (see [below for nested schema](#nestedblock--config--device_id_from_url_param))

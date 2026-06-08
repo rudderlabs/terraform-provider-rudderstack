@@ -2,6 +2,8 @@ package destinations
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -21,6 +23,7 @@ func init() {
 		c.Simple("trackProductsOnce", "track_products_once", c.SkipZeroValue),
 		c.Simple("trackRevenuePerProduct", "track_revenue_per_product", c.SkipZeroValue),
 		c.Simple("versionName", "version_name", c.SkipZeroValue),
+		amplitudeAPIVersionProperty(),
 		c.ArrayWithStrings("traitsToIncrement", "traits", "traits_to_increment"),
 		c.ArrayWithStrings("traitsToSetOnce", "traits", "traits_to_set_once"),
 		c.ArrayWithStrings("traitsToAppend", "traits", "traits_to_append"),
@@ -131,6 +134,13 @@ func init() {
 			Optional:         true,
 			Description:      "The value of this field is set as the `versionName` of the Amplitude SDK.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+		},
+		"api_version": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "v1",
+			Description:      "Amplitude API version to use.",
+			ValidateDiagFunc: c.StringMatchesRegexp("^(v1|v2)$"),
 		},
 		"traits_to_increment": {
 			Type:        schema.TypeList,
@@ -488,4 +498,23 @@ func init() {
 		Properties:   properties,
 		ConfigSchema: schema,
 	})
+}
+
+func amplitudeAPIVersionProperty() c.ConfigProperty {
+	return c.ConfigProperty{
+		FromStateFunc: func(config, state string) (string, error) {
+			v := gjson.Get(state, "api_version")
+			if v.Exists() && v.Value() != nil {
+				return sjson.Set(config, "apiVersion", v.Value())
+			}
+			return config, nil
+		},
+		ToStateFunc: func(state, config string) (string, error) {
+			v := gjson.Get(config, "apiVersion")
+			if v.Exists() && v.Value() != nil {
+				return sjson.Set(state, "api_version", v.Value())
+			}
+			return sjson.Set(state, "api_version", "v1")
+		},
+	}
 }
