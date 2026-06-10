@@ -5,6 +5,7 @@ import "fmt"
 var (
 	Sources      *Registry = &Registry{name: "sources"}
 	Destinations *Registry = &Registry{name: "destinations"}
+	Accounts     *Registry = &Registry{name: "accounts"}
 )
 
 type Registry struct {
