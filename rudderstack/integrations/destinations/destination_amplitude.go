@@ -2,6 +2,7 @@ package destinations
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -141,10 +142,10 @@ func init() {
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"web": {
-						Type:             schema.TypeString,
+						Type:             schema.TypeInt,
 						Required:         true,
 						Description:      "Amplitude Browser SDK version for web sources. Valid values are `1` and `2`.",
-						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(1|2)$"),
+						ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 2)),
 					},
 				},
 			},

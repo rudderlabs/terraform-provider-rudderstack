@@ -6,7 +6,6 @@ import (
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
-	"github.com/tidwall/gjson"
 )
 
 var amplitudeTestConfigs = []c.TestConfig{
@@ -56,7 +55,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				version_name = "name"
 
 				sdk_version {
-				  web = "2"
+				  web = 2
 				}
 
 				traits_to_increment = ["one", "two", "three"]
@@ -213,7 +212,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"trackProductsOnce": true,
 				"trackRevenuePerProduct": true,
 				"versionName": "name",
-				"sdkVersion": { "web": "2" },
+				"sdkVersion": { "web": 2 },
 				"traitsToIncrement": [
 				  { "traits": "one" },
 				  { "traits": "two" },
@@ -502,28 +501,4 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 
 func TestAccDestinationAmplitude(t *testing.T) {
 	acc.AccAssertDestination(t, "amplitude", amplitudeTestConfigs)
-}
-
-func TestDestinationAmplitudeSdkVersionRoundTrip(t *testing.T) {
-	cm := c.Destinations.Entries()["amplitude"]
-
-	// When the API response omits sdkVersion, nothing is written to state.
-	// The Terraform schema sets no default for sdk_version; absence resolves to
-	// version 1 via the control-plane (integration-config) schema default and the SDK fallback.
-	state, err := cm.APIToState(`{}`)
-	if err != nil {
-		t.Fatalf("APIToState failed: %v", err)
-	}
-	if v := gjson.Get(state, "sdk_version.0.web"); v.Exists() && v.String() != "" {
-		t.Fatalf("expected sdk_version.web to be absent, got %q", v.String())
-	}
-
-	// An explicit web-scoped sdkVersion round-trips into the nested terraform block.
-	state, err = cm.APIToState(`{"sdkVersion":{"web":"2"}}`)
-	if err != nil {
-		t.Fatalf("APIToState failed: %v", err)
-	}
-	if v := gjson.Get(state, "sdk_version.0.web").String(); v != "2" {
-		t.Fatalf("expected sdk_version.web to round-trip 2, got %q", v)
-	}
 }

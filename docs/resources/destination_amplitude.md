@@ -10,7 +10,7 @@ description: |-
 This resource represents an Amplitude destination. For more information check 
 https://www.rudderstack.com/docs/destinations/analytics/amplitude
 
-Omit the `sdk_version` block to keep existing Amplitude behavior (version `1`), or set `sdk_version.web` to `2` to opt into version 2. The provider sets no Terraform default — version `1` is applied by the control plane and SDK when the field is absent.
+Omit the `sdk_version` block to keep existing Amplitude behavior (version `1`), or set `sdk_version.web` to `2` to opt into version 2. The provider sets no Terraform default — version `1` is applied by the control plane when the field is absent.
 
 ## Example Usage
 
@@ -52,7 +52,7 @@ resource "rudderstack_destination_amplitude" "example" {
     # version_name = ""
 
     # sdk_version {
-    #   web = "2"
+    #   web = 2
     # }
 
     # traits_to_increment = ["one", "two", "three"]
@@ -485,7 +485,7 @@ Optional:
 
 Required:
 
-- `web` (String) Amplitude Browser SDK version for web sources. Valid values are `1` and `2`.
+- `web` (Number) Amplitude Browser SDK version for web sources. Valid values are `1` and `2`.
 
 
 <a id="nestedblock--config--track_gclid"></a>
