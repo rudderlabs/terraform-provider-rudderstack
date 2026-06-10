@@ -52,3 +52,9 @@
 - State/API translation is the shared abstraction boundary across CRUD and
   generation, which is why `ConfigMeta` and `ConfigProperty` are more central
   than the resource handlers themselves.
+
+## DEX-376 — Registry Activation Boundaries
+
+- The integration catalog is split across three boundaries: registry declaration in `rudderstack/configs/registries.go`, activation via blank imports in `rudderstack/integrations/integrations.go`, and provider resource exposure in `rudderstack/provider.go`.
+- DEX-376 added an exported `Accounts` registry global alongside `Sources` and `Destinations` in `rudderstack/configs/registries.go`, but left activation and provider wiring unchanged.
+- Because provider registration still expands only `configs.Sources` and `configs.Destinations`, new registries are intentionally inert until follow-on tickets add blank-import registration and provider expansion logic.

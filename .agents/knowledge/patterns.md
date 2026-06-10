@@ -32,3 +32,9 @@
   instead of serializing zero values into request payloads.
 - `rudderstack/configs/validators.go::ValidateAll` composes multiple schema
   validators into one Terraform diag function.
+
+## DEX-376 — Inert Registry First Pattern
+
+- `rudderstack/configs/registries.go` can accept new exported registry globals before runtime behavior changes; this repo allows "catalog-first" additions.
+- Runtime effects require two separate follow-ons after a new registry appears: blank-import activation in `rudderstack/integrations/integrations.go` and resource-map expansion in `rudderstack/provider.go`.
+- Scope slicing guideline from DEX-376: introduce registry surface area first, then layer integration registrations and provider exposure in later tickets to keep PR blast radius low.
