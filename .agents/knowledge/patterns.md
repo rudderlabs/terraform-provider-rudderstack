@@ -32,3 +32,9 @@
   instead of serializing zero values into request payloads.
 - `rudderstack/configs/validators.go::ValidateAll` composes multiple schema
   validators into one Terraform diag function.
+
+## DEX-377 — Narrow service seam for pre-client resources
+
+- When resource work must proceed before `rudderstack.Client` grows a concrete field, use a narrow interface seam: define only the CRUD methods needed by the resource, expose it through a package-local accessor on `*Client`, and keep the shim isolated in a deletable file.
+- Keep test injection local to the seam (for example, a test-only setter keyed by client instance) so tests can provide fakes without widening provider wiring or importing not-yet-stable client symbols.
+- Reuse the existing RETL seam style (`rudderstack/retl/common.go` pattern): resource code depends on the minimal interface, while provider construction remains unchanged.
