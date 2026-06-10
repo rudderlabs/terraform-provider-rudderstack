@@ -3,6 +3,7 @@ package rudderstack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"sync"
 	"time"
 )
@@ -45,6 +46,8 @@ type AccountTypeInfo struct {
 	Category string `json:"category"`
 }
 
+var ErrAccountNotFound = errors.New("account not found")
+
 var accountServiceByClient sync.Map
 
 func (c *Client) accountsClient() accountsAPI {
@@ -55,15 +58,4 @@ func (c *Client) accountsClient() accountsAPI {
 		return svc.(accountsAPI)
 	}
 	return nil
-}
-
-func (c *Client) setAccountsClientForTests(svc accountsAPI) {
-	if c == nil {
-		return
-	}
-	if svc == nil {
-		accountServiceByClient.Delete(c)
-		return
-	}
-	accountServiceByClient.Store(c, svc)
 }

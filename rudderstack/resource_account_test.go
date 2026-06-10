@@ -97,11 +97,11 @@ func TestAccountResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccountResourceConfig("example", "example-project", "US", "create-credentials"),
-				Check:  checkAccountState("example-project", "US", "", "2010-01-02T03:04:05Z", "2010-01-02T03:04:05Z"),
+				Check:  checkAccountState("example-project", "US", "create-credentials", "2010-01-02T03:04:05Z", "2010-01-02T03:04:05Z"),
 			},
 			{
 				Config: testAccountResourceConfig("example-updated", "example-updated-project", "EU", "update-credentials"),
-				Check:  checkAccountState("example-updated-project", "EU", "", "2010-01-02T03:04:05Z", "2010-02-02T03:04:05Z"),
+				Check:  checkAccountState("example-updated-project", "EU", "update-credentials", "2010-01-02T03:04:05Z", "2010-02-02T03:04:05Z"),
 			},
 		},
 	})
@@ -140,6 +140,9 @@ func TestAccountResourceImportState(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				Config: testAccountResourceConfig("example", "example-project", "US", "create-credentials"),
+			},
+			{
 				Config:            testAccountResourceConfig("example", "example-project", "US", "create-credentials"),
 				ResourceName:      "rudderstack_account_mock.example",
 				ImportState:       true,
@@ -154,14 +157,75 @@ func TestAccountResourceImportState(t *testing.T) {
 	accounts.AssertExpectations(t)
 }
 
+func TestResourceAccountReadNotFound(t *testing.T) {
+	cm := testAccountConfigMeta()
+	accounts := &mockAccountsService{}
+	accounts.On("Get", mock.Anything, "missing-id").Return((*Account)(nil), ErrAccountNotFound).Once()
+
+	client := &Client{}
+	setAccountsClientForTests(client, accounts)
+	t.Cleanup(func() {
+		setAccountsClientForTests(client, nil)
+	})
+
+	d := resourceAccount(cm).TestResourceData()
+	d.SetId("missing-id")
+
+	diagnostics := resourceAccountRead(cm)(context.Background(), d, client)
+	if diagnostics.HasError() {
+		t.Fatalf("expected no diagnostics, got: %v", diagnostics)
+	}
+	if d.Id() != "" {
+		t.Fatalf("expected id to be cleared on not found, got %q", d.Id())
+	}
+
+	accounts.AssertExpectations(t)
+}
+
+func TestResourceAccountDeleteNotFound(t *testing.T) {
+	cm := testAccountConfigMeta()
+	accounts := &mockAccountsService{}
+	accounts.On("Delete", mock.Anything, "missing-id").Return(ErrAccountNotFound).Once()
+
+	client := &Client{}
+	setAccountsClientForTests(client, accounts)
+	t.Cleanup(func() {
+		setAccountsClientForTests(client, nil)
+	})
+
+	d := resourceAccount(cm).TestResourceData()
+	d.SetId("missing-id")
+
+	diagnostics := resourceAccountDelete(cm)(context.Background(), d, client)
+	if diagnostics.HasError() {
+		t.Fatalf("expected no diagnostics, got: %v", diagnostics)
+	}
+	if d.Id() != "" {
+		t.Fatalf("expected id to be cleared on not found, got %q", d.Id())
+	}
+
+	accounts.AssertExpectations(t)
+}
+
 func testProviderWithAccountResource(cm configs.ConfigMeta, accounts accountsAPI) *schema.Provider {
 	p := NewWithConfigureClientFunc(func(_ context.Context, _ *schema.ResourceData) (*Client, diag.Diagnostics) {
 		c := &Client{}
-		c.setAccountsClientForTests(accounts)
+		setAccountsClientForTests(c, accounts)
 		return c, nil
 	})
 	p.ResourcesMap["rudderstack_account_mock"] = resourceAccount(cm)
 	return p
+}
+
+func setAccountsClientForTests(c *Client, svc accountsAPI) {
+	if c == nil {
+		return
+	}
+	if svc == nil {
+		accountServiceByClient.Delete(c)
+		return
+	}
+	accountServiceByClient.Store(c, svc)
 }
 
 func testAccountConfigMeta() configs.ConfigMeta {

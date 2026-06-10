@@ -3,6 +3,7 @@ package rudderstack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -18,8 +19,9 @@ import (
 // The ConfigMeta property list must map account config fields using
 // `options.<path>` and `secret.<path>` keys. Secret fields should be marked
 // sensitive in schema, and accountDefinitionName is sourced from cm.APIType.
-// The API does not return secret values on read/import, so state rehydration
-// always reconstructs `secret: {}` before running APIToState.
+// The API does not return secret values on read/import. Read preserves secrets
+// from prior state to avoid perpetual drift, while import initializes
+// `secret: {}` because no prior state exists.
 func resourceAccount(cm configs.ConfigMeta) *schema.Resource {
 	return &schema.Resource{
 		Schema:        resourceAccountSchema(cm),
@@ -104,6 +106,10 @@ func resourceAccountRead(cm configs.ConfigMeta) schema.ReadContextFunc {
 
 		account, err := api.Get(ctx, d.Id())
 		if err != nil {
+			if errors.Is(err, ErrAccountNotFound) {
+				d.SetId("")
+				return nil
+			}
 			return diag.FromErr(err)
 		}
 
@@ -127,6 +133,7 @@ func resourceAccountUpdate(cm configs.ConfigMeta) schema.UpdateContextFunc {
 			return diag.FromErr(err)
 		}
 
+		// CONTRACT-ACCT-V1 §6.1 uses replacement semantics; send all fields.
 		req := &UpdateAccountRequest{
 			Name:    d.Get("name").(string),
 			Options: nestedJSONOrEmpty(combined, "options"),
@@ -151,6 +158,10 @@ func resourceAccountDelete(cm configs.ConfigMeta) schema.DeleteContextFunc {
 		}
 
 		if err := api.Delete(ctx, d.Id()); err != nil {
+			if errors.Is(err, ErrAccountNotFound) {
+				d.SetId("")
+				return nil
+			}
 			return diag.FromErr(err)
 		}
 
@@ -199,7 +210,7 @@ func accountConfigStateToAPI(cm configs.ConfigMeta, d *schema.ResourceData) (str
 
 func nestedJSONOrEmpty(raw, path string) json.RawMessage {
 	value := gjson.Get(raw, path)
-	if value.Exists() {
+	if value.Exists() && value.IsObject() {
 		return json.RawMessage(value.Raw)
 	}
 	return json.RawMessage("{}")
@@ -224,11 +235,11 @@ func storeAccountToState(cm configs.ConfigMeta, account *Account, d *schema.Reso
 		}
 	}
 
-	combined, err := sjson.SetRaw("{}", "options", string(account.Options))
+	combined, err := sjson.SetRaw("{}", "options", string(objectJSONOrEmpty(account.Options)))
 	if err != nil {
 		return err
 	}
-	combined, err = sjson.SetRaw(combined, "secret", "{}")
+	combined, err = sjson.SetRaw(combined, "secret", string(accountSecretsFromState(cm, d)))
 	if err != nil {
 		return err
 	}
@@ -254,4 +265,31 @@ func storeAccountToState(cm configs.ConfigMeta, account *Account, d *schema.Reso
 	}
 
 	return nil
+}
+
+func accountSecretsFromState(cm configs.ConfigMeta, d *schema.ResourceData) json.RawMessage {
+	currentConfig, ok := d.GetOk("config.0")
+	if !ok || currentConfig == nil {
+		return json.RawMessage("{}")
+	}
+
+	currentState, err := json.Marshal(currentConfig)
+	if err != nil {
+		return json.RawMessage("{}")
+	}
+
+	combined, err := cm.StateToAPI(string(currentState))
+	if err != nil {
+		return json.RawMessage("{}")
+	}
+
+	return nestedJSONOrEmpty(combined, "secret")
+}
+
+func objectJSONOrEmpty(raw json.RawMessage) json.RawMessage {
+	value := gjson.ParseBytes(raw)
+	if value.IsObject() {
+		return json.RawMessage(value.Raw)
+	}
+	return json.RawMessage("{}")
 }
