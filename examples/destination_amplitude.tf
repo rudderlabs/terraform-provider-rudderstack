@@ -33,7 +33,10 @@ resource "rudderstack_destination_amplitude" "example" {
     # }
 
     # version_name = ""
-    # api_version  = "v1"
+
+    # sdk_version {
+    #   web = "2"
+    # }
 
     # traits_to_increment = ["one", "two", "three"]
     # traits_to_set_once  = ["one", "two", "three"]

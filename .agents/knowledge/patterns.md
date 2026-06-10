@@ -33,14 +33,21 @@
 - `rudderstack/configs/validators.go::ValidateAll` composes multiple schema
   validators into one Terraform diag function.
 
-## SDK-4941 — Default normalization for omitted API keys
+## SDK-4941 — Amplitude web SDK version field
 
-- For integration fields that are `Optional` with a Terraform `Default`, avoid
-  relying on `configs.Simple(...)` if control-plane `GET` responses may omit
-  the API key; missing keys are not written into state by default and can cause
-  repeated plan/apply churn.
-- Prefer a custom `ConfigProperty.ToStateFunc` that writes the effective
-  default into state when the API key is absent, while preserving explicit API
-  values when present. Example applied in
-  `rudderstack/integrations/destinations/destination_amplitude.go` for
-  `apiVersion` <-> `api_version` with read fallback to `"v1"`.
+- Web (JavaScript) source-scoped destination settings are stored nested per
+  source type in the control plane (`{ "web": "2" }`) and validated against that
+  nested shape, even though config-backend flattens them to a top-level value
+  when it delivers the source config to the JS SDK. Terraform writes the stored
+  (nested) shape, so the field must map to the nested API key, not a flat one.
+- The Amplitude destination already follows this for every web-scoped field
+  (`forceHttps.web`, `trackGclid.web`, `preferAnonymousIdForDeviceId.web`, …).
+  The SDK version field follows the same convention:
+  `c.Simple("sdkVersion.web", "sdk_version.0.web", c.SkipZeroValue)` with a
+  `TypeList`/`MaxItems: 1` block exposing a `web` string (`1` | `2`).
+- API key is `sdkVersion`, HCL key is `sdk_version`, and the accepted values
+  are `"1"` / `"2"`, matching rudder-integrations-config and rudder-sdk-js.
+- No custom default-normalization `ToStateFunc` is needed: an omitted value is
+  treated as version 1 by both the integration schema default and the SDK
+  fallback, exactly like the other optional web-scoped blocks, so `SkipZeroValue`
+  is sufficient and avoids plan churn.

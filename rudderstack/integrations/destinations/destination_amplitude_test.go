@@ -18,7 +18,6 @@ var amplitudeTestConfigs = []c.TestConfig{
 		APICreate: `{
 				"apiKey": "123abc",
 				"apiSecret": "abc123",
-				"apiVersion": "v1",
 				"trackCategorizedPages": true,
 				"trackNamedPages": true,
 				"residencyServer": "standard"
@@ -55,8 +54,11 @@ var amplitudeTestConfigs = []c.TestConfig{
 				}
 			
 				version_name = "name"
-				api_version  = "v2"
-			
+
+				sdk_version {
+				  web = "2"
+				}
+
 				traits_to_increment = ["one", "two", "three"]
 				traits_to_set_once  = ["one", "two", "three"]
 				traits_to_append    = ["one", "two", "three"]
@@ -211,7 +213,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"trackProductsOnce": true,
 				"trackRevenuePerProduct": true,
 				"versionName": "name",
-				"apiVersion": "v2",
+				"sdkVersion": { "web": "2" },
 				"traitsToIncrement": [
 				  { "traits": "one" },
 				  { "traits": "two" },
@@ -502,22 +504,25 @@ func TestAccDestinationAmplitude(t *testing.T) {
 	acc.AccAssertDestination(t, "amplitude", amplitudeTestConfigs)
 }
 
-func TestDestinationAmplitudeAPIVersionDefaultsToV1OnRead(t *testing.T) {
+func TestDestinationAmplitudeSdkVersionRoundTrip(t *testing.T) {
 	cm := c.Destinations.Entries()["amplitude"]
 
+	// When the API response omits sdkVersion, nothing is written to state.
+	// Absence is treated as version 1 by the schema default and the SDK fallback.
 	state, err := cm.APIToState(`{}`)
 	if err != nil {
 		t.Fatalf("APIToState failed: %v", err)
 	}
-	if v := gjson.Get(state, "api_version").String(); v != "v1" {
-		t.Fatalf("expected api_version to default to v1, got %q", v)
+	if v := gjson.Get(state, "sdk_version.0.web"); v.Exists() && v.String() != "" {
+		t.Fatalf("expected sdk_version.web to be absent, got %q", v.String())
 	}
 
-	state, err = cm.APIToState(`{"apiVersion":"v2"}`)
+	// An explicit web-scoped sdkVersion round-trips into the nested terraform block.
+	state, err = cm.APIToState(`{"sdkVersion":{"web":"2"}}`)
 	if err != nil {
 		t.Fatalf("APIToState failed: %v", err)
 	}
-	if v := gjson.Get(state, "api_version").String(); v != "v2" {
-		t.Fatalf("expected api_version to round-trip v2, got %q", v)
+	if v := gjson.Get(state, "sdk_version.0.web").String(); v != "2" {
+		t.Fatalf("expected sdk_version.web to round-trip 2, got %q", v)
 	}
 }
