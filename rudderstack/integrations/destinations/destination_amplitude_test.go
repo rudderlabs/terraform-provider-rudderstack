@@ -508,7 +508,8 @@ func TestDestinationAmplitudeSdkVersionRoundTrip(t *testing.T) {
 	cm := c.Destinations.Entries()["amplitude"]
 
 	// When the API response omits sdkVersion, nothing is written to state.
-	// Absence is treated as version 1 by the schema default and the SDK fallback.
+	// The Terraform schema sets no default for sdk_version; absence resolves to
+	// version 1 via the control-plane (integration-config) schema default and the SDK fallback.
 	state, err := cm.APIToState(`{}`)
 	if err != nil {
 		t.Fatalf("APIToState failed: %v", err)

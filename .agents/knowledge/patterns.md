@@ -47,7 +47,11 @@
   `TypeList`/`MaxItems: 1` block exposing a `web` string (`1` | `2`).
 - API key is `sdkVersion`, HCL key is `sdk_version`, and the accepted values
   are `"1"` / `"2"`, matching rudder-integrations-config and rudder-sdk-js.
-- No custom default-normalization `ToStateFunc` is needed: an omitted value is
-  treated as version 1 by both the integration schema default and the SDK
-  fallback, exactly like the other optional web-scoped blocks, so `SkipZeroValue`
-  is sufficient and avoids plan churn.
+- No custom default-normalization `ToStateFunc` is needed: an omitted block
+  resolves to version 1 via the integration schema default + the SDK fallback,
+  and `SkipZeroValue` keeps an absent value out of the API payload.
+- The inner `web` is `Required` (unlike the sibling *optional* web-scoped
+  blocks): an empty `sdk_version {}` would otherwise serialize to nothing and
+  cause a perpetual `+ sdk_version {}` plan diff. Requiring `web` turns that into
+  a clear plan-time error. (Siblings share the footgun but are left as-is for
+  back-compat.)

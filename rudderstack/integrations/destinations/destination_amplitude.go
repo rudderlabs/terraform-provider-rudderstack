@@ -137,12 +137,12 @@ func init() {
 			Type:        schema.TypeList,
 			MaxItems:    1,
 			Optional:    true,
-			Description: "Choose the Amplitude Browser SDK version to load for web (JavaScript) sources. Defaults to `1` when omitted.",
+			Description: "Choose the Amplitude Browser SDK version to load for web (JavaScript) sources. Version `1` is used when this block is omitted.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"web": {
 						Type:             schema.TypeString,
-						Optional:         true,
+						Required:         true,
 						Description:      "Amplitude Browser SDK version for web sources. Valid values are `1` and `2`.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(1|2)$"),
 					},
