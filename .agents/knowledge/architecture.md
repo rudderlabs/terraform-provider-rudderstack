@@ -52,3 +52,8 @@
 - State/API translation is the shared abstraction boundary across CRUD and
   generation, which is why `ConfigMeta` and `ConfigProperty` are more central
   than the resource handlers themselves.
+
+## DEX-377 — Temporary accounts seam topology
+
+- Account resource decoupling can be staged without editing `client.go` by adding a package-local accounts accessor on `*Client` plus a temporary shim file (`accounts_client_stub.go`) that centralizes all bridge logic.
+- This creates an explicit interim boundary: resource handlers call the accessor interface, while the concrete account client wiring can land later (for example, in follow-up client-construction work) without reshaping resource code.

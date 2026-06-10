@@ -58,3 +58,8 @@
 - The main stale-code signal is the pagination TODO in
   `cmd/generatetf/main.go::getAPIRetlSources`; that is a known functional gap,
   not just dead code.
+
+## DEX-377 — Account-resource test coverage gap
+
+- Root-level mocked CRUD coverage is currently asymmetric: destination diff-validation and connection tests exist, but there is no equivalent root-level `resource_source_test.go` CRUD suite to mirror request/state translation assertions used elsewhere.
+- For new generic CRUD resources (such as accounts), this gap increases regression risk unless tests are added that verify translated API payloads, read-after-write refresh behavior, and importer-read consistency.
