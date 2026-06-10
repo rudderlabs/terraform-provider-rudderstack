@@ -14,6 +14,7 @@ type CreateAccountRequest struct {
 	Secret                json.RawMessage `json:"secret"`
 }
 
+// UpdateAccountRequest intentionally omits accountDefinitionName — it is immutable and must not be sent on update.
 type UpdateAccountRequest struct {
 	Name    string          `json:"name"`
 	Options json.RawMessage `json:"options"`

@@ -152,22 +152,28 @@ func resourceAccountRead(cm configs.ConfigMeta) schema.ReadContextFunc {
 			return diag.FromErr(fmt.Errorf("could not unmarshal state JSON: %w", err))
 		}
 
-		// Merge with existing state: start from whatever the prior config block held,
-		// then overlay API-returned fields. This preserves write-only (secret) fields
-		// that the API never echoes — they keep their user-configured value in state
-		// and do not cause a perpetual diff.
+		// Merge: start from API-returned fields (authoritative for all non-secret/options
+		// fields), then preserve write-only secret fields from prior state — the API
+		// never returns them, so without this they'd be dropped from state and cause a
+		// perpetual diff.
 		mergedProps := make(map[string]interface{})
+		for k, v := range apiProps {
+			mergedProps[k] = v
+		}
+		// Preserve write-only secret fields from prior state — the API never returns them,
+		// so without this they'd be dropped from state and cause a perpetual diff.
 		if existing, ok := d.GetOk("config"); ok {
 			if list, ok := existing.([]interface{}); ok && len(list) > 0 {
-				if m, ok := list[0].(map[string]interface{}); ok {
-					for k, v := range m {
-						mergedProps[k] = v
+				if priorMap, ok := list[0].(map[string]interface{}); ok {
+					for key, sch := range cm.ConfigSchema {
+						if sch.Sensitive {
+							if val, ok := priorMap[key]; ok {
+								mergedProps[key] = val
+							}
+						}
 					}
 				}
 			}
-		}
-		for k, v := range apiProps {
-			mergedProps[k] = v
 		}
 
 		if err := d.Set("name", acc.Name); err != nil {

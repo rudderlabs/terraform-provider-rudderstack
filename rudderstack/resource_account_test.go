@@ -23,16 +23,25 @@ type mockAccountsService struct {
 
 func (m *mockAccountsService) Create(ctx context.Context, req *CreateAccountRequest) (*Account, error) {
 	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*Account), args.Error(1)
 }
 
 func (m *mockAccountsService) Get(ctx context.Context, id string) (*Account, error) {
 	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*Account), args.Error(1)
 }
 
 func (m *mockAccountsService) Update(ctx context.Context, id string, req *UpdateAccountRequest) (*Account, error) {
 	args := m.Called(ctx, id, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*Account), args.Error(1)
 }
 
@@ -217,6 +226,8 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "created_at", "2024-01-02T03:04:05Z"),
 					resource.TestCheckResourceAttr(resourceName, "updated_at", "2024-02-03T04:05:06Z"),
 					resource.TestCheckResourceAttr(resourceName, "config.0.foo", "world"),
+					// Secret value updated — preserved in state (API never returns it).
+					resource.TestCheckResourceAttr(resourceName, "config.0.bar", "s3cr3t-new"),
 				),
 			},
 		},
