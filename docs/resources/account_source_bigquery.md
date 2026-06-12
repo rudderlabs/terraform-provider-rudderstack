@@ -28,11 +28,8 @@ resource "rudderstack_account_source_bigquery" "example" {
 
 ### Required
 
-- `name` (String) Human readable name of the account.
-
-### Optional
-
-- `enabled` (Boolean) Whether the account is enabled.
+- `config` (Block List, Min: 1, Max: 1) Account specific configuration. Check the nested block documentation for more information. (see [below for nested schema](#nestedblock--config))
+- `name` (String) Human readable name of the account. The value has to be unique across all accounts.
 
 ### Read-Only
 
