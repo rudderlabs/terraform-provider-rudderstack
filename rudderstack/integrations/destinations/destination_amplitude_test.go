@@ -53,7 +53,11 @@ var amplitudeTestConfigs = []c.TestConfig{
 				}
 			
 				version_name = "name"
-			
+
+				sdk_version {
+				  web = 2
+				}
+
 				traits_to_increment = ["one", "two", "three"]
 				traits_to_set_once  = ["one", "two", "three"]
 				traits_to_append    = ["one", "two", "three"]
@@ -208,6 +212,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"trackProductsOnce": true,
 				"trackRevenuePerProduct": true,
 				"versionName": "name",
+				"sdkVersion": { "web": 2 },
 				"traitsToIncrement": [
 				  { "traits": "one" },
 				  { "traits": "two" },

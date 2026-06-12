@@ -32,3 +32,26 @@
   instead of serializing zero values into request payloads.
 - `rudderstack/configs/validators.go::ValidateAll` composes multiple schema
   validators into one Terraform diag function.
+
+## SDK-4941 — Amplitude web SDK version field
+
+- Web (JavaScript) source-scoped destination settings are stored nested per
+  source type in the control plane (`{ "web": "2" }`) and validated against that
+  nested shape, even though config-backend flattens them to a top-level value
+  when it delivers the source config to the JS SDK. Terraform writes the stored
+  (nested) shape, so the field must map to the nested API key, not a flat one.
+- The Amplitude destination already follows this for every web-scoped field
+  (`forceHttps.web`, `trackGclid.web`, `preferAnonymousIdForDeviceId.web`, …).
+  The SDK version field follows the same convention:
+  `c.Simple("sdkVersion.web", "sdk_version.0.web", c.SkipZeroValue)` with a
+  `TypeList`/`MaxItems: 1` block exposing a `web` string (`1` | `2`).
+- API key is `sdkVersion`, HCL key is `sdk_version`, and the accepted values
+  are `"1"` / `"2"`, matching rudder-integrations-config and rudder-sdk-js.
+- No custom default-normalization `ToStateFunc` is needed: an omitted block
+  resolves to version 1 via the integration schema default + the SDK fallback,
+  and `SkipZeroValue` keeps an absent value out of the API payload.
+- The inner `web` is `Required` (unlike the sibling *optional* web-scoped
+  blocks): an empty `sdk_version {}` would otherwise serialize to nothing and
+  cause a perpetual `+ sdk_version {}` plan diff. Requiring `web` turns that into
+  a clear plan-time error. (Siblings share the footgun but are left as-is for
+  back-compat.)

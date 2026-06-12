@@ -2,6 +2,7 @@ package destinations
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -21,6 +22,7 @@ func init() {
 		c.Simple("trackProductsOnce", "track_products_once", c.SkipZeroValue),
 		c.Simple("trackRevenuePerProduct", "track_revenue_per_product", c.SkipZeroValue),
 		c.Simple("versionName", "version_name", c.SkipZeroValue),
+		c.Simple("sdkVersion.web", "sdk_version.0.web", c.SkipZeroValue),
 		c.ArrayWithStrings("traitsToIncrement", "traits", "traits_to_increment"),
 		c.ArrayWithStrings("traitsToSetOnce", "traits", "traits_to_set_once"),
 		c.ArrayWithStrings("traitsToAppend", "traits", "traits_to_append"),
@@ -131,6 +133,22 @@ func init() {
 			Optional:         true,
 			Description:      "The value of this field is set as the `versionName` of the Amplitude SDK.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+		},
+		"sdk_version": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Choose the Amplitude Browser SDK version to load for web (JavaScript) sources. Version `1` is used when this block is omitted.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:             schema.TypeInt,
+						Required:         true,
+						Description:      "Amplitude Browser SDK version for web sources. Valid values are `1` and `2`.",
+						ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 2)),
+					},
+				},
+			},
 		},
 		"traits_to_increment": {
 			Type:        schema.TypeList,
