@@ -82,9 +82,9 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 	accounts := &mockAccountsService{}
 
 	createOptionsJSON := `{"foo":"hello"}`
-	createSecretJSON := `{"bar":"s3cr3t"}`
+	createSecretJSON := `{"bar":"s3cr3t"}` //nolint:gosec // test fixture, not a real credential
 	updateOptionsJSON := `{"foo":"world"}`
-	updateSecretJSON := `{"bar":"s3cr3t-new"}`
+	updateSecretJSON := `{"bar":"s3cr3t-new"}` //nolint:gosec // test fixture, not a real credential
 
 	// The provider registers a throwaway resource name for this test.
 	const resourceType = "rudderstack_account_testwh"
