@@ -42,8 +42,9 @@ import (
 // and verifies the account options match the expected JSON from test configs.
 //
 // The import step ignores "config.0.credentials" because the API never returns secrets —
-// they cannot be reconstructed from state on import. Adjust ImportStateVerifyIgnore in
-// the calling test if the account type uses a different credentials field name.
+// they cannot be reconstructed from state on import. The ignore list is hardcoded here:
+// all current account types expose their secret as a single top-level "credentials"
+// attribute. Extend this helper if a future account type names its secret differently.
 func AccAssertAccount(t *testing.T, accountType string, testConfigs []configs.TestConfig) {
 	t.Helper()
 
@@ -67,10 +68,12 @@ func AccAssertAccount(t *testing.T, accountType string, testConfigs []configs.Te
 		return
 	}
 
+	// No CheckDestroy: the RudderStack API soft-deletes accounts, so Get keeps
+	// returning 200 after deletion and there is nothing meaningful to assert.
+	// The destroy step itself already fails the test if the Delete call errors.
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { TestAccPreCheck(t) },
 		ProviderFactories: TestAccProviderFactories,
-		CheckDestroy:      testAccCheckAccountDestroy(accountType),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAccountConfig(accountType, name, cfg.TerraformCreate),
@@ -165,31 +168,5 @@ func testAccCheckAccountAPIOptions(resourceName, expectedOptionsJSON string) res
 		}
 
 		return compareConfig(acc.Options, expectedOptionsJSON)
-	}
-}
-
-// testAccCheckAccountDestroy verifies all accounts created by the test are deleted
-// from the API after the test completes.
-// Note: The RudderStack API uses soft-delete, so Get may still return a 200
-// after deletion. We accept this and do not fail — the destroy step already
-// verified the Delete handler ran without error.
-func testAccCheckAccountDestroy(accountType string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		cl, err := newTestAPIClient()
-		if err != nil {
-			return err
-		}
-
-		resourceType := fmt.Sprintf("rudderstack_account_source_%s", accountType)
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != resourceType {
-				continue
-			}
-			// RudderStack API uses soft-delete: Get may still return 200 after deletion.
-			// We accept this and do not fail — the destroy step already verified the
-			// Delete handler ran without error.
-			_, _ = cl.Accounts.Get(context.Background(), rs.Primary.ID)
-		}
-		return nil
 	}
 }
