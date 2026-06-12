@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.6.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.5.1...v4.6.0) (2026-06-12)
+
+
+### Features
+
+* add Amplitude sdk_version selector ([#257](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/257)) ([558dec6](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/558dec6ea701f9226ed82b83b1fce812229da922))
+* validate duplicate consent providers in plan diff ([#254](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/254)) ([ed5229a](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/ed5229aec6bcd98630a2010b0e0f53acca70794a))
+
+
+### Miscellaneous
+
+* upgrade vulnerabilities ([#252](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/252)) ([2253c38](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/2253c38361204eb590c18a2d556a5816b1831d93))
+
+
+### Documentation
+
+* **e2e:** add operational guide for E2E test suite ([#250](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/250)) ([f72d00d](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/f72d00d70b6b7dbed73e88f1825b202f72b70392))
+* refresh knowledge docs for repo-local skill ([#255](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/255)) ([3c4a52e](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/3c4a52ec8619ce799f8a5ef19e77c1d2f133abd1))
+
 ## [4.5.1](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.5.0...v4.5.1) (2026-05-19)
 
 
