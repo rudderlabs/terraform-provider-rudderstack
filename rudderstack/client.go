@@ -46,9 +46,9 @@ type ConnectionsService interface {
 }
 
 type AccountsService interface {
-	Create(ctx context.Context, req *CreateAccountRequest) (*Account, error)
-	Get(ctx context.Context, id string) (*Account, error)
-	Update(ctx context.Context, id string, req *UpdateAccountRequest) (*Account, error)
+	Create(ctx context.Context, req *client.CreateAccountRequest) (*client.Account, error)
+	Get(ctx context.Context, id string) (*client.Account, error)
+	Update(ctx context.Context, id string, req *client.UpdateAccountRequest) (*client.Account, error)
 	Delete(ctx context.Context, id string) error
 }
 

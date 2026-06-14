@@ -17,6 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tidwall/gjson"
 
+	"github.com/rudderlabs/rudder-iac/api/client"
+
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -107,7 +109,7 @@ func resourceAccountCreate(cm configs.ConfigMeta) schema.CreateContextFunc {
 
 		options, secret := splitOptionsSecret(combined)
 
-		req := &CreateAccountRequest{
+		req := &client.CreateAccountRequest{
 			Name:                  d.Get("name").(string),
 			AccountDefinitionName: cm.APIType,
 			Options:               options,
@@ -225,7 +227,7 @@ func resourceAccountUpdate(cm configs.ConfigMeta) schema.UpdateContextFunc {
 
 		options, secret := splitOptionsSecret(combined)
 
-		req := &UpdateAccountRequest{
+		req := &client.UpdateAccountRequest{
 			Name:    d.Get("name").(string),
 			Options: options,
 			Secret:  secret,

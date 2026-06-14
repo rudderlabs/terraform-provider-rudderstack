@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.1
-	github.com/rudderlabs/rudder-iac v0.15.0
+	github.com/rudderlabs/rudder-iac v0.17.1-0.20260612051227-31f63ee269cf // pinned to feat/go-client-account-crud (DEX-375, PR #617) for the accounts client; bump to the tagged release once it merges
 	github.com/stretchr/testify v1.11.1
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5

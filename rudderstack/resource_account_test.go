@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/rudderlabs/rudder-iac/api/client"
+
 	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -21,28 +23,28 @@ type mockAccountsService struct {
 	mock.Mock
 }
 
-func (m *mockAccountsService) Create(ctx context.Context, req *CreateAccountRequest) (*Account, error) {
+func (m *mockAccountsService) Create(ctx context.Context, req *client.CreateAccountRequest) (*client.Account, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*Account), args.Error(1)
+	return args.Get(0).(*client.Account), args.Error(1)
 }
 
-func (m *mockAccountsService) Get(ctx context.Context, id string) (*Account, error) {
+func (m *mockAccountsService) Get(ctx context.Context, id string) (*client.Account, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*Account), args.Error(1)
+	return args.Get(0).(*client.Account), args.Error(1)
 }
 
-func (m *mockAccountsService) Update(ctx context.Context, id string, req *UpdateAccountRequest) (*Account, error) {
+func (m *mockAccountsService) Update(ctx context.Context, id string, req *client.UpdateAccountRequest) (*client.Account, error) {
 	args := m.Called(ctx, id, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*Account), args.Error(1)
+	return args.Get(0).(*client.Account), args.Error(1)
 }
 
 func (m *mockAccountsService) Delete(ctx context.Context, id string) error {
@@ -91,31 +93,23 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 	const resourceName = resourceType + ".example"
 
 	// --- Create mock: assert exact payload ---
-	accounts.On("Create", mock.Anything, mock.MatchedBy(func(req *CreateAccountRequest) bool {
+	accounts.On("Create", mock.Anything, mock.MatchedBy(func(req *client.CreateAccountRequest) bool {
 		return req.Name == "example" &&
 			req.AccountDefinitionName == cm.APIType &&
 			testutil.JSONEq(string(req.Options), createOptionsJSON) &&
 			testutil.JSONEq(string(req.Secret), createSecretJSON)
-	})).Return(&Account{
-		ID:   "acct-001",
-		Name: "example",
-		Definition: AccountDefinition{
-			Name: cm.APIType,
-			Type: cm.APIType,
-		},
+	})).Return(&client.Account{
+		ID:        "acct-001",
+		Name:      "example",
 		Options:   json.RawMessage(createOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
 
 	// --- Read mock (called after Create, and once during plan for next step = 3 total) ---
-	accounts.On("Get", mock.Anything, "acct-001").Return(&Account{
+	accounts.On("Get", mock.Anything, "acct-001").Return(&client.Account{
 		ID:   "acct-001",
 		Name: "example",
-		Definition: AccountDefinition{
-			Name: cm.APIType,
-			Type: cm.APIType,
-		},
 		// Secret intentionally absent — API never returns it.
 		Options:   json.RawMessage(createOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
@@ -123,30 +117,22 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 	}, nil).Times(3)
 
 	// --- Update mock ---
-	accounts.On("Update", mock.Anything, "acct-001", mock.MatchedBy(func(req *UpdateAccountRequest) bool {
+	accounts.On("Update", mock.Anything, "acct-001", mock.MatchedBy(func(req *client.UpdateAccountRequest) bool {
 		return req.Name == "example-updated" &&
 			testutil.JSONEq(string(req.Options), updateOptionsJSON) &&
 			testutil.JSONEq(string(req.Secret), updateSecretJSON)
-	})).Return(&Account{
-		ID:   "acct-001",
-		Name: "example-updated",
-		Definition: AccountDefinition{
-			Name: cm.APIType,
-			Type: cm.APIType,
-		},
+	})).Return(&client.Account{
+		ID:        "acct-001",
+		Name:      "example-updated",
 		Options:   json.RawMessage(updateOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2024, 2, 3, 4, 5, 6, 0, time.UTC)),
 	}, nil)
 
 	// --- Read mock after Update (called twice: post-update refresh + destroy plan check) ---
-	accounts.On("Get", mock.Anything, "acct-001").Return(&Account{
-		ID:   "acct-001",
-		Name: "example-updated",
-		Definition: AccountDefinition{
-			Name: cm.APIType,
-			Type: cm.APIType,
-		},
+	accounts.On("Get", mock.Anything, "acct-001").Return(&client.Account{
+		ID:        "acct-001",
+		Name:      "example-updated",
 		Options:   json.RawMessage(updateOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2024, 2, 3, 4, 5, 6, 0, time.UTC)),
@@ -241,13 +227,9 @@ func TestResourceAccountSchemaNoSecretInState(t *testing.T) {
 	cm := testAccountConfigMeta()
 	accounts := &mockAccountsService{}
 
-	accounts.On("Get", mock.Anything, "acct-002").Return(&Account{
+	accounts.On("Get", mock.Anything, "acct-002").Return(&client.Account{
 		ID:   "acct-002",
 		Name: "test-acct",
-		Definition: AccountDefinition{
-			Name: cm.APIType,
-			Type: cm.APIType,
-		},
 		// Options returned, secret NOT returned.
 		Options:   json.RawMessage(`{"foo":"val1"}`),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 3, 4, 5, 6, 7, 0, time.UTC)),
