@@ -13,7 +13,6 @@ import (
 func init() {
 	supportedSourceTypes := []string{"web", "android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "cloudSource", "shopify"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
-	sourceTypesWithLegacyConsentFields := []string{"web", "android", "ios", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "cloudSource", "shopify"}
 
 	properties := []c.ConfigProperty{
 		c.Simple("account", "account"),
@@ -75,8 +74,6 @@ func init() {
 		c.Conditional("storageIntegration", "azure.0.storage_integration", c.Equals("cloudProvider", "AZURE")),
 		c.Simple("prefix", "prefix", c.SkipZeroValue),
 	}
-	properties = append(properties, snowflakeLegacyConsentProperties(sourceTypesWithLegacyConsentFields)...)
-
 	properties = append(properties, commonProperties...)
 
 	schema := map[string]*schema.Schema{
@@ -226,24 +223,6 @@ func init() {
 			Description: "Use this setting to set how you want to route events from your source to destination.",
 			Elem: &schema.Resource{
 				Schema: snowflakeConnectionModeSourceSchema(supportedSourceTypes),
-			},
-		},
-		"one_trust_cookie_categories": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			MaxItems:    1,
-			Description: "Configure OneTrust cookie categories by source type. This is intentionally Snowflake-specific parity with config-backend legacy keys.",
-			Elem: &schema.Resource{
-				Schema: snowflakeLegacyConsentSourceSchema("one_trust_cookie_category"),
-			},
-		},
-		"ketch_consent_purposes": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			MaxItems:    1,
-			Description: "Configure Ketch consent purposes by source type.",
-			Elem: &schema.Resource{
-				Schema: snowflakeLegacyConsentSourceSchema("purpose"),
 			},
 		},
 		"additional_properties": {
@@ -399,27 +378,6 @@ func init() {
 	})
 }
 
-func snowflakeLegacyConsentProperties(sourceTypes []string) []c.ConfigProperty {
-	// Snowflake config metadata still exposes legacy consent keys in parallel
-	// with consentManagement, so keep these mappings as additive compatibility
-	// fields for this destination only.
-	properties := make([]c.ConfigProperty, 0, len(sourceTypes)*2)
-
-	for _, sourceType := range sourceTypes {
-		sourceTypeTF := camelToSnake(sourceType)
-		properties = append(properties,
-			c.ArrayWithObjects("oneTrustCookieCategories."+sourceType, "one_trust_cookie_categories.0."+sourceTypeTF, map[string]interface{}{
-				"oneTrustCookieCategory": "one_trust_cookie_category",
-			}),
-			c.ArrayWithObjects("ketchConsentPurposes."+sourceType, "ketch_consent_purposes.0."+sourceTypeTF, map[string]interface{}{
-				"purpose": "purpose",
-			}),
-		)
-	}
-
-	return properties
-}
-
 func snowflakeConnectionModeSourceSchema(sourceTypes []string) map[string]*schema.Schema {
 	sourceSchema := map[string]*schema.Schema{}
 
@@ -428,31 +386,6 @@ func snowflakeConnectionModeSourceSchema(sourceTypes []string) map[string]*schem
 			Type:             schema.TypeString,
 			Optional:         true,
 			ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-		}
-	}
-
-	return sourceSchema
-}
-
-func snowflakeLegacyConsentSourceSchema(fieldName string) map[string]*schema.Schema {
-	sourceTypes := []string{"web", "android", "ios", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "cloudSource", "shopify"}
-	sourceSchema := map[string]*schema.Schema{}
-
-	for _, sourceType := range sourceTypes {
-		sourceTypeTF := camelToSnake(sourceType)
-		sourceSchema[sourceTypeTF] = &schema.Schema{
-			Type:       schema.TypeList,
-			Optional:   true,
-			ConfigMode: schema.SchemaConfigModeAttr,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					fieldName: {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
-					},
-				},
-			},
 		}
 	}
 

@@ -70,12 +70,6 @@ resource "rudderstack_destination_snowflake" "example" {
     #   account_key = "..."
     #   storage_integration = "..."
     # }
-    # one_trust_cookie_categories {
-    #   web = [{ one_trust_cookie_category = "marketing" }]
-    # }
-    # ketch_consent_purposes {
-    #   web = [{ purpose = "marketing" }]
-    # }
     # consent_management {
     # 	web = [
     # 		{

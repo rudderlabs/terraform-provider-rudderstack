@@ -75,32 +75,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 					access_key = "example-access-key"
 					enable_sse = true
 				}
-				one_trust_cookie_categories {
-					web = [{ one_trust_cookie_category = "one_trust_web" }]
-					android = [{ one_trust_cookie_category = "one_trust_android" }]
-					ios = [{ one_trust_cookie_category = "one_trust_ios" }]
-					unity = [{ one_trust_cookie_category = "one_trust_unity" }]
-					amp = [{ one_trust_cookie_category = "one_trust_amp" }]
-					cloud = [{ one_trust_cookie_category = "one_trust_cloud" }]
-					reactnative = [{ one_trust_cookie_category = "one_trust_reactnative" }]
-					cloud_source = [{ one_trust_cookie_category = "one_trust_cloud_source" }]
-					flutter = [{ one_trust_cookie_category = "one_trust_flutter" }]
-					cordova = [{ one_trust_cookie_category = "one_trust_cordova" }]
-					shopify = [{ one_trust_cookie_category = "one_trust_shopify" }]
-				}
-				ketch_consent_purposes {
-					web = [{ purpose = "ketch_web" }]
-					android = [{ purpose = "ketch_android" }]
-					ios = [{ purpose = "ketch_ios" }]
-					unity = [{ purpose = "ketch_unity" }]
-					amp = [{ purpose = "ketch_amp" }]
-					cloud = [{ purpose = "ketch_cloud" }]
-					reactnative = [{ purpose = "ketch_reactnative" }]
-					cloud_source = [{ purpose = "ketch_cloud_source" }]
-					flutter = [{ purpose = "ketch_flutter" }]
-					cordova = [{ purpose = "ketch_cordova" }]
-					shopify = [{ purpose = "ketch_shopify" }]
-				}
 				consent_management {
 					web = [
 						{
@@ -221,36 +195,10 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"roleBasedAuth": false,
 				"storageIntegration": "",
 				"prefix": "example-prefix",
-	        		"bucketName": "example-bucket-name",
-	        		"accessKeyID": "example-access-key-id",
-	        		"accessKey": "example-access-key",
-	        		"enableSSE": true,
-				"oneTrustCookieCategories": {
-					"web": [{"oneTrustCookieCategory": "one_trust_web"}],
-					"android": [{"oneTrustCookieCategory": "one_trust_android"}],
-					"ios": [{"oneTrustCookieCategory": "one_trust_ios"}],
-					"unity": [{"oneTrustCookieCategory": "one_trust_unity"}],
-					"amp": [{"oneTrustCookieCategory": "one_trust_amp"}],
-					"cloud": [{"oneTrustCookieCategory": "one_trust_cloud"}],
-					"reactnative": [{"oneTrustCookieCategory": "one_trust_reactnative"}],
-					"cloudSource": [{"oneTrustCookieCategory": "one_trust_cloud_source"}],
-					"flutter": [{"oneTrustCookieCategory": "one_trust_flutter"}],
-					"cordova": [{"oneTrustCookieCategory": "one_trust_cordova"}],
-					"shopify": [{"oneTrustCookieCategory": "one_trust_shopify"}]
-				},
-				"ketchConsentPurposes": {
-					"web": [{"purpose": "ketch_web"}],
-					"android": [{"purpose": "ketch_android"}],
-					"ios": [{"purpose": "ketch_ios"}],
-					"unity": [{"purpose": "ketch_unity"}],
-					"amp": [{"purpose": "ketch_amp"}],
-					"cloud": [{"purpose": "ketch_cloud"}],
-					"reactnative": [{"purpose": "ketch_reactnative"}],
-					"cloudSource": [{"purpose": "ketch_cloud_source"}],
-					"flutter": [{"purpose": "ketch_flutter"}],
-					"cordova": [{"purpose": "ketch_cordova"}],
-					"shopify": [{"purpose": "ketch_shopify"}]
-				},
+				"bucketName": "example-bucket-name",
+				"accessKeyID": "example-access-key-id",
+				"accessKey": "example-access-key",
+				"enableSSE": true,
 				"consentManagement": {
 					"web": [
 						{
