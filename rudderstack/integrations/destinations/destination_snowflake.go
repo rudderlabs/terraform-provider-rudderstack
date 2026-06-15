@@ -12,6 +12,7 @@ import (
 
 func init() {
 	supportedSourceTypes := []string{"web", "android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "cloudSource", "shopify"}
+	connectionModeSourceTypes := []string{"web", "android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "cloudSource", "shopify"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{
@@ -220,7 +221,7 @@ func init() {
 			Optional:    true,
 			Description: "Use this setting to set how you want to route events from your source to destination.",
 			Elem: &schema.Resource{
-				Schema: snowflakeConnectionModeSourceSchema(supportedSourceTypes),
+				Schema: snowflakeConnectionModeSourceSchema(connectionModeSourceTypes),
 			},
 		},
 		"additional_properties": {
