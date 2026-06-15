@@ -185,7 +185,6 @@ func init() {
 		"skip_tracks_table": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Default:     false,
 			Description: "Enable this toggle to skip sending the event data to the tracks table.",
 		},
 		"skip_users_table": {
@@ -213,7 +212,6 @@ func init() {
 		"manual_sync": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Default:     false,
 			Description: "Enable manual sync mode.",
 		},
 		"connection_mode": {
