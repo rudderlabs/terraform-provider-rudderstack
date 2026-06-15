@@ -30,3 +30,8 @@
   compatibility with older user configurations.
 - Release versioning is synchronized across `Makefile`, `rudderstack/provider.go`,
   `examples/main.tf`, and the generated docs via release-please.
+
+## INT-6562 — Additive Snowflake Parity for Backward Compatibility
+
+- For Snowflake destination parity changes, prefer additive schema/mapping updates when config metadata still carries legacy consent-adjacent keys.
+- Keep existing `consent_management` Terraform structure stable while reintroducing or retaining legacy fields (`one_trust_cookie_categories`, `ketch_consent_purposes`) if they remain in upstream destination schema, to avoid breaking existing configurations.

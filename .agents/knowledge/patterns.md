@@ -55,3 +55,8 @@
   cause a perpetual `+ sdk_version {}` plan diff. Requiring `web` turns that into
   a clear plan-time error. (Siblings share the footgun but are left as-is for
   back-compat.)
+
+## INT-6562 — Snowflake Config Mapping Gates
+
+- `GetCommonConfigMeta` contributes only `consent_management` mappings for declared source types; warehouse controls and other destination-level fields must be mapped in the destination integration itself.
+- Snowflake `supportedSourceTypes` directly gates which nested `consent_management` source-type blocks are exposed in Terraform; omitted source types (for example Android Kotlin / iOS Swift) silently drop corresponding nested keys.

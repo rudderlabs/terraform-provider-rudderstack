@@ -29,6 +29,10 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -46,13 +50,58 @@ var snowflakeTestConfigs = []c.TestConfig{
 					exclude_window_start_time = "11:00"
 					exclude_window_end_time   = "12:00"
 				}
+				skip_tracks_table = true
+				skip_users_table = false
+				prefer_append = false
+				manual_sync = true
 				json_paths = "./example-paths"
 				prefix = "example-prefix"
+				connection_mode {
+					web = "cloud"
+					android = "cloud"
+					android_kotlin = "cloud"
+					ios = "cloud"
+					ios_swift = "cloud"
+					unity = "cloud"
+					amp = "cloud"
+					cloud = "cloud"
+					cloud_source = "cloud"
+					reactnative = "cloud"
+					flutter = "cloud"
+					cordova = "cloud"
+					shopify = "cloud"
+				}
 				s3 {
 					bucket_name = "example-bucket-name"
 					access_key_id = "example-access-key-id"
 					access_key = "example-access-key"
 					enable_sse = true
+				}
+				one_trust_cookie_categories {
+					web = [{ one_trust_cookie_category = "one_trust_web" }]
+					android = [{ one_trust_cookie_category = "one_trust_android" }]
+					ios = [{ one_trust_cookie_category = "one_trust_ios" }]
+					unity = [{ one_trust_cookie_category = "one_trust_unity" }]
+					amp = [{ one_trust_cookie_category = "one_trust_amp" }]
+					cloud = [{ one_trust_cookie_category = "one_trust_cloud" }]
+					reactnative = [{ one_trust_cookie_category = "one_trust_reactnative" }]
+					cloud_source = [{ one_trust_cookie_category = "one_trust_cloud_source" }]
+					flutter = [{ one_trust_cookie_category = "one_trust_flutter" }]
+					cordova = [{ one_trust_cookie_category = "one_trust_cordova" }]
+					shopify = [{ one_trust_cookie_category = "one_trust_shopify" }]
+				}
+				ketch_consent_purposes {
+					web = [{ purpose = "ketch_web" }]
+					android = [{ purpose = "ketch_android" }]
+					ios = [{ purpose = "ketch_ios" }]
+					unity = [{ purpose = "ketch_unity" }]
+					amp = [{ purpose = "ketch_amp" }]
+					cloud = [{ purpose = "ketch_cloud" }]
+					reactnative = [{ purpose = "ketch_reactnative" }]
+					cloud_source = [{ purpose = "ketch_cloud_source" }]
+					flutter = [{ purpose = "ketch_flutter" }]
+					cordova = [{ purpose = "ketch_cordova" }]
+					shopify = [{ purpose = "ketch_shopify" }]
 				}
 				consent_management {
 					web = [
@@ -77,10 +126,20 @@ var snowflakeTestConfigs = []c.TestConfig{
 						consents = ["one_android", "two_android", "three_android"]
 						resolution_strategy = ""
 					}]
+					android_kotlin = [{
+						provider = "custom"
+						resolution_strategy = "and"
+						consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+					}]
 					ios = [{
 						provider = "custom"
 						resolution_strategy = "and"
 						consents = ["one_ios", "two_ios", "three_ios"]
+					}]
+					ios_swift = [{
+						provider = "custom"
+						resolution_strategy = "or"
+						consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
 					}]
 					unity = [{
 						provider = "custom"
@@ -138,17 +197,62 @@ var snowflakeTestConfigs = []c.TestConfig{
 					"excludeWindowStartTime": "11:00",
 					"excludeWindowEndTime": "12:00"
 				},
+				"skipTracksTable": true,
+				"skipUsersTable": false,
+				"preferAppend": false,
+				"manualSync": true,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
+				"connectionMode": {
+					"web": "cloud",
+					"android": "cloud",
+					"androidKotlin": "cloud",
+					"ios": "cloud",
+					"iosSwift": "cloud",
+					"unity": "cloud",
+					"amp": "cloud",
+					"cloud": "cloud",
+					"cloudSource": "cloud",
+					"reactnative": "cloud",
+					"flutter": "cloud",
+					"cordova": "cloud",
+					"shopify": "cloud"
+				},
 				"cloudProvider": "AWS",
 				"roleBasedAuth": false,
 				"storageIntegration": "",
 				"prefix": "example-prefix",
-        		"bucketName": "example-bucket-name",
-        		"accessKeyID": "example-access-key-id",
-        		"accessKey": "example-access-key",
-        		"enableSSE": true,
+	        		"bucketName": "example-bucket-name",
+	        		"accessKeyID": "example-access-key-id",
+	        		"accessKey": "example-access-key",
+	        		"enableSSE": true,
+				"oneTrustCookieCategories": {
+					"web": [{"oneTrustCookieCategory": "one_trust_web"}],
+					"android": [{"oneTrustCookieCategory": "one_trust_android"}],
+					"ios": [{"oneTrustCookieCategory": "one_trust_ios"}],
+					"unity": [{"oneTrustCookieCategory": "one_trust_unity"}],
+					"amp": [{"oneTrustCookieCategory": "one_trust_amp"}],
+					"cloud": [{"oneTrustCookieCategory": "one_trust_cloud"}],
+					"reactnative": [{"oneTrustCookieCategory": "one_trust_reactnative"}],
+					"cloudSource": [{"oneTrustCookieCategory": "one_trust_cloud_source"}],
+					"flutter": [{"oneTrustCookieCategory": "one_trust_flutter"}],
+					"cordova": [{"oneTrustCookieCategory": "one_trust_cordova"}],
+					"shopify": [{"oneTrustCookieCategory": "one_trust_shopify"}]
+				},
+				"ketchConsentPurposes": {
+					"web": [{"purpose": "ketch_web"}],
+					"android": [{"purpose": "ketch_android"}],
+					"ios": [{"purpose": "ketch_ios"}],
+					"unity": [{"purpose": "ketch_unity"}],
+					"amp": [{"purpose": "ketch_amp"}],
+					"cloud": [{"purpose": "ketch_cloud"}],
+					"reactnative": [{"purpose": "ketch_reactnative"}],
+					"cloudSource": [{"purpose": "ketch_cloud_source"}],
+					"flutter": [{"purpose": "ketch_flutter"}],
+					"cordova": [{"purpose": "ketch_cordova"}],
+					"shopify": [{"purpose": "ketch_shopify"}]
+				},
 				"consentManagement": {
 					"web": [
 						{
@@ -214,6 +318,23 @@ var snowflakeTestConfigs = []c.TestConfig{
 							]
 						}
 					],
+					"androidKotlin": [
+						{
+							"provider": "custom",
+							"resolutionStrategy": "and",
+							"consents": [
+								{
+									"consent": "one_android_kotlin"
+								},
+								{
+									"consent": "two_android_kotlin"
+								},
+								{
+									"consent": "three_android_kotlin"
+								}
+							]
+						}
+					],
 					"ios": [
 						{
 							"provider": "custom",
@@ -227,6 +348,23 @@ var snowflakeTestConfigs = []c.TestConfig{
 								},
 								{
 									"consent": "three_ios"
+								}
+							]
+						}
+					],
+					"iosSwift": [
+						{
+							"provider": "custom",
+							"resolutionStrategy": "or",
+							"consents": [
+								{
+									"consent": "one_ios_swift"
+								},
+								{
+									"consent": "two_ios_swift"
+								},
+								{
+									"consent": "three_ios_swift"
 								}
 							]
 						}
@@ -405,6 +543,10 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key\n-----END PRIVATE KEY-----",
 				"privateKeyPassphrase": "example-passphrase",
 				"syncFrequency": "30",
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -428,6 +570,10 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key-updated\n-----END PRIVATE KEY-----",
 				"syncFrequency": "60",
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true
 			}`,
@@ -457,6 +603,10 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -494,6 +644,10 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 					"excludeWindowStartTime": "11:00",
 					"excludeWindowEndTime": "12:00"
 				},
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
@@ -529,6 +683,10 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -567,6 +725,10 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 					"excludeWindowStartTime": "11:00",
 					"excludeWindowEndTime": "12:00"
 				},
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
@@ -604,6 +766,10 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-pem-key\n-----END PRIVATE KEY-----",
 				"syncFrequency": "30",
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -627,6 +793,10 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN ENCRYPTED PRIVATE KEY-----\nexample-encrypted-key\n-----END ENCRYPTED PRIVATE KEY-----",
 				"syncFrequency": "30",
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -656,6 +826,10 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -685,6 +859,10 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "60",
+				"skipTracksTable": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"cloudProvider": "AWS",

@@ -58,3 +58,8 @@
 - The main stale-code signal is the pagination TODO in
   `cmd/generatetf/main.go::getAPIRetlSources`; that is a known functional gap,
   not just dead code.
+
+## INT-6562 — Terraform Auto-Install 403 Blocks Validation Paths
+
+- Full destination resource tests and docs generation can be environment-blocked when Terraform CLI auto-install fails with HTTP 403 before test/doc logic executes.
+- In this failure mode, compile-only checks (for example `go test ./rudderstack/integrations/destinations -run '^$' -count=1`) can still validate build integrity, but they do not replace behavior/doc validation.

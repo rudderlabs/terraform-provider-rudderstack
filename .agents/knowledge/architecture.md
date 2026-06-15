@@ -52,3 +52,8 @@
 - State/API translation is the shared abstraction boundary across CRUD and
   generation, which is why `ConfigMeta` and `ConfigProperty` are more central
   than the resource handlers themselves.
+
+## INT-6562 — Snowflake vs Snowflake Streaming Scope Boundary
+
+- The provider maintains separate destination integrations for standard Snowflake and Snowflake Streaming, each with its own implementation/tests/docs surfaces.
+- When task input points to `src/configurations/destinations/snowflake` (non-streaming), changes should be scoped to the standard Snowflake destination unless explicitly requested otherwise.
