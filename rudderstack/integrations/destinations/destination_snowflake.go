@@ -194,13 +194,11 @@ func init() {
 		"skip_users_table": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Default:     true,
 			Description: "Disable the creation of a users table.",
 		},
 		"prefer_append": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Default:     true,
 			Description: "Enable append operation for warehouse syncs.",
 		},
 		"json_paths": {
@@ -300,7 +298,7 @@ func init() {
 			Type:        schema.TypeList,
 			Optional:    true,
 			MaxItems:    1,
-			Description: "Configure OneTrust cookie categories by source type.",
+			Description: "Configure OneTrust cookie categories by source type. This is intentionally Snowflake-specific parity with config-backend legacy keys.",
 			Elem: &schema.Resource{
 				Schema: snowflakeLegacyConsentSourceSchema("one_trust_cookie_category"),
 			},
@@ -468,6 +466,9 @@ func init() {
 }
 
 func snowflakeLegacyConsentProperties(sourceTypes []string) []c.ConfigProperty {
+	// Snowflake config metadata still exposes legacy consent keys in parallel
+	// with consentManagement, so keep these mappings as additive compatibility
+	// fields for this destination only.
 	properties := make([]c.ConfigProperty, 0, len(sourceTypes)*2)
 
 	for _, sourceType := range sourceTypes {
