@@ -12,7 +12,6 @@ import (
 
 func init() {
 	supportedSourceTypes := []string{"web", "android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "cloudSource", "shopify"}
-	connectionModeSourceTypes := []string{"web", "android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "cloudSource", "shopify"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{
@@ -221,7 +220,73 @@ func init() {
 			Optional:    true,
 			Description: "Use this setting to set how you want to route events from your source to destination.",
 			Elem: &schema.Resource{
-				Schema: snowflakeConnectionModeSourceSchema(connectionModeSourceTypes),
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"android": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"android_kotlin": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"ios": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"ios_swift": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"unity": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"amp": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"cloud": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"cloud_source": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"reactnative": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"flutter": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"cordova": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+					"shopify": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+					},
+				},
 			},
 		},
 		"additional_properties": {
@@ -375,20 +440,6 @@ func init() {
 		Properties:   properties,
 		ConfigSchema: schema,
 	})
-}
-
-func snowflakeConnectionModeSourceSchema(sourceTypes []string) map[string]*schema.Schema {
-	sourceSchema := map[string]*schema.Schema{}
-
-	for _, sourceType := range sourceTypes {
-		sourceSchema[camelToSnake(sourceType)] = &schema.Schema{
-			Type:             schema.TypeString,
-			Optional:         true,
-			ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-		}
-	}
-
-	return sourceSchema
 }
 
 // privateKeyProperty creates a ConfigProperty for the privateKey field that
