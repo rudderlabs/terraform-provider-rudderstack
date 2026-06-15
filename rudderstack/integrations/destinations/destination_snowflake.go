@@ -225,73 +225,7 @@ func init() {
 			Optional:    true,
 			Description: "Use this setting to set how you want to route events from your source to destination.",
 			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"web": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"android": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"android_kotlin": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"ios": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"ios_swift": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"unity": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"amp": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"cloud": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"cloud_source": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"reactnative": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"flutter": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"cordova": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-					"shopify": {
-						Type:             schema.TypeString,
-						Optional:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
-					},
-				},
+				Schema: snowflakeConnectionModeSourceSchema(supportedSourceTypes),
 			},
 		},
 		"one_trust_cookie_categories": {
@@ -484,6 +418,20 @@ func snowflakeLegacyConsentProperties(sourceTypes []string) []c.ConfigProperty {
 	}
 
 	return properties
+}
+
+func snowflakeConnectionModeSourceSchema(sourceTypes []string) map[string]*schema.Schema {
+	sourceSchema := map[string]*schema.Schema{}
+
+	for _, sourceType := range sourceTypes {
+		sourceSchema[camelToSnake(sourceType)] = &schema.Schema{
+			Type:             schema.TypeString,
+			Optional:         true,
+			ValidateDiagFunc: c.StringMatchesRegexp("^(cloud)$"),
+		}
+	}
+
+	return sourceSchema
 }
 
 func snowflakeLegacyConsentSourceSchema(fieldName string) map[string]*schema.Schema {
