@@ -29,11 +29,11 @@ func init() {
 		c.Simple("syncStartAt", "sync.0.start_at", c.SkipZeroValue),
 		c.Simple("excludeWindow.excludeWindowStartTime", "sync.0.exclude_window_start_time", c.SkipZeroValue),
 		c.Simple("excludeWindow.excludeWindowEndTime", "sync.0.exclude_window_end_time", c.SkipZeroValue),
-		c.Simple("skipTracksTable", "skip_tracks_table", c.SkipZeroValue),
+		c.Simple("skipTracksTable", "skip_tracks_table"),
 		c.Simple("skipUsersTable", "skip_users_table"),
 		c.Simple("preferAppend", "prefer_append"),
 		c.Simple("jsonPaths", "json_paths", c.SkipZeroValue),
-		c.Simple("manualSync", "manual_sync", c.SkipZeroValue),
+		c.Simple("manualSync", "manual_sync"),
 		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
 		c.Simple("connectionMode.androidKotlin", "connection_mode.0.android_kotlin", c.SkipZeroValue),
@@ -185,6 +185,7 @@ func init() {
 		"skip_tracks_table": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     false,
 			Description: "Enable this toggle to skip sending the event data to the tracks table.",
 		},
 		"skip_users_table": {
@@ -214,6 +215,7 @@ func init() {
 		"manual_sync": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     false,
 			Description: "Enable manual sync mode.",
 		},
 		"connection_mode": {

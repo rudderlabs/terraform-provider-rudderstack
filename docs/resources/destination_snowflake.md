@@ -33,8 +33,27 @@ resource "rudderstack_destination_snowflake" "example" {
       # exclude_window_start_time = "11:00"
       # exclude_window_end_time   = "12:00"
     }
+    # skip_tracks_table = false
+    # skip_users_table = true
+    # prefer_append = true
+    # manual_sync = false
     # json_paths = "..."
     use_rudder_storage = true
+    # connection_mode {
+    #   web = "cloud"
+    #   android = "cloud"
+    #   android_kotlin = "cloud"
+    #   ios = "cloud"
+    #   ios_swift = "cloud"
+    #   unity = "cloud"
+    #   amp = "cloud"
+    #   cloud = "cloud"
+    #   cloud_source = "cloud"
+    #   reactnative = "cloud"
+    #   flutter = "cloud"
+    #   cordova = "cloud"
+    #   shopify = "cloud"
+    # }
     # namespace = "..."
     # prefix = "..."
     # additional_properties = true
@@ -88,10 +107,20 @@ resource "rudderstack_destination_snowflake" "example" {
     # 		consents = ["one_android", "two_android", "three_android"]
     # 		resolution_strategy = ""
     # 	}]
+    # 	android_kotlin = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+    # 	}]
     # 	ios = [{
     # 		provider = "custom"
     # 		resolution_strategy = "and"
     # 		consents = ["one_ios", "two_ios", "three_ios"]
+    # 	}]
+    # 	ios_swift = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "or"
+    # 		consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
     # 	}]
     # 	unity = [{
     # 		provider = "custom"
@@ -179,16 +208,21 @@ Optional:
 
 - `additional_properties` (Boolean)
 - `azure` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--azure))
+- `connection_mode` (Block List, Max: 1) Use this setting to set how you want to route events from your source to destination. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `gcp` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--gcp))
 - `json_paths` (String) Specify required json properties in dot notation separated by commas.
+- `manual_sync` (Boolean) Enable manual sync mode.
 - `namespace` (String) Schema name for the warehouse where the tables are created by Rudderstack.
 - `password` (String, Sensitive) Password for the user. Required when use_key_pair_auth is false.
+- `prefer_append` (Boolean) Enable append operation for warehouse syncs.
 - `prefix` (String) If specified, RudderStack will create a folder in the bucket with this prefix and push all the data within that folder.
 - `private_key` (String, Sensitive) Private key for key pair authentication. Required when use_key_pair_auth is true. Accepts both PEM-formatted keys (with BEGIN/END headers) and raw base64-encoded key bodies. Raw keys are automatically wrapped with PEM headers before being sent to the API.
 - `private_key_passphrase` (String, Sensitive) Passphrase for the private key, if the private key is encrypted.
 - `role` (String) Role for the user. If not specified, the default role is used
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
+- `skip_tracks_table` (Boolean) Enable this toggle to skip sending the event data to the tracks table.
+- `skip_users_table` (Boolean) Disable the creation of a users table.
 - `use_key_pair_auth` (Boolean) Enable this setting to use key pair authentication instead of password-based authentication.
 - `use_rudder_storage` (Boolean) Enable this setting to use RudderStack-managed buckets for object storage.
 
@@ -217,6 +251,26 @@ Required:
 - `storage_integration` (String) Create the cloud storage integration in Snowflake and enter the name of integration. Please refer to this for more details -> https://www.rudderstack.com/docs/destinations/warehouse-destinations/snowflake/#configuring-cloud-storage-integration-with-snowflake
 
 
+<a id="nestedblock--config--connection_mode"></a>
+### Nested Schema for `config.connection_mode`
+
+Optional:
+
+- `amp` (String)
+- `android` (String)
+- `android_kotlin` (String)
+- `cloud` (String)
+- `cloud_source` (String)
+- `cordova` (String)
+- `flutter` (String)
+- `ios` (String)
+- `ios_swift` (String)
+- `reactnative` (String)
+- `shopify` (String)
+- `unity` (String)
+- `web` (String)
+
+
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`
 
@@ -224,11 +278,13 @@ Optional:
 
 - `amp` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--amp))
 - `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `android_kotlin` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android_kotlin))
 - `cloud` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud))
 - `cloud_source` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud_source))
 - `cordova` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cordova))
 - `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
 - `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `ios_swift` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios_swift))
 - `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
 - `shopify` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--shopify))
 - `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
@@ -246,6 +302,16 @@ Optional:
 
 <a id="nestedatt--config--consent_management--android"></a>
 ### Nested Schema for `config.consent_management.android`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android_kotlin"></a>
+### Nested Schema for `config.consent_management.android_kotlin`
 
 Optional:
 
@@ -296,6 +362,16 @@ Optional:
 
 <a id="nestedatt--config--consent_management--ios"></a>
 ### Nested Schema for `config.consent_management.ios`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios_swift"></a>
+### Nested Schema for `config.consent_management.ios_swift`
 
 Optional:
 

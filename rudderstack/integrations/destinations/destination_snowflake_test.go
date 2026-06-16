@@ -31,6 +31,8 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"syncFrequency": "30",
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -491,6 +493,8 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"syncFrequency": "30",
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -516,6 +520,8 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"syncFrequency": "60",
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true
 			}`,
@@ -547,6 +553,8 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"syncFrequency": "30",
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -586,6 +594,8 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				},
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
@@ -623,6 +633,8 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"syncFrequency": "30",
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -663,6 +675,8 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				},
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
@@ -702,6 +716,8 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"syncFrequency": "30",
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -727,6 +743,8 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"syncFrequency": "30",
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -758,6 +776,8 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"syncFrequency": "30",
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -789,6 +809,8 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"syncFrequency": "60",
 				"skipUsersTable": true,
 				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"cloudProvider": "AWS",
