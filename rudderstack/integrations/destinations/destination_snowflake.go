@@ -30,8 +30,8 @@ func init() {
 		c.Simple("excludeWindow.excludeWindowStartTime", "sync.0.exclude_window_start_time", c.SkipZeroValue),
 		c.Simple("excludeWindow.excludeWindowEndTime", "sync.0.exclude_window_end_time", c.SkipZeroValue),
 		c.Simple("skipTracksTable", "skip_tracks_table", c.SkipZeroValue),
-		c.Simple("skipUsersTable", "skip_users_table", c.SkipZeroValue),
-		c.Simple("preferAppend", "prefer_append", c.SkipZeroValue),
+		c.Simple("skipUsersTable", "skip_users_table"),
+		c.Simple("preferAppend", "prefer_append"),
 		c.Simple("jsonPaths", "json_paths", c.SkipZeroValue),
 		c.Simple("manualSync", "manual_sync", c.SkipZeroValue),
 		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
@@ -190,11 +190,13 @@ func init() {
 		"skip_users_table": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     true,
 			Description: "Disable the creation of a users table.",
 		},
 		"prefer_append": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Default:     true,
 			Description: "Enable append operation for warehouse syncs.",
 		},
 		"json_paths": {
