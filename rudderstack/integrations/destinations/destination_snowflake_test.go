@@ -29,10 +29,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -51,8 +47,8 @@ var snowflakeTestConfigs = []c.TestConfig{
 					exclude_window_end_time   = "12:00"
 				}
 				skip_tracks_table = true
-				skip_users_table = false
-				prefer_append = false
+				skip_users_table = true
+				prefer_append = true
 				manual_sync = true
 				json_paths = "./example-paths"
 				prefix = "example-prefix"
@@ -172,8 +168,8 @@ var snowflakeTestConfigs = []c.TestConfig{
 					"excludeWindowEndTime": "12:00"
 				},
 				"skipTracksTable": true,
-				"skipUsersTable": false,
-				"preferAppend": false,
+				"skipUsersTable": true,
+				"preferAppend": true,
 				"manualSync": true,
 				"useRudderStorage": false,
 				"additionalProperties": true,
@@ -491,10 +487,6 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key\n-----END PRIVATE KEY-----",
 				"privateKeyPassphrase": "example-passphrase",
 				"syncFrequency": "30",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -518,10 +510,6 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key-updated\n-----END PRIVATE KEY-----",
 				"syncFrequency": "60",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true
 			}`,
@@ -551,10 +539,6 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -587,10 +571,6 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "60",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"syncStartAt": "10:00",
 				"excludeWindow": {
 					"excludeWindowStartTime": "11:00",
@@ -631,10 +611,6 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -668,10 +644,6 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "60",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"syncStartAt": "10:00",
 				"excludeWindow": {
 					"excludeWindowStartTime": "11:00",
@@ -714,10 +686,6 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-pem-key\n-----END PRIVATE KEY-----",
 				"syncFrequency": "30",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -741,10 +709,6 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN ENCRYPTED PRIVATE KEY-----\nexample-encrypted-key\n-----END ENCRYPTED PRIVATE KEY-----",
 				"syncFrequency": "30",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -774,10 +738,6 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -807,10 +767,6 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "60",
-				"skipTracksTable": false,
-				"skipUsersTable": false,
-				"preferAppend": false,
-				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"cloudProvider": "AWS",
