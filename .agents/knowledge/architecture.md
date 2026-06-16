@@ -52,3 +52,14 @@
 - State/API translation is the shared abstraction boundary across CRUD and
   generation, which is why `ConfigMeta` and `ConfigProperty` are more central
   than the resource handlers themselves.
+
+## INT-6565 — Destination registration path
+
+- Destination integrations self-register under `rudderstack/integrations/destinations`
+  with `configs.Destinations.Register(<snake_case_name>, configs.ConfigMeta{APIType:
+  <PUBLIC_API_TYPE>, ...})`; once registered, `rudderstack/provider.go` exposes
+  them automatically as `rudderstack_destination_<snake_case_name>` through
+  `resourcesMap()`.
+- `CONFLUENT_CLOUD` follows this path with registry key `confluent_cloud`; adding
+  it does not require a bespoke provider resource entry beyond the destination
+  registry metadata.
