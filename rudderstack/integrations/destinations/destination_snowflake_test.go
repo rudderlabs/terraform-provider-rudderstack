@@ -822,3 +822,75 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 		},
 	})
 }
+
+// TestDestinationResourceSnowflakeExplicitBooleanFalse verifies that the four
+// boolean toggles serialize an explicit `false` on create — overriding the
+// Default:true on skip_users_table / prefer_append — and flip to `true` on
+// update, with no post-apply drift. This guards the no-SkipZeroValue mapping
+// that lets users disable these toggles via Terraform.
+func TestDestinationResourceSnowflakeExplicitBooleanFalse(t *testing.T) {
+	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
+		{
+			TerraformCreate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = true
+				skip_users_table = false
+				prefer_append = false
+				skip_tracks_table = false
+				manual_sync = false
+				sync {
+					frequency = "30"
+				}
+			`,
+			APICreate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": false,
+				"password": "example-password",
+				"syncFrequency": "30",
+				"skipUsersTable": false,
+				"preferAppend": false,
+				"skipTracksTable": false,
+				"manualSync": false,
+				"useRudderStorage": true,
+				"additionalProperties": true
+			}`,
+			TerraformUpdate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = true
+				skip_users_table = true
+				prefer_append = true
+				skip_tracks_table = true
+				manual_sync = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APIUpdate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": false,
+				"password": "example-password",
+				"syncFrequency": "30",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": true,
+				"manualSync": true,
+				"useRudderStorage": true,
+				"additionalProperties": true
+			}`,
+		},
+	})
+}
