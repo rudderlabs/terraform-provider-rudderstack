@@ -115,6 +115,8 @@ Two-credential model:
 
 ## 6. Running locally
 
+The Terraform CLI must be installed on `PATH` before running `make test-ci` or the `testacc-*` targets below. These commands use Terraform Plugin SDK test harnesses (`resource.UnitTest` / `resource.Test`) that invoke the Terraform CLI. Package-scoped tests that avoid those harnesses may not need Terraform.
+
 Minimal commands. Full reference in the `Makefile`.
 
 ```bash

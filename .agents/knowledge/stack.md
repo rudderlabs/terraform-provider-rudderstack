@@ -37,3 +37,14 @@
 - `.claude/skills/onboard-integration/SKILL.md` is the repo-local automation
   hook for integration onboarding; it complements the generated-code workflow
   described in `README.md` without changing the provider runtime stack.
+
+## INF-2349 — test-ci requires Terraform CLI
+
+- `make test-ci` runs the Terraform Plugin SDK unit-test suite through
+  `go test ./...`, and those non-acceptance `resource.UnitTest` tests invoke
+  the Terraform CLI.
+- The `test-ci` target depends on a `test-ci-preflight` check that requires
+  `terraform` to already be present on `PATH`. The preflight is intentionally
+  diagnostic only; it does not download Terraform.
+- GitHub Actions performs Terraform setup before invoking `make test-ci`, while
+  local and DevBox environments must provide Terraform themselves.

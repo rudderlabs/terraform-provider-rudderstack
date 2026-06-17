@@ -31,9 +31,10 @@ Questions? Join our [Slack community](https://resources.rudderstack.com/join-rud
 
 Before you get started, make sure that following dependencies are installed:
 
-- Bash (On Windows, consider using WSL2 Ubuntu) 
+- Bash (On Windows, consider using WSL2 Ubuntu)
 - Go
 - Make
+- Terraform CLI
 
 ## Building the Terraform provider
 
@@ -260,6 +261,8 @@ func TestAccConnectionExampleToWebhook(t *testing.T) {
 ## CI, secrets, and operations
 
 CI orchestration (affected-integration detection, matrix CRUD jobs, summary gate) and the per-environment credentials model live in [`E2E_TESTING.md`](E2E_TESTING.md). The step-by-step PAT rotation procedure is in the platform team's runbook (the operational guide points to it). Read both before rotating the PAT or debugging a CI-only failure.
+
+Note: `make test-ci` requires the Terraform CLI to be installed on `PATH`. The command runs `go test ./...`, and several non-acceptance tests use Terraform Plugin SDK `resource.UnitTest`, which invokes the Terraform CLI. Narrower package tests that do not use `resource.UnitTest` may still run without Terraform installed.
 
 Note: `make test-ci` enforces coverage — any registered integration missing its `TestAcc*` function will fail the build. Matching is case-insensitive (`TestAccDestinationCustomerIO` matches the registry key `customerio`).
 
