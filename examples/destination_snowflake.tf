@@ -19,8 +19,27 @@ resource "rudderstack_destination_snowflake" "example" {
       # exclude_window_start_time = "11:00"
       # exclude_window_end_time   = "12:00"
     }
+    # skip_tracks_table = false
+    # skip_users_table = true
+    # prefer_append = true
+    # manual_sync = false
     # json_paths = "..."
     use_rudder_storage = true
+    # connection_mode {
+    #   web = "cloud"
+    #   android = "cloud"
+    #   android_kotlin = "cloud"
+    #   ios = "cloud"
+    #   ios_swift = "cloud"
+    #   unity = "cloud"
+    #   amp = "cloud"
+    #   cloud = "cloud"
+    #   cloud_source = "cloud"
+    #   reactnative = "cloud"
+    #   flutter = "cloud"
+    #   cordova = "cloud"
+    #   shopify = "cloud"
+    # }
     # namespace = "..."
     # prefix = "..."
     # additional_properties = true
@@ -74,10 +93,20 @@ resource "rudderstack_destination_snowflake" "example" {
     # 		consents = ["one_android", "two_android", "three_android"]
     # 		resolution_strategy = ""
     # 	}]
+    # 	android_kotlin = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+    # 	}]
     # 	ios = [{
     # 		provider = "custom"
     # 		resolution_strategy = "and"
     # 		consents = ["one_ios", "two_ios", "three_ios"]
+    # 	}]
+    # 	ios_swift = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "or"
+    # 		consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
     # 	}]
     # 	unity = [{
     # 		provider = "custom"
