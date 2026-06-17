@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.7.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.6.0...v4.7.0) (2026-06-17)
+
+
+### Features
+
+* align snowflake destination schema with config parity ([#267](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/267)) ([1060519](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/1060519cc5352767d6a6a339f3c829cd705f818d))
+
 ## [4.6.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.5.1...v4.6.0) (2026-06-12)
 
 
