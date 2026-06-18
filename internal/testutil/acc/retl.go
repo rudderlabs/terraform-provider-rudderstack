@@ -31,7 +31,7 @@ const planOnlyAccountID = "acc-plan-only"
 // AccAssertRETLSourceTable. The Config / UpdateConfig fields are HCL fragments
 // that go inside the resource's `config { }` block.
 type RETLSourceTestConfig struct {
-	SourceDefinitionName string // e.g. "snowflake"
+	SourceDefinitionName string // e.g. "bigquery"
 	Config               string // HCL inside config { } block for the create step
 	UpdateConfig         string // HCL for the update step (omit to skip update)
 }
@@ -272,7 +272,7 @@ func retlConnectionHCL(srcName, dstName, accountID string, cfg RETLConnectionTes
 	return fmt.Sprintf(`
 resource "rudderstack_retl_source_model" "test" {
   name                   = %q
-  source_definition_name = "snowflake"
+  source_definition_name = "bigquery"
   account_id             = %q
   config {
     primary_key = "id"
