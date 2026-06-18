@@ -112,6 +112,26 @@ func TestAccRETLConnection_CronSchedule(t *testing.T) {
 	})
 }
 
+// TestAccRETLConnectionCustomerIOAudience_Manual exercises the typed
+// rudderstack_retl_connection_customerio_audience resource. Plan-only (the CI
+// default) validates HCL/schema — including the top-level audience_id field —
+// with no creds. The live path is vendor-gated on RUDDERSTACK_CUSTOMERIO_TEST_AUDIENCE_ID
+// (plus the warehouse account env var) and skips when unset, mirroring the
+// other vendor-gated integrations.
+func TestAccRETLConnectionCustomerIOAudience_Manual(t *testing.T) {
+	acc.AccAssertRETLConnectionCustomerIOAudience(t, acc.RETLConnectionTestConfig{
+		Variant:       "cio-aud-manual",
+		SyncBehaviour: "mirror",
+		Schedule:      `type = "manual"`,
+		Identifiers: `
+			identifiers {
+				from = "email"
+				to   = "email"
+			}
+		`,
+	})
+}
+
 // TestAccRETLConnection_ManualSchedule covers the manual schedule branch.
 // `full` sync_behaviour flexes a non-upsert path (the JSON Mapper flow accepts
 // only "upsert" or "full" — "mirror" is rejected by the API).

@@ -48,18 +48,20 @@ func TestAllSourcesHaveAcceptanceTests(t *testing.T) {
 	}
 }
 
-// retlResources lists the RETL resources registered in rudderstack/provider.go.
-// They have no registry like configs.Sources/Destinations, so the coverage gate
-// hard-codes the set. Update this list when adding a new RETL resource.
+// retlResources lists the RETL resources registered in rudderstack/provider.go
+// that are enforced by this coverage gate. They have no registry like
+// configs.Sources/Destinations, so the set is hard-coded here. Update this
+// list when adding a new RETL resource that has full acceptance-test coverage.
 //
-// rudderstack_retl_connection_customerio_audience is intentionally excluded here:
-// it is a vendor-gated integration (needs a Customer.io account to exercise live),
-// handled the same way as other vendor-gated integrations. It is brought under the
-// gate by its own follow-up change.
+// rudderstack_retl_connection_customerio_audience is covered by a plan-only-safe
+// acceptance test (TestAccRETLConnectionCustomerIOAudience_*); its live path is
+// vendor-gated on a Customer.io env var, the same way the other vendor-gated
+// integrations are handled.
 var retlResources = []string{
 	"retl_source_model",
 	"retl_source_table",
 	"retl_connection",
+	"retl_connection_customerio_audience",
 }
 
 // TestAllRETLResourcesHaveAcceptanceTests verifies that every RETL resource
