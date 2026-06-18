@@ -251,6 +251,59 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 	})
 }
 
+// TestResourceAccountRead_404ClearsState verifies that when the accounts API returns
+// a 404 (out-of-band deletion / import of a missing ID), resourceAccountRead clears
+// the resource ID and returns no Terraform error — matching the drift-detection
+// pattern used in rudderstack/retl/common.go.
+func TestResourceAccountRead_404ClearsState(t *testing.T) {
+	cm := testAccountConfigMeta()
+	accounts := &mockAccountsService{}
+
+	accounts.On("Get", mock.Anything, "acct-gone").
+		Return(nil, &client.APIError{HTTPStatusCode: 404}).Once()
+
+	res := resourceAccount(cm)
+	d := res.Data(nil)
+	d.SetId("acct-gone")
+
+	c := &Client{Accounts: accounts}
+	diags := resourceAccountRead(cm)(context.Background(), d, c)
+	if diags.HasError() {
+		t.Fatalf("expected no error on 404, got %+v", diags)
+	}
+	if d.Id() != "" {
+		t.Fatalf("expected ID cleared on 404, got %q", d.Id())
+	}
+
+	accounts.AssertExpectations(t)
+}
+
+// TestResourceAccountRead_NonNotFoundErrorReturnsError verifies that non-404 API errors
+// are surfaced as Terraform diagnostics (not silently swallowed).
+func TestResourceAccountRead_NonNotFoundErrorReturnsError(t *testing.T) {
+	cm := testAccountConfigMeta()
+	accounts := &mockAccountsService{}
+
+	accounts.On("Get", mock.Anything, "acct-err").
+		Return(nil, &client.APIError{HTTPStatusCode: 500, Message: "internal server error"}).Once()
+
+	res := resourceAccount(cm)
+	d := res.Data(nil)
+	d.SetId("acct-err")
+
+	c := &Client{Accounts: accounts}
+	diags := resourceAccountRead(cm)(context.Background(), d, c)
+	if !diags.HasError() {
+		t.Fatal("expected error on 500, got none")
+	}
+	// ID must NOT be cleared on a non-404 error.
+	if d.Id() == "" {
+		t.Fatal("expected ID to remain set on non-404 error")
+	}
+
+	accounts.AssertExpectations(t)
+}
+
 // TestResourceAccountSchemaNoSecretInState verifies that after a Read whose mocked
 // Get returns no secret, the bar field is absent from state. This test exercises the
 // schema + read function directly without needing a full provider lifecycle.
