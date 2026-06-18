@@ -1,50 +1,80 @@
 # Branch / PR Map — TF rETL Account Management verification
 
-Branch & PR layout for the
+Full branch & PR layout for the
 [TF — rETL Account Management (Lovable Phase 1)](https://linear.app/rudderstack/project/tf-retl-account-management-lovable-phase-1-6076c97fd07f)
-verification work. Render with any Mermaid-aware viewer (GitHub, Notion, VS Code, mermaid.live).
+project: the 7-PR **accounts feature stack** (Stream E) plus the 4-PR **e2e verification stack** built on top of it.
+Render with any Mermaid-aware viewer (GitHub, Notion, VS Code, mermaid.live).
 
 ## Git tree
 
 ```mermaid
 %%{init: {'gitGraph': {'mainBranchName': 'main'}}}%%
 gitGraph
-   commit id: "4ab4efc (4.6.0)"
-   branch accounts-stack
-   commit id: "#260–266 dex-376..382 (accounts)" tag: "stack tip e1b8c9c"
-   branch pr1-237
+   commit id: "main 4ab4efc"
+   branch dex-376
+   commit id: "#260 DEX-376 accounts registry"
+   branch dex-377
+   commit id: "#261 DEX-377 resource_account CRUD"
+   branch dex-378
+   commit id: "#262 DEX-378 data source"
+   branch dex-381
+   commit id: "#263 DEX-381 AssertAccount helper"
+   branch dex-379
+   commit id: "#264 DEX-379 bq ConfigMeta"
+   branch dex-380
+   commit id: "#265 DEX-380 provider wiring"
+   branch dex-382
+   commit id: "#266 DEX-382 bq integration test"
+   branch pr1-271
    commit id: "Alexandros: rETL acc + CI" type: HIGHLIGHT
    commit id: "Alexandros: account-id update" type: HIGHLIGHT
    commit id: "enabled + cio-excluded doc"
-   commit id: "→ BigQuery"
-   branch pr2-client-staging
+   commit id: "to BigQuery"
+   branch pr2-272
    commit id: "wire Accounts client [#617]"
    commit id: "404 fix"
    commit id: "staging smoke + run.sh"
-   branch pr3-docs
+   branch pr3-273
    commit id: "HANDOFF + BRANCH-MAP"
-   branch pr4-cio
-   commit id: "customerio_audience acc coverage"
+   branch pr4-274
+   commit id: "customerio_audience coverage"
 ```
 
-*HIGHLIGHT = Alexandros Milaios's preserved commits.*
+*HIGHLIGHT = Alexandros Milaios's preserved commits. Lower 7 branches = accounts feature stack (Stream E); upper 4 = this verification stack.*
 
 ## PR stack (bottom-up merge order)
 
 ```mermaid
 flowchart TD
-  main["origin/main"]:::remote
-  stack["accounts stack · PR#260–266 · dex-376…382"]:::remote
-  p237["PR#237 · CLOSED (superseded)"]:::closed
-  pr1["PR#271 · feature/pro-5676… · rETL acc → BigQuery (rebased from #237)"]:::remote
-  pr2["PR#272 · feature/retl-e2e-account-client-and-staging · Accounts client + staging smoke ⚠️#617"]:::remote
-  pr3["PR3 · feature/retl-e2e-docs · HANDOFF + BRANCH-MAP (this PR)"]:::remote
-  pr4["PR4 · feature/retl-customerio-audience-acc · CIO audience coverage"]:::remote
-  verify["verify/accounts-retl-e2e · integrated reference (local only, all layers)"]:::localonly
+  main["origin/main @4ab4efc"]:::remote
 
-  main --> stack --> pr1 --> pr2 --> pr3 --> pr4
-  p237 -. "force-push blocked reopen → new PR" .-> pr1
-  stack -. "complete integrated copy" .-> verify
+  subgraph ACC["Accounts feature stack · Stream E · #260-266"]
+    direction TB
+    d376["#260 · DEX-376 · dex-376 · accounts integration registry"]:::remote
+    d377["#261 · DEX-377 · dex-377 · generic resource_account.go CRUD"]:::remote
+    d378["#262 · DEX-378 · dex-378 · data_source_account (read-only)"]:::remote
+    d381["#263 · DEX-381 · dex-381 · AssertAccount test helper"]:::remote
+    d379["#264 · DEX-379 · dex-379 · BigQuery account ConfigMeta"]:::remote
+    d380["#265 · DEX-380 · dex-380 · provider.go resources wiring"]:::remote
+    d382["#266 · DEX-382 · dex-382 · BigQuery account integration test"]:::remote
+    d376 --> d377 --> d378 --> d381 --> d379 --> d380 --> d382
+  end
+
+  subgraph VER["E2E verification stack · this work"]
+    direction TB
+    pr1["#271 · feature/pro-5676 · rETL acc to BigQuery (rebased from #237)"]:::remote
+    pr2["#272 · feature/retl-e2e-account-client-and-staging · Accounts client + staging smoke (gated #617)"]:::remote
+    pr3["#273 · feature/retl-e2e-docs · HANDOFF + BRANCH-MAP (this PR)"]:::remote
+    pr4["#274 · feature/retl-customerio-audience-acc · customerio_audience coverage"]:::remote
+    pr1 --> pr2 --> pr3 --> pr4
+  end
+
+  main --> d376
+  d382 --> pr1
+  p237["PR#237 · CLOSED (superseded)"]:::closed
+  p237 -. "force-push blocked reopen, new PR" .-> pr1
+  verify["verify/accounts-retl-e2e · integrated reference (local only, all layers)"]:::localonly
+  d382 -. "complete integrated copy" .-> verify
 
   classDef remote fill:#0d4429,stroke:#3fb950,color:#e6edf3;
   classDef localonly fill:#5a3b00,stroke:#d29922,color:#e6edf3;
@@ -53,15 +83,29 @@ flowchart TD
 
 🟩 remote/pushed · 🟧 local-only · ⬛ closed
 
+## Accounts feature stack (Stream E)
+
+| PR | Issue | Branch (`feature/…`) | Base | Summary |
+|----|-------|----------------------|------|---------|
+| #260 | DEX-376 | `dex-376-…-add-accounts-registry` | `main` | Accounts integration registry |
+| #261 | DEX-377 | `dex-377-…-generic-resource_accountgo-crud-handler` | #260 | generic `resource_account.go` CRUD + import |
+| #262 | DEX-378 | `dex-378-…-data_source_accountgo-read-only` | #261 | read-only `rudderstack_account` data source |
+| #263 | DEX-381 | `dex-381-…-build-assertaccount-test-helper` | #262 | `AssertAccount` / `AccAssertAccount` helpers |
+| #264 | DEX-379 | `dex-379-…-bigquery-account-integration-file` | #263 | BigQuery account `ConfigMeta` + example |
+| #265 | DEX-380 | `dex-380-…-wire-providergo-resources-datasourcesmap` | #264 | register resource + data source in `provider.go` |
+| #266 | DEX-382 | `dex-382-…-bigquery-account-integration-test` | #265 | BigQuery account integration test + docs |
+
+## E2E verification stack (this work)
+
 | PR | Branch | Base | Contents | Merge gate |
 |----|--------|------|----------|-----------|
-| **#271** | `feature/pro-5676…terraform` | `feature/dex-382` (#266) | rETL acceptance tests (Alexandros, authorship preserved) → BigQuery; CIO documented-excluded | after accounts stack |
+| **#271** | `feature/pro-5676…terraform` | #266 | rETL acceptance tests (Alexandros, authorship preserved) → BigQuery; CIO documented-excluded | after accounts stack |
 | **#272** | `feature/retl-e2e-account-client-and-staging` | #271 | real Accounts client wiring + 404 fix + `test/e2e/staging` smoke | **rudder-iac #617** |
-| **PR3** | `feature/retl-e2e-docs` | #272 | `HANDOFF.md` + `BRANCH-MAP.md` | with #272 |
-| **PR4** | `feature/retl-customerio-audience-acc` | PR3 | `retl_connection_customerio_audience` acc coverage (flips gate exclusion→enforced) | with stack |
+| **#273** | `feature/retl-e2e-docs` | #272 | `HANDOFF.md` + `BRANCH-MAP.md` | with #272 |
+| **#274** | `feature/retl-customerio-audience-acc` | #273 | `retl_connection_customerio_audience` coverage (gate exclusion→enforced) | with stack |
 
 ## Notes
 
 - **#237 could not be reopened** — its branch was force-pushed after close, which GitHub blocks. #271 carries the identical commits (Alexandros's authorship intact) as a new PR.
-- **`verify/accounts-retl-e2e`** is kept locally as the complete integrated reference (all four layers in one branch) and as the runnable target for the [HANDOFF](HANDOFF.md) test runbook.
-- The accounts stack #260–266 should merge bottom-up into `main` first; then this 4-PR stack rebases onto `main` and #272's `go.mod` pin flips to a released rudder-iac version once #617 lands.
+- **`verify/accounts-retl-e2e`** is kept locally as the complete integrated reference (all layers in one branch); the [HANDOFF](HANDOFF.md) runbook targets the pushed stack tip `feature/retl-customerio-audience-acc`.
+- **Merge order:** the accounts stack #260–266 merges bottom-up into `main` first; then this 4-PR stack rebases onto `main` and #272's `go.mod` pin flips to a released rudder-iac version once #617 lands.
