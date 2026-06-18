@@ -18,7 +18,6 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
-
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 

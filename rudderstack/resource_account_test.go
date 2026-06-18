@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
-
 	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -99,8 +98,16 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 			testutil.JSONEq(string(req.Options), createOptionsJSON) &&
 			testutil.JSONEq(string(req.Secret), createSecretJSON)
 	})).Return(&client.Account{
-		ID:        "acct-001",
-		Name:      "example",
+		ID:   "acct-001",
+		Name: "example",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		Options:   json.RawMessage(createOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
@@ -110,6 +117,14 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 	accounts.On("Get", mock.Anything, "acct-001").Return(&client.Account{
 		ID:   "acct-001",
 		Name: "example",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		// Secret intentionally absent — API never returns it.
 		Options:   json.RawMessage(createOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
@@ -122,8 +137,16 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 			testutil.JSONEq(string(req.Options), updateOptionsJSON) &&
 			testutil.JSONEq(string(req.Secret), updateSecretJSON)
 	})).Return(&client.Account{
-		ID:        "acct-001",
-		Name:      "example-updated",
+		ID:   "acct-001",
+		Name: "example-updated",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		Options:   json.RawMessage(updateOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2024, 2, 3, 4, 5, 6, 0, time.UTC)),
@@ -131,8 +154,16 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 
 	// --- Read mock after Update (called twice: post-update refresh + destroy plan check) ---
 	accounts.On("Get", mock.Anything, "acct-001").Return(&client.Account{
-		ID:        "acct-001",
-		Name:      "example-updated",
+		ID:   "acct-001",
+		Name: "example-updated",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		Options:   json.RawMessage(updateOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2024, 2, 3, 4, 5, 6, 0, time.UTC)),
@@ -230,6 +261,14 @@ func TestResourceAccountSchemaNoSecretInState(t *testing.T) {
 	accounts.On("Get", mock.Anything, "acct-002").Return(&client.Account{
 		ID:   "acct-002",
 		Name: "test-acct",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		// Options returned, secret NOT returned.
 		Options:   json.RawMessage(`{"foo":"val1"}`),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 3, 4, 5, 6, 7, 0, time.UTC)),
