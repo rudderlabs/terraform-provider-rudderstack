@@ -95,21 +95,34 @@ func TestAccRETLConnection_CronSchedule(t *testing.T) {
 				to   = "user_id"
 			}
 		`,
+		Mappings: `
+			mappings {
+				from = "name"
+				to   = "first_name"
+			}
+		`,
 		Event: `type = "identify"`,
 	})
 }
 
 // TestAccRETLConnection_ManualSchedule covers the manual schedule branch.
-// `mirror` sync_behaviour is used here to flex a non-upsert path.
+// `full` sync_behaviour flexes a non-upsert path (the JSON Mapper flow accepts
+// only "upsert" or "full" — "mirror" is rejected by the API).
 func TestAccRETLConnection_ManualSchedule(t *testing.T) {
 	acc.AccAssertRETLConnection(t, acc.RETLConnectionTestConfig{
 		Variant:       "manual",
-		SyncBehaviour: "mirror",
+		SyncBehaviour: "full",
 		Schedule:      `type = "manual"`,
 		Identifiers: `
 			identifiers {
 				from = "email"
 				to   = "user_id"
+			}
+		`,
+		Mappings: `
+			mappings {
+				from = "name"
+				to   = "first_name"
 			}
 		`,
 		Event: `type = "identify"`,
