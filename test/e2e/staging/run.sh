@@ -62,7 +62,9 @@ BIN_DIR="${SCRIPT_DIR}/.bin"
 PROVIDER_BINARY="${BIN_DIR}/terraform-provider-rudderstack"
 
 # ── Temp dev-override CLI config ─────────────────────────────────────────────
-OVERRIDE_CFG="$(mktemp "${TMPDIR:-/tmp}/tf-dev-override-XXXXXX.tfrc")"
+# No .tfrc suffix on the template: BSD/macOS mktemp requires the X's at the end.
+# TF_CLI_CONFIG_FILE accepts any path, so the extension is unnecessary.
+OVERRIDE_CFG="$(mktemp "${TMPDIR:-/tmp}/tf-dev-override-XXXXXX")"
 trap 'rm -f "${OVERRIDE_CFG}"' EXIT
 
 # ── Build the provider ───────────────────────────────────────────────────────
