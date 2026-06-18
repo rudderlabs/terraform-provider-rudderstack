@@ -51,6 +51,11 @@ func TestAllSourcesHaveAcceptanceTests(t *testing.T) {
 // retlResources lists the RETL resources registered in rudderstack/provider.go.
 // They have no registry like configs.Sources/Destinations, so the coverage gate
 // hard-codes the set. Update this list when adding a new RETL resource.
+//
+// rudderstack_retl_connection_customerio_audience is intentionally excluded here:
+// it is a vendor-gated integration (needs a Customer.io account to exercise live),
+// handled the same way as other vendor-gated integrations. It is brought under the
+// gate by its own follow-up change.
 var retlResources = []string{
 	"retl_source_model",
 	"retl_source_table",

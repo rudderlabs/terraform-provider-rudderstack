@@ -291,6 +291,7 @@ resource "rudderstack_destination_webhook" "test" {
 resource "rudderstack_retl_connection" "test" {
   source_id      = rudderstack_retl_source_model.test.id
   destination_id = rudderstack_destination_webhook.test.id
+  enabled        = true
   sync_behaviour = %q%s
   schedule {
     %s
