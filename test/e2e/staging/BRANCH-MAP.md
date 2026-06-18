@@ -10,37 +10,32 @@ Render with any Mermaid-aware viewer (GitHub, Notion, VS Code, mermaid.live).
 ```mermaid
 %%{init: {'gitGraph': {'mainBranchName': 'main'}}}%%
 gitGraph
-   commit id: "main 4ab4efc"
-   branch dex-376
-   commit id: "#260 DEX-376 accounts registry"
-   branch dex-377
-   commit id: "#261 DEX-377 resource_account CRUD"
-   branch dex-378
-   commit id: "#262 DEX-378 data source"
-   branch dex-381
-   commit id: "#263 DEX-381 AssertAccount helper"
-   branch dex-379
-   commit id: "#264 DEX-379 bq ConfigMeta"
-   branch dex-380
-   commit id: "#265 DEX-380 provider wiring"
-   branch dex-382
-   commit id: "#266 DEX-382 bq integration test"
-   branch pr1-271
-   commit id: "Alexandros: rETL acc + CI" type: HIGHLIGHT
-   commit id: "Alexandros: account-id update" type: HIGHLIGHT
-   commit id: "enabled + cio-excluded doc"
-   commit id: "to BigQuery"
-   branch pr2-272
-   commit id: "wire Accounts client [#617]"
-   commit id: "404 fix"
-   commit id: "staging smoke + run.sh"
-   branch pr3-273
-   commit id: "HANDOFF + BRANCH-MAP"
-   branch pr4-274
-   commit id: "customerio_audience coverage"
+   commit id: "4ab4efc (main)"
+   branch "#260 DEX-376 accounts registry"
+   commit id: "dex-376"
+   branch "#261 DEX-377 resource_account CRUD"
+   commit id: "dex-377"
+   branch "#262 DEX-378 data source"
+   commit id: "dex-378"
+   branch "#263 DEX-381 AssertAccount helper"
+   commit id: "dex-381"
+   branch "#264 DEX-379 bq ConfigMeta"
+   commit id: "dex-379"
+   branch "#265 DEX-380 provider wiring"
+   commit id: "dex-380"
+   branch "#266 DEX-382 bq integration test"
+   commit id: "dex-382"
+   branch "#271 rETL acc to BigQuery"
+   commit id: "feature/pro-5676" type: HIGHLIGHT
+   branch "#272 Accounts client + staging smoke"
+   commit id: "retl-e2e-account-client-and-staging"
+   branch "#273 docs (HANDOFF + BRANCH-MAP)"
+   commit id: "retl-e2e-docs"
+   branch "#274 customerio_audience coverage"
+   commit id: "retl-customerio-audience-acc"
 ```
 
-*HIGHLIGHT = Alexandros Milaios's preserved commits. Lower 7 branches = accounts feature stack (Stream E); upper 4 = this verification stack.*
+*Branch lanes are labelled by PR (`#NNN` + DEX issue); commit dots carry the branch name. HIGHLIGHT (#271) = the lane carrying Alexandros Milaios's preserved commits. Lower 7 lanes = accounts feature stack (Stream E); upper 4 = this verification stack.*
 
 ## PR stack (bottom-up merge order)
 
