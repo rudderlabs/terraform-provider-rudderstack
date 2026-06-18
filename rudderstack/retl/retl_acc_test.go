@@ -6,37 +6,39 @@ import (
 	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 )
 
-// TestAccRETLSourceModel_Snowflake exercises rudderstack_retl_source_model
-// against a snowflake account. SQL is intentionally trivial; the API accepts
-// it at create time and any sync-time SQL validation is out of scope here.
-func TestAccRETLSourceModel_Snowflake(t *testing.T) {
+// TestAccRETLSourceModel_BigQuery exercises rudderstack_retl_source_model
+// against a BigQuery account. The SQL references the e2e fixture table
+// (dataset.table, resolved in the account's project); the API accepts it at
+// create time and any sync-time SQL validation is out of scope here.
+func TestAccRETLSourceModel_BigQuery(t *testing.T) {
 	acc.AccAssertRETLSourceModel(t, acc.RETLSourceTestConfig{
-		SourceDefinitionName: "snowflake",
+		SourceDefinitionName: "bigquery",
 		Config: `
-			primary_key = "id"
-			sql         = "select 1 as id"
+			primary_key = "user_id"
+			sql         = "select user_id, email from rudder_tf_e2e.users"
 		`,
 		UpdateConfig: `
-			primary_key = "id"
-			sql         = "select 1 as id, 'two' as name"
+			primary_key = "user_id"
+			sql         = "select user_id, email, created_at from rudder_tf_e2e.users"
 			description = "v2"
 		`,
 	})
 }
 
-// TestAccRETLSourceTable_Snowflake exercises rudderstack_retl_source_table.
-func TestAccRETLSourceTable_Snowflake(t *testing.T) {
+// TestAccRETLSourceTable_BigQuery exercises rudderstack_retl_source_table.
+// schema is the BigQuery dataset; the e2e fixture is rudder_tf_e2e.users.
+func TestAccRETLSourceTable_BigQuery(t *testing.T) {
 	acc.AccAssertRETLSourceTable(t, acc.RETLSourceTestConfig{
-		SourceDefinitionName: "snowflake",
+		SourceDefinitionName: "bigquery",
 		Config: `
-			primary_key = "id"
-			schema      = "public"
+			primary_key = "user_id"
+			schema      = "rudder_tf_e2e"
 			table       = "users"
 		`,
 		UpdateConfig: `
-			primary_key = "id"
-			schema      = "public"
-			table       = "events"
+			primary_key = "email"
+			schema      = "rudder_tf_e2e"
+			table       = "users"
 		`,
 	})
 }
