@@ -63,5 +63,6 @@ func NewAPIClient(accessToken string, options ...client.Option) (*Client, error)
 		Destinations: api.Destinations,
 		Connections:  api.Connections,
 		RETLSources:  iacretl.NewRudderRETLStore(api),
+		Accounts:     api.Accounts,
 	}, nil
 }
