@@ -38,6 +38,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/tidwall/gjson"
 
+	iaclient "github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -78,15 +79,19 @@ func AssertAccount(t *testing.T, accountType string, testConfigs []configs.TestC
 	accounts := &mockAccountsService{}
 
 	// Create: match name, accountDefinitionName, options, and secret.
-	accounts.On("Create", mock.Anything, mock.MatchedBy(func(req *rudderstack.CreateAccountRequest) bool {
+	accounts.On("Create", mock.Anything, mock.MatchedBy(func(req *iaclient.CreateAccountRequest) bool {
 		return req.Name == "example" &&
 			req.AccountDefinitionName == cm.APIType &&
 			testutil.JSONEq(string(req.Options), createOptionsJSON) &&
 			testutil.JSONEq(string(req.Secret), createSecretJSON)
-	})).Return(&rudderstack.Account{
+	})).Return(&iaclient.Account{
 		ID:   "some-id",
 		Name: "example",
-		Definition: rudderstack.AccountDefinition{
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
 			Name: cm.APIType,
 			Type: cm.APIType,
 		},
@@ -96,14 +101,18 @@ func AssertAccount(t *testing.T, accountType string, testConfigs []configs.TestC
 	}, nil)
 
 	// Update: match id, name, options, and secret (accountDefinitionName is NOT sent on update).
-	accounts.On("Update", mock.Anything, "some-id", mock.MatchedBy(func(req *rudderstack.UpdateAccountRequest) bool {
+	accounts.On("Update", mock.Anything, "some-id", mock.MatchedBy(func(req *iaclient.UpdateAccountRequest) bool {
 		return req.Name == "example-updated" &&
 			testutil.JSONEq(string(req.Options), updateOptionsJSON) &&
 			testutil.JSONEq(string(req.Secret), updateSecretJSON)
-	})).Return(&rudderstack.Account{
+	})).Return(&iaclient.Account{
 		ID:   "some-id",
 		Name: "example-updated",
-		Definition: rudderstack.AccountDefinition{
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
 			Name: cm.APIType,
 			Type: cm.APIType,
 		},
@@ -114,10 +123,14 @@ func AssertAccount(t *testing.T, accountType string, testConfigs []configs.TestC
 
 	// Get after Create: called 3 times (post-create refresh, plan check before step 2, and
 	// one more read in step 2's apply — matches the destination/source pattern of .Times(3)).
-	accounts.On("Get", mock.Anything, "some-id").Return(&rudderstack.Account{
+	accounts.On("Get", mock.Anything, "some-id").Return(&iaclient.Account{
 		ID:   "some-id",
 		Name: "example",
-		Definition: rudderstack.AccountDefinition{
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
 			Name: cm.APIType,
 			Type: cm.APIType,
 		},
@@ -128,10 +141,14 @@ func AssertAccount(t *testing.T, accountType string, testConfigs []configs.TestC
 	}, nil).Times(3)
 
 	// Get after Update: called twice (post-update refresh + destroy plan check).
-	accounts.On("Get", mock.Anything, "some-id").Return(&rudderstack.Account{
+	accounts.On("Get", mock.Anything, "some-id").Return(&iaclient.Account{
 		ID:   "some-id",
 		Name: "example-updated",
-		Definition: rudderstack.AccountDefinition{
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
 			Name: cm.APIType,
 			Type: cm.APIType,
 		},
@@ -226,28 +243,28 @@ type mockAccountsService struct {
 	mock.Mock
 }
 
-func (m *mockAccountsService) Create(ctx context.Context, req *rudderstack.CreateAccountRequest) (*rudderstack.Account, error) {
+func (m *mockAccountsService) Create(ctx context.Context, req *iaclient.CreateAccountRequest) (*iaclient.Account, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*rudderstack.Account), args.Error(1)
+	return args.Get(0).(*iaclient.Account), args.Error(1)
 }
 
-func (m *mockAccountsService) Get(ctx context.Context, id string) (*rudderstack.Account, error) {
+func (m *mockAccountsService) Get(ctx context.Context, id string) (*iaclient.Account, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*rudderstack.Account), args.Error(1)
+	return args.Get(0).(*iaclient.Account), args.Error(1)
 }
 
-func (m *mockAccountsService) Update(ctx context.Context, id string, req *rudderstack.UpdateAccountRequest) (*rudderstack.Account, error) {
+func (m *mockAccountsService) Update(ctx context.Context, id string, req *iaclient.UpdateAccountRequest) (*iaclient.Account, error) {
 	args := m.Called(ctx, id, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*rudderstack.Account), args.Error(1)
+	return args.Get(0).(*iaclient.Account), args.Error(1)
 }
 
 func (m *mockAccountsService) Delete(ctx context.Context, id string) error {
