@@ -2,6 +2,7 @@ package acc
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -34,6 +35,12 @@ type RETLSourceTestConfig struct {
 	SourceDefinitionName string // e.g. "bigquery"
 	Config               string // HCL inside config { } block for the create step
 	UpdateConfig         string // HCL for the update step (omit to skip update)
+
+	// ExpectedConfigJSON / ExpectedUpdateConfigJSON are API-shaped config JSON
+	// (camelCase keys, e.g. "primaryKey") verified as a subset against the
+	// source's persisted config after the create / update step. Empty = skip.
+	ExpectedConfigJSON       string
+	ExpectedUpdateConfigJSON string
 }
 
 // RETLConnectionTestConfig describes a connection variant. The helper builds
@@ -55,6 +62,14 @@ type RETLConnectionTestConfig struct {
 	// connection's mappings { } blocks. Mappings are mutable across all flows,
 	// so this is the cheapest way to flex the Update path.
 	UpdateMappings string
+
+	// ExpectedConfigJSON / ExpectedUpdateConfigJSON are API-shaped JSON
+	// (camelCase keys, e.g. "syncBehaviour", "everyMinutes") verified as a
+	// subset against the connection returned by the API after the create /
+	// update step. Empty = skip. Extra API fields (id, sourceId, …) are
+	// tolerated by the subset matcher.
+	ExpectedConfigJSON       string
+	ExpectedUpdateConfigJSON string
 }
 
 // AccAssertRETLSourceModel runs the standard E2E lifecycle against
@@ -120,6 +135,7 @@ func runRETLSourceLifecycle(t *testing.T, resourceType string, cfg RETLSourceTes
 				resource.TestCheckResourceAttrSet(resourceName, "id"),
 				resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 				resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
+				testAccCheckRETLSourceConfig(resourceName, cfg.ExpectedConfigJSON),
 			),
 		},
 	}
@@ -131,6 +147,7 @@ func runRETLSourceLifecycle(t *testing.T, resourceType string, cfg RETLSourceTes
 			Check: resource.ComposeTestCheckFunc(
 				testAccCheckRETLSourceExists(resourceName),
 				resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
+				testAccCheckRETLSourceConfig(resourceName, cfg.ExpectedUpdateConfigJSON),
 			),
 		})
 	}
@@ -207,6 +224,7 @@ func AccAssertRETLConnection(t *testing.T, cfg RETLConnectionTestConfig) {
 				resource.TestCheckResourceAttr(connResource, "sync_behaviour", cfg.SyncBehaviour),
 				resource.TestCheckResourceAttrPair(connResource, "source_id", srcResource, "id"),
 				resource.TestCheckResourceAttrPair(connResource, "destination_id", dstResource, "id"),
+				testAccCheckRETLConnectionConfig(connResource, cfg.ExpectedConfigJSON),
 			),
 		},
 	}
@@ -219,6 +237,7 @@ func AccAssertRETLConnection(t *testing.T, cfg RETLConnectionTestConfig) {
 			Config: retlConnectionHCL(srcName, dstName, accountID, updated),
 			Check: resource.ComposeTestCheckFunc(
 				testAccCheckRETLConnectionExists(connResource),
+				testAccCheckRETLConnectionConfig(connResource, cfg.ExpectedUpdateConfigJSON),
 			),
 		})
 	}
@@ -328,6 +347,65 @@ func testAccCheckRETLSourceExists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("RETL source %s not found in API: %w", rs.Primary.ID, err)
 		}
 		return nil
+	}
+}
+
+// testAccCheckRETLSourceConfig fetches the source from the RETL API and verifies
+// its persisted config contains every field in expectedJSON (subset match —
+// extra API-added fields are tolerated). expectedJSON uses the API's camelCase
+// keys (e.g. "primaryKey"). No-op when expectedJSON is empty.
+func testAccCheckRETLSourceConfig(resourceName, expectedJSON string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if expectedJSON == "" {
+			return nil
+		}
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+		store, err := newTestRETLClient()
+		if err != nil {
+			return err
+		}
+		src, err := store.GetRetlSource(context.Background(), rs.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get RETL source from API: %w", err)
+		}
+		actual, err := json.Marshal(src.Config)
+		if err != nil {
+			return fmt.Errorf("failed to marshal RETL source config: %w", err)
+		}
+		return compareConfig(actual, expectedJSON)
+	}
+}
+
+// testAccCheckRETLConnectionConfig fetches the connection from the RETL API and
+// verifies it contains every field in expectedJSON (subset match). The whole
+// connection is marshalled, so expectedJSON may assert on any returned field
+// (syncBehaviour, schedule, identifiers, mappings, event, …); unlisted fields
+// like id/sourceId are ignored. No-op when expectedJSON is empty.
+func testAccCheckRETLConnectionConfig(resourceName, expectedJSON string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if expectedJSON == "" {
+			return nil
+		}
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+		store, err := newTestRETLClient()
+		if err != nil {
+			return err
+		}
+		conn, err := store.GetConnection(context.Background(), rs.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get RETL connection from API: %w", err)
+		}
+		actual, err := json.Marshal(conn)
+		if err != nil {
+			return fmt.Errorf("failed to marshal RETL connection: %w", err)
+		}
+		return compareConfig(actual, expectedJSON)
 	}
 }
 
