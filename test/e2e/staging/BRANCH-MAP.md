@@ -58,13 +58,16 @@ flowchart TD
   subgraph VER["E2E verification stack · this work"]
     direction TB
     pr1["#271 · feature/pro-5676 · rETL acc to BigQuery (rebased from #237)"]:::remote
-    pr2["#272 · feature/retl-e2e-account-client-and-staging · Accounts client + staging smoke (gated #617)"]:::remote
+    pcv["#278 · feature/pro-5768 · rETL upstream config-verify (PRO-5768)"]:::remote
+    pr2["#272 · feature/retl-e2e-account-client-and-staging · Accounts client + staging smoke (v0.18.0, #617 resolved)"]:::remote
     pr3["#273 · feature/retl-e2e-docs · HANDOFF + BRANCH-MAP (this PR)"]:::remote
     pr4["#274 · feature/retl-customerio-audience-acc · customerio_audience coverage"]:::remote
-    pr1 --> pr2 --> pr3 --> pr4
+    pr1 --> pcv --> pr2 --> pr3 --> pr4
   end
 
-  main --> d376
+  ci277["#277 · ci/fix-pr-triggers · run e2e+unit on all PRs (PRO-5776)"]:::remote
+  main --> ci277
+  ci277 --> d376
   d382 --> pr1
   p237["PR#237 · CLOSED (superseded)"]:::closed
   p237 -. "force-push blocked reopen, new PR" .-> pr1
@@ -90,17 +93,25 @@ flowchart TD
 | #265 | DEX-380 | `dex-380-…-wire-providergo-resources-datasourcesmap` | #264 | register resource + data source in `provider.go` |
 | #266 | DEX-382 | `dex-382-…-bigquery-account-integration-test` | #265 | BigQuery account integration test + docs |
 
-## E2E verification stack (this work)
+## Linear tree (current — bottom-up merge order)
 
-| PR | Branch | Base | Contents | Merge gate |
-|----|--------|------|----------|-----------|
-| **#271** | `feature/pro-5676…terraform` | #266 | rETL acceptance tests (Alexandros, authorship preserved) → BigQuery; CIO documented-excluded | after accounts stack |
-| **#272** | `feature/retl-e2e-account-client-and-staging` | #271 | real Accounts client wiring + 404 fix + `test/e2e/staging` smoke | **rudder-iac #617** |
-| **#273** | `feature/retl-e2e-docs` | #272 | `HANDOFF.md` + `BRANCH-MAP.md` | with #272 |
-| **#274** | `feature/retl-customerio-audience-acc` | #273 | `retl_connection_customerio_audience` coverage (gate exclusion→enforced) | with stack |
+The whole chain is now stacked on **#277** so every PR's head carries the CI
+trigger-fix and runs checks. rudder-iac is standardized to **v0.18.0**
+throughout (the #617 gate is dissolved — it's now a tagged release).
+
+| PR | Branch | Base | Contents |
+|----|--------|------|----------|
+| **#277** | `ci/fix-pr-triggers` | `main` | run e2e + unit on all PRs (drop `branches:[main]`) — PRO-5776 |
+| #260–#266 | `feature/dex-376…382` | #277 → … | accounts stack (Stream E); #261 bumps rudder-iac→v0.18.0; #262/#263 carry the `client.*` consumer migration; #266 adds the `e2e-account-crud` job |
+| **#271** | `feature/pro-5676…` | #266 | rETL acceptance tests (Alexandros authorship preserved) → BigQuery |
+| **#278** | `feature/pro-5768-retl-upstream-config-verify` | #271 | rETL upstream config verification — PRO-5768 |
+| **#272** | `feature/retl-e2e-account-client-and-staging` | #278 | real Accounts client wiring + 404 fix + `test/e2e/staging` smoke (v0.18.0; duplicate stub-migration dropped) |
+| **#273** | `feature/retl-e2e-docs` | #272 | `HANDOFF.md` + `BRANCH-MAP.md` (this PR) |
+| **#274** | `feature/retl-customerio-audience-acc` | #273 | `retl_connection_customerio_audience` coverage |
 
 ## Notes
 
 - **#237 could not be reopened** — its branch was force-pushed after close, which GitHub blocks. #271 carries the identical commits (Alexandros's authorship intact) as a new PR.
 - **`verify/accounts-retl-e2e`** is kept locally as the complete integrated reference (all layers in one branch); the [HANDOFF](HANDOFF.md) runbook targets the pushed stack tip `feature/retl-customerio-audience-acc`.
-- **Merge order:** the accounts stack #260–266 merges bottom-up into `main` first; then this 4-PR stack rebases onto `main` and #272's `go.mod` pin flips to a released rudder-iac version once #617 lands.
+- **Merge order:** merge bottom-up starting at **#277** → main; each PR below auto-retargets to `main` as the one beneath it merges, and its checks run green before merge.
+- **rudder-iac v0.18.0 / #617:** the released v0.18.0 supersedes the old `#617` pseudo-version pin, so #272 is no longer gated. The stub-removal + `client.*` migration (originally duplicated across #261 and #272) now lands once, in the accounts stack.
