@@ -77,6 +77,7 @@ func GetConfigMetaForGenericConsentManagement(supportedSourceTypes []string) ([]
 						"consents": {
 							Type:        schema.TypeList,
 							Required:    true,
+							MinItems:    1,
 							Description: "The list of consent IDs for the provider.",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,

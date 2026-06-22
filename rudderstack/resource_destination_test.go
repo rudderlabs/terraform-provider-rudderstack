@@ -65,6 +65,53 @@ func TestResourceDestinationConsentManagementDuplicateProvider(t *testing.T) {
 	})
 }
 
+func TestResourceDestinationConsentManagementRejectsEmptyConsents(t *testing.T) {
+	_, consentSchema := destinations.GetConfigMetaForGenericConsentManagement([]string{"web", "android"})
+
+	cm := configs.ConfigMeta{
+		APIType:      "TEST",
+		ConfigSchema: consentSchema,
+	}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"rudderstack": func() (*schema.Provider, error) {
+				return &schema.Provider{
+					ConfigureContextFunc: func(_ context.Context, _ *schema.ResourceData) (interface{}, diag.Diagnostics) {
+						return nil, nil
+					},
+					ResourcesMap: map[string]*schema.Resource{
+						"rudderstack_destination_test": resourceDestination(cm),
+					},
+				}, nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				PlanOnly: true,
+				Config: `
+					resource "rudderstack_destination_test" "example" {
+						name = "test-destination"
+
+						config {
+							consent_management {
+								web = [
+									{
+										provider = "oneTrust"
+										consents = []
+										resolution_strategy = ""
+									}
+								]
+							}
+						}
+					}
+				`,
+				ExpectError: regexp.MustCompile(`consents requires 1 item\s+minimum, but config has only 0 declared`),
+			},
+		},
+	})
+}
+
 func TestResourceDestinationConsentManagementAllowsDistinctAndPerSourceType(t *testing.T) {
 	_, consentSchema := destinations.GetConfigMetaForGenericConsentManagement([]string{"web", "android"})
 
