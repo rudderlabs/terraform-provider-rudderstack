@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/rudderlabs/rudder-iac/api/client"
 )
 
 // TestDataSourceAccountRead exercises dataSourceAccountRead using a mock
@@ -18,10 +20,14 @@ func TestDataSourceAccountRead(t *testing.T) {
 
 	optionsJSON := `{"warehouse":"us-east-1","project":"my-project"}`
 
-	accounts.On("Get", mock.Anything, "acc_1").Return(&Account{
+	accounts.On("Get", mock.Anything, "acc_1").Return(&client.Account{
 		ID:   "acc_1",
 		Name: "my-bigquery-account",
-		Definition: AccountDefinition{
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
 			Name:     "SOURCE_BIGQUERY",
 			Type:     "bigquery",
 			Category: "warehouse",
@@ -94,10 +100,14 @@ func TestDataSourceAccountRead(t *testing.T) {
 func TestDataSourceAccountReadNilOptions(t *testing.T) {
 	accounts := &mockAccountsService{}
 
-	accounts.On("Get", mock.Anything, "acc_2").Return(&Account{
+	accounts.On("Get", mock.Anything, "acc_2").Return(&client.Account{
 		ID:   "acc_2",
 		Name: "no-options-account",
-		Definition: AccountDefinition{
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
 			Name: "SOURCE_SNOWFLAKE",
 			Type: "snowflake",
 		},
