@@ -47,3 +47,43 @@ func TestDecodeCustomerIOAudienceID(t *testing.T) {
 		})
 	}
 }
+
+func TestDecodeCustomerIOObject(t *testing.T) {
+	cases := []struct {
+		name    string
+		in      string
+		want    string
+		wantErr bool
+		wantNil bool // expect errCustomerIONullConfig sentinel
+	}{
+		{name: "valid object", in: `{"object": "customers"}`, want: "customers"},
+		{name: "extra fields are ignored", in: `{"object": "customers", "x": 1}`, want: "customers"},
+		// JSON null is the server saying "no destination-specific config" —
+		// surface as the sentinel so the caller treats it as a soft signal.
+		{name: "json null returns sentinel", in: `null`, wantNil: true},
+		{name: "missing object is unsupported", in: `{}`, wantErr: true},
+		{name: "non-string object is unsupported", in: `{"object": 7}`, wantErr: true},
+		{name: "empty object string is unsupported", in: `{"object": ""}`, wantErr: true},
+		{name: "invalid JSON", in: `not json`, wantErr: true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := decodeCustomerIOObject(json.RawMessage(tc.in))
+			if tc.wantNil {
+				if !errors.Is(err, errCustomerIONullConfig) {
+					t.Fatalf("expected errCustomerIONullConfig, got %v", err)
+				}
+				return
+			}
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("err=%v, wantErr=%v", err, tc.wantErr)
+			}
+			if tc.wantErr {
+				return
+			}
+			if got != tc.want {
+				t.Errorf("object = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}

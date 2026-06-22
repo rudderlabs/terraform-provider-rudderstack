@@ -59,6 +59,7 @@ func resourcesMap() map[string]*schema.Resource {
 		"rudderstack_retl_source_table":                   retl.ResourceTable(),
 		"rudderstack_retl_connection":                     retl.ResourceConnection(),
 		"rudderstack_retl_connection_customerio_audience": retl.ResourceConnectionCustomerIOAudience(),
+		"rudderstack_retl_connection_customerio":          retl.ResourceConnectionCustomerIO(),
 	}
 
 	// append sources and destinations from integration registries
