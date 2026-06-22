@@ -22,6 +22,8 @@ func TestAccRETLSourceModel_BigQuery(t *testing.T) {
 			sql         = "select user_id, email, created_at from rudder_tf_e2e.users"
 			description = "v2"
 		`,
+		ExpectedConfigJSON:       `{"primaryKey":"user_id","sql":"select user_id, email from rudder_tf_e2e.users"}`,
+		ExpectedUpdateConfigJSON: `{"primaryKey":"user_id","sql":"select user_id, email, created_at from rudder_tf_e2e.users","description":"v2"}`,
 	})
 }
 
@@ -40,6 +42,8 @@ func TestAccRETLSourceTable_BigQuery(t *testing.T) {
 			schema      = "rudder_tf_e2e"
 			table       = "users"
 		`,
+		ExpectedConfigJSON:       `{"primaryKey":"user_id","schema":"rudder_tf_e2e","table":"users"}`,
+		ExpectedUpdateConfigJSON: `{"primaryKey":"email","schema":"rudder_tf_e2e","table":"users"}`,
 	})
 }
 
@@ -77,6 +81,8 @@ func TestAccRETLConnection_JSONMapperBasicSchedule(t *testing.T) {
 				to   = "phone_number"
 			}
 		`,
+		ExpectedConfigJSON:       `{"syncBehaviour":"upsert","schedule":{"type":"basic","everyMinutes":60},"identifiers":[{"from":"email","to":"user_id"}],"mappings":[{"from":"name","to":"first_name"}],"event":{"type":"identify"}}`,
+		ExpectedUpdateConfigJSON: `{"syncBehaviour":"upsert","schedule":{"type":"basic","everyMinutes":60},"identifiers":[{"from":"email","to":"user_id"}],"mappings":[{"from":"name","to":"first_name"},{"from":"phone","to":"phone_number"}],"event":{"type":"identify"}}`,
 	})
 }
 
@@ -101,7 +107,8 @@ func TestAccRETLConnection_CronSchedule(t *testing.T) {
 				to   = "first_name"
 			}
 		`,
-		Event: `type = "identify"`,
+		Event:              `type = "identify"`,
+		ExpectedConfigJSON: `{"syncBehaviour":"upsert","schedule":{"type":"cron","cronExpression":"30 13 * * *"},"identifiers":[{"from":"email","to":"user_id"}],"mappings":[{"from":"name","to":"first_name"}],"event":{"type":"identify"}}`,
 	})
 }
 
@@ -125,6 +132,7 @@ func TestAccRETLConnection_ManualSchedule(t *testing.T) {
 				to   = "first_name"
 			}
 		`,
-		Event: `type = "identify"`,
+		Event:              `type = "identify"`,
+		ExpectedConfigJSON: `{"syncBehaviour":"full","schedule":{"type":"manual"},"identifiers":[{"from":"email","to":"user_id"}],"mappings":[{"from":"name","to":"first_name"}],"event":{"type":"identify"}}`,
 	})
 }
