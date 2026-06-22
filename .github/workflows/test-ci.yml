@@ -2,11 +2,12 @@ name: Tests
 permissions:
   contents: read
 
+# No base-branch filter: feature work ships as stacks of inter-dependent PRs
+# (feature/… → feature/…). Restricting to `main` meant unit tests never ran on
+# any stacked PR. Run on every PR regardless of base branch.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches:
-      - main
 
 jobs:
   unit-tests:
