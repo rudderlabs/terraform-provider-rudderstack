@@ -174,4 +174,11 @@ if [[ "${BACKFILL}" == "true" ]]; then
   exit 3
 fi
 
+# ── Optional hold-open for manual inspection ─────────────────────────────────
+if [[ "${PAUSE:-false}" == "true" ]]; then
+  echo "==> PAUSED. Resources are live in staging. Outputs above."
+  echo "    Run the rETL sync manually in the workspace, then press Enter to destroy."
+  read -r   # ponytail: blocks here; trap destroys on exit. Ctrl-C also triggers destroy.
+fi
+
 echo "==> Smoke run complete."
