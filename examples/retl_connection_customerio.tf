@@ -1,4 +1,4 @@
-# Customer.io (VDM v2) flow — RETL connection scoped to Customer.io
+# Customer.io — RETL connection scoped to Customer.io
 # destinations. `object` is a typed top-level field (ForceNew — changing it
 # recreates the connection). Only `customers` is supported as the object, and
 # only the `upsert` and `mirror` sync behaviours. identifiers and mappings

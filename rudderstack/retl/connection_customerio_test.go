@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/mock"
@@ -252,11 +251,11 @@ func TestResourceConnectionCustomerIO_RejectsCursorColumnWithNonUpsert(t *testin
 	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
-// A JSON-`null` or empty destinationConfig is a server-side inconsistency for
-// a Customer.io VDM v2 connection (object is mandatory). Refresh must emit a
-// Warning and NOT zero `object` — zeroing would produce a never-reconcilable
-// plan because `object` is ForceNew.
-func TestResourceConnectionCustomerIO_NullDestinationConfigOnRead(t *testing.T) {
+// A 200 GetConnection with no usable object (JSON `null` or empty payload) is
+// a persistent server-side inconsistency, not a transient glitch the HTTP
+// layer would retry. Refresh must hard-error so the broken connection surfaces
+// instead of being masked by a warning that leaves the plan a silent no-op.
+func TestResourceConnectionCustomerIO_MissingObjectOnReadErrors(t *testing.T) {
 	cases := []struct {
 		name              string
 		destinationConfig json.RawMessage
@@ -282,16 +281,12 @@ func TestResourceConnectionCustomerIO_NullDestinationConfigOnRead(t *testing.T) 
 			r := retl.ResourceConnectionCustomerIO()
 			d := r.TestResourceData()
 			d.SetId("conn-cio-null")
-			// Seed prior object so we can prove refresh leaves it untouched.
-			require.NoError(t, d.Set("object", "customers"))
 
 			diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
-			require.False(t, diags.HasError(), "diags=%v", diags)
-			require.Len(t, diags, 1, "expected one warning diagnostic")
-			require.Equal(t, diag.Warning, diags[0].Severity)
-			require.Regexp(t, `missing object`, diags[0].Summary)
-			require.Equal(t, "customers", d.Get("object"),
-				"prior object must be preserved to avoid a never-reconcilable plan")
+			require.True(t, diags.HasError(), "expected a hard error, got %v", diags)
+			// Either surfacing is acceptable: a nil/empty payload fails at JSON
+			// decode, a JSON `null` fails the missing-object check.
+			require.Regexp(t, `no object|decode customerio destination config`, diags[0].Summary)
 			svc.AssertExpectations(t)
 		})
 	}

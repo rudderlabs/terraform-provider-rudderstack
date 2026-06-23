@@ -30,15 +30,15 @@ import (
 // pack/unpack destinationConfig.
 func ResourceConnectionCustomerIO() *schema.Resource {
 	return &schema.Resource{
-		Description: "A RETL connection to a Customer.io destination (VDM v2). " +
+		Description: "A RETL connection to a Customer.io destination. " +
 			"Carries the destination object as a typed top-level field; ForceNew because the " +
 			"object cannot be changed in place — changing it recreates the connection.",
 		Schema: mergeSchemas(baseConnectionSchema(), map[string]*schema.Schema{
-			// Customer.io supports exactly one object — `customers` (the Person
-			// object; VDM v2 listObjects returns {value:'customers',
-			// label:'Person'}). Restrict to that value so typos fail at plan
-			// time instead of on apply. If Customer.io ever adds objects,
-			// extend this slice.
+			// Customer.io supports exactly one object, whose on-the-wire value is
+			// `customers` (this is the `value` from the listObjects API, not the
+			// human-readable label). Restrict to it so typos fail at plan time
+			// instead of on apply. If Customer.io ever adds objects, extend this
+			// slice.
 			"object": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -46,7 +46,7 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"customers"}, false),
 				Description:  "Customer.io destination object. Only `customers` is supported.",
 			},
-			// VDM v2 supports only upsert and mirror — drop `full` from the base
+			// Only upsert and mirror are supported — drop `full` from the base
 			// schema's allowed set so users see a plan-time error instead of an
 			// API rejection on apply.
 			"sync_behaviour": {
@@ -54,7 +54,7 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror"}, false),
-				Description:  "How records are synced to the destination: `upsert` or `mirror` (VDM v2).",
+				Description:  "How records are synced to the destination: `upsert` or `mirror`.",
 			},
 			// cursor_column is a generic source-side field (the incremental
 			// watermark column), sent as a top-level request field — NOT inside
@@ -138,51 +138,21 @@ func readCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(err)
 	}
 	// cursor_column is a generic source-side field returned at top level
-	// (independent of destinationConfig validity).
+	// (independent of the destination config).
 	if err := d.Set("cursor_column", conn.CursorColumn); err != nil {
 		return diag.FromErr(fmt.Errorf("set cursor_column: %w", err))
 	}
-	// Empty or JSON-`null` destinationConfig on a Customer.io connection is a
-	// server-side inconsistency — the connection MUST carry an object. Don't
-	// zero the field in state: `object` is ForceNew with StringIsNotEmpty, so a
-	// zero value would produce a plan that can never reconcile. Leave the prior
-	// state value intact and surface a warning. (Same rationale as the audience
-	// resource — see warnMissingCustomerIOAudienceConfig.)
-	if len(conn.DestinationConfig) == 0 {
-		return diag.Diagnostics{warnMissingCustomerIOObjectConfig(conn.ID, "destinationConfig is empty")}
-	}
+	// A missing/empty/malformed object is a hard error (see decodeCustomerIOObject)
+	// rather than a warning — surfacing it at refresh beats masking a broken
+	// connection behind a plan that stays a silent no-op.
 	object, err := decodeCustomerIOObject(conn.DestinationConfig)
 	if err != nil {
-		if errors.Is(err, errCustomerIONullConfig) {
-			return diag.Diagnostics{warnMissingCustomerIOObjectConfig(conn.ID, "destinationConfig is JSON null")}
-		}
 		return diag.FromErr(err)
 	}
 	if err := d.Set("object", object); err != nil {
 		return diag.FromErr(fmt.Errorf("set object: %w", err))
 	}
 	return nil
-}
-
-// warnMissingCustomerIOObjectConfig formats a warning diagnostic for the
-// inconsistent-server-state case where a Customer.io connection comes back
-// without a usable destinationConfig. Returns a Warning (not an Error) so
-// refresh still succeeds — silently zeroing `object` would produce a
-// never-reconcilable plan (ForceNew + StringIsNotEmpty). See the audience
-// resource's warnMissingCustomerIOAudienceConfig for the full rationale.
-func warnMissingCustomerIOObjectConfig(connID, reason string) diag.Diagnostic {
-	return diag.Diagnostic{
-		Severity: diag.Warning,
-		Summary:  fmt.Sprintf("Customer.io connection %q is missing object", connID),
-		Detail: fmt.Sprintf(
-			"The server returned a connection with no object (%s). "+
-				"This is an inconsistent server state — object is mandatory for Customer.io VDM v2 destinations. "+
-				"Terraform preserved the prior object value in state and will NOT automatically reconcile this. "+
-				"To recover: fix the connection in the RudderStack UI, or force a replacement with "+
-				"`terraform apply -replace=<resource address>`.",
-			reason,
-		),
-	}
 }
 
 func updateCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -219,36 +189,30 @@ func encodeCustomerIOObjectConfig(d *schema.ResourceData) (json.RawMessage, erro
 	return out, nil
 }
 
-// errCustomerIONullConfig signals that destinationConfig was the JSON literal
-// `null` — semantically "no destination-specific config", not a malformed
-// payload. Callers distinguish this from a hard decode error.
-var errCustomerIONullConfig = errors.New("customerio destinationConfig is null")
-
-// decodeCustomerIOObject extracts the destination object from a
-// destinationConfig JSON blob. Returns errCustomerIONullConfig (a soft signal)
-// for JSON `null`. Returns a hard error when the payload is a non-null shape
-// without a non-empty string `object` — that signals an unsupported
-// destination-specific connection (e.g. imported from a destination that isn't
-// Customer.io VDM v2), which this resource does not represent.
+// decodeCustomerIOObject extracts the destination object from the connection's
+// destination config. A successful GetConnection (200) returns a complete body,
+// so any shape without a non-empty string `object` — empty input, JSON `null`,
+// missing key, non-string, or empty string — is a persistent server-side
+// inconsistency (this resource always writes a non-empty object on create) or
+// signals a connection that isn't a Customer.io connection at all. All of these
+// are hard errors so the problem surfaces at refresh instead of being masked by
+// a warning that turns the plan into a silent no-op.
 func decodeCustomerIOObject(raw json.RawMessage) (string, error) {
 	var parsed map[string]interface{}
 	if err := json.Unmarshal(raw, &parsed); err != nil {
-		return "", fmt.Errorf("decode customerio destinationConfig: %w", err)
-	}
-	if parsed == nil {
-		// JSON `null` unmarshalls into a nil map — treat as "no typed config".
-		return "", errCustomerIONullConfig
+		return "", fmt.Errorf("decode customerio destination config: %w", err)
 	}
 	v, ok := parsed["object"]
 	if !ok {
-		return "", fmt.Errorf("destinationConfig has no object — only Customer.io VDM v2 destination-specific connections are supported")
+		// nil map (JSON `null`) and an object-less payload land here together.
+		return "", fmt.Errorf("connection has no object — only Customer.io connections are supported by this resource")
 	}
 	s, ok := v.(string)
 	if !ok {
-		return "", fmt.Errorf("destinationConfig object is %T, expected string", v)
+		return "", fmt.Errorf("connection object is %T, expected string", v)
 	}
 	if s == "" {
-		return "", fmt.Errorf("destinationConfig object is empty")
+		return "", fmt.Errorf("connection object is empty")
 	}
 	return s, nil
 }

@@ -7,12 +7,12 @@ description: |-
 
 # rudderstack_retl_connection_customerio (Resource)
 
-A RETL (Reverse ETL) connection to a Customer.io destination using the VDM v2 flow. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Only `customers` is supported as the object, and only the `upsert` and `mirror` sync behaviours.
+A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Only `customers` is supported as the object, and only the `upsert` and `mirror` sync behaviours.
 
 ## Example Usage
 
 ```terraform
-# Customer.io (VDM v2) flow — RETL connection scoped to Customer.io
+# Customer.io — RETL connection scoped to Customer.io
 # destinations. `object` is a typed top-level field (ForceNew — changing it
 # recreates the connection). Only `customers` is supported as the object, and
 # only the `upsert` and `mirror` sync behaviours. identifiers and mappings
@@ -64,7 +64,7 @@ resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
 - `object` (String) Customer.io destination object. Only `customers` is supported.
 - `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
 - `source_id` (String) ID of the RETL source.
-- `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror` (VDM v2).
+- `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror`.
 
 ### Optional
 

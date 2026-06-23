@@ -54,13 +54,14 @@ func TestDecodeCustomerIOObject(t *testing.T) {
 		in      string
 		want    string
 		wantErr bool
-		wantNil bool // expect errCustomerIONullConfig sentinel
 	}{
 		{name: "valid object", in: `{"object": "customers"}`, want: "customers"},
 		{name: "extra fields are ignored", in: `{"object": "customers", "x": 1}`, want: "customers"},
-		// JSON null is the server saying "no destination-specific config" —
-		// surface as the sentinel so the caller treats it as a soft signal.
-		{name: "json null returns sentinel", in: `null`, wantNil: true},
+		// A 200 with no usable object is a persistent server-side inconsistency,
+		// not a transient soft signal — every shape below is a hard error so the
+		// problem surfaces at refresh instead of being masked.
+		{name: "json null is an error", in: `null`, wantErr: true},
+		{name: "empty input is an error", in: ``, wantErr: true},
 		{name: "missing object is unsupported", in: `{}`, wantErr: true},
 		{name: "non-string object is unsupported", in: `{"object": 7}`, wantErr: true},
 		{name: "empty object string is unsupported", in: `{"object": ""}`, wantErr: true},
@@ -69,12 +70,6 @@ func TestDecodeCustomerIOObject(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			got, err := decodeCustomerIOObject(json.RawMessage(tc.in))
-			if tc.wantNil {
-				if !errors.Is(err, errCustomerIONullConfig) {
-					t.Fatalf("expected errCustomerIONullConfig, got %v", err)
-				}
-				return
-			}
 			if (err != nil) != tc.wantErr {
 				t.Fatalf("err=%v, wantErr=%v", err, tc.wantErr)
 			}
