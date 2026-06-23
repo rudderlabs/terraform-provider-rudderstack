@@ -3,7 +3,6 @@ package retl_test
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -92,91 +91,35 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 	svc.AssertExpectations(t)
 }
 
-// Changing `object` must recreate the connection (ForceNew) — the
-// destinationConfig shape is not mutable in place on this flow. A new
-// resource ID after the value change proves destroy + create; terraform would
-// have called UpdateConnection (which the mock does not register) otherwise.
-func TestResourceConnectionCustomerIO_ObjectIsForceNew(t *testing.T) {
+// CustomerIO supports exactly one object — `customers` (the Person object;
+// see the VDM v2 listObjects response: {value:'customers', label:'Person'}).
+// The resource must reject any other object value at plan time rather than
+// letting the server fail on apply.
+func TestResourceConnectionCustomerIO_RejectsUnknownObject(t *testing.T) {
 	svc := &mockService{}
-	enabled := true
-
-	mkReq := func(object string) *iacretl.CreateRETLConnectionRequest {
-		return &iacretl.CreateRETLConnectionRequest{
-			SourceID:          "retl-src-1",
-			DestinationID:     "dest-cio",
-			Enabled:           &enabled,
-			Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-			SyncBehaviour:     iacretl.SyncBehaviourUpsert,
-			Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-			DestinationConfig: json.RawMessage(fmt.Sprintf(`{"object":%q}`, object)),
-		}
-	}
-	mkConn := func(id, object string) *iacretl.RETLConnection {
-		return &iacretl.RETLConnection{
-			ID:                id,
-			SourceID:          "retl-src-1",
-			DestinationID:     "dest-cio",
-			Enabled:           true,
-			Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-			SyncBehaviour:     iacretl.SyncBehaviourUpsert,
-			Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-			DestinationConfig: json.RawMessage(fmt.Sprintf(`{"object":%q}`, object)),
-		}
-	}
-	first := mkConn("conn-cio-1", "customers")
-	second := mkConn("conn-cio-2", "accounts")
-	svc.On("CreateConnection", mock.Anything, mkReq("customers")).Return(first, nil).Once()
-	svc.On("CreateConnection", mock.Anything, mkReq("accounts")).Return(second, nil).Once()
-	svc.On("GetConnection", mock.Anything, "conn-cio-1").Return(first, nil)
-	svc.On("GetConnection", mock.Anything, "conn-cio-2").Return(second, nil)
-	svc.On("DeleteConnection", mock.Anything, "conn-cio-1").Return(nil).Once()
-	svc.On("DeleteConnection", mock.Anything, "conn-cio-2").Return(nil).Once()
-
-	cfg := func(object string) string {
-		return fmt.Sprintf(`
-			provider "rudderstack" { access_token = "tok" }
-			resource "rudderstack_retl_connection_customerio" "example" {
-				source_id      = "retl-src-1"
-				destination_id = "dest-cio"
-				sync_behaviour = "upsert"
-				object         = %q
-				schedule { type = "manual" }
-				identifiers {
-					from = "email"
-					to   = "email"
-				}
-			}
-		`, object)
-	}
-
 	resource.UnitTest(t, resource.TestCase{
 		ProviderFactories: providerFactories(svc),
 		Steps: []resource.TestStep{
 			{
-				Config: cfg("customers"),
-				Check: func(s *terraform.State) error {
-					attrs, err := resourceAttrs(s, "rudderstack_retl_connection_customerio.example")
-					if err != nil {
-						return err
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection_customerio" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-cio"
+						sync_behaviour = "upsert"
+						object         = "accounts"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
 					}
-					return checkAll(map[string]string{"id": "conn-cio-1", "object": "customers"}, attrs)
-				},
-			},
-			{
-				Config: cfg("accounts"),
-				Check: func(s *terraform.State) error {
-					attrs, err := resourceAttrs(s, "rudderstack_retl_connection_customerio.example")
-					if err != nil {
-						return err
-					}
-					// New ID proves destroy + create — ForceNew fired.
-					return checkAll(map[string]string{"id": "conn-cio-2", "object": "accounts"}, attrs)
-				},
+				`,
+				ExpectError: regexpMatches(`expected object to be one of`),
 			},
 		},
 	})
-
-	svc.AssertExpectations(t)
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
 // VDM v2 supports only upsert and mirror sync modes; the typed resource must

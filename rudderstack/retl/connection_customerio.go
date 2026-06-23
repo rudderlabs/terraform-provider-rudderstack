@@ -32,14 +32,19 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 	return &schema.Resource{
 		Description: "A RETL connection to a Customer.io destination (VDM v2). " +
 			"Carries the destination object as a typed top-level field; ForceNew because the " +
-			"destinationConfig shape is not mutable in place on this flow.",
+			"object cannot be changed in place — changing it recreates the connection.",
 		Schema: mergeSchemas(baseConnectionSchema(), map[string]*schema.Schema{
+			// Customer.io supports exactly one object — `customers` (the Person
+			// object; VDM v2 listObjects returns {value:'customers',
+			// label:'Person'}). Restrict to that value so typos fail at plan
+			// time instead of on apply. If Customer.io ever adds objects,
+			// extend this slice.
 			"object": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
-				Description:  "Customer.io destination object (e.g. `customers`). Packed into destinationConfig.",
+				ValidateFunc: validation.StringInSlice([]string{"customers"}, false),
+				Description:  "Customer.io destination object. Only `customers` is supported.",
 			},
 			// VDM v2 supports only upsert and mirror — drop `full` from the base
 			// schema's allowed set so users see a plan-time error instead of an

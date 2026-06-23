@@ -7,7 +7,7 @@ description: |-
 
 # rudderstack_retl_connection_customerio (Resource)
 
-A RETL (Reverse ETL) connection to a Customer.io destination using the VDM v2 flow. The destination `object` is exposed as a typed top-level field and round-trips through `destinationConfig`. The `object` attribute is `ForceNew` because the `destinationConfig` shape is not mutable in place on this flow — changing it triggers replacement. Only the `upsert` and `mirror` sync behaviours are supported.
+A RETL (Reverse ETL) connection to a Customer.io destination using the VDM v2 flow. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Only `customers` is supported as the object, and only the `upsert` and `mirror` sync behaviours.
 
 ## Example Usage
 

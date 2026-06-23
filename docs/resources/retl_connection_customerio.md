@@ -7,26 +7,23 @@ description: |-
 
 # rudderstack_retl_connection_customerio (Resource)
 
-A RETL (Reverse ETL) connection to a Customer.io destination using the VDM v2 flow. The destination `object` is exposed as a typed top-level field and round-trips through `destinationConfig`. The `object` attribute is `ForceNew` because the `destinationConfig` shape is not mutable in place on this flow — changing it triggers replacement. Only the `upsert` and `mirror` sync behaviours are supported.
+A RETL (Reverse ETL) connection to a Customer.io destination using the VDM v2 flow. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Only `customers` is supported as the object, and only the `upsert` and `mirror` sync behaviours.
 
 ## Example Usage
 
 ```terraform
-# Customer.io (VDM v2) flow — destination-specific RETL connection scoped to
-# Customer.io destinations. `object` is a typed top-level field (ForceNew
-# because the destinationConfig shape is not mutable in place on this flow —
-# changing it recreates the connection). identifiers map to VDM v2
-# identifierMappings and mappings to fieldMappings; config-be assembles the
-# VDM v2 connectionConfig server-side from the Customer.io destination
-# definition. Only `upsert` and `mirror` sync behaviours are supported.
+# Customer.io (VDM v2) flow — RETL connection scoped to Customer.io
+# destinations. `object` is a typed top-level field (ForceNew — changing it
+# recreates the connection). Only `customers` is supported as the object, and
+# only the `upsert` and `mirror` sync behaviours. identifiers and mappings
+# are the source-to-destination identifier and field mappings.
 resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
   source_id      = rudderstack_retl_source_model.users_revenue.id
   destination_id = rudderstack_destination_customerio.example.id
   sync_behaviour = "upsert"
   object         = "customers"
 
-  # Optional: incremental watermark column. Only valid when sync_behaviour
-  # is "upsert". Sent as a generic top-level source field (not destinationConfig).
+  # Optional: incremental watermark column. Only valid when sync_behaviour is "upsert".
   cursor_column = "updated_at"
 
   schedule {
@@ -64,7 +61,7 @@ resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
 
 - `destination_id` (String) ID of the destination.
 - `identifiers` (Block List, Min: 1) Source-to-destination identifier mappings. ForceNew: any change recreates the connection. (see [below for nested schema](#nestedblock--identifiers))
-- `object` (String) Customer.io destination object (e.g. `customers`). Packed into destinationConfig.
+- `object` (String) Customer.io destination object. Only `customers` is supported.
 - `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
 - `source_id` (String) ID of the RETL source.
 - `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror` (VDM v2).
