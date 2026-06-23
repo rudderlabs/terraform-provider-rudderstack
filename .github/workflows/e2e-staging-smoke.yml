@@ -3,12 +3,24 @@ name: E2E Staging Smoke
 permissions:
   contents: read
 
-# Manual only. This applies REAL resources to the staging workspace
-# (BigQuery account → rETL source → connection), asserts no drift, and
-# destroys them on exit — it is the CI counterpart of test/e2e/staging/run.sh
-# (the #274 black-box smoke). It is workflow_dispatch (not per-PR) because the
-# config uses fixed resource names (tf-e2e-*), so concurrent runs would collide.
+# Applies REAL resources to the staging workspace (BigQuery account → rETL
+# source → connection), asserts no drift, destroys them on exit — the CI
+# counterpart of test/e2e/staging/run.sh (the #274 black-box smoke).
+#
+# Triggers:
+#   - pull_request, gated by the `e2e-staging` label — runnable on a PR BEFORE
+#     merge. For pull_request, GitHub reads this workflow from the PR HEAD, so
+#     it works even though the file isn't on the default branch yet. Add the
+#     label to run; pushes re-run while it's present.
+#   - workflow_dispatch — manual runs once this file is on the default branch
+#     (post-merge). Dispatch is NOT available pre-merge: GitHub lists dispatch
+#     workflows from the default branch only.
+#
+# Opt-in (label/manual), never automatic on every push: main.tf uses fixed
+# resource names (tf-e2e-*), so the concurrency group serializes runs.
 on:
+  pull_request:
+    types: [labeled, synchronize, reopened]
   workflow_dispatch:
 
 concurrency:
@@ -17,6 +29,10 @@ concurrency:
 
 jobs:
   staging-smoke:
+    # Always on manual dispatch; on a PR only when the `e2e-staging` label is set.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'e2e-staging')
     runs-on: ubuntu-latest
     environment: e2e
     timeout-minutes: 20
