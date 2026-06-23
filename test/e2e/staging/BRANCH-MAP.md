@@ -2,7 +2,7 @@
 
 Full branch & PR layout for the
 [TF — rETL Account Management (Lovable Phase 1)](https://linear.app/rudderstack/project/tf-retl-account-management-lovable-phase-1-6076c97fd07f)
-project: the 7-PR **accounts feature stack** (Stream E) plus the 4-PR **e2e verification stack** built on top of it.
+project: the 7-PR **accounts feature stack** (Stream E) plus the **e2e verification stack** built on top of it — the whole chain now rooted on the CI-enablement PR **#277**.
 Render with any Mermaid-aware viewer (GitHub, Notion, VS Code, mermaid.live).
 
 ## Git tree
@@ -10,7 +10,9 @@ Render with any Mermaid-aware viewer (GitHub, Notion, VS Code, mermaid.live).
 ```mermaid
 %%{init: {'gitGraph': {'mainBranchName': 'main'}}}%%
 gitGraph
-   commit id: "4ab4efc (main)"
+   commit id: "ef89fed (main)"
+   branch "#277 ci/fix-pr-triggers"
+   commit id: "ci-trigger-fix"
    branch "#260 DEX-376 accounts registry"
    commit id: "dex-376"
    branch "#261 DEX-377 resource_account CRUD"
@@ -27,6 +29,8 @@ gitGraph
    commit id: "dex-382"
    branch "#271 rETL acc to BigQuery"
    commit id: "feature/pro-5676" type: HIGHLIGHT
+   branch "#278 rETL config-verify (PRO-5768)"
+   commit id: "feature/pro-5768"
    branch "#272 Accounts client + staging smoke"
    commit id: "retl-e2e-account-client-and-staging"
    branch "#273 docs (HANDOFF + BRANCH-MAP)"
@@ -41,7 +45,7 @@ gitGraph
 
 ```mermaid
 flowchart TD
-  main["origin/main @4ab4efc"]:::remote
+  main["origin/main @ef89fed"]:::remote
 
   subgraph ACC["Accounts feature stack · Stream E · #260-266"]
     direction TB
