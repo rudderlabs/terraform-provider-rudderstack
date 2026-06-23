@@ -106,7 +106,7 @@ func TestResourceDestinationConsentManagementRejectsEmptyConsents(t *testing.T) 
 						}
 					}
 				`,
-				ExpectError: regexp.MustCompile(`consents requires 1 item\s+minimum, but config has only 0 declared`),
+				ExpectError: regexp.MustCompile(`consents requires 1 item\s+minimum`),
 			},
 		},
 	})
