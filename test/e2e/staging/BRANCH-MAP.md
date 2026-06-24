@@ -1,121 +1,85 @@
 # Branch / PR Map — TF rETL Account Management verification
 
-Full branch & PR layout for the
+Layout for the
 [TF — rETL Account Management (Lovable Phase 1)](https://linear.app/rudderstack/project/tf-retl-account-management-lovable-phase-1-6076c97fd07f)
-project: the 7-PR **accounts feature stack** (Stream E) plus the **e2e verification stack** built on top of it — the whole chain now rooted on the CI-enablement PR **#277**.
-Render with any Mermaid-aware viewer (GitHub, Notion, VS Code, mermaid.live).
+project. The original **13 stacked PRs** have been **collapsed into 3 review units
+(A / B / C)** stacked on the **#277 CI scaffold**. Render with any Mermaid-aware
+viewer (GitHub, Notion, VS Code, mermaid.live).
 
-## Git tree
+## Current state — 3 review PRs on the #277 scaffold
 
 ```mermaid
 %%{init: {'gitGraph': {'mainBranchName': 'main'}}}%%
 gitGraph
-   commit id: "ef89fed (main)"
-   branch "#277 ci/fix-pr-triggers"
+   commit id: "main"
+   branch "#277 ci/fix-pr-triggers (scaffold)"
    commit id: "ci-trigger-fix"
-   branch "#260 DEX-376 accounts registry"
-   commit id: "dex-376"
-   branch "#261 DEX-377 resource_account CRUD"
-   commit id: "dex-377"
-   branch "#262 DEX-378 data source"
-   commit id: "dex-378"
-   branch "#263 DEX-381 AssertAccount helper"
-   commit id: "dex-381"
-   branch "#264 DEX-379 bq ConfigMeta"
-   commit id: "dex-379"
-   branch "#265 DEX-380 provider wiring"
-   commit id: "dex-380"
-   branch "#266 DEX-382 bq integration test"
-   commit id: "dex-382"
-   branch "#271 rETL acc to BigQuery"
-   commit id: "feature/pro-5676" type: HIGHLIGHT
-   branch "#278 rETL config-verify (PRO-5768)"
-   commit id: "feature/pro-5768"
-   branch "#272 Accounts client + staging smoke"
-   commit id: "retl-e2e-account-client-and-staging"
-   branch "#273 docs (HANDOFF + BRANCH-MAP)"
-   commit id: "retl-e2e-docs"
-   branch "#274 customerio_audience coverage"
-   commit id: "retl-customerio-audience-acc"
+   branch "A #266 accounts"
+   commit id: "DEX-376..382 + v0.18.0"
+   branch "B #278 rETL tests + config-verify"
+   commit id: "PRO-5676 / PRO-5768"
+   branch "C #274 client+staging+docs+cio"
+   commit id: "verification"
 ```
 
-*Branch lanes are labelled by PR (`#NNN` + DEX issue); commit dots carry the branch name. HIGHLIGHT (#271) = the lane carrying Alexandros Milaios's preserved commits. Lower 7 lanes = accounts feature stack (Stream E); upper 4 = this verification stack.*
+Linear chain: `main → #277 → A (#266) → B (#278) → C (#274)`. Reviewers see **3
+PRs**; #277 is a never-merged base that lets every PR run checks pre-merge.
 
-## PR stack (bottom-up merge order)
+## How the 13 PRs collapsed
 
 ```mermaid
-flowchart TD
-  main["origin/main @ef89fed"]:::remote
-
-  subgraph ACC["Accounts feature stack · Stream E · #260-266"]
-    direction TB
-    d376["#260 · DEX-376 · dex-376 · accounts integration registry"]:::remote
-    d377["#261 · DEX-377 · dex-377 · generic resource_account.go CRUD"]:::remote
-    d378["#262 · DEX-378 · dex-378 · data_source_account (read-only)"]:::remote
-    d381["#263 · DEX-381 · dex-381 · AssertAccount test helper"]:::remote
-    d379["#264 · DEX-379 · dex-379 · BigQuery account ConfigMeta"]:::remote
-    d380["#265 · DEX-380 · dex-380 · provider.go resources wiring"]:::remote
-    d382["#266 · DEX-382 · dex-382 · BigQuery account integration test"]:::remote
-    d376 --> d377 --> d378 --> d381 --> d379 --> d380 --> d382
-  end
-
-  subgraph VER["E2E verification stack · this work"]
-    direction TB
-    pr1["#271 · feature/pro-5676 · rETL acc to BigQuery (rebased from #237)"]:::remote
-    pcv["#278 · feature/pro-5768 · rETL upstream config-verify (PRO-5768)"]:::remote
-    pr2["#272 · feature/retl-e2e-account-client-and-staging · Accounts client + staging smoke (v0.18.0, #617 resolved)"]:::remote
-    pr3["#273 · feature/retl-e2e-docs · HANDOFF + BRANCH-MAP (this PR)"]:::remote
-    pr4["#274 · feature/retl-customerio-audience-acc · customerio_audience coverage"]:::remote
-    pr1 --> pcv --> pr2 --> pr3 --> pr4
-  end
-
-  ci277["#277 · ci/fix-pr-triggers · run e2e+unit on all PRs (PRO-5776)"]:::remote
-  main --> ci277
-  ci277 --> d376
-  d382 --> pr1
-  p237["PR#237 · CLOSED (superseded)"]:::closed
-  p237 -. "force-push blocked reopen, new PR" .-> pr1
-  verify["verify/accounts-retl-e2e · integrated reference (local only, all layers)"]:::localonly
-  d382 -. "complete integrated copy" .-> verify
-
-  classDef remote fill:#0d4429,stroke:#3fb950,color:#e6edf3;
-  classDef localonly fill:#5a3b00,stroke:#d29922,color:#e6edf3;
+flowchart LR
+  classDef keep fill:#0d4429,stroke:#3fb950,color:#e6edf3;
   classDef closed fill:#3d3d3d,stroke:#8b949e,color:#e6edf3,stroke-dasharray:4 3;
+  classDef scaffold fill:#5a3b00,stroke:#d29922,color:#e6edf3;
+
+  main["origin/main"] --> s["#277 ci/fix-pr-triggers — scaffold, never merged"]:::scaffold
+  s --> A["A · #266 — feat(accounts) DEX-376–382"]:::keep
+  A --> B["B · #278 — rETL tests + config-verify"]:::keep
+  B --> C["C · #274 — client + staging + docs + customerio"]:::keep
+
+  subgraph GA ["folded into A (#266)"]
+    direction TB
+    n260["#260 DEX-376"]; n261["#261 DEX-377"]; n262["#262 DEX-378"]
+    n263["#263 DEX-381"]; n264["#264 DEX-379"]; n265["#265 DEX-380"]
+  end
+  subgraph GB ["folded into B (#278)"]
+    n271["#271 rETL acc · Alexandros"]
+  end
+  subgraph GC ["folded into C (#274)"]
+    n272["#272 client+staging"]; n273["#273 docs"]
+  end
+  class n260,n261,n262,n263,n264,n265,n271,n272,n273 closed
+  GA -. closed, commits preserved .-> A
+  GB -. closed, commits preserved .-> B
+  GC -. closed, commits preserved .-> C
 ```
 
-🟩 remote/pushed · 🟧 local-only · ⬛ closed
+🟩 kept (review unit) · 🟧 scaffold (never merged) · ⬛ closed (folded in)
 
-## Accounts feature stack (Stream E)
+## Consolidation map
 
-| PR | Issue | Branch (`feature/…`) | Base | Summary |
-|----|-------|----------------------|------|---------|
-| #260 | DEX-376 | `dex-376-…-add-accounts-registry` | `main` | Accounts integration registry |
-| #261 | DEX-377 | `dex-377-…-generic-resource_accountgo-crud-handler` | #260 | generic `resource_account.go` CRUD + import |
-| #262 | DEX-378 | `dex-378-…-data_source_accountgo-read-only` | #261 | read-only `rudderstack_account` data source |
-| #263 | DEX-381 | `dex-381-…-build-assertaccount-test-helper` | #262 | `AssertAccount` / `AccAssertAccount` helpers |
-| #264 | DEX-379 | `dex-379-…-bigquery-account-integration-file` | #263 | BigQuery account `ConfigMeta` + example |
-| #265 | DEX-380 | `dex-380-…-wire-providergo-resources-datasourcesmap` | #264 | register resource + data source in `provider.go` |
-| #266 | DEX-382 | `dex-382-…-bigquery-account-integration-test` | #265 | BigQuery account integration test + docs |
+| Review PR | Branch | Base | Folds in (closed) | Contents |
+|-----------|--------|------|-------------------|----------|
+| **#277** scaffold | `ci/fix-pr-triggers` | `main` | — | Run e2e + unit on all PRs (drop `branches:[main]`) — PRO-5776. **Never merged**; closed at the end. |
+| **A · #266** | `feature/dex-382-…` | #277 | #260, #261, #262, #263, #264, #265 | Full accounts feature (DEX-376–382): registry, generic `resource_account` CRUD, data source, `AssertAccount` helper, BigQuery `ConfigMeta`, provider + `NewAPIClient` wiring, BigQuery integration test. rudder-iac **v0.18.0**, `client.*` consumer migration, `e2e-account-crud` job. |
+| **B · #278** | `feature/pro-5768-…` | A (#266) | #271 | rETL source/connection acceptance tests on BigQuery (Alexandros's commits preserved) + PRO-5768 upstream config verification. |
+| **C · #274** | `feature/retl-customerio-audience-acc` | B (#278) | #272, #273 | Real Accounts client + 404 fix, `test/e2e/staging` smoke (`run.sh` + PAUSE hold-open + label-gated `e2e-staging-smoke.yml`), HANDOFF/BRANCH-MAP docs, `customerio_audience` coverage. |
 
-## Linear tree (current — bottom-up merge order)
+Closed PRs carry a comment pointing to their keeper; their commits live on in the
+kept branch (nothing abandoned). They can be reopened if a split is ever needed.
 
-The whole chain is now stacked on **#277** so every PR's head carries the CI
-trigger-fix and runs checks. rudder-iac is standardized to **v0.18.0**
-throughout (the #617 gate is dissolved — it's now a tagged release).
+## Merge plan (never merging #277)
 
-| PR | Branch | Base | Contents |
-|----|--------|------|----------|
-| **#277** | `ci/fix-pr-triggers` | `main` | run e2e + unit on all PRs (drop `branches:[main]`) — PRO-5776 |
-| #260–#266 | `feature/dex-376…382` | #277 → … | accounts stack (Stream E); #261 bumps rudder-iac→v0.18.0; #262/#263 carry the `client.*` consumer migration; #266 adds the `e2e-account-crud` job |
-| **#271** | `feature/pro-5676…` | #266 | rETL acceptance tests (Alexandros authorship preserved) → BigQuery |
-| **#278** | `feature/pro-5768-retl-upstream-config-verify` | #271 | rETL upstream config verification — PRO-5768 |
-| **#272** | `feature/retl-e2e-account-client-and-staging` | #278 | real Accounts client wiring + 404 fix + `test/e2e/staging` smoke (v0.18.0; duplicate stub-migration dropped) |
-| **#273** | `feature/retl-e2e-docs` | #272 | `HANDOFF.md` + `BRANCH-MAP.md` (this PR) |
-| **#274** | `feature/retl-customerio-audience-acc` | #273 | `retl_connection_customerio_audience` coverage |
+Review A → B → C. Then collapse upward — merge **C into B**, **B into A** (one
+final check run on the combined A) — then **rebase A off #277 onto `main`** (drops
+the single scaffold commit; restores `branches:[main]`), and merge A into `main`.
+Close #277. The CI-trigger change never lands in `main`.
 
 ## Notes
 
-- **#237 could not be reopened** — its branch was force-pushed after close, which GitHub blocks. #271 carries the identical commits (Alexandros's authorship intact) as a new PR.
-- **`verify/accounts-retl-e2e`** is kept locally as the complete integrated reference (all layers in one branch); the [HANDOFF](HANDOFF.md) runbook targets the pushed stack tip `feature/retl-customerio-audience-acc`.
-- **Merge order:** merge bottom-up starting at **#277** → main; each PR below auto-retargets to `main` as the one beneath it merges, and its checks run green before merge.
-- **rudder-iac v0.18.0 / #617:** the released v0.18.0 supersedes the old `#617` pseudo-version pin, so #272 is no longer gated. The stub-removal + `client.*` migration (originally duplicated across #261 and #272) now lands once, in the accounts stack.
+- **#237** could not be reopened (force-pushed after close); its commits live in **B** (#278) via #271, authorship intact.
+- **Secrets, not Vault.** A Vault integration was prototyped and removed — the e2e tests source creds from GitHub Environment secrets/vars on the `e2e` environment (`RUDDERSTACK_ACC_TEST_TOKEN`, `RUDDERSTACK_STAGING_*`, and `RUDDERSTACK_RETL_TEST_ACCOUNT_ID` once the dev seed account is aligned).
+- **Staging smoke** runs pre-merge via the `e2e-staging` label on #274 (and `workflow_dispatch` once on `main`); it applies → asserts no drift → destroys against staging.
+- **rudder-iac v0.18.0** is standardized across the chain (the old `#617` pseudo-version gate is gone).
+- `verify/accounts-retl-e2e` (the old local integrated reference) has been **deleted** — the C tip / `integration/retl-accounts-full` is the current full integration.
