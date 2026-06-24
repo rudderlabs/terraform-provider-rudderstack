@@ -23,10 +23,8 @@ import (
 // single cross-flow rule (sync_behaviour="upsert"); each resource enforces
 // that rule via validateCursorColumnUpsertOnly in its CustomizeDiff.
 //
-// Identifiers are ForceNew at both the top level (catches list-size changes)
-// and the nested from/to attributes (catches in-place value mutations). This
-// applies uniformly across all flows — every RETL flow treats identifier
-// changes as breaking and requires a new connection.
+// Identifiers are mutable: changes are forwarded on update rather than
+// recreating the connection.
 func baseConnectionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"id": {
@@ -137,19 +135,14 @@ func baseConnectionSchema() map[string]*schema.Schema {
 		"identifiers": {
 			Type:     schema.TypeList,
 			Required: true,
-			ForceNew: true,
 			MinItems: 1,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					// Nested ForceNew is required: the top-level ForceNew on a
-					// TypeList triggers replacement only on list-size changes
-					// (add/remove), not when an existing element's value
-					// mutates in place.
-					"from": {Type: schema.TypeString, Required: true, ForceNew: true},
-					"to":   {Type: schema.TypeString, Required: true, ForceNew: true},
+					"from": {Type: schema.TypeString, Required: true},
+					"to":   {Type: schema.TypeString, Required: true},
 				},
 			},
-			Description: "Source-to-destination identifier mappings. ForceNew: any change recreates the connection.",
+			Description: "Source-to-destination identifier mappings (mutable).",
 		},
 		// cursor_column is a generic source-side field (the incremental
 		// watermark column), shared by every flow. Its only constraint is
@@ -254,9 +247,11 @@ func applyBaseToUpdateRequest(d *schema.ResourceData, req *retl.UpdateRETLConnec
 			req.SyncSettings = ss
 		}
 	}
-	// Identifiers are ForceNew across all flows (see baseConnectionSchema),
-	// so HasChange("identifiers") never fires on Update — terraform routes
-	// identifier changes through destroy + create instead.
+	// Identifiers are mutable: forward them on change so the server updates the
+	// connection in place rather than the resource being recreated.
+	if d.HasChange("identifiers") {
+		req.Identifiers = mappingsFromState(d, "identifiers")
+	}
 	return nil
 }
 
