@@ -20,9 +20,10 @@ import (
 //
 // The destination `object` is a first-class typed field. Internally it
 // round-trips through the API's untyped `destinationConfig` JSON as
-// `{"object": "..."}`. identifiers and mappings flow through the base schema
-// (VDM v2 identifierMappings / fieldMappings); config-be assembles the VDM v2
-// connectionConfig server-side from the Customer.io destination definition.
+// `{"object": "..."}`. identifiers flow through the base schema; VDM v2 does
+// not support field mappings, so this resource has no `mappings`. config-be
+// assembles the VDM v2 connectionConfig server-side from the Customer.io
+// destination definition.
 //
 // This follows the same typed-destination pattern as
 // rudderstack_retl_connection_customerio_audience: baseConnectionSchema()

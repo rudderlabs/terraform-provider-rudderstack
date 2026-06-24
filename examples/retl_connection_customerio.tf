@@ -1,8 +1,8 @@
 # Customer.io — RETL connection scoped to Customer.io
 # destinations. `object` is a typed top-level field (ForceNew — changing it
 # recreates the connection). Only `person` is supported as the object, and
-# only the `upsert` and `mirror` sync behaviours. identifiers and mappings
-# are the source-to-destination identifier and field mappings.
+# only the `upsert` and `mirror` sync behaviours. VDM v2 does not support
+# field mappings, so there is no `mappings` block.
 resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
   source_id      = rudderstack_retl_source_model.users_revenue.id
   destination_id = rudderstack_destination_customerio.example.id
@@ -20,11 +20,6 @@ resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
   identifiers {
     from = "email"
     to   = "email"
-  }
-
-  mappings {
-    from = "name"
-    to   = "plan"
   }
 
   sync_settings {

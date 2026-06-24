@@ -139,6 +139,19 @@ func genericConnectionSchema() map[string]*schema.Schema {
 			ForceNew:    true,
 			Description: "Destination entity for Object Mapping flows (e.g. `Contact`, `Lead`).",
 		},
+		// mappings (field mappings) is generic-flow-only. Destination-specific
+		// flows (e.g. customerio VDM v2) do not expose it.
+		"mappings": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"from": {Type: schema.TypeString, Required: true},
+					"to":   {Type: schema.TypeString, Required: true},
+				},
+			},
+			Description: "Source-to-destination field mappings (mutable).",
+		},
 	})
 }
 
@@ -271,6 +284,9 @@ func buildCreateRequest(d *schema.ResourceData) (*retl.CreateRETLConnectionReque
 	if v := d.Get("object").(string); v != "" {
 		req.Object = v
 	}
+	if mappings := mappingsFromState(d, "mappings"); len(mappings) > 0 {
+		req.Mappings = mappings
+	}
 	return req, nil
 }
 
@@ -282,6 +298,10 @@ func buildUpdateRequest(d *schema.ResourceData) (*retl.UpdateRETLConnectionReque
 	if d.HasChange("constants") {
 		constants := constantsFromState(d)
 		req.Constants = &constants
+	}
+	if d.HasChange("mappings") {
+		mappings := mappingsFromState(d, "mappings")
+		req.Mappings = &mappings
 	}
 	return req, nil
 }
@@ -298,6 +318,9 @@ func storeGenericConnectionToState(d *schema.ResourceData, c *retl.RETLConnectio
 	}
 	if err := d.Set("object", c.Object); err != nil {
 		return fmt.Errorf("set object: %w", err)
+	}
+	if err := d.Set("mappings", mappingsToState(c.Mappings)); err != nil {
+		return fmt.Errorf("set mappings: %w", err)
 	}
 
 	// The API returns destinationConfig as a non-empty JSON payload only for

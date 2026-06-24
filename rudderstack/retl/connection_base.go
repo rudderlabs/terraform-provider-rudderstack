@@ -151,17 +151,6 @@ func baseConnectionSchema() map[string]*schema.Schema {
 			},
 			Description: "Source-to-destination identifier mappings. ForceNew: any change recreates the connection.",
 		},
-		"mappings": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"from": {Type: schema.TypeString, Required: true},
-					"to":   {Type: schema.TypeString, Required: true},
-				},
-			},
-			Description: "Source-to-destination field mappings (mutable).",
-		},
 		// cursor_column is a generic source-side field (the incremental
 		// watermark column), shared by every flow. Its only constraint is
 		// sync_behaviour="upsert", enforced uniformly via
@@ -214,9 +203,10 @@ func mergeSchemas(base, override map[string]*schema.Schema) map[string]*schema.S
 }
 
 // applyBaseToCreateRequest populates the universal fields of a
-// CreateRETLConnectionRequest from terraform state. Destination-flow-specific
-// fields (Event, Constants, Object, DestinationConfig) are the caller's
-// responsibility.
+// CreateRETLConnectionRequest from terraform state. Flow-specific fields
+// (Event, Constants, Mappings, Object, DestinationConfig) are the caller's
+// responsibility — e.g. `mappings` (field mappings) lives only on the generic
+// resource, not on the destination-specific flows.
 //
 // cursor_column is handled here rather than per-resource: it's a generic
 // source-side field, not destination-specific. GetOk is panic-safe on a
@@ -237,9 +227,6 @@ func applyBaseToCreateRequest(d *schema.ResourceData, req *retl.CreateRETLConnec
 
 	if ss, ok := syncSettingsFromState(d); ok {
 		req.SyncSettings = ss
-	}
-	if mappings := mappingsFromState(d, "mappings"); len(mappings) > 0 {
-		req.Mappings = mappings
 	}
 	if v, ok := d.GetOk("cursor_column"); ok {
 		req.CursorColumn = v.(string)
@@ -267,10 +254,6 @@ func applyBaseToUpdateRequest(d *schema.ResourceData, req *retl.UpdateRETLConnec
 			req.SyncSettings = ss
 		}
 	}
-	if d.HasChange("mappings") {
-		mappings := mappingsFromState(d, "mappings")
-		req.Mappings = &mappings
-	}
 	// Identifiers are ForceNew across all flows (see baseConnectionSchema),
 	// so HasChange("identifiers") never fires on Update — terraform routes
 	// identifier changes through destroy + create instead.
@@ -297,7 +280,6 @@ func storeBaseConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) 
 		{"schedule", scheduleToState(c.Schedule)},
 		{"sync_settings", syncSettingsToState(c.SyncSettings)},
 		{"identifiers", mappingsToState(c.Identifiers)},
-		{"mappings", mappingsToState(c.Mappings)},
 	}
 	for _, s := range setters {
 		if err := d.Set(s.k, s.v); err != nil {

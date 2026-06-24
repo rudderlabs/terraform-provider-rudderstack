@@ -17,9 +17,8 @@ import (
 
 // The typed Customer.io (VDM v2) resource exposes `object` as a top-level
 // string; internally it round-trips through destinationConfig as
-// {"object": "..."}. identifiers and mappings flow through the base schema
-// (VDM v2 identifierMappings / fieldMappings); config-be assembles the VDM v2
-// connectionConfig from the destination definition.
+// {"object": "..."}. identifiers flow through the base schema; VDM v2 does NOT
+// support field mappings, so this resource has no `mappings`.
 func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 	svc := &mockService{}
 	enabled := true
@@ -31,7 +30,6 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
 		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		Mappings:          []iacretl.Mapping{{From: "name", To: "plan"}},
 		DestinationConfig: json.RawMessage(`{"object":"person"}`),
 	}
 	created := &iacretl.RETLConnection{
@@ -42,7 +40,6 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
 		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		Mappings:          []iacretl.Mapping{{From: "name", To: "plan"}},
 		DestinationConfig: json.RawMessage(`{"object":"person"}`),
 	}
 	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
@@ -65,10 +62,6 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 							from = "email"
 							to   = "email"
 						}
-						mappings {
-							from = "name"
-							to   = "plan"
-						}
 					}
 				`,
 				Check: func(s *terraform.State) error {
@@ -77,10 +70,8 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 						return err
 					}
 					return checkAll(map[string]string{
-						"id":              "conn-cio",
-						"object":          "person",
-						"mappings.0.from": "name",
-						"mappings.0.to":   "plan",
+						"id":     "conn-cio",
+						"object": "person",
 					}, attrs)
 				},
 			},
@@ -88,6 +79,40 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 	})
 
 	svc.AssertExpectations(t)
+}
+
+// VDM v2 does not support field mappings — the resource must reject a
+// `mappings` block at plan time (unknown argument) rather than silently
+// accept it.
+func TestResourceConnectionCustomerIO_RejectsMappings(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection_customerio" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-cio"
+						sync_behaviour = "upsert"
+						object         = "person"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
+						mappings {
+							from = "name"
+							to   = "plan"
+						}
+					}
+				`,
+				ExpectError: regexpMatches(`[Uu]nsupported argument|not expected here`),
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
 // CustomerIO supports exactly one object — `person` (the listObjects value).

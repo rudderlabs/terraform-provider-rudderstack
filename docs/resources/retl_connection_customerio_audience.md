@@ -61,7 +61,6 @@ resource "rudderstack_retl_connection_customerio_audience" "model_to_customerio_
 
 - `cursor_column` (String) Column name for incremental upsert syncs (only valid when sync_behaviour is `upsert`).
 - `enabled` (Boolean) Whether the connection is enabled.
-- `mappings` (Block List) Source-to-destination field mappings (mutable). (see [below for nested schema](#nestedblock--mappings))
 - `sync_settings` (Block List, Max: 1) (see [below for nested schema](#nestedblock--sync_settings))
 
 ### Read-Only
@@ -90,15 +89,6 @@ Optional:
 
 - `cron_expression` (String) Cron expression. Required when `type` is `cron`.
 - `every_minutes` (Number) Sync interval in minutes. Required when `type` is `basic`.
-
-
-<a id="nestedblock--mappings"></a>
-### Nested Schema for `mappings`
-
-Required:
-
-- `from` (String)
-- `to` (String)
 
 
 <a id="nestedblock--sync_settings"></a>
