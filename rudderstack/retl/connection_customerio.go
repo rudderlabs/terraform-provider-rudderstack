@@ -56,16 +56,6 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror"}, false),
 				Description:  "How records are synced to the destination: `upsert` or `mirror`.",
 			},
-			// cursor_column is a generic source-side field (the incremental
-			// watermark column), sent as a top-level request field — NOT inside
-			// destinationConfig. Only valid when sync_behaviour is `upsert`
-			// (enforced in customizeCustomerIOConnectionDiff).
-			"cursor_column": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Column name for incremental upsert syncs (only valid when sync_behaviour is `upsert`).",
-			},
 		}),
 		CreateContext: createCustomerIOConnection,
 		ReadContext:   readCustomerIOConnection,
@@ -80,14 +70,9 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 
 // customizeCustomerIOConnectionDiff rejects cursor_column when sync_behaviour
 // is not `upsert`, surfacing the error at plan time instead of an API
-// rejection on apply (mirroring the generic resource's customizeConnectionDiff).
+// rejection on apply.
 func customizeCustomerIOConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if cursor := d.Get("cursor_column").(string); cursor != "" {
-		if sb := d.Get("sync_behaviour").(string); sb != "" && sb != "upsert" {
-			return fmt.Errorf("cursor_column is only valid when sync_behaviour is %q, got %q", "upsert", sb)
-		}
-	}
-	return nil
+	return validateCursorColumnUpsertOnly(d)
 }
 
 func createCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -105,10 +90,6 @@ func createCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 	req.DestinationConfig = cfg
-	// cursor_column is a generic top-level source field (not destinationConfig).
-	if v := d.Get("cursor_column").(string); v != "" {
-		req.CursorColumn = v
-	}
 
 	created, err := svc.CreateConnection(ctx, req)
 	if err != nil {
@@ -136,11 +117,6 @@ func readCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m int
 
 	if err := storeBaseConnectionToState(d, conn); err != nil {
 		return diag.FromErr(err)
-	}
-	// cursor_column is a generic source-side field returned at top level
-	// (independent of the destination config).
-	if err := d.Set("cursor_column", conn.CursorColumn); err != nil {
-		return diag.FromErr(fmt.Errorf("set cursor_column: %w", err))
 	}
 	// A missing/empty/malformed object is a hard error (see decodeCustomerIOObject)
 	// rather than a warning — surfacing it at refresh beats masking a broken

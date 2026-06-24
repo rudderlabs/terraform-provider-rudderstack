@@ -219,6 +219,38 @@ func TestResourceConnectionCustomerIO_CursorColumnCreateRead(t *testing.T) {
 	svc.AssertExpectations(t)
 }
 
+// cursor_column must round-trip on a bare refresh (ReadContext with no config,
+// only a prior Id) — the real terraform refresh scenario. This guards the
+// regression where a config-dependent schema-presence check would silently
+// drop cursor_column from state because config is absent during refresh,
+// producing perpetual drift.
+func TestResourceConnectionCustomerIO_CursorColumnSurvivesRefresh(t *testing.T) {
+	svc := &mockService{}
+	conn := &iacretl.RETLConnection{
+		ID:                "conn-cio",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		CursorColumn:      "updated_at",
+		DestinationConfig: json.RawMessage(`{"object":"customers"}`),
+	}
+	svc.On("GetConnection", mock.Anything, "conn-cio").Return(conn, nil).Once()
+
+	r := retl.ResourceConnectionCustomerIO()
+	d := r.TestResourceData()
+	d.SetId("conn-cio")
+
+	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+	require.False(t, diags.HasError(), "diags=%v", diags)
+	require.Equal(t, "updated_at", d.Get("cursor_column"),
+		"cursor_column must round-trip on refresh (no config present)")
+	require.Equal(t, "customers", d.Get("object"))
+	svc.AssertExpectations(t)
+}
+
 // cursor_column is only meaningful for incremental upsert syncs. The resource
 // must reject it at plan time when sync_behaviour is not "upsert" (e.g.
 // "mirror"), mirroring the generic resource's CustomizeDiff check, rather than

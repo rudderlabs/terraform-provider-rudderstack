@@ -12,12 +12,16 @@ import (
 
 // baseConnectionSchema returns the fields shared by every
 // rudderstack_retl_connection_* resource: the universal source / destination /
-// schedule / sync fields, but NOT destination-flow-specific fields like
-// `event`, `cursor_column`, `object`, or `audience_id`. Each per-flow
-// resource (the generic JSON Mapper / Object Mapping resource and any typed
+// schedule / sync / cursor fields, but NOT destination-flow-specific fields
+// like `event`, `object`, or `audience_id`. Each per-flow resource (the
+// generic JSON Mapper / Object Mapping resource and any typed
 // destination-scoped resource such as
 // rudderstack_retl_connection_customerio_audience) merges its own
 // destination-specific fields onto this base via mergeSchemas.
+//
+// cursor_column lives here because it's a generic source-side field with a
+// single cross-flow rule (sync_behaviour="upsert"); each resource enforces
+// that rule via validateCursorColumnUpsertOnly in its CustomizeDiff.
 //
 // Identifiers are ForceNew at both the top level (catches list-size changes)
 // and the nested from/to attributes (catches in-place value mutations). This
@@ -158,6 +162,16 @@ func baseConnectionSchema() map[string]*schema.Schema {
 			},
 			Description: "Source-to-destination field mappings (mutable).",
 		},
+		// cursor_column is a generic source-side field (the incremental
+		// watermark column), shared by every flow. Its only constraint is
+		// sync_behaviour="upsert", enforced uniformly via
+		// validateCursorColumnUpsertOnly in each resource's CustomizeDiff.
+		"cursor_column": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			ForceNew:    true,
+			Description: "Column name for incremental upsert syncs (only valid when sync_behaviour is `upsert`).",
+		},
 		"created_at": {
 			Type:     schema.TypeString,
 			Computed: true,
@@ -167,6 +181,22 @@ func baseConnectionSchema() map[string]*schema.Schema {
 			Computed: true,
 		},
 	}
+}
+
+// validateCursorColumnUpsertOnly enforces the one cross-flow rule on
+// cursor_column: it's only valid when sync_behaviour is "upsert". Shared by
+// every resource's CustomizeDiff so the error surfaces at plan time instead of
+// an API rejection on apply. Takes resourceGetter so it works from
+// *schema.ResourceDiff and is trivially testable.
+func validateCursorColumnUpsertOnly(d resourceGetter) error {
+	cursor, _ := d.Get("cursor_column").(string)
+	if cursor == "" {
+		return nil
+	}
+	if sb, _ := d.Get("sync_behaviour").(string); sb != "" && sb != "upsert" {
+		return fmt.Errorf("cursor_column is only valid when sync_behaviour is %q, got %q", "upsert", sb)
+	}
+	return nil
 }
 
 // mergeSchemas combines a base map with overrides. Overrides win on key
@@ -185,8 +215,13 @@ func mergeSchemas(base, override map[string]*schema.Schema) map[string]*schema.S
 
 // applyBaseToCreateRequest populates the universal fields of a
 // CreateRETLConnectionRequest from terraform state. Destination-flow-specific
-// fields (Event, Constants, CursorColumn, Object, DestinationConfig) are the
-// caller's responsibility.
+// fields (Event, Constants, Object, DestinationConfig) are the caller's
+// responsibility.
+//
+// cursor_column is handled here rather than per-resource: it's a generic
+// source-side field, not destination-specific. GetOk is panic-safe on a
+// resource that doesn't declare the field (e.g. the audience resource), so
+// this is a no-op there.
 func applyBaseToCreateRequest(d *schema.ResourceData, req *retl.CreateRETLConnectionRequest) error {
 	schedule, err := scheduleFromState(d)
 	if err != nil {
@@ -205,6 +240,9 @@ func applyBaseToCreateRequest(d *schema.ResourceData, req *retl.CreateRETLConnec
 	}
 	if mappings := mappingsFromState(d, "mappings"); len(mappings) > 0 {
 		req.Mappings = mappings
+	}
+	if v, ok := d.GetOk("cursor_column"); ok {
+		req.CursorColumn = v.(string)
 	}
 	return nil
 }
@@ -240,8 +278,12 @@ func applyBaseToUpdateRequest(d *schema.ResourceData, req *retl.UpdateRETLConnec
 }
 
 // storeBaseConnectionToState writes the universal fields back to terraform
-// state. Destination-flow-specific fields (event, constants, cursor_column,
-// object, audience_id, ...) are written by the caller after this returns.
+// state. Destination-flow-specific fields (event, constants, object,
+// audience_id, ...) are written by the caller after this returns.
+//
+// cursor_column is a generic source-side field declared in
+// baseConnectionSchema, so every connection resource has it and it is written
+// back here unconditionally.
 func storeBaseConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) error {
 	d.SetId(c.ID)
 	setters := []struct {
@@ -261,6 +303,9 @@ func storeBaseConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) 
 		if err := d.Set(s.k, s.v); err != nil {
 			return fmt.Errorf("set %s: %w", s.k, err)
 		}
+	}
+	if err := d.Set("cursor_column", c.CursorColumn); err != nil {
+		return fmt.Errorf("set cursor_column: %w", err)
 	}
 	if c.CreatedAt != nil {
 		if err := d.Set("created_at", c.CreatedAt.Format(time.RFC3339)); err != nil {

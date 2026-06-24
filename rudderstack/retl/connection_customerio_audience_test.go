@@ -377,3 +377,60 @@ func TestResourceConnectionCustomerIOAudience_NullDestinationConfigOnRead(t *tes
 		})
 	}
 }
+
+// cursor_column is a base-schema field, so the audience resource inherits it.
+// Verify it round-trips on a config-less refresh.
+func TestResourceConnectionCustomerIOAudience_CursorColumnSurvivesRefresh(t *testing.T) {
+	svc := &mockService{}
+	conn := &iacretl.RETLConnection{
+		ID:                "conn-aud",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		CursorColumn:      "updated_at",
+		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
+	}
+	svc.On("GetConnection", mock.Anything, "conn-aud").Return(conn, nil).Once()
+
+	r := retl.ResourceConnectionCustomerIOAudience()
+	d := r.TestResourceData()
+	d.SetId("conn-aud")
+
+	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+	require.False(t, diags.HasError(), "diags=%v", diags)
+	require.Equal(t, "updated_at", d.Get("cursor_column"))
+	require.Equal(t, 42, d.Get("audience_id"))
+	svc.AssertExpectations(t)
+}
+
+// The audience resource enforces the shared cursor+upsert rule at plan time.
+func TestResourceConnectionCustomerIOAudience_RejectsCursorColumnWithNonUpsert(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection_customerio_audience" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-cio"
+						sync_behaviour = "mirror"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
+						audience_id   = 42
+						cursor_column = "updated_at"
+					}
+				`,
+				ExpectError: regexpMatches(`cursor_column is only valid when sync_behaviour is`),
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
+}

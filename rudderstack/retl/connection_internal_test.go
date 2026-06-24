@@ -6,6 +6,40 @@ import (
 	"testing"
 )
 
+// fakeGetter is a minimal resourceGetter for unit-testing the shared
+// CustomizeDiff validators without standing up a real *schema.ResourceData.
+type fakeGetter map[string]interface{}
+
+func (f fakeGetter) Get(k string) interface{} { return f[k] }
+
+func TestValidateCursorColumnUpsertOnly(t *testing.T) {
+	cases := []struct {
+		name    string
+		cursor  string
+		sync    string
+		wantErr bool
+	}{
+		{name: "cursor with upsert is allowed", cursor: "updated_at", sync: "upsert"},
+		{name: "cursor with mirror is rejected", cursor: "updated_at", sync: "mirror", wantErr: true},
+		{name: "cursor with full is rejected", cursor: "updated_at", sync: "full", wantErr: true},
+		{name: "no cursor is always allowed", cursor: "", sync: "mirror"},
+		// sync_behaviour empty (not yet known at diff time) shouldn't error —
+		// the rule only fires once a non-upsert value is concrete.
+		{name: "cursor with unknown sync is allowed", cursor: "updated_at", sync: ""},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := validateCursorColumnUpsertOnly(fakeGetter{
+				"cursor_column":  tc.cursor,
+				"sync_behaviour": tc.sync,
+			})
+			if (err != nil) != tc.wantErr {
+				t.Fatalf("err=%v, wantErr=%v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
 func TestDecodeCustomerIOAudienceID(t *testing.T) {
 	cases := []struct {
 		name    string
