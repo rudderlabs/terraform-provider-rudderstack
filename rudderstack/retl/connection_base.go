@@ -202,9 +202,9 @@ func mergeSchemas(base, override map[string]*schema.Schema) map[string]*schema.S
 // resource, not on the destination-specific flows.
 //
 // cursor_column is handled here rather than per-resource: it's a generic
-// source-side field, not destination-specific. GetOk is panic-safe on a
-// resource that doesn't declare the field (e.g. the audience resource), so
-// this is a no-op there.
+// source-side field declared in baseConnectionSchema, so every connection
+// resource has it. GetOk returns ("", false) when it's unset, so the field is
+// only forwarded when the user actually set it.
 func applyBaseToCreateRequest(d *schema.ResourceData, req *retl.CreateRETLConnectionRequest) error {
 	schedule, err := scheduleFromState(d)
 	if err != nil {

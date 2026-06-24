@@ -89,8 +89,9 @@ func ResourceConnection() *schema.Resource {
 
 // genericConnectionSchema composes the base RETL connection schema with the
 // generic-flow-only fields: `event` (JSON Mapper), `constants`, `object`
-// (Object Mapping). `cursor_column` and identifiers ForceNew live in the base
-// schema because every flow shares them.
+// (Object Mapping), and `mappings` (field mappings). `cursor_column` and
+// `identifiers` live in the base schema because every flow shares them
+// (identifiers are mutable; changes are forwarded on update).
 // `constants` ForceNew is conditional on Object Mapping and is applied in
 // CustomizeDiff (Object Mapping = ForceNew; JSON Mapper = mutable), so the
 // schema declares it without ForceNew.
