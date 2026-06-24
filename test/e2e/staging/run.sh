@@ -195,7 +195,13 @@ fi
 # ── Optional hold-open for manual inspection ─────────────────────────────────
 if [[ "${PAUSE:-false}" == "true" ]]; then
   echo "==> PAUSED. Resources are live in staging. Outputs above."
-  echo "    Run the rETL sync manually in the workspace, then press Enter to destroy."
+  echo ""
+  echo "    To inspect resources in a second terminal, export the provider config first:"
+  echo "      export TF_CLI_CONFIG_FILE='${TF_CLI_CONFIG_FILE}'"
+  echo "      terraform -chdir='${SCRIPT_DIR}' state show rudderstack_account_source_bigquery.acct"
+  echo "      terraform -chdir='${SCRIPT_DIR}' show -json | jq '.values.root_module.resources[] | select(.type==\"rudderstack_account_source_bigquery\") | .values.config'"
+  echo ""
+  echo "    Press Enter to destroy."
   read -r || true   # blocks here; || true prevents set -e from exiting on EOF/signal
 fi
 
