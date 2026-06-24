@@ -54,6 +54,12 @@ if [[ ! -f "${TFVARS_FILE}" ]]; then
   exit 1
 fi
 
+# Normalize to an absolute path. terraform is invoked with -chdir=<staging dir>,
+# which resolves -var-file relative to that dir — so a relative path (e.g. the
+# CI workflow's "test/e2e/staging/secret.tfvars") would be looked up under the
+# chdir dir and fail. Absolute path is -chdir-proof.
+TFVARS_FILE="$(cd "$(dirname "${TFVARS_FILE}")" && pwd)/$(basename "${TFVARS_FILE}")"
+
 # ── Repo root (two levels above test/e2e/staging) ───────────────────────────
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
