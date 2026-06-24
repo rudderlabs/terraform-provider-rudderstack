@@ -32,7 +32,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		Mappings:          []iacretl.Mapping{{From: "name", To: "plan"}},
-		DestinationConfig: json.RawMessage(`{"object":"customers"}`),
+		DestinationConfig: json.RawMessage(`{"object":"person"}`),
 	}
 	created := &iacretl.RETLConnection{
 		ID:                "conn-cio",
@@ -43,7 +43,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		Mappings:          []iacretl.Mapping{{From: "name", To: "plan"}},
-		DestinationConfig: json.RawMessage(`{"object":"customers"}`),
+		DestinationConfig: json.RawMessage(`{"object":"person"}`),
 	}
 	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
 	svc.On("GetConnection", mock.Anything, "conn-cio").Return(created, nil).Times(2)
@@ -59,7 +59,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 						source_id      = "retl-src-1"
 						destination_id = "dest-cio"
 						sync_behaviour = "upsert"
-						object         = "customers"
+						object         = "person"
 						schedule { type = "manual" }
 						identifiers {
 							from = "email"
@@ -78,7 +78,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 					}
 					return checkAll(map[string]string{
 						"id":              "conn-cio",
-						"object":          "customers",
+						"object":          "person",
 						"mappings.0.from": "name",
 						"mappings.0.to":   "plan",
 					}, attrs)
@@ -90,8 +90,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 	svc.AssertExpectations(t)
 }
 
-// CustomerIO supports exactly one object — `customers` (the Person object;
-// see the VDM v2 listObjects response: {value:'customers', label:'Person'}).
+// CustomerIO supports exactly one object — `person` (the listObjects value).
 // The resource must reject any other object value at plan time rather than
 // letting the server fail on apply.
 func TestResourceConnectionCustomerIO_RejectsUnknownObject(t *testing.T) {
@@ -135,7 +134,7 @@ func TestResourceConnectionCustomerIO_RejectsFullSyncBehaviour(t *testing.T) {
 						source_id      = "retl-src-1"
 						destination_id = "dest-cio"
 						sync_behaviour = "full"
-						object         = "customers"
+						object         = "person"
 						schedule { type = "manual" }
 						identifiers {
 							from = "email"
@@ -165,7 +164,7 @@ func TestResourceConnectionCustomerIO_CursorColumnCreateRead(t *testing.T) {
 		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		CursorColumn:      "updated_at",
-		DestinationConfig: json.RawMessage(`{"object":"customers"}`),
+		DestinationConfig: json.RawMessage(`{"object":"person"}`),
 	}
 	created := &iacretl.RETLConnection{
 		ID:                "conn-cio",
@@ -176,7 +175,7 @@ func TestResourceConnectionCustomerIO_CursorColumnCreateRead(t *testing.T) {
 		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		CursorColumn:      "updated_at",
-		DestinationConfig: json.RawMessage(`{"object":"customers"}`),
+		DestinationConfig: json.RawMessage(`{"object":"person"}`),
 	}
 	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
 	svc.On("GetConnection", mock.Anything, "conn-cio").Return(created, nil).Times(2)
@@ -192,7 +191,7 @@ func TestResourceConnectionCustomerIO_CursorColumnCreateRead(t *testing.T) {
 						source_id      = "retl-src-1"
 						destination_id = "dest-cio"
 						sync_behaviour = "upsert"
-						object         = "customers"
+						object         = "person"
 						cursor_column  = "updated_at"
 						schedule { type = "manual" }
 						identifiers {
@@ -208,7 +207,7 @@ func TestResourceConnectionCustomerIO_CursorColumnCreateRead(t *testing.T) {
 					}
 					return checkAll(map[string]string{
 						"id":            "conn-cio",
-						"object":        "customers",
+						"object":        "person",
 						"cursor_column": "updated_at",
 					}, attrs)
 				},
@@ -235,7 +234,7 @@ func TestResourceConnectionCustomerIO_CursorColumnSurvivesRefresh(t *testing.T) 
 		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		CursorColumn:      "updated_at",
-		DestinationConfig: json.RawMessage(`{"object":"customers"}`),
+		DestinationConfig: json.RawMessage(`{"object":"person"}`),
 	}
 	svc.On("GetConnection", mock.Anything, "conn-cio").Return(conn, nil).Once()
 
@@ -247,7 +246,7 @@ func TestResourceConnectionCustomerIO_CursorColumnSurvivesRefresh(t *testing.T) 
 	require.False(t, diags.HasError(), "diags=%v", diags)
 	require.Equal(t, "updated_at", d.Get("cursor_column"),
 		"cursor_column must round-trip on refresh (no config present)")
-	require.Equal(t, "customers", d.Get("object"))
+	require.Equal(t, "person", d.Get("object"))
 	svc.AssertExpectations(t)
 }
 
@@ -267,7 +266,7 @@ func TestResourceConnectionCustomerIO_RejectsCursorColumnWithNonUpsert(t *testin
 						source_id      = "retl-src-1"
 						destination_id = "dest-cio"
 						sync_behaviour = "mirror"
-						object         = "customers"
+						object         = "person"
 						cursor_column  = "updated_at"
 						schedule { type = "manual" }
 						identifiers {

@@ -89,8 +89,8 @@ func TestDecodeCustomerIOObject(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{name: "valid object", in: `{"object": "customers"}`, want: "customers"},
-		{name: "extra fields are ignored", in: `{"object": "customers", "x": 1}`, want: "customers"},
+		{name: "valid object", in: `{"object": "person"}`, want: "person"},
+		{name: "extra fields are ignored", in: `{"object": "person", "x": 1}`, want: "person"},
 		// A 200 with no usable object is a persistent server-side inconsistency,
 		// not a transient soft signal — every shape below is a hard error so the
 		// problem surfaces at refresh instead of being masked.

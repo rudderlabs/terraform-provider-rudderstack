@@ -7,21 +7,21 @@ description: |-
 
 # rudderstack_retl_connection_customerio (Resource)
 
-A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Only `customers` is supported as the object, and only the `upsert` and `mirror` sync behaviours.
+A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Only `person` is supported as the object, and only the `upsert` and `mirror` sync behaviours.
 
 ## Example Usage
 
 ```terraform
 # Customer.io — RETL connection scoped to Customer.io
 # destinations. `object` is a typed top-level field (ForceNew — changing it
-# recreates the connection). Only `customers` is supported as the object, and
+# recreates the connection). Only `person` is supported as the object, and
 # only the `upsert` and `mirror` sync behaviours. identifiers and mappings
 # are the source-to-destination identifier and field mappings.
 resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
   source_id      = rudderstack_retl_source_model.users_revenue.id
   destination_id = rudderstack_destination_customerio.example.id
   sync_behaviour = "upsert"
-  object         = "customers"
+  object         = "person"
 
   # Optional: incremental watermark column. Only valid when sync_behaviour is "upsert".
   cursor_column = "updated_at"
@@ -61,7 +61,7 @@ resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
 
 - `destination_id` (String) ID of the destination.
 - `identifiers` (Block List, Min: 1) Source-to-destination identifier mappings. ForceNew: any change recreates the connection. (see [below for nested schema](#nestedblock--identifiers))
-- `object` (String) Customer.io destination object. Only `customers` is supported.
+- `object` (String) Customer.io destination object. Only `person` is supported.
 - `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
 - `source_id` (String) ID of the RETL source.
 - `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror`.

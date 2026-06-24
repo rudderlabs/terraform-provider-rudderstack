@@ -1,13 +1,13 @@
 # Customer.io — RETL connection scoped to Customer.io
 # destinations. `object` is a typed top-level field (ForceNew — changing it
-# recreates the connection). Only `customers` is supported as the object, and
+# recreates the connection). Only `person` is supported as the object, and
 # only the `upsert` and `mirror` sync behaviours. identifiers and mappings
 # are the source-to-destination identifier and field mappings.
 resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
   source_id      = rudderstack_retl_source_model.users_revenue.id
   destination_id = rudderstack_destination_customerio.example.id
   sync_behaviour = "upsert"
-  object         = "customers"
+  object         = "person"
 
   # Optional: incremental watermark column. Only valid when sync_behaviour is "upsert".
   cursor_column = "updated_at"
