@@ -275,14 +275,12 @@ func storeBaseConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) 
 		{"schedule", scheduleToState(c.Schedule)},
 		{"sync_settings", syncSettingsToState(c.SyncSettings)},
 		{"identifiers", mappingsToState(c.Identifiers)},
+		{"cursor_column", c.CursorColumn},
 	}
 	for _, s := range setters {
 		if err := d.Set(s.k, s.v); err != nil {
 			return fmt.Errorf("set %s: %w", s.k, err)
 		}
-	}
-	if err := d.Set("cursor_column", c.CursorColumn); err != nil {
-		return fmt.Errorf("set cursor_column: %w", err)
 	}
 	if c.CreatedAt != nil {
 		if err := d.Set("created_at", c.CreatedAt.Format(time.RFC3339)); err != nil {
