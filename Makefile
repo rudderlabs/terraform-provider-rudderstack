@@ -68,7 +68,7 @@ test-ci:
 
 .PHONY: testacc-all
 testacc-all: ## Run all E2E acceptance tests (full CRUD)
-	TF_ACC=1 go test ./rudderstack/integrations/... -v -run "TestAcc" -timeout 60m -count=1
+	TF_ACC=1 go test ./rudderstack/integrations/... ./rudderstack/accounts/ -v -run "TestAcc" -timeout 60m -count=1
 
 .PHONY: testacc-dest
 testacc-dest: ## Run E2E for one destination. Usage: make testacc-dest DEST=webhook
@@ -88,4 +88,4 @@ testacc-conn: ## Run E2E for connections. Usage: make testacc-conn
 
 .PHONY: testacc-plan
 testacc-plan: ## Plan-only validation for all integrations (no API calls)
-	TF_ACC=1 TF_ACC_PLAN_ONLY=1 go test ./rudderstack/integrations/... -run "TestAcc" -timeout 5m -count=1
+	TF_ACC=1 TF_ACC_PLAN_ONLY=1 go test ./rudderstack/integrations/... ./rudderstack/accounts/ -run "TestAcc" -timeout 5m -count=1

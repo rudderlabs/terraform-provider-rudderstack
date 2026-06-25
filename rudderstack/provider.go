@@ -42,7 +42,8 @@ func NewWithConfigureClientFunc(f ConfigureClientFunc) *schema.Provider {
 					"and fail with an error if that is missing.",
 			},
 		},
-		ResourcesMap: resourcesMap(),
+		ResourcesMap:   resourcesMap(),
+		DataSourcesMap: dataSourcesMap(),
 	}
 
 	return p
@@ -72,7 +73,17 @@ func resourcesMap() map[string]*schema.Resource {
 		resource := resourceDestination(v)
 		resources[key] = resource
 	}
+	for k, v := range configs.Accounts.Entries() {
+		key := fmt.Sprintf("rudderstack_account_source_%s", k)
+		resources[key] = resourceAccount(v)
+	}
 	return resources
+}
+
+func dataSourcesMap() map[string]*schema.Resource {
+	return map[string]*schema.Resource{
+		"rudderstack_account": dataSourceAccount(),
+	}
 }
 
 func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag.Diagnostics) {
