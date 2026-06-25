@@ -27,7 +27,7 @@ func init() {
 			Type:             schema.TypeString,
 			Required:         true,
 			Sensitive:        true,
-			Description:      "GCP service account key JSON.",
+			Description:      "Full contents of the GCP service-account key JSON file (downloaded from the GCP console). Load it with Terraform's file() function instead of inlining the multi-line key.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|[\\s\\S]+"),
 		},
 	}

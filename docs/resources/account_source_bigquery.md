@@ -16,9 +16,11 @@ https://www.rudderstack.com/docs/sources/reverse-etl/google-bigquery/
 resource "rudderstack_account_source_bigquery" "example" {
   name = "my-bigquery-account"
   config {
-    project     = "my-gcp-project"
-    location    = "US"
-    credentials = "{\"type\":\"service_account\"}"
+    project  = "my-gcp-project"
+    location = "US"
+    # Full GCP service-account key JSON. Load it from a file (keep the file out
+    # of version control) rather than inlining the multi-line key.
+    credentials = file("${path.module}/service-account-key.json")
   }
 }
 ```
@@ -42,7 +44,7 @@ resource "rudderstack_account_source_bigquery" "example" {
 
 Required:
 
-- `credentials` (String, Sensitive) GCP service account key JSON.
+- `credentials` (String, Sensitive) Full contents of the GCP service-account key JSON file (downloaded from the GCP console). Load it with Terraform's file() function instead of inlining the multi-line key.
 - `project` (String) GCP project ID where the BigQuery dataset lives.
 
 Optional:
