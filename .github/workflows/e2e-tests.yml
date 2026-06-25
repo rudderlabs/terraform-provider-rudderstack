@@ -100,7 +100,7 @@ jobs:
           fi
 
           # Account detection: run account acceptance tests if accounts/ or core files changed.
-          if [ "$RUN_ALL" = true ] || echo "$CHANGED_FILES" | grep -q "rudderstack/integrations/accounts/"; then
+          if [ "$RUN_ALL" = true ] || echo "$CHANGED_FILES" | grep -q "rudderstack/accounts/"; then
             echo "has_affected_accounts=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_affected_accounts=false" >> "$GITHUB_OUTPUT"
@@ -294,7 +294,7 @@ jobs:
           RUDDERSTACK_API_URL: ${{ vars.RUDDERSTACK_ACC_TEST_API_URL }}
         run: |
           go test \
-            ./rudderstack/integrations/accounts/ \
+            ./rudderstack/accounts/ \
             -v \
             -run "TestAccAccount" \
             -timeout 10m \

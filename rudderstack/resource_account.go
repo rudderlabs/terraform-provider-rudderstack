@@ -28,7 +28,7 @@ func resourceAccount(cm configs.ConfigMeta) *schema.Resource {
 		CreateContext: resourceAccountCreate(cm),
 		ReadContext:   resourceAccountRead(cm),
 		UpdateContext: resourceAccountUpdate(cm),
-		DeleteContext: resourceAccountDelete(cm),
+		DeleteContext: resourceAccountDelete(),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceAccountImportState(cm),
 		},
@@ -244,7 +244,7 @@ func resourceAccountUpdate(cm configs.ConfigMeta) schema.UpdateContextFunc {
 	}
 }
 
-func resourceAccountDelete(cm configs.ConfigMeta) schema.DeleteContextFunc {
+func resourceAccountDelete() schema.DeleteContextFunc {
 	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 		c, ok := m.(*Client)
 		if !ok {

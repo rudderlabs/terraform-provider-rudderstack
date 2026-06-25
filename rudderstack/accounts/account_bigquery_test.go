@@ -6,20 +6,21 @@ import (
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
-	_ "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations/accounts"
+	_ "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/accounts"
 )
 
 var bigqueryAccountTestConfigs = []c.TestConfig{
 	{
+		// Create with only required fields; the optional `location` is exercised
+		// in the update step below.
 		TerraformCreate: `
 			project     = "my-gcp-project"
-			location    = "US"
 			credentials = "{\"type\":\"service_account\"}"
 		`,
 		APICreate: `{
 			"name": "example",
 			"accountDefinitionName": "SOURCE_BIGQUERY",
-			"options": { "projectId": "my-gcp-project", "location": "US" },
+			"options": { "projectId": "my-gcp-project" },
 			"secret":  { "credentials": "{\"type\":\"service_account\"}" }
 		}`,
 		TerraformUpdate: `
