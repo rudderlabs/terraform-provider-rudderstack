@@ -10,6 +10,7 @@ package rudderstack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -18,7 +19,6 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
-
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -136,6 +136,11 @@ func resourceAccountRead(cm configs.ConfigMeta) schema.ReadContextFunc {
 
 		acc, err := c.Accounts.Get(ctx, d.Id())
 		if err != nil {
+			var apiErr *client.APIError
+			if errors.As(err, &apiErr) && apiErr.HTTPStatusCode == 404 {
+				d.SetId("")
+				return nil
+			}
 			return diag.FromErr(fmt.Errorf("could not get account: %w", err))
 		}
 

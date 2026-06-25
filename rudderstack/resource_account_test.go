@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
-
 	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -99,8 +98,16 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 			testutil.JSONEq(string(req.Options), createOptionsJSON) &&
 			testutil.JSONEq(string(req.Secret), createSecretJSON)
 	})).Return(&client.Account{
-		ID:        "acct-001",
-		Name:      "example",
+		ID:   "acct-001",
+		Name: "example",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		Options:   json.RawMessage(createOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
@@ -110,6 +117,14 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 	accounts.On("Get", mock.Anything, "acct-001").Return(&client.Account{
 		ID:   "acct-001",
 		Name: "example",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		// Secret intentionally absent — API never returns it.
 		Options:   json.RawMessage(createOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
@@ -122,8 +137,16 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 			testutil.JSONEq(string(req.Options), updateOptionsJSON) &&
 			testutil.JSONEq(string(req.Secret), updateSecretJSON)
 	})).Return(&client.Account{
-		ID:        "acct-001",
-		Name:      "example-updated",
+		ID:   "acct-001",
+		Name: "example-updated",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		Options:   json.RawMessage(updateOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2024, 2, 3, 4, 5, 6, 0, time.UTC)),
@@ -131,8 +154,16 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 
 	// --- Read mock after Update (called twice: post-update refresh + destroy plan check) ---
 	accounts.On("Get", mock.Anything, "acct-001").Return(&client.Account{
-		ID:        "acct-001",
-		Name:      "example-updated",
+		ID:   "acct-001",
+		Name: "example-updated",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		Options:   json.RawMessage(updateOptionsJSON),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2024, 2, 3, 4, 5, 6, 0, time.UTC)),
@@ -220,6 +251,59 @@ func TestResourceAccountCreateReadUpdate(t *testing.T) {
 	})
 }
 
+// TestResourceAccountRead_404ClearsState verifies that when the accounts API returns
+// a 404 (out-of-band deletion / import of a missing ID), resourceAccountRead clears
+// the resource ID and returns no Terraform error — matching the drift-detection
+// pattern used in rudderstack/retl/common.go.
+func TestResourceAccountRead_404ClearsState(t *testing.T) {
+	cm := testAccountConfigMeta()
+	accounts := &mockAccountsService{}
+
+	accounts.On("Get", mock.Anything, "acct-gone").
+		Return(nil, &client.APIError{HTTPStatusCode: 404}).Once()
+
+	res := resourceAccount(cm)
+	d := res.Data(nil)
+	d.SetId("acct-gone")
+
+	c := &Client{Accounts: accounts}
+	diags := resourceAccountRead(cm)(context.Background(), d, c)
+	if diags.HasError() {
+		t.Fatalf("expected no error on 404, got %+v", diags)
+	}
+	if d.Id() != "" {
+		t.Fatalf("expected ID cleared on 404, got %q", d.Id())
+	}
+
+	accounts.AssertExpectations(t)
+}
+
+// TestResourceAccountRead_NonNotFoundErrorReturnsError verifies that non-404 API errors
+// are surfaced as Terraform diagnostics (not silently swallowed).
+func TestResourceAccountRead_NonNotFoundErrorReturnsError(t *testing.T) {
+	cm := testAccountConfigMeta()
+	accounts := &mockAccountsService{}
+
+	accounts.On("Get", mock.Anything, "acct-err").
+		Return(nil, &client.APIError{HTTPStatusCode: 500, Message: "internal server error"}).Once()
+
+	res := resourceAccount(cm)
+	d := res.Data(nil)
+	d.SetId("acct-err")
+
+	c := &Client{Accounts: accounts}
+	diags := resourceAccountRead(cm)(context.Background(), d, c)
+	if !diags.HasError() {
+		t.Fatal("expected error on 500, got none")
+	}
+	// ID must NOT be cleared on a non-404 error.
+	if d.Id() == "" {
+		t.Fatal("expected ID to remain set on non-404 error")
+	}
+
+	accounts.AssertExpectations(t)
+}
+
 // TestResourceAccountSchemaNoSecretInState verifies that after a Read whose mocked
 // Get returns no secret, the bar field is absent from state. This test exercises the
 // schema + read function directly without needing a full provider lifecycle.
@@ -230,6 +314,14 @@ func TestResourceAccountSchemaNoSecretInState(t *testing.T) {
 	accounts.On("Get", mock.Anything, "acct-002").Return(&client.Account{
 		ID:   "acct-002",
 		Name: "test-acct",
+		Definition: struct {
+			Name     string `json:"name"`
+			Type     string `json:"type"`
+			Category string `json:"category"`
+		}{
+			Name: cm.APIType,
+			Type: cm.APIType,
+		},
 		// Options returned, secret NOT returned.
 		Options:   json.RawMessage(`{"foo":"val1"}`),
 		CreatedAt: testutil.TimePtr(time.Date(2024, 3, 4, 5, 6, 7, 0, time.UTC)),

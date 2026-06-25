@@ -1,0 +1,83 @@
+name: E2E Staging Smoke
+
+permissions:
+  contents: read
+
+# Applies REAL resources to the staging workspace (BigQuery account → rETL
+# source → connection), asserts no drift, destroys them on exit — the CI
+# counterpart of test/e2e/staging/run.sh (the #274 black-box smoke).
+#
+# Triggers:
+#   - pull_request, gated by the `e2e-staging` label — runnable on a PR BEFORE
+#     merge. For pull_request, GitHub reads this workflow from the PR HEAD, so
+#     it works even though the file isn't on the default branch yet. Add the
+#     label to run; pushes re-run while it's present.
+#   - workflow_dispatch — manual runs once this file is on the default branch
+#     (post-merge). Dispatch is NOT available pre-merge: GitHub lists dispatch
+#     workflows from the default branch only.
+#
+# Opt-in (label/manual), never automatic on every push: main.tf uses fixed
+# resource names (tf-e2e-*), so the concurrency group serializes runs.
+on:
+  pull_request:
+    types: [labeled, synchronize, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-staging-smoke
+  cancel-in-progress: false
+
+jobs:
+  staging-smoke:
+    # Always on manual dispatch; on a PR only when the `e2e-staging` label is set.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'e2e-staging')
+    runs-on: ubuntu-latest
+    environment: e2e
+    timeout-minutes: 20
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: go.mod
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_wrapper: false
+
+      - name: Run staging smoke (apply → assert no drift → destroy)
+        # Creds come from the `e2e` GitHub Environment. bq_credentials is passed
+        # via TF_VAR_ (not the tfvars file) to avoid embedding the JSON key.
+        # If the staging token is unset the job no-ops (skips) rather than
+        # failing — same pattern as RUDDERSTACK_RETL_TEST_ACCOUNT_ID. PAUSE is
+        # intentionally not set: the hold-open path is for local runs only.
+        env:
+          STAGING_ACCESS_TOKEN: ${{ secrets.RUDDERSTACK_STAGING_ACCESS_TOKEN }}
+          STAGING_API_URL: ${{ vars.RUDDERSTACK_STAGING_API_URL }}
+          BQ_PROJECT: ${{ vars.RUDDERSTACK_STAGING_BQ_PROJECT }}
+          BQ_DATASET: ${{ vars.RUDDERSTACK_STAGING_BQ_DATASET }}
+          BQ_TABLE: ${{ vars.RUDDERSTACK_STAGING_BQ_TABLE }}
+          TF_VAR_bq_credentials: ${{ secrets.RUDDERSTACK_STAGING_BQ_CREDENTIALS }}
+        run: |
+          if [ -z "$STAGING_ACCESS_TOKEN" ]; then
+            echo "RUDDERSTACK_STAGING_ACCESS_TOKEN is not set on the e2e environment; skipping staging smoke."
+            exit 0
+          fi
+          cat > test/e2e/staging/secret.tfvars <<EOF
+          access_token = "$STAGING_ACCESS_TOKEN"
+          api_url      = "${STAGING_API_URL:-https://api.staging.rudderlabs.com}"
+          bq_project   = "$BQ_PROJECT"
+          bq_dataset   = "$BQ_DATASET"
+          bq_table     = "$BQ_TABLE"
+          EOF
+          bash test/e2e/staging/run.sh test/e2e/staging/secret.tfvars
