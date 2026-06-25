@@ -3,6 +3,7 @@ package rudderstack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -124,6 +125,11 @@ func resourceDestinationRead(cm configs.ConfigMeta) schema.ReadContextFunc {
 
 		destination, err := c.Destinations.Get(ctx, id)
 		if err != nil {
+			var apiErr *client.APIError
+			if errors.As(err, &apiErr) && apiErr.HTTPStatusCode == 404 {
+				d.SetId("")
+				return diag.Diagnostics{}
+			}
 			return diag.FromErr(err)
 		}
 

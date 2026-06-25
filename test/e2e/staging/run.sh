@@ -110,6 +110,18 @@ terraform -chdir="${SCRIPT_DIR}" apply -auto-approve \
   -var-file="${TFVARS_FILE}"
 echo "==> Apply succeeded."
 
+# ── Verify resource IDs are non-empty ────────────────────────────────────────
+echo "==> Verifying resource IDs are non-empty …"
+for out in account_id retl_source_id destination_id connection_id; do
+  val=$(terraform -chdir="${SCRIPT_DIR}" output -raw "$out" 2>/dev/null)
+  if [[ -z "$val" ]]; then
+    echo "FAIL: output '$out' is empty — resource may not have been created."
+    exit 1
+  fi
+  echo "    $out = $val"
+done
+echo "==> All resources confirmed created."
+
 # ── Assert: plan must show zero drift ────────────────────────────────────────
 # terraform plan -detailed-exitcode exit codes:
 #   0 = success, no diff (what we want)
@@ -183,8 +195,14 @@ fi
 # ── Optional hold-open for manual inspection ─────────────────────────────────
 if [[ "${PAUSE:-false}" == "true" ]]; then
   echo "==> PAUSED. Resources are live in staging. Outputs above."
-  echo "    Run the rETL sync manually in the workspace, then press Enter to destroy."
-  read -r   # ponytail: blocks here; trap destroys on exit. Ctrl-C also triggers destroy.
+  echo ""
+  echo "    To inspect resources in a second terminal, export the provider config first:"
+  echo "      export TF_CLI_CONFIG_FILE='${TF_CLI_CONFIG_FILE}'"
+  echo "      terraform -chdir='${SCRIPT_DIR}' state show rudderstack_account_source_bigquery.acct"
+  echo "      terraform -chdir='${SCRIPT_DIR}' show -json | jq '.values.root_module.resources[] | select(.type==\"rudderstack_account_source_bigquery\") | .values.config'"
+  echo ""
+  echo "    Press Enter to destroy."
+  read -r || true   # blocks here; || true prevents set -e from exiting on EOF/signal
 fi
 
 echo "==> Smoke run complete."

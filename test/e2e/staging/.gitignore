@@ -5,3 +5,4 @@
 .bin/
 sa.json
 .env
+.dev-override.tfrc
