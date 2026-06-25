@@ -7,7 +7,7 @@ import (
 
 func init() {
 	properties := []c.ConfigProperty{
-		c.Simple("options.projectId", "project"),
+		c.Simple("options.project", "project"),
 		c.Simple("options.location", "location", c.SkipZeroValue),
 		c.Simple("secret.credentials", "credentials"),
 	}

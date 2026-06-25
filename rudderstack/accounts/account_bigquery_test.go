@@ -20,7 +20,7 @@ var bigqueryAccountTestConfigs = []c.TestConfig{
 		APICreate: `{
 			"name": "example",
 			"accountDefinitionName": "SOURCE_BIGQUERY",
-			"options": { "projectId": "my-gcp-project" },
+			"options": { "project": "my-gcp-project" },
 			"secret":  { "credentials": "{\"type\":\"service_account\"}" }
 		}`,
 		TerraformUpdate: `
@@ -31,7 +31,7 @@ var bigqueryAccountTestConfigs = []c.TestConfig{
 		APIUpdate: `{
 			"name": "example-updated",
 			"accountDefinitionName": "SOURCE_BIGQUERY",
-			"options": { "projectId": "my-gcp-project", "location": "EU" },
+			"options": { "project": "my-gcp-project", "location": "EU" },
 			"secret":  { "credentials": "{\"type\":\"service_account\"}" }
 		}`,
 	},
