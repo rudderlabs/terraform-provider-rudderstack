@@ -173,6 +173,11 @@ func resourceDestinationDelete(cm configs.ConfigMeta) schema.DeleteContextFunc {
 		}
 
 		if err := c.Destinations.Delete(ctx, d.Id()); err != nil {
+			var apiErr *client.APIError
+			if errors.As(err, &apiErr) && apiErr.HTTPStatusCode == 404 {
+				d.SetId("")
+				return diag.Diagnostics{}
+			}
 			return diag.FromErr(err)
 		}
 

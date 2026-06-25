@@ -32,43 +32,7 @@ resource "rudderstack_retl_source_table" "users" {
   }
 }
 
-# 3. Webhook destination — throwaway endpoint; delivery is not the point here.
-resource "rudderstack_destination_webhook" "demo" {
-  name = "tf-e2e-webhook"
-  config {
-    webhook_url    = "https://example.com/test"
-    webhook_method = "POST"
-  }
-}
-
-# 4. rETL connection wiring the source to the destination.
-#    Uses a manual schedule so no automatic syncs are triggered during the test.
-resource "rudderstack_retl_connection" "to_webhook" {
-  source_id      = rudderstack_retl_source_table.users.id
-  destination_id = rudderstack_destination_webhook.demo.id
-  enabled        = true
-  sync_behaviour = "full"
-
-  schedule {
-    type = "manual"
-  }
-
-  event {
-    type = "identify"
-  }
-
-  identifiers {
-    from = "user_id"
-    to   = "user_id"
-  }
-
-  mappings {
-    from = "email"
-    to   = "email"
-  }
-}
-
-# 5. (optional) Customer.io destination + a second rETL connection from the SAME
+# 3. (optional) Customer.io destination + rETL connection from the BigQuery source.
 #    BigQuery source. ponytail: count-gated on creds so the webhook-only smoke
 #    still runs when Customer.io creds aren't supplied.
 locals {
@@ -117,13 +81,13 @@ output "retl_source_id" {
 }
 
 output "destination_id" {
-  description = "ID of the created webhook destination."
-  value       = rudderstack_destination_webhook.demo.id
+  description = "ID of the created Customer.io destination (empty when creds not supplied)."
+  value       = try(rudderstack_destination_customerio.cio[0].id, "")
 }
 
 output "connection_id" {
-  description = "ID of the created rETL connection."
-  value       = rudderstack_retl_connection.to_webhook.id
+  description = "ID of the created rETL connection (empty when creds not supplied)."
+  value       = try(rudderstack_retl_connection_customerio.to_customerio[0].id, "")
 }
 
 output "customerio_destination_id" {
