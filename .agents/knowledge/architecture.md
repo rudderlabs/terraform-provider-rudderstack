@@ -63,3 +63,8 @@
 - `CONFLUENT_CLOUD` follows this path with registry key `confluent_cloud`; adding
   it does not require a bespoke provider resource entry beyond the destination
   registry metadata.
+
+## INT-6562 — Snowflake vs Snowflake Streaming Scope Boundary
+
+- The provider maintains separate destination integrations for standard Snowflake and Snowflake Streaming, each with its own implementation/tests/docs surfaces.
+- When task input points to `src/configurations/destinations/snowflake` (non-streaming), changes should be scoped to the standard Snowflake destination unless explicitly requested otherwise.

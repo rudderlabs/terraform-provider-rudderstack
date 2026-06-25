@@ -47,6 +47,11 @@ func ResourceConnectionCustomerIOAudience() *schema.Resource {
 		ReadContext:   readCustomerIOAudienceConnection,
 		UpdateContext: updateCustomerIOAudienceConnection,
 		DeleteContext: deleteConnection,
+		// cursor_column comes from baseConnectionSchema; enforce the shared
+		// upsert-only rule at plan time.
+		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+			return validateCursorColumnUpsertOnly(d)
+		},
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

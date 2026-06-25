@@ -42,3 +42,8 @@
 - Terraform fields `api_key` and `api_secret` are credentials for Confluent
   Cloud and should remain marked `Sensitive: true`, matching the integration
   config's `apiKey` and `apiSecret` secret-key semantics.
+
+## INT-6562 — Additive Snowflake Parity for Backward Compatibility
+
+- For Snowflake destination parity changes, prefer additive schema/mapping updates so existing configurations keep working.
+- Handle OneTrust/Ketch consent solely through the unified `consent_management` block (via `GetCommonConfigMeta`). Do **not** add standalone `one_trust_cookie_categories` / `ketch_consent_purposes` blocks for Snowflake even when those keys appear in the upstream destination schema — the unified block already covers those providers, and standalone blocks would diverge from how every other destination handles consent.

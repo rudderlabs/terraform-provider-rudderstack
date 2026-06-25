@@ -88,9 +88,10 @@ func ResourceConnection() *schema.Resource {
 }
 
 // genericConnectionSchema composes the base RETL connection schema with the
-// generic-flow-only fields: `event` (JSON Mapper), `constants`, `cursor_column`,
-// `object` (Object Mapping). Identifiers ForceNew lives in the base schema
-// because every flow treats identifier changes as breaking.
+// generic-flow-only fields: `event` (JSON Mapper), `constants`, `object`
+// (Object Mapping), and `mappings` (field mappings). `cursor_column` and
+// `identifiers` live in the base schema because every flow shares them
+// (identifiers are mutable; changes are forwarded on update).
 // `constants` ForceNew is conditional on Object Mapping and is applied in
 // CustomizeDiff (Object Mapping = ForceNew; JSON Mapper = mutable), so the
 // schema declares it without ForceNew.
@@ -133,17 +134,24 @@ func genericConnectionSchema() map[string]*schema.Schema {
 			},
 			Description: "User-defined constants. Mutable for JSON Mapper; ForceNew for Object Mapping.",
 		},
-		"cursor_column": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			ForceNew:    true,
-			Description: "Column name for incremental upsert syncs (only valid when sync_behaviour is `upsert`).",
-		},
 		"object": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			ForceNew:    true,
 			Description: "Destination entity for Object Mapping flows (e.g. `Contact`, `Lead`).",
+		},
+		// mappings (field mappings) is generic-flow-only. Destination-specific
+		// flows (e.g. customerio VDM v2) do not expose it.
+		"mappings": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"from": {Type: schema.TypeString, Required: true},
+					"to":   {Type: schema.TypeString, Required: true},
+				},
+			},
+			Description: "Source-to-destination field mappings (mutable).",
 		},
 	})
 }
@@ -153,10 +161,8 @@ func genericConnectionSchema() map[string]*schema.Schema {
 // sync_behaviour=upsert) so users see the error at plan time instead of on
 // apply.
 func customizeConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if cursor := d.Get("cursor_column").(string); cursor != "" {
-		if sb := d.Get("sync_behaviour").(string); sb != "" && sb != "upsert" {
-			return fmt.Errorf("cursor_column is only valid when sync_behaviour is %q, got %q", "upsert", sb)
-		}
+	if err := validateCursorColumnUpsertOnly(d); err != nil {
+		return err
 	}
 
 	// JSON Mapper restricts identifiers[*].to to {user_id, anonymous_id}. The
@@ -276,11 +282,11 @@ func buildCreateRequest(d *schema.ResourceData) (*retl.CreateRETLConnectionReque
 	if constants := constantsFromState(d); len(constants) > 0 {
 		req.Constants = constants
 	}
-	if v := d.Get("cursor_column").(string); v != "" {
-		req.CursorColumn = v
-	}
 	if v := d.Get("object").(string); v != "" {
 		req.Object = v
+	}
+	if mappings := mappingsFromState(d, "mappings"); len(mappings) > 0 {
+		req.Mappings = mappings
 	}
 	return req, nil
 }
@@ -293,6 +299,10 @@ func buildUpdateRequest(d *schema.ResourceData) (*retl.UpdateRETLConnectionReque
 	if d.HasChange("constants") {
 		constants := constantsFromState(d)
 		req.Constants = &constants
+	}
+	if d.HasChange("mappings") {
+		mappings := mappingsFromState(d, "mappings")
+		req.Mappings = &mappings
 	}
 	return req, nil
 }
@@ -307,11 +317,11 @@ func storeGenericConnectionToState(d *schema.ResourceData, c *retl.RETLConnectio
 	if err := d.Set("constants", constantsToState(c.Constants)); err != nil {
 		return fmt.Errorf("set constants: %w", err)
 	}
-	if err := d.Set("cursor_column", c.CursorColumn); err != nil {
-		return fmt.Errorf("set cursor_column: %w", err)
-	}
 	if err := d.Set("object", c.Object); err != nil {
 		return fmt.Errorf("set object: %w", err)
+	}
+	if err := d.Set("mappings", mappingsToState(c.Mappings)); err != nil {
+		return fmt.Errorf("set mappings: %w", err)
 	}
 
 	// The API returns destinationConfig as a non-empty JSON payload only for

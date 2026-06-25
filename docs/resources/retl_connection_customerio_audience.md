@@ -52,15 +52,15 @@ resource "rudderstack_retl_connection_customerio_audience" "model_to_customerio_
 
 - `audience_id` (Number) Customer.io audience ID (positive integer).
 - `destination_id` (String) ID of the destination.
-- `identifiers` (Block List, Min: 1) Source-to-destination identifier mappings. ForceNew: any change recreates the connection. (see [below for nested schema](#nestedblock--identifiers))
+- `identifiers` (Block List, Min: 1) Source-to-destination identifier mappings (mutable). (see [below for nested schema](#nestedblock--identifiers))
 - `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
 - `source_id` (String) ID of the RETL source.
 - `sync_behaviour` (String) How records are synced to the destination: `upsert`, `mirror`, or `full`.
 
 ### Optional
 
+- `cursor_column` (String) Column name for incremental upsert syncs (only valid when sync_behaviour is `upsert`).
 - `enabled` (Boolean) Whether the connection is enabled.
-- `mappings` (Block List) Source-to-destination field mappings (mutable). (see [below for nested schema](#nestedblock--mappings))
 - `sync_settings` (Block List, Max: 1) (see [below for nested schema](#nestedblock--sync_settings))
 
 ### Read-Only
@@ -89,15 +89,6 @@ Optional:
 
 - `cron_expression` (String) Cron expression. Required when `type` is `cron`.
 - `every_minutes` (Number) Sync interval in minutes. Required when `type` is `basic`.
-
-
-<a id="nestedblock--mappings"></a>
-### Nested Schema for `mappings`
-
-Required:
-
-- `from` (String)
-- `to` (String)
 
 
 <a id="nestedblock--sync_settings"></a>

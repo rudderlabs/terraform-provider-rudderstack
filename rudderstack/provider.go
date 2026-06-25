@@ -42,7 +42,8 @@ func NewWithConfigureClientFunc(f ConfigureClientFunc) *schema.Provider {
 					"and fail with an error if that is missing.",
 			},
 		},
-		ResourcesMap: resourcesMap(),
+		ResourcesMap:   resourcesMap(),
+		DataSourcesMap: dataSourcesMap(),
 	}
 
 	return p
@@ -59,6 +60,7 @@ func resourcesMap() map[string]*schema.Resource {
 		"rudderstack_retl_source_table":                   retl.ResourceTable(),
 		"rudderstack_retl_connection":                     retl.ResourceConnection(),
 		"rudderstack_retl_connection_customerio_audience": retl.ResourceConnectionCustomerIOAudience(),
+		"rudderstack_retl_connection_customerio":          retl.ResourceConnectionCustomerIO(),
 	}
 
 	// append sources and destinations from integration registries
@@ -72,7 +74,17 @@ func resourcesMap() map[string]*schema.Resource {
 		resource := resourceDestination(v)
 		resources[key] = resource
 	}
+	for k, v := range configs.Accounts.Entries() {
+		key := fmt.Sprintf("rudderstack_account_source_%s", k)
+		resources[key] = resourceAccount(v)
+	}
 	return resources
+}
+
+func dataSourcesMap() map[string]*schema.Resource {
+	return map[string]*schema.Resource{
+		"rudderstack_account": dataSourceAccount(),
+	}
 }
 
 func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag.Diagnostics) {
@@ -85,7 +97,7 @@ func configureClient(ctx context.Context, d *schema.ResourceData) (*Client, diag
 
 	c, err := NewAPIClient(accessToken,
 		client.WithBaseURL(apiUrl),
-		client.WithUserAgent("terraform-provider-rudderstack/4.6.0")) // x-release-please-version
+		client.WithUserAgent("terraform-provider-rudderstack/4.8.0")) // x-release-please-version
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}

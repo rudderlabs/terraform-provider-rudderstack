@@ -29,6 +29,10 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -46,8 +50,27 @@ var snowflakeTestConfigs = []c.TestConfig{
 					exclude_window_start_time = "11:00"
 					exclude_window_end_time   = "12:00"
 				}
+				skip_tracks_table = true
+				skip_users_table = true
+				prefer_append = true
+				manual_sync = true
 				json_paths = "./example-paths"
 				prefix = "example-prefix"
+				connection_mode {
+					web = "cloud"
+					android = "cloud"
+					android_kotlin = "cloud"
+					ios = "cloud"
+					ios_swift = "cloud"
+					unity = "cloud"
+					amp = "cloud"
+					cloud = "cloud"
+					cloud_source = "cloud"
+					reactnative = "cloud"
+					flutter = "cloud"
+					cordova = "cloud"
+					shopify = "cloud"
+				}
 				s3 {
 					bucket_name = "example-bucket-name"
 					access_key_id = "example-access-key-id"
@@ -77,10 +100,20 @@ var snowflakeTestConfigs = []c.TestConfig{
 						consents = ["one_android", "two_android", "three_android"]
 						resolution_strategy = ""
 					}]
+					android_kotlin = [{
+						provider = "custom"
+						resolution_strategy = "and"
+						consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+					}]
 					ios = [{
 						provider = "custom"
 						resolution_strategy = "and"
 						consents = ["one_ios", "two_ios", "three_ios"]
+					}]
+					ios_swift = [{
+						provider = "custom"
+						resolution_strategy = "or"
+						consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
 					}]
 					unity = [{
 						provider = "custom"
@@ -138,17 +171,36 @@ var snowflakeTestConfigs = []c.TestConfig{
 					"excludeWindowStartTime": "11:00",
 					"excludeWindowEndTime": "12:00"
 				},
+				"skipTracksTable": true,
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"manualSync": true,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
+				"connectionMode": {
+					"web": "cloud",
+					"android": "cloud",
+					"androidKotlin": "cloud",
+					"ios": "cloud",
+					"iosSwift": "cloud",
+					"unity": "cloud",
+					"amp": "cloud",
+					"cloud": "cloud",
+					"cloudSource": "cloud",
+					"reactnative": "cloud",
+					"flutter": "cloud",
+					"cordova": "cloud",
+					"shopify": "cloud"
+				},
 				"cloudProvider": "AWS",
 				"roleBasedAuth": false,
 				"storageIntegration": "",
 				"prefix": "example-prefix",
-        		"bucketName": "example-bucket-name",
-        		"accessKeyID": "example-access-key-id",
-        		"accessKey": "example-access-key",
-        		"enableSSE": true,
+				"bucketName": "example-bucket-name",
+				"accessKeyID": "example-access-key-id",
+				"accessKey": "example-access-key",
+				"enableSSE": true,
 				"consentManagement": {
 					"web": [
 						{
@@ -214,6 +266,23 @@ var snowflakeTestConfigs = []c.TestConfig{
 							]
 						}
 					],
+					"androidKotlin": [
+						{
+							"provider": "custom",
+							"resolutionStrategy": "and",
+							"consents": [
+								{
+									"consent": "one_android_kotlin"
+								},
+								{
+									"consent": "two_android_kotlin"
+								},
+								{
+									"consent": "three_android_kotlin"
+								}
+							]
+						}
+					],
 					"ios": [
 						{
 							"provider": "custom",
@@ -227,6 +296,23 @@ var snowflakeTestConfigs = []c.TestConfig{
 								},
 								{
 									"consent": "three_ios"
+								}
+							]
+						}
+					],
+					"iosSwift": [
+						{
+							"provider": "custom",
+							"resolutionStrategy": "or",
+							"consents": [
+								{
+									"consent": "one_ios_swift"
+								},
+								{
+									"consent": "two_ios_swift"
+								},
+								{
+									"consent": "three_ios_swift"
 								}
 							]
 						}
@@ -405,6 +491,10 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key\n-----END PRIVATE KEY-----",
 				"privateKeyPassphrase": "example-passphrase",
 				"syncFrequency": "30",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -428,6 +518,10 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-private-key-updated\n-----END PRIVATE KEY-----",
 				"syncFrequency": "60",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true
 			}`,
@@ -457,6 +551,10 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -494,6 +592,10 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 					"excludeWindowStartTime": "11:00",
 					"excludeWindowEndTime": "12:00"
 				},
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
@@ -529,6 +631,10 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -567,6 +673,10 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 					"excludeWindowStartTime": "11:00",
 					"excludeWindowEndTime": "12:00"
 				},
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
@@ -604,6 +714,10 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN PRIVATE KEY-----\nexample-pem-key\n-----END PRIVATE KEY-----",
 				"syncFrequency": "30",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -627,6 +741,10 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"useKeyPairAuth": true,
 				"privateKey": "-----BEGIN ENCRYPTED PRIVATE KEY-----\nexample-encrypted-key\n-----END ENCRYPTED PRIVATE KEY-----",
 				"syncFrequency": "30",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -656,6 +774,10 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "30",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": true,
 				"additionalProperties": true
 			}`,
@@ -685,6 +807,10 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"useKeyPairAuth": false,
 				"password": "example-password",
 				"syncFrequency": "60",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": false,
+				"manualSync": false,
 				"useRudderStorage": false,
 				"additionalProperties": true,
 				"cloudProvider": "AWS",
@@ -692,6 +818,78 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"roleBasedAuth": true,
 				"iamRoleARN": "arn:aws:iam::123456789012:role/S3Access",
 				"storageIntegration": "example-aws-int"
+			}`,
+		},
+	})
+}
+
+// TestDestinationResourceSnowflakeExplicitBooleanFalse verifies that the four
+// boolean toggles serialize an explicit `false` on create — overriding the
+// Default:true on skip_users_table / prefer_append — and flip to `true` on
+// update, with no post-apply drift. This guards the no-SkipZeroValue mapping
+// that lets users disable these toggles via Terraform.
+func TestDestinationResourceSnowflakeExplicitBooleanFalse(t *testing.T) {
+	cmt.AssertDestination(t, "snowflake", []c.TestConfig{
+		{
+			TerraformCreate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = true
+				skip_users_table = false
+				prefer_append = false
+				skip_tracks_table = false
+				manual_sync = false
+				sync {
+					frequency = "30"
+				}
+			`,
+			APICreate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": false,
+				"password": "example-password",
+				"syncFrequency": "30",
+				"skipUsersTable": false,
+				"preferAppend": false,
+				"skipTracksTable": false,
+				"manualSync": false,
+				"useRudderStorage": true,
+				"additionalProperties": true
+			}`,
+			TerraformUpdate: `
+				account = "example-account"
+				database = "example-database"
+				warehouse = "example-warehouse"
+				user = "example-user"
+				password = "example-password"
+				use_rudder_storage = true
+				skip_users_table = true
+				prefer_append = true
+				skip_tracks_table = true
+				manual_sync = true
+				sync {
+					frequency = "30"
+				}
+			`,
+			APIUpdate: `{
+				"account": "example-account",
+				"database": "example-database",
+				"warehouse": "example-warehouse",
+				"user": "example-user",
+				"useKeyPairAuth": false,
+				"password": "example-password",
+				"syncFrequency": "30",
+				"skipUsersTable": true,
+				"preferAppend": true,
+				"skipTracksTable": true,
+				"manualSync": true,
+				"useRudderStorage": true,
+				"additionalProperties": true
 			}`,
 		},
 	})

@@ -12,17 +12,19 @@ import (
 
 // baseConnectionSchema returns the fields shared by every
 // rudderstack_retl_connection_* resource: the universal source / destination /
-// schedule / sync fields, but NOT destination-flow-specific fields like
-// `event`, `cursor_column`, `object`, or `audience_id`. Each per-flow
-// resource (the generic JSON Mapper / Object Mapping resource and any typed
+// schedule / sync / cursor fields, but NOT destination-flow-specific fields
+// like `event`, `object`, or `audience_id`. Each per-flow resource (the
+// generic JSON Mapper / Object Mapping resource and any typed
 // destination-scoped resource such as
 // rudderstack_retl_connection_customerio_audience) merges its own
 // destination-specific fields onto this base via mergeSchemas.
 //
-// Identifiers are ForceNew at both the top level (catches list-size changes)
-// and the nested from/to attributes (catches in-place value mutations). This
-// applies uniformly across all flows — every RETL flow treats identifier
-// changes as breaking and requires a new connection.
+// cursor_column lives here because it's a generic source-side field with a
+// single cross-flow rule (sync_behaviour="upsert"); each resource enforces
+// that rule via validateCursorColumnUpsertOnly in its CustomizeDiff.
+//
+// Identifiers are mutable: changes are forwarded on update rather than
+// recreating the connection.
 func baseConnectionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"id": {
@@ -133,30 +135,24 @@ func baseConnectionSchema() map[string]*schema.Schema {
 		"identifiers": {
 			Type:     schema.TypeList,
 			Required: true,
-			ForceNew: true,
 			MinItems: 1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					// Nested ForceNew is required: the top-level ForceNew on a
-					// TypeList triggers replacement only on list-size changes
-					// (add/remove), not when an existing element's value
-					// mutates in place.
-					"from": {Type: schema.TypeString, Required: true, ForceNew: true},
-					"to":   {Type: schema.TypeString, Required: true, ForceNew: true},
-				},
-			},
-			Description: "Source-to-destination identifier mappings. ForceNew: any change recreates the connection.",
-		},
-		"mappings": {
-			Type:     schema.TypeList,
-			Optional: true,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"from": {Type: schema.TypeString, Required: true},
 					"to":   {Type: schema.TypeString, Required: true},
 				},
 			},
-			Description: "Source-to-destination field mappings (mutable).",
+			Description: "Source-to-destination identifier mappings (mutable).",
+		},
+		// cursor_column is a generic source-side field (the incremental
+		// watermark column), shared by every flow. Its only constraint is
+		// sync_behaviour="upsert", enforced uniformly via
+		// validateCursorColumnUpsertOnly in each resource's CustomizeDiff.
+		"cursor_column": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			ForceNew:    true,
+			Description: "Column name for incremental upsert syncs (only valid when sync_behaviour is `upsert`).",
 		},
 		"created_at": {
 			Type:     schema.TypeString,
@@ -167,6 +163,22 @@ func baseConnectionSchema() map[string]*schema.Schema {
 			Computed: true,
 		},
 	}
+}
+
+// validateCursorColumnUpsertOnly enforces the one cross-flow rule on
+// cursor_column: it's only valid when sync_behaviour is "upsert". Shared by
+// every resource's CustomizeDiff so the error surfaces at plan time instead of
+// an API rejection on apply. Takes resourceGetter so it works from
+// *schema.ResourceDiff and is trivially testable.
+func validateCursorColumnUpsertOnly(d resourceGetter) error {
+	cursor, _ := d.Get("cursor_column").(string)
+	if cursor == "" {
+		return nil
+	}
+	if sb, _ := d.Get("sync_behaviour").(string); sb != "" && sb != "upsert" {
+		return fmt.Errorf("cursor_column is only valid when sync_behaviour is %q, got %q", "upsert", sb)
+	}
+	return nil
 }
 
 // mergeSchemas combines a base map with overrides. Overrides win on key
@@ -184,9 +196,15 @@ func mergeSchemas(base, override map[string]*schema.Schema) map[string]*schema.S
 }
 
 // applyBaseToCreateRequest populates the universal fields of a
-// CreateRETLConnectionRequest from terraform state. Destination-flow-specific
-// fields (Event, Constants, CursorColumn, Object, DestinationConfig) are the
-// caller's responsibility.
+// CreateRETLConnectionRequest from terraform state. Flow-specific fields
+// (Event, Constants, Mappings, Object, DestinationConfig) are the caller's
+// responsibility — e.g. `mappings` (field mappings) lives only on the generic
+// resource, not on the destination-specific flows.
+//
+// cursor_column is handled here rather than per-resource: it's a generic
+// source-side field declared in baseConnectionSchema, so every connection
+// resource has it. GetOk returns ("", false) when it's unset, so the field is
+// only forwarded when the user actually set it.
 func applyBaseToCreateRequest(d *schema.ResourceData, req *retl.CreateRETLConnectionRequest) error {
 	schedule, err := scheduleFromState(d)
 	if err != nil {
@@ -203,8 +221,8 @@ func applyBaseToCreateRequest(d *schema.ResourceData, req *retl.CreateRETLConnec
 	if ss, ok := syncSettingsFromState(d); ok {
 		req.SyncSettings = ss
 	}
-	if mappings := mappingsFromState(d, "mappings"); len(mappings) > 0 {
-		req.Mappings = mappings
+	if v, ok := d.GetOk("cursor_column"); ok {
+		req.CursorColumn = v.(string)
 	}
 	return nil
 }
@@ -229,19 +247,21 @@ func applyBaseToUpdateRequest(d *schema.ResourceData, req *retl.UpdateRETLConnec
 			req.SyncSettings = ss
 		}
 	}
-	if d.HasChange("mappings") {
-		mappings := mappingsFromState(d, "mappings")
-		req.Mappings = &mappings
+	// Identifiers are mutable: forward them on change so the server updates the
+	// connection in place rather than the resource being recreated.
+	if d.HasChange("identifiers") {
+		req.Identifiers = mappingsFromState(d, "identifiers")
 	}
-	// Identifiers are ForceNew across all flows (see baseConnectionSchema),
-	// so HasChange("identifiers") never fires on Update — terraform routes
-	// identifier changes through destroy + create instead.
 	return nil
 }
 
 // storeBaseConnectionToState writes the universal fields back to terraform
-// state. Destination-flow-specific fields (event, constants, cursor_column,
-// object, audience_id, ...) are written by the caller after this returns.
+// state. Destination-flow-specific fields (event, constants, object,
+// audience_id, ...) are written by the caller after this returns.
+//
+// cursor_column is a generic source-side field declared in
+// baseConnectionSchema, so every connection resource has it and it is written
+// back here unconditionally.
 func storeBaseConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) error {
 	d.SetId(c.ID)
 	setters := []struct {
@@ -255,7 +275,7 @@ func storeBaseConnectionToState(d *schema.ResourceData, c *retl.RETLConnection) 
 		{"schedule", scheduleToState(c.Schedule)},
 		{"sync_settings", syncSettingsToState(c.SyncSettings)},
 		{"identifiers", mappingsToState(c.Identifiers)},
-		{"mappings", mappingsToState(c.Mappings)},
+		{"cursor_column", c.CursorColumn},
 	}
 	for _, s := range setters {
 		if err := d.Set(s.k, s.v); err != nil {

@@ -1,0 +1,16 @@
+---
+page_title: "rudderstack_retl_connection_customerio Resource - terraform-provider-rudderstack"
+subcategory: ""
+description: |-
+
+---
+
+# rudderstack_retl_connection_customerio (Resource)
+
+A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Only `person` is supported as the object, and only the `upsert` and `mirror` sync behaviours.
+
+## Example Usage
+
+{{tffile "examples/retl_connection_customerio.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}
