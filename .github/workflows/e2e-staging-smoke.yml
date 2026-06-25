@@ -68,6 +68,11 @@ jobs:
           BQ_DATASET: ${{ vars.RUDDERSTACK_STAGING_BQ_DATASET }}
           BQ_TABLE: ${{ vars.RUDDERSTACK_STAGING_BQ_TABLE }}
           TF_VAR_bq_credentials: ${{ secrets.RUDDERSTACK_STAGING_BQ_CREDENTIALS }}
+          # Customer.io creds are optional — if unset, the BigQuery→Customer.io
+          # chain is skipped (count-gated in main.tf) and the webhook-only smoke runs.
+          CUSTOMERIO_SITE_ID: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_SITE_ID }}
+          CUSTOMERIO_DATACENTER: ${{ vars.RUDDERSTACK_STAGING_CUSTOMERIO_DATACENTER }}
+          TF_VAR_customerio_api_key: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_API_KEY }}
         run: |
           if [ -z "$STAGING_ACCESS_TOKEN" ]; then
             echo "RUDDERSTACK_STAGING_ACCESS_TOKEN is not set on the e2e environment; skipping staging smoke."
@@ -79,5 +84,7 @@ jobs:
           bq_project   = "$BQ_PROJECT"
           bq_dataset   = "$BQ_DATASET"
           bq_table     = "$BQ_TABLE"
+          customerio_site_id    = "$CUSTOMERIO_SITE_ID"
+          customerio_datacenter = "${CUSTOMERIO_DATACENTER:-US}"
           EOF
           bash test/e2e/staging/run.sh test/e2e/staging/secret.tfvars

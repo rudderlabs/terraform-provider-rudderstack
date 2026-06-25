@@ -68,6 +68,16 @@ api_url     = "https://api.staging.rudderlabs.com"
 bq_location = "US"
 ```
 
+To also exercise the **BigQuery → Customer.io** connection, add Customer.io
+creds. Supply both `customerio_api_key` and `customerio_site_id` to enable it;
+omit them and the run falls back to the webhook-only chain.
+
+```hcl
+customerio_api_key    = "REPLACE_ME"
+customerio_site_id    = "REPLACE_ME"
+customerio_datacenter = "US"   # or "EU"; optional, defaults to US
+```
+
 ---
 
 ## 3. Run
@@ -89,6 +99,17 @@ TFVARS_FILE=path/to/other.tfvars ./run.sh
 
 The script does **not** require `TF_CLI_CONFIG_FILE` to be set beforehand; it
 writes a temporary dev-override config and exports the variable itself.
+
+#### Hold resources open for inspection (`PAUSE=true`)
+
+Apply, then block before destroy so you can inspect the live resources (e.g. the
+BigQuery→Customer.io connection in the staging UI). Press Enter to tear down.
+
+```sh
+PAUSE=true ./run.sh test/e2e/staging/secret.tfvars
+# or, with the default secret.tfvars path:
+PAUSE=true ./run.sh
+```
 
 ### `--backfill` flag (opt-in, not yet wired)
 

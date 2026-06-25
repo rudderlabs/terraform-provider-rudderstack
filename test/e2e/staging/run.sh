@@ -21,6 +21,8 @@
 #   - Terraform ≥ 1.0
 #   - secret.tfvars (or the path supplied as $1 / $TFVARS_FILE) with at least:
 #       access_token, bq_project, bq_dataset, bq_table, bq_credentials
+#     Optionally add customerio_api_key + customerio_site_id (+ customerio_datacenter)
+#     to also exercise the BigQuery→Customer.io connection.
 
 set -euo pipefail
 
@@ -119,6 +121,15 @@ for out in account_id retl_source_id destination_id connection_id; do
     exit 1
   fi
   echo "    $out = $val"
+done
+# Customer.io chain is optional — report its IDs only when creds enabled it.
+for out in customerio_destination_id customerio_connection_id; do
+  val=$(terraform -chdir="${SCRIPT_DIR}" output -raw "$out" 2>/dev/null)
+  if [[ -n "$val" ]]; then
+    echo "    $out = $val"
+  else
+    echo "    $out = (skipped — no Customer.io creds)"
+  fi
 done
 echo "==> All resources confirmed created."
 

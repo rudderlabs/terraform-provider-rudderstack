@@ -36,3 +36,25 @@ variable "bq_credentials" {
   type        = string
   sensitive   = true
 }
+
+# Customer.io creds are optional: supply api_key + site_id to also exercise the
+# BigQuery→Customer.io chain; leave empty to run the webhook-only smoke.
+variable "customerio_api_key" {
+  description = "Customer.io App API key. Empty skips the BigQuery→Customer.io chain."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "customerio_site_id" {
+  description = "Customer.io site ID (required with customerio_api_key to enable the chain)."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "customerio_datacenter" {
+  description = "Customer.io data center (US or EU)."
+  type        = string
+  default     = "US"
+}

@@ -68,6 +68,49 @@ resource "rudderstack_retl_connection" "to_webhook" {
   }
 }
 
+# 5. (optional) Customer.io destination + a second rETL connection from the SAME
+#    BigQuery source. ponytail: count-gated on creds so the webhook-only smoke
+#    still runs when Customer.io creds aren't supplied.
+locals {
+  enable_customerio = var.customerio_api_key != "" && var.customerio_site_id != ""
+}
+
+resource "rudderstack_destination_customerio" "cio" {
+  count = local.enable_customerio ? 1 : 0
+  name  = "tf-e2e-customerio"
+  config {
+    site_id    = var.customerio_site_id
+    api_key    = var.customerio_api_key
+    datacenter = var.customerio_datacenter
+  }
+}
+
+resource "rudderstack_retl_connection" "to_customerio" {
+  count          = local.enable_customerio ? 1 : 0
+  source_id      = rudderstack_retl_source_table.users.id
+  destination_id = rudderstack_destination_customerio.cio[0].id
+  enabled        = true
+  sync_behaviour = "full"
+
+  schedule {
+    type = "manual"
+  }
+
+  event {
+    type = "identify"
+  }
+
+  identifiers {
+    from = "user_id"
+    to   = "user_id"
+  }
+
+  mappings {
+    from = "email"
+    to   = "email"
+  }
+}
+
 # Outputs — consumed by run.sh to verify IDs were created.
 output "account_id" {
   description = "ID of the created BigQuery rETL account."
@@ -87,4 +130,14 @@ output "destination_id" {
 output "connection_id" {
   description = "ID of the created rETL connection."
   value       = rudderstack_retl_connection.to_webhook.id
+}
+
+output "customerio_destination_id" {
+  description = "ID of the Customer.io destination (empty when creds not supplied)."
+  value       = try(rudderstack_destination_customerio.cio[0].id, "")
+}
+
+output "customerio_connection_id" {
+  description = "ID of the BigQuery→Customer.io rETL connection (empty when creds not supplied)."
+  value       = try(rudderstack_retl_connection.to_customerio[0].id, "")
 }
