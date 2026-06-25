@@ -3,13 +3,11 @@ name: E2E Tests
 permissions:
   contents: read
 
-# No base-branch filter: feature work ships as stacks of inter-dependent PRs
-# (feature/… → feature/…). Restricting to `main` meant the E2E suite never ran
-# on any stacked PR. detect-changes diffs base.sha..head.sha, so each PR's run
-# stays scoped to its incremental change regardless of base branch.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    branches:
+      - main
 
 concurrency:
   group: e2e-${{ github.event.pull_request.number }}
