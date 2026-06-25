@@ -49,15 +49,16 @@ resource "rudderstack_destination_customerio" "cio" {
   }
 }
 
-# Customer.io rETL connection via the GENERIC rudderstack_retl_connection in
-# object-mapping mode: object="person" selects the Customer.io object — same
-# {"object":"person"} payload the typed resource sends. manual schedule so no
-# syncs fire during the smoke.
-resource "rudderstack_retl_connection" "to_customerio" {
+# Customer.io rETL connection. Customer.io is a VDM v2 / "destination-specific
+# flow": the object must travel inside the API's destinationConfig as
+# {"object":"person"}, which only the typed resource packs. The generic
+# rudderstack_retl_connection sends object as a top-level field, which the API
+# rejects ("Fields not allowed for Destination-specific flow: object"), so this
+# must use the typed resource (added in #275). manual schedule so no syncs fire.
+resource "rudderstack_retl_connection_customerio" "to_customerio" {
   count          = local.enable_customerio ? 1 : 0
   source_id      = rudderstack_retl_source_table.users.id
   destination_id = rudderstack_destination_customerio.cio[0].id
-  enabled        = true
   sync_behaviour = "mirror"
   object         = "person"
 
@@ -89,7 +90,7 @@ output "destination_id" {
 
 output "connection_id" {
   description = "ID of the created rETL connection (empty when creds not supplied)."
-  value       = try(rudderstack_retl_connection.to_customerio[0].id, "")
+  value       = try(rudderstack_retl_connection_customerio.to_customerio[0].id, "")
 }
 
 output "customerio_destination_id" {
@@ -99,5 +100,5 @@ output "customerio_destination_id" {
 
 output "customerio_connection_id" {
   description = "ID of the BigQuery→Customer.io rETL connection (empty when creds not supplied)."
-  value       = try(rudderstack_retl_connection.to_customerio[0].id, "")
+  value       = try(rudderstack_retl_connection_customerio.to_customerio[0].id, "")
 }
