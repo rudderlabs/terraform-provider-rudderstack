@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.8.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.7.0...v4.8.0) (2026-06-25)
+
+
+### Features
+
+* **retl:** add rudderstack_retl_connection_customerio resource ([#275](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/275)) ([a779a18](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/a779a18ae74bb745869ace65bf30b68f9244304f))
+
+
+### Bug Fixes
+
+* **accounts:** BigQuery account uses options.project, not projectId ([c4834ca](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/c4834ca6932613b3c4abed6db16ce49e7dd927cc))
+
+
+### Miscellaneous
+
+* retl-bq-account support ([#277](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/277)) ([c4834ca](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/c4834ca6932613b3c4abed6db16ce49e7dd927cc))
+
 ## [4.7.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.6.0...v4.7.0) (2026-06-17)
 
 
