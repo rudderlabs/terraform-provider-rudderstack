@@ -5,7 +5,7 @@ to verify that the Terraform provider can create and link:
 
 1. A BigQuery rETL **account** (`rudderstack_account_source_bigquery`)
 2. An rETL **source table** (`rudderstack_retl_source_table`) backed by that account
-3. A webhook **destination** (`rudderstack_destination_webhook`) — throwaway endpoint
+3. A Customer.io **destination** (`rudderstack_destination_customerio`)
 4. An rETL **connection** (`rudderstack_retl_connection`) wiring source → destination
 
 No real syncs are triggered (schedule type is `manual`).
@@ -48,17 +48,19 @@ commit it):
 
 ```hcl
 # secret.tfvars — DO NOT COMMIT
-access_token   = "rsa_REPLACE_ME"
-bq_project     = "my-gcp-project"
-bq_dataset     = "my_dataset"
-bq_table       = "users"
-bq_credentials = <<EOT
+access_token       = "rsa_REPLACE_ME"
+bq_project         = "my-gcp-project"
+bq_dataset         = "my_dataset"
+bq_table           = "users"
+bq_credentials     = <<EOT
 {
   "type": "service_account",
   "project_id": "my-gcp-project",
   ...
 }
 EOT
+customerio_site_id = "REPLACE_ME"
+customerio_api_key = "REPLACE_ME"
 ```
 
 Optional overrides (have defaults):
@@ -147,7 +149,7 @@ provider_installation {
 HCL
 
 # 3. Apply:
-TF_CLI_CONFIG_FILE=/tmp/dev.tfrc terraform -chdir=test/e2e/staging \
+TF_CLI_CONFIG_FILE=/tmp/dev.tfrc terraform -chdir=test/e2e \
   apply -var-file=test/e2e/secret.tfvars -auto-approve
 ```
 

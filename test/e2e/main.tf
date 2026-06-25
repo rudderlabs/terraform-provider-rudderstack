@@ -32,39 +32,31 @@ resource "rudderstack_retl_source_table" "users" {
   }
 }
 
-# 3. Webhook destination — throwaway endpoint; delivery is not the point here.
-resource "rudderstack_destination_webhook" "demo" {
-  name = "tf-e2e-webhook"
+# 3. Customer.io destination — receives the rETL sync events.
+resource "rudderstack_destination_customerio" "customerio" {
+  name = "tf-e2e-customerio"
   config {
-    webhook_url    = "https://example.com/test"
-    webhook_method = "POST"
+    site_id = var.customerio_site_id
+    api_key = var.customerio_api_key
   }
 }
 
 # 4. rETL connection wiring the source to the destination.
 #    Uses a manual schedule so no automatic syncs are triggered during the test.
-resource "rudderstack_retl_connection" "to_webhook" {
+resource "rudderstack_retl_connection_customerio" "to_customerio" {
   source_id      = rudderstack_retl_source_table.users.id
-  destination_id = rudderstack_destination_webhook.demo.id
+  destination_id = rudderstack_destination_customerio.customerio.id
   enabled        = true
-  sync_behaviour = "full"
+  sync_behaviour = "upsert"
+  object         = "person"
 
   schedule {
     type = "manual"
   }
 
-  event {
-    type = "identify"
-  }
-
   identifiers {
     from = "user_id"
     to   = "user_id"
-  }
-
-  mappings {
-    from = "email"
-    to   = "email"
   }
 }
 
@@ -117,13 +109,13 @@ output "retl_source_id" {
 }
 
 output "destination_id" {
-  description = "ID of the created webhook destination."
-  value       = rudderstack_destination_webhook.demo.id
+  description = "ID of the created Customer.io destination."
+  value       = rudderstack_destination_customerio.customerio.id
 }
 
 output "connection_id" {
   description = "ID of the created rETL connection."
-  value       = rudderstack_retl_connection.to_webhook.id
+  value       = rudderstack_retl_connection_customerio.to_customerio.id
 }
 
 output "customerio_destination_id" {
