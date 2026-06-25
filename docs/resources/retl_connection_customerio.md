@@ -1,30 +1,33 @@
 ---
-page_title: "rudderstack_retl_connection_customerio_audience Resource - terraform-provider-rudderstack"
+page_title: "rudderstack_retl_connection_customerio Resource - terraform-provider-rudderstack"
 subcategory: ""
 description: |-
 
 ---
 
-# rudderstack_retl_connection_customerio_audience (Resource)
+# rudderstack_retl_connection_customerio (Resource)
 
-A RETL (Reverse ETL) connection to a Customer.io Audience destination. The audience ID is exposed as a typed top-level field. The resource is `ForceNew` because the Customer.io Audience API does not accept `destinationConfig` changes on update — modifying the audience triggers replacement.
+A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Only `person` is supported as the object, and only the `upsert` and `mirror` sync behaviours.
 
 ## Example Usage
 
 ```terraform
-# Customer.io Audience flow — destination-specific RETL connection scoped
-# to Customer.io Audience destinations. `audience_id` is a typed top-level
-# field (ForceNew because the Customer.io Audience API does not accept
-# destinationConfig changes on update — bumping audience_id recreates the
-# connection). `manual` schedule only runs when triggered explicitly.
-resource "rudderstack_retl_connection_customerio_audience" "model_to_customerio_audience" {
+# Customer.io — RETL connection scoped to Customer.io
+# destinations. `object` is a typed top-level field (ForceNew — changing it
+# recreates the connection). Only `person` is supported as the object, and
+# only the `upsert` and `mirror` sync behaviours.
+resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
   source_id      = rudderstack_retl_source_model.users_revenue.id
-  destination_id = rudderstack_destination_customerio_audience.example.id
-  sync_behaviour = "mirror"
-  audience_id    = 16
+  destination_id = rudderstack_destination_customerio.example.id
+  sync_behaviour = "upsert"
+  object         = "person"
+
+  # Optional: incremental watermark column. Only valid when sync_behaviour is "upsert".
+  cursor_column = "updated_at"
 
   schedule {
-    type = "manual"
+    type          = "basic"
+    every_minutes = 30
   }
 
   identifiers {
@@ -50,12 +53,12 @@ resource "rudderstack_retl_connection_customerio_audience" "model_to_customerio_
 
 ### Required
 
-- `audience_id` (Number) Customer.io audience ID (positive integer).
 - `destination_id` (String) ID of the destination.
 - `identifiers` (Block List, Min: 1) Source-to-destination identifier mappings (mutable). (see [below for nested schema](#nestedblock--identifiers))
+- `object` (String) Customer.io destination object. Only `person` is supported.
 - `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
 - `source_id` (String) ID of the RETL source.
-- `sync_behaviour` (String) How records are synced to the destination: `upsert`, `mirror`, or `full`.
+- `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror`.
 
 ### Optional
 

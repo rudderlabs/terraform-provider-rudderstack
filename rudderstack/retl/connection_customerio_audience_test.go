@@ -221,16 +221,15 @@ func TestResourceConnectionCustomerIOAudience_RejectsNonPositiveID(t *testing.T)
 	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
-// Identifier changes must recreate the typed resource (ForceNew is set at
-// both the top level and the nested from/to in baseConnectionSchema). A new
-// ID after the value change proves destroy + create — terraform would have
-// called UpdateConnection (which the mock does not register) if the schema
-// had allowed in-place updates.
-func TestResourceConnectionCustomerIOAudience_IdentifiersAreForceNew(t *testing.T) {
+// Identifiers are mutable: changing them updates the connection in place
+// (same ID, an UpdateConnection call) rather than recreating it. The mock
+// registers exactly one CreateConnection and one UpdateConnection — no second
+// Create and no Delete — so a destroy+create would fail the expectations.
+func TestResourceConnectionCustomerIOAudience_IdentifiersAreMutable(t *testing.T) {
 	svc := &mockService{}
 	enabled := true
 
-	firstReq := &iacretl.CreateRETLConnectionRequest{
+	createReq := &iacretl.CreateRETLConnectionRequest{
 		SourceID:          "retl-src-1",
 		DestinationID:     "dest-cio",
 		Enabled:           &enabled,
@@ -239,8 +238,8 @@ func TestResourceConnectionCustomerIOAudience_IdentifiersAreForceNew(t *testing.
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
 	}
-	firstCreated := &iacretl.RETLConnection{
-		ID:                "conn-cio-ids-1",
+	created := &iacretl.RETLConnection{
+		ID:                "conn-cio-ids",
 		SourceID:          "retl-src-1",
 		DestinationID:     "dest-cio",
 		Enabled:           true,
@@ -249,17 +248,8 @@ func TestResourceConnectionCustomerIOAudience_IdentifiersAreForceNew(t *testing.
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
 	}
-	secondReq := &iacretl.CreateRETLConnectionRequest{
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           &enabled,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
-		Identifiers:       []iacretl.Mapping{{From: "user_id", To: "external_id"}},
-		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
-	}
-	secondCreated := &iacretl.RETLConnection{
-		ID:                "conn-cio-ids-2",
+	updated := &iacretl.RETLConnection{
+		ID:                "conn-cio-ids",
 		SourceID:          "retl-src-1",
 		DestinationID:     "dest-cio",
 		Enabled:           true,
@@ -268,12 +258,21 @@ func TestResourceConnectionCustomerIOAudience_IdentifiersAreForceNew(t *testing.
 		Identifiers:       []iacretl.Mapping{{From: "user_id", To: "external_id"}},
 		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
 	}
-	svc.On("CreateConnection", mock.Anything, firstReq).Return(firstCreated, nil).Once()
-	svc.On("CreateConnection", mock.Anything, secondReq).Return(secondCreated, nil).Once()
-	svc.On("GetConnection", mock.Anything, "conn-cio-ids-1").Return(firstCreated, nil)
-	svc.On("GetConnection", mock.Anything, "conn-cio-ids-2").Return(secondCreated, nil)
-	svc.On("DeleteConnection", mock.Anything, "conn-cio-ids-1").Return(nil).Once()
-	svc.On("DeleteConnection", mock.Anything, "conn-cio-ids-2").Return(nil).Once()
+	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
+	// Reads before the update (apply read-back + step-1 refresh) return the
+	// original; reads after the update return the new identifiers. Sequencing
+	// the GetConnection stubs around the UpdateConnection call keeps step 1's
+	// post-apply refresh stable (no spurious diff) while step 2 sees the change.
+	getBeforeUpdate := svc.On("GetConnection", mock.Anything, "conn-cio-ids").Return(created, nil)
+	// Update forwards the changed identifiers; audience_id is ForceNew but
+	// unchanged here, so this is an in-place update.
+	svc.On("UpdateConnection", mock.Anything, "conn-cio-ids", mock.MatchedBy(func(r *iacretl.UpdateRETLConnectionRequest) bool {
+		return len(r.Identifiers) == 1 && r.Identifiers[0].From == "user_id" && r.Identifiers[0].To == "external_id"
+	})).Return(updated, nil).Once().Run(func(mock.Arguments) {
+		// Once the update lands, subsequent reads reflect the new identifiers.
+		getBeforeUpdate.Return(updated, nil)
+	})
+	svc.On("DeleteConnection", mock.Anything, "conn-cio-ids").Return(nil).Once()
 
 	cfg := func(from, to string) string {
 		return fmt.Sprintf(`
@@ -303,7 +302,7 @@ func TestResourceConnectionCustomerIOAudience_IdentifiersAreForceNew(t *testing.
 						return err
 					}
 					return checkAll(map[string]string{
-						"id":                 "conn-cio-ids-1",
+						"id":                 "conn-cio-ids",
 						"identifiers.0.from": "email",
 						"identifiers.0.to":   "email",
 					}, attrs)
@@ -316,11 +315,10 @@ func TestResourceConnectionCustomerIOAudience_IdentifiersAreForceNew(t *testing.
 					if err != nil {
 						return err
 					}
-					// New ID proves destroy + create — ForceNew fired. The
-					// mock also expects two distinct CreateConnection calls
-					// (one per identifier value).
+					// Same ID proves in-place update (UpdateConnection), not
+					// destroy + create.
 					return checkAll(map[string]string{
-						"id":                 "conn-cio-ids-2",
+						"id":                 "conn-cio-ids",
 						"identifiers.0.from": "user_id",
 						"identifiers.0.to":   "external_id",
 					}, attrs)
@@ -376,4 +374,61 @@ func TestResourceConnectionCustomerIOAudience_NullDestinationConfigOnRead(t *tes
 			svc.AssertExpectations(t)
 		})
 	}
+}
+
+// cursor_column is a base-schema field, so the audience resource inherits it.
+// Verify it round-trips on a config-less refresh.
+func TestResourceConnectionCustomerIOAudience_CursorColumnSurvivesRefresh(t *testing.T) {
+	svc := &mockService{}
+	conn := &iacretl.RETLConnection{
+		ID:                "conn-aud",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		CursorColumn:      "updated_at",
+		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
+	}
+	svc.On("GetConnection", mock.Anything, "conn-aud").Return(conn, nil).Once()
+
+	r := retl.ResourceConnectionCustomerIOAudience()
+	d := r.TestResourceData()
+	d.SetId("conn-aud")
+
+	diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+	require.False(t, diags.HasError(), "diags=%v", diags)
+	require.Equal(t, "updated_at", d.Get("cursor_column"))
+	require.Equal(t, 42, d.Get("audience_id"))
+	svc.AssertExpectations(t)
+}
+
+// The audience resource enforces the shared cursor+upsert rule at plan time.
+func TestResourceConnectionCustomerIOAudience_RejectsCursorColumnWithNonUpsert(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection_customerio_audience" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-cio"
+						sync_behaviour = "mirror"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
+						audience_id   = 42
+						cursor_column = "updated_at"
+					}
+				`,
+				ExpectError: regexpMatches(`cursor_column is only valid when sync_behaviour is`),
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
