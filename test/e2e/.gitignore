@@ -1,0 +1,8 @@
+*.tfvars
+*.tfstate*
+.terraform/
+.terraform.lock.hcl
+.bin/
+sa.json
+.env
+.dev-override.tfrc
