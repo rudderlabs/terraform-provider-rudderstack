@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,10 +16,11 @@ import (
 	"github.com/rudderlabs/rudder-iac/api/client/retl"
 )
 
-// retlAccountIDEnv names the env var that supplies a real warehouse account ID
-// for live RETL acceptance tests. When unset (and the test is not running in
-// plan-only mode) the helpers t.Skip — local runs without a workspace fixture
-// shouldn't fail. The e2e-tests.yml workflow forwards `vars.RUDDERSTACK_RETL_TEST_ACCOUNT_ID`
+// retlAccountIDEnv names the env var that supplies a real BigQuery account ID
+// (a rudderstack_account_source_bigquery resource's id) for live RETL
+// acceptance tests. When unset (and the test is not running in plan-only mode)
+// the helpers t.Skip — local runs without a workspace fixture shouldn't fail.
+// The e2e-tests.yml workflow forwards `vars.RUDDERSTACK_RETL_TEST_ACCOUNT_ID`
 // (a GitHub Environment variable, not a secret — the ID is opaque, not credentials)
 // to this env var; until that variable is added, the expression renders empty
 // in CI and the live RETL tests skip.
@@ -27,6 +29,18 @@ const retlAccountIDEnv = "RUDDERSTACK_RETL_TEST_ACCOUNT_ID"
 // planOnlyAccountID is a placeholder used in plan-only mode where no API call
 // is made; the value just has to satisfy the schema (non-empty string).
 const planOnlyAccountID = "acc-plan-only"
+
+// customerIOAudienceEnv gates the LIVE Customer.io Audience connection test and
+// supplies the audience ID to use. Customer.io Audience is a vendor-specific
+// RETL flow; like the other vendor-gated integrations it only runs live when an
+// operator opts in by pointing this at a real audience ID. Unset (the CI
+// default) → the live path skips; the plan-only path always runs. The warehouse
+// source still needs retlAccountIDEnv on top of this.
+const customerIOAudienceEnv = "RUDDERSTACK_CUSTOMERIO_TEST_AUDIENCE_ID"
+
+// planOnlyAudienceID satisfies the audience_id IntAtLeast(1) schema in plan-only
+// mode, where no API call is made.
+const planOnlyAudienceID = 1
 
 // RETLSourceTestConfig is the shape consumed by AccAssertRETLSourceModel /
 // AccAssertRETLSourceTable. The Config / UpdateConfig fields are HCL fragments
@@ -103,7 +117,7 @@ func runRETLSourceLifecycle(t *testing.T, resourceType string, cfg RETLSourceTes
 	if !planOnly {
 		accountID = os.Getenv(retlAccountIDEnv)
 		if accountID == "" {
-			t.Skipf("%s is not set; skipping live RETL source test (set it to a workspace warehouse account ID)", retlAccountIDEnv)
+			t.Skipf("%s is not set; skipping live RETL source test (set it to a BigQuery account id)", retlAccountIDEnv)
 		}
 	}
 
@@ -251,9 +265,157 @@ func AccAssertRETLConnection(t *testing.T, cfg RETLConnectionTestConfig) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { TestAccPreCheck(t) },
 		ProviderFactories: TestAccProviderFactories,
-		CheckDestroy:      testAccCheckRETLConnectionDestroy,
+		CheckDestroy:      testAccCheckRETLConnectionDestroy("rudderstack_retl_connection"),
 		Steps:             steps,
 	})
+}
+
+// AccAssertRETLConnectionCustomerIOAudience wires a model source + Customer.io
+// Audience destination + rudderstack_retl_connection_customerio_audience and
+// runs the lifecycle. The typed connection carries audience_id as a top-level
+// field (no event/cursor_column — those are JSON-mapper-only).
+//
+// Plan-only (CI default): validates HCL/schema with placeholder creds, zero API
+// calls. Live: gated on customerIOAudienceEnv (the audience ID) plus
+// retlAccountIDEnv (the warehouse source account); skips when either is unset.
+func AccAssertRETLConnectionCustomerIOAudience(t *testing.T, cfg RETLConnectionTestConfig) {
+	t.Helper()
+
+	planOnly := PlanOnly()
+	if planOnly {
+		t.Parallel()
+	}
+
+	connResource := "rudderstack_retl_connection_customerio_audience.test"
+	srcResource := "rudderstack_retl_source_model.test"
+	dstResource := "rudderstack_destination_customerio_audience.test"
+
+	suffix := cfg.Variant
+	if suffix == "" {
+		suffix = "cio-aud"
+	}
+	srcName := RandomName("retl-src-" + suffix)
+	dstName := RandomName("retl-dst-" + suffix)
+
+	accountID := planOnlyAccountID
+	audienceID := planOnlyAudienceID
+	if !planOnly {
+		accountID = os.Getenv(retlAccountIDEnv)
+		if accountID == "" {
+			t.Skipf("%s is not set; skipping live Customer.io Audience connection test", retlAccountIDEnv)
+		}
+		raw := os.Getenv(customerIOAudienceEnv)
+		if raw == "" {
+			t.Skipf("%s is not set; skipping live Customer.io Audience connection test", customerIOAudienceEnv)
+		}
+		id, err := strconv.Atoi(raw)
+		if err != nil || id < 1 {
+			t.Fatalf("%s must be a positive integer, got %q", customerIOAudienceEnv, raw)
+		}
+		audienceID = id
+	}
+
+	createHCL := retlCustomerIOAudienceHCL(srcName, dstName, accountID, audienceID, cfg)
+
+	if planOnly {
+		ensureDummyToken(t)
+		resource.UnitTest(t, resource.TestCase{
+			ProviderFactories: TestAccProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					Config:             createHCL,
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+				},
+			},
+		})
+		return
+	}
+
+	steps := []resource.TestStep{
+		{
+			Config: createHCL,
+			Check: resource.ComposeTestCheckFunc(
+				testAccCheckRETLConnectionExists(connResource),
+				resource.TestCheckResourceAttrSet(connResource, "id"),
+				resource.TestCheckResourceAttr(connResource, "audience_id", strconv.Itoa(audienceID)),
+				resource.TestCheckResourceAttr(connResource, "sync_behaviour", cfg.SyncBehaviour),
+				resource.TestCheckResourceAttrPair(connResource, "source_id", srcResource, "id"),
+				resource.TestCheckResourceAttrPair(connResource, "destination_id", dstResource, "id"),
+			),
+		},
+	}
+
+	if cfg.UpdateMappings != "" {
+		updated := cfg
+		updated.Mappings = cfg.UpdateMappings
+		updated.UpdateMappings = ""
+		steps = append(steps, resource.TestStep{
+			Config: retlCustomerIOAudienceHCL(srcName, dstName, accountID, audienceID, updated),
+			Check: resource.ComposeTestCheckFunc(
+				testAccCheckRETLConnectionExists(connResource),
+			),
+		})
+	}
+
+	steps = append(steps, resource.TestStep{
+		ResourceName:      connResource,
+		ImportState:       true,
+		ImportStateVerify: true,
+	})
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { TestAccPreCheck(t) },
+		ProviderFactories: TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRETLConnectionDestroy("rudderstack_retl_connection_customerio_audience"),
+		Steps:             steps,
+	})
+}
+
+// retlCustomerIOAudienceHCL builds the source + Customer.io Audience destination
+// + typed connection pipeline. The destination creds are placeholders: the
+// control-plane API stores them without validating against Customer.io (same
+// rationale as the webhook destination in retlConnectionHCL), so live runs don't
+// need real keys — only a warehouse account and an audience ID.
+func retlCustomerIOAudienceHCL(srcName, dstName, accountID string, audienceID int, cfg RETLConnectionTestConfig) string {
+	mappingsBlock := ""
+	if cfg.Mappings != "" {
+		mappingsBlock = "\n  " + cfg.Mappings
+	}
+
+	return fmt.Sprintf(`
+resource "rudderstack_retl_source_model" "test" {
+  name                   = %q
+  source_definition_name = "bigquery"
+  account_id             = %q
+  config {
+    primary_key = "id"
+    sql         = "select 1 as id"
+  }
+}
+
+resource "rudderstack_destination_customerio_audience" "test" {
+  name = %q
+  config {
+    site_id     = "tf-acc-site"
+    api_key     = "tf-acc-api-key"
+    app_api_key = "tf-acc-app-api-key"
+    region      = "US"
+  }
+}
+
+resource "rudderstack_retl_connection_customerio_audience" "test" {
+  source_id      = rudderstack_retl_source_model.test.id
+  destination_id = rudderstack_destination_customerio_audience.test.id
+  enabled        = true
+  sync_behaviour = %q
+  audience_id    = %d
+  schedule {
+    %s
+  }
+  %s%s
+}
+`, srcName, accountID, dstName, cfg.SyncBehaviour, audienceID, cfg.Schedule, cfg.Identifiers, mappingsBlock)
 }
 
 // retlSourceHCL builds the HCL for a single RETL source resource.
@@ -449,26 +611,28 @@ func testAccCheckRETLConnectionExists(resourceName string) resource.TestCheckFun
 	}
 }
 
-func testAccCheckRETLConnectionDestroy(s *terraform.State) error {
-	store, err := newTestRETLClient()
-	if err != nil {
-		return err
+func testAccCheckRETLConnectionDestroy(resourceType string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		store, err := newTestRETLClient()
+		if err != nil {
+			return err
+		}
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != resourceType {
+				continue
+			}
+			// Expect 404 after delete; tolerant of any error (network blips,
+			// soft-delete) — we don't fail the test here.
+			_, getErr := store.GetConnection(context.Background(), rs.Primary.ID)
+			if getErr == nil {
+				// If it still exists, surface that — it's likely a real bug.
+				return fmt.Errorf("RETL connection %s still exists after destroy", rs.Primary.ID)
+			}
+			var apiErr *client.APIError
+			if errors.As(getErr, &apiErr) && apiErr.HTTPStatusCode == 404 {
+				continue
+			}
+		}
+		return nil
 	}
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "rudderstack_retl_connection" {
-			continue
-		}
-		// Expect 404 after delete; tolerant of any error (network blips,
-		// soft-delete) — we don't fail the test here.
-		_, getErr := store.GetConnection(context.Background(), rs.Primary.ID)
-		if getErr == nil {
-			// If it still exists, surface that — it's likely a real bug.
-			return fmt.Errorf("RETL connection %s still exists after destroy", rs.Primary.ID)
-		}
-		var apiErr *client.APIError
-		if errors.As(getErr, &apiErr) && apiErr.HTTPStatusCode == 404 {
-			continue
-		}
-	}
-	return nil
 }
