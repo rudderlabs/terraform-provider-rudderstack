@@ -5,7 +5,7 @@ permissions:
 
 # Applies REAL resources to the staging workspace (BigQuery account → rETL
 # source → connection), asserts no drift, destroys them on exit — the CI
-# counterpart of test/e2e/staging/run.sh (the #274 black-box smoke).
+# counterpart of test/e2e/run.sh (the #274 black-box smoke).
 #
 # Triggers:
 #   - pull_request, gated by the `e2e-staging` label — runnable on a PR BEFORE
@@ -78,7 +78,7 @@ jobs:
             echo "RUDDERSTACK_STAGING_ACCESS_TOKEN is not set on the e2e environment; skipping staging smoke."
             exit 0
           fi
-          cat > test/e2e/staging/secret.tfvars <<EOF
+          cat > test/e2e/secret.tfvars <<EOF
           access_token = "$STAGING_ACCESS_TOKEN"
           api_url      = "${STAGING_API_URL:-https://api.staging.rudderlabs.com}"
           bq_project   = "$BQ_PROJECT"
@@ -87,4 +87,4 @@ jobs:
           customerio_site_id    = "$CUSTOMERIO_SITE_ID"
           customerio_datacenter = "${CUSTOMERIO_DATACENTER:-US}"
           EOF
-          bash test/e2e/staging/run.sh test/e2e/staging/secret.tfvars
+          bash test/e2e/run.sh test/e2e/secret.tfvars

@@ -43,7 +43,7 @@ provider_installation {
 
 ## 2. Supply credentials via a git-ignored tfvars file
 
-Create `test/e2e/staging/secret.tfvars` (this path is in `.gitignore` — never
+Create `test/e2e/secret.tfvars` (this path is in `.gitignore` — never
 commit it):
 
 ```hcl
@@ -134,13 +134,13 @@ To apply manually without `run.sh`:
 
 ```sh
 # 1. Build first:
-go build -o test/e2e/staging/.bin/terraform-provider-rudderstack .
+go build -o test/e2e/.bin/terraform-provider-rudderstack .
 
 # 2. Write a dev-override config:
 cat > /tmp/dev.tfrc <<'HCL'
 provider_installation {
   dev_overrides {
-    "rudderstack.com/rudderlabs/rudderstack" = "test/e2e/staging/.bin"
+    "rudderstack.com/rudderlabs/rudderstack" = "test/e2e/.bin"
   }
   direct {}
 }
@@ -148,7 +148,7 @@ HCL
 
 # 3. Apply:
 TF_CLI_CONFIG_FILE=/tmp/dev.tfrc terraform -chdir=test/e2e/staging \
-  apply -var-file=test/e2e/staging/secret.tfvars -auto-approve
+  apply -var-file=test/e2e/secret.tfvars -auto-approve
 ```
 
 ---
