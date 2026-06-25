@@ -248,7 +248,7 @@ resource "rudderstack_retl_connection" "track_to_webhook_named_column" {
 ### Required
 
 - `destination_id` (String) ID of the destination.
-- `identifiers` (Block List, Min: 1) Source-to-destination identifier mappings. ForceNew: any change recreates the connection. (see [below for nested schema](#nestedblock--identifiers))
+- `identifiers` (Block List, Min: 1) Source-to-destination identifier mappings (mutable). (see [below for nested schema](#nestedblock--identifiers))
 - `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
 - `source_id` (String) ID of the RETL source.
 - `sync_behaviour` (String) How records are synced to the destination: `upsert`, `mirror`, or `full`.
