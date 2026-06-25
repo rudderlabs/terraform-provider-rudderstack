@@ -85,27 +85,21 @@ resource "rudderstack_destination_customerio" "cio" {
   }
 }
 
-resource "rudderstack_retl_connection" "to_customerio" {
+# Typed Customer.io rETL connection (rudderstack_retl_connection_customerio,
+# added in #275): object="person", sync_behaviour limited to upsert/mirror.
+# manual schedule so no syncs fire during the smoke.
+resource "rudderstack_retl_connection_customerio" "to_customerio" {
   count          = local.enable_customerio ? 1 : 0
   source_id      = rudderstack_retl_source_table.users.id
   destination_id = rudderstack_destination_customerio.cio[0].id
-  enabled        = true
-  sync_behaviour = "full"
+  sync_behaviour = "mirror"
+  object         = "person"
 
   schedule {
     type = "manual"
   }
 
-  event {
-    type = "identify"
-  }
-
   identifiers {
-    from = "user_id"
-    to   = "user_id"
-  }
-
-  mappings {
     from = "email"
     to   = "email"
   }
@@ -139,5 +133,5 @@ output "customerio_destination_id" {
 
 output "customerio_connection_id" {
   description = "ID of the BigQuery→Customer.io rETL connection (empty when creds not supplied)."
-  value       = try(rudderstack_retl_connection.to_customerio[0].id, "")
+  value       = try(rudderstack_retl_connection_customerio.to_customerio[0].id, "")
 }
