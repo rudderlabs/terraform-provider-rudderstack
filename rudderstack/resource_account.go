@@ -70,7 +70,7 @@ func resourceAccountSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
 
 // optionsOrEmpty returns the raw JSON of options, falling back to "{}".
 func optionsOrEmpty(raw json.RawMessage) string {
-	if len(raw) == 0 {
+	if len(raw) == 0 || string(raw) == "null" {
 		return "{}"
 	}
 	return string(raw)
@@ -80,11 +80,11 @@ func optionsOrEmpty(raw json.RawMessage) string {
 // into separate options and secret raw JSON messages.
 func splitOptionsSecret(combined string) (options, secret json.RawMessage) {
 	optRaw := gjson.Get(combined, "options").Raw
-	if optRaw == "" {
+	if optRaw == "" || optRaw == "null" {
 		optRaw = "{}"
 	}
 	secRaw := gjson.Get(combined, "secret").Raw
-	if secRaw == "" {
+	if secRaw == "" || secRaw == "null" {
 		secRaw = "{}"
 	}
 	return json.RawMessage(optRaw), json.RawMessage(secRaw)
@@ -199,14 +199,8 @@ func resourceAccountRead(cm configs.ConfigMeta) schema.ReadContextFunc {
 			}
 		}
 
-		if len(mergedProps) > 0 {
-			if err := d.Set("config", []interface{}{mergedProps}); err != nil {
-				return diag.FromErr(err)
-			}
-		} else {
-			if err := d.Set("config", []interface{}{}); err != nil {
-				return diag.FromErr(err)
-			}
+		if err := d.Set("config", []interface{}{mergedProps}); err != nil {
+			return diag.FromErr(err)
 		}
 
 		return diag.Diagnostics{}

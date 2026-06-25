@@ -98,7 +98,7 @@ jobs:
           fi
 
           # Account detection: run account acceptance tests if accounts/ or core files changed.
-          if [ "$RUN_ALL" = true ] || echo "$CHANGED_FILES" | grep -q "rudderstack/accounts/"; then
+          if [ "$RUN_ALL" = true ] || echo "$CHANGED_FILES" | grep -Eq "rudderstack/accounts/|rudderstack/resource_account\\.go|rudderstack/data_source_account\\.go"; then
             echo "has_affected_accounts=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_affected_accounts=false" >> "$GITHUB_OUTPUT"
