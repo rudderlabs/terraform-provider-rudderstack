@@ -122,11 +122,14 @@ for out in account_id retl_source_id destination_id connection_id; do
   fi
   echo "    $out = $val"
 done
-# Customer.io chain is optional — report its IDs only when creds enabled it.
-for out in customerio_destination_id customerio_connection_id; do
+# Customer.io chains are optional — report their IDs only when creds enabled them.
+for out in customerio_destination_id customerio_connection_id \
+           customerio_audience_destination_id customerio_audience_connection_id; do
   val=$(terraform -chdir="${SCRIPT_DIR}" output -raw "$out" 2>/dev/null)
   if [[ -n "$val" ]]; then
     echo "    $out = $val"
+  elif [[ "$out" == *audience* ]]; then
+    echo "    $out = (skipped — no Customer.io Audience creds: set customerio_audience_app_api_key + customerio_audience_id)"
   else
     echo "    $out = (skipped — no Customer.io creds)"
   fi

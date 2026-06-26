@@ -58,3 +58,28 @@ variable "customerio_datacenter" {
   type        = string
   default     = "US"
 }
+
+# Customer.io Audience creds are optional and independent of the Customer.io
+# (VDM v2) chain above: supply customerio_audience_app_api_key + a real
+# customerio_audience_id (alongside customerio_site_id + customerio_api_key) to
+# also exercise the BigQuery→Customer.io Audience chain. The Audience
+# destination reuses site_id/api_key (same Customer.io account) but additionally
+# needs the App API key and a region.
+variable "customerio_audience_app_api_key" {
+  description = "Customer.io App API key for the Audience destination. Empty skips the BigQuery→Customer.io Audience chain."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "customerio_audience_region" {
+  description = "Customer.io Audience destination region (US or EU)."
+  type        = string
+  default     = "US"
+}
+
+variable "customerio_audience_id" {
+  description = "Customer.io audience ID (positive integer). 0 skips the BigQuery→Customer.io Audience chain."
+  type        = number
+  default     = 0
+}

@@ -6,7 +6,12 @@ to verify that the Terraform provider can create and link:
 1. A BigQuery rETL **account** (`rudderstack_account_source_bigquery`)
 2. An rETL **source table** (`rudderstack_retl_source_table`) backed by that account
 3. A Customer.io **destination** (`rudderstack_destination_customerio`)
-4. An rETL **connection** (`rudderstack_retl_connection`) wiring source → destination
+4. An rETL **connection** (`rudderstack_retl_connection_customerio`) wiring source → destination
+
+Optionally, off the **same** BigQuery source, a second chain:
+
+5. A Customer.io **Audience destination** (`rudderstack_destination_customerio_audience`)
+6. An rETL **connection** (`rudderstack_retl_connection_customerio_audience`) wiring source → audience destination
 
 No real syncs are triggered (schedule type is `manual`).
 
@@ -78,6 +83,17 @@ omit them and the run falls back to the webhook-only chain.
 customerio_api_key    = "REPLACE_ME"
 customerio_site_id    = "REPLACE_ME"
 customerio_datacenter = "US"   # or "EU"; optional, defaults to US
+```
+
+To **additionally** exercise the **BigQuery → Customer.io Audience** chain (off the
+same BigQuery source), supply the App API key and a real audience ID on top of the
+shared `customerio_site_id` / `customerio_api_key`. Omit either and only the
+Customer.io (VDM v2) chain runs.
+
+```hcl
+customerio_audience_app_api_key = "REPLACE_ME"
+customerio_audience_id          = 16     # a real Customer.io audience ID (positive integer)
+customerio_audience_region      = "US"   # or "EU"; optional, defaults to US
 ```
 
 ---

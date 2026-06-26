@@ -73,6 +73,11 @@ jobs:
           CUSTOMERIO_SITE_ID: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_SITE_ID }}
           CUSTOMERIO_DATACENTER: ${{ vars.RUDDERSTACK_STAGING_CUSTOMERIO_DATACENTER }}
           TF_VAR_customerio_api_key: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_API_KEY }}
+          # Customer.io Audience creds are optional too — if unset, the
+          # BigQuery→Customer.io Audience chain is skipped (count-gated in main.tf).
+          CUSTOMERIO_AUDIENCE_ID: ${{ vars.RUDDERSTACK_STAGING_CUSTOMERIO_AUDIENCE_ID }}
+          CUSTOMERIO_AUDIENCE_REGION: ${{ vars.RUDDERSTACK_STAGING_CUSTOMERIO_AUDIENCE_REGION }}
+          TF_VAR_customerio_audience_app_api_key: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_APP_API_KEY }}
         run: |
           if [ -z "$STAGING_ACCESS_TOKEN" ]; then
             echo "RUDDERSTACK_STAGING_ACCESS_TOKEN is not set on the e2e environment; skipping staging smoke."
@@ -86,5 +91,7 @@ jobs:
           bq_table     = "$BQ_TABLE"
           customerio_site_id    = "$CUSTOMERIO_SITE_ID"
           customerio_datacenter = "${CUSTOMERIO_DATACENTER:-US}"
+          customerio_audience_id     = ${CUSTOMERIO_AUDIENCE_ID:-0}
+          customerio_audience_region = "${CUSTOMERIO_AUDIENCE_REGION:-US}"
           EOF
           bash test/e2e/run.sh test/e2e/secret.tfvars

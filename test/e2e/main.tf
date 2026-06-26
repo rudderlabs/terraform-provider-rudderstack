@@ -37,6 +37,10 @@ resource "rudderstack_retl_source_table" "users" {
 #    still runs when Customer.io creds aren't supplied.
 locals {
   enable_customerio = var.customerio_api_key != "" && var.customerio_site_id != ""
+
+  # Independent of the VDM v2 chain above: the Audience chain needs its own App
+  # API key plus a real audience ID (on top of the shared site_id/api_key).
+  enable_customerio_audience = var.customerio_site_id != "" && var.customerio_api_key != "" && var.customerio_audience_app_api_key != "" && var.customerio_audience_id > 0
 }
 
 resource "rudderstack_destination_customerio" "cio" {
@@ -61,6 +65,40 @@ resource "rudderstack_retl_connection_customerio" "to_customerio" {
   destination_id = rudderstack_destination_customerio.cio[0].id
   sync_behaviour = "mirror"
   object         = "person"
+
+  schedule {
+    type = "manual"
+  }
+
+  identifiers {
+    from = "email"
+    to   = "email"
+  }
+}
+
+# 4. (optional) Customer.io Audience destination + rETL connection from the same
+#    BigQuery source. Mirrors the Customer.io (VDM v2) chain above but targets the
+#    Audience destination via the typed rudderstack_retl_connection_customerio_audience
+#    resource, which carries audience_id as a top-level field (packed into the API's
+#    destinationConfig). count-gated on its own creds so it's independent of the
+#    VDM v2 chain. manual schedule so no syncs fire.
+resource "rudderstack_destination_customerio_audience" "cio_aud" {
+  count = local.enable_customerio_audience ? 1 : 0
+  name  = "tf-e2e-customerio-audience"
+  config {
+    site_id     = var.customerio_site_id
+    api_key     = var.customerio_api_key
+    app_api_key = var.customerio_audience_app_api_key
+    region      = var.customerio_audience_region
+  }
+}
+
+resource "rudderstack_retl_connection_customerio_audience" "to_customerio_audience" {
+  count          = local.enable_customerio_audience ? 1 : 0
+  source_id      = rudderstack_retl_source_table.users.id
+  destination_id = rudderstack_destination_customerio_audience.cio_aud[0].id
+  sync_behaviour = "mirror"
+  audience_id    = var.customerio_audience_id
 
   schedule {
     type = "manual"
@@ -101,4 +139,14 @@ output "customerio_destination_id" {
 output "customerio_connection_id" {
   description = "ID of the BigQuery→Customer.io rETL connection (empty when creds not supplied)."
   value       = try(rudderstack_retl_connection_customerio.to_customerio[0].id, "")
+}
+
+output "customerio_audience_destination_id" {
+  description = "ID of the Customer.io Audience destination (empty when audience creds not supplied)."
+  value       = try(rudderstack_destination_customerio_audience.cio_aud[0].id, "")
+}
+
+output "customerio_audience_connection_id" {
+  description = "ID of the BigQuery→Customer.io Audience rETL connection (empty when audience creds not supplied)."
+  value       = try(rudderstack_retl_connection_customerio_audience.to_customerio_audience[0].id, "")
 }
