@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.8.0...v4.9.0) (2026-06-29)
+
+
+### Features
+
+* require non-empty consents in consent management schema [SDK-4965] ([#276](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/276)) ([3b37744](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/3b37744009f759d23f7c9984152018f464509d50))
+
 ## [4.8.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.7.0...v4.8.0) (2026-06-25)
 
 
