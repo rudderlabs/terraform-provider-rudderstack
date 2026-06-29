@@ -81,6 +81,13 @@ func GetConfigMetaForGenericConsentManagement(supportedSourceTypes []string) ([]
 							Description: "The list of consent IDs for the provider.",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+								// Mirror the integrations-config consent schema (pattern
+								// ^(?=.*\S).{1,100}$): reject empty/whitespace-only IDs and
+								// cap length at 100 so local plan validation matches the backend.
+								ValidateFunc: validation.All(
+									validation.StringIsNotWhiteSpace,
+									validation.StringLenBetween(1, 100),
+								),
 							},
 						},
 					},
