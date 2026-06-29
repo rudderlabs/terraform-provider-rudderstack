@@ -7,15 +7,15 @@ description: |-
 
 # rudderstack_retl_connection_customerio (Resource)
 
-A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Only `person` is supported as the object, and only the `upsert` and `mirror` sync behaviours.
+A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Supported object values are `person` and `event`; supported sync behaviours are `upsert` and `mirror`.
 
 ## Example Usage
 
 ```terraform
 # Customer.io — RETL connection scoped to Customer.io
 # destinations. `object` is a typed top-level field (ForceNew — changing it
-# recreates the connection). Only `person` is supported as the object, and
-# only the `upsert` and `mirror` sync behaviours.
+# recreates the connection). Supported object values are `person` and `event`;
+# supported sync behaviours are `upsert` and `mirror`.
 resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
   source_id      = rudderstack_retl_source_model.users_revenue.id
   destination_id = rudderstack_destination_customerio.example.id
@@ -55,7 +55,7 @@ resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
 
 - `destination_id` (String) ID of the destination.
 - `identifiers` (Block List, Min: 1) Source-to-destination identifier mappings (mutable). (see [below for nested schema](#nestedblock--identifiers))
-- `object` (String) Customer.io destination object. Only `person` is supported.
+- `object` (String) Customer.io destination object: `person` or `event`.
 - `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
 - `source_id` (String) ID of the RETL source.
 - `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror`.

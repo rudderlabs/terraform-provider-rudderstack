@@ -35,16 +35,14 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 			"Carries the destination object as a typed top-level field; ForceNew because the " +
 			"object cannot be changed in place — changing it recreates the connection.",
 		Schema: mergeSchemas(baseConnectionSchema(), map[string]*schema.Schema{
-			// Customer.io supports exactly one object, whose on-the-wire value is
-			// `person` (the `value` from the listObjects API). Restrict to it so
-			// typos fail at plan time instead of on apply. If Customer.io ever
-			// adds objects, extend this slice.
+			// Restrict objects to the Customer.io listObjects values this
+			// resource supports so typos fail at plan time instead of on apply.
 			"object": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"person"}, false),
-				Description:  "Customer.io destination object. Only `person` is supported.",
+				ValidateFunc: validation.StringInSlice([]string{"person", "event"}, false),
+				Description:  "Customer.io destination object: `person` or `event`.",
 			},
 			// Only upsert and mirror are supported — drop `full` from the base
 			// schema's allowed set so users see a plan-time error instead of an

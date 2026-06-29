@@ -20,65 +20,69 @@ import (
 // {"object": "..."}. identifiers flow through the base schema; VDM v2 does NOT
 // support field mappings, so this resource has no `mappings`.
 func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
-	svc := &mockService{}
-	enabled := true
+	for _, object := range []string{"person", "event"} {
+		t.Run(object, func(t *testing.T) {
+			svc := &mockService{}
+			enabled := true
 
-	createReq := &iacretl.CreateRETLConnectionRequest{
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           &enabled,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`{"object":"person"}`),
-	}
-	created := &iacretl.RETLConnection{
-		ID:                "conn-cio",
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           true,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-		DestinationConfig: json.RawMessage(`{"object":"person"}`),
-	}
-	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
-	svc.On("GetConnection", mock.Anything, "conn-cio").Return(created, nil).Times(2)
-	svc.On("DeleteConnection", mock.Anything, "conn-cio").Return(nil).Once()
+			createReq := &iacretl.CreateRETLConnectionRequest{
+				SourceID:          "retl-src-1",
+				DestinationID:     "dest-cio",
+				Enabled:           &enabled,
+				Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+				SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+				Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+				DestinationConfig: json.RawMessage(`{"object":"` + object + `"}`),
+			}
+			created := &iacretl.RETLConnection{
+				ID:                "conn-cio",
+				SourceID:          "retl-src-1",
+				DestinationID:     "dest-cio",
+				Enabled:           true,
+				Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+				SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+				Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+				DestinationConfig: json.RawMessage(`{"object":"` + object + `"}`),
+			}
+			svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
+			svc.On("GetConnection", mock.Anything, "conn-cio").Return(created, nil).Times(2)
+			svc.On("DeleteConnection", mock.Anything, "conn-cio").Return(nil).Once()
 
-	resource.UnitTest(t, resource.TestCase{
-		ProviderFactories: providerFactories(svc),
-		Steps: []resource.TestStep{
-			{
-				Config: `
-					provider "rudderstack" { access_token = "tok" }
-					resource "rudderstack_retl_connection_customerio" "example" {
-						source_id      = "retl-src-1"
-						destination_id = "dest-cio"
-						sync_behaviour = "upsert"
-						object         = "person"
-						schedule { type = "manual" }
-						identifiers {
-							from = "email"
-							to   = "email"
-						}
-					}
-				`,
-				Check: func(s *terraform.State) error {
-					attrs, err := resourceAttrs(s, "rudderstack_retl_connection_customerio.example")
-					if err != nil {
-						return err
-					}
-					return checkAll(map[string]string{
-						"id":     "conn-cio",
-						"object": "person",
-					}, attrs)
+			resource.UnitTest(t, resource.TestCase{
+				ProviderFactories: providerFactories(svc),
+				Steps: []resource.TestStep{
+					{
+						Config: `
+							provider "rudderstack" { access_token = "tok" }
+							resource "rudderstack_retl_connection_customerio" "example" {
+								source_id      = "retl-src-1"
+								destination_id = "dest-cio"
+								sync_behaviour = "upsert"
+								object         = "` + object + `"
+								schedule { type = "manual" }
+								identifiers {
+									from = "email"
+									to   = "email"
+								}
+							}
+						`,
+						Check: func(s *terraform.State) error {
+							attrs, err := resourceAttrs(s, "rudderstack_retl_connection_customerio.example")
+							if err != nil {
+								return err
+							}
+							return checkAll(map[string]string{
+								"id":     "conn-cio",
+								"object": object,
+							}, attrs)
+						},
+					},
 				},
-			},
-		},
-	})
+			})
 
-	svc.AssertExpectations(t)
+			svc.AssertExpectations(t)
+		})
+	}
 }
 
 // VDM v2 does not support field mappings — the resource must reject a
@@ -115,7 +119,7 @@ func TestResourceConnectionCustomerIO_RejectsMappings(t *testing.T) {
 	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
-// CustomerIO supports exactly one object — `person` (the listObjects value).
+// CustomerIO supports only `person` and `event` objects.
 // The resource must reject any other object value at plan time rather than
 // letting the server fail on apply.
 func TestResourceConnectionCustomerIO_RejectsUnknownObject(t *testing.T) {
