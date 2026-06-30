@@ -7,7 +7,7 @@ description: |-
 
 # rudderstack_retl_connection_customerio (Resource)
 
-A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Supported object values are `person` and `event`; supported sync behaviours are `upsert` and `mirror`.
+A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Supported object values are `person` and `event`; supported sync behaviours are `upsert` and `mirror`. `event` objects support only `upsert`.
 
 ## Example Usage
 
@@ -15,7 +15,8 @@ A RETL (Reverse ETL) connection to a Customer.io destination. The destination `o
 # Customer.io — RETL connection scoped to Customer.io
 # destinations. `object` is a typed top-level field (ForceNew — changing it
 # recreates the connection). Supported object values are `person` and `event`;
-# supported sync behaviours are `upsert` and `mirror`.
+# supported sync behaviours are `upsert` and `mirror`; `event` supports only
+# `upsert`.
 resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
   source_id      = rudderstack_retl_source_model.users_revenue.id
   destination_id = rudderstack_destination_customerio.example.id
@@ -58,7 +59,7 @@ resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
 - `object` (String) Customer.io destination object: `person` or `event`.
 - `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
 - `source_id` (String) ID of the RETL source.
-- `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror`.
+- `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror`. `event` objects support only `upsert`.
 
 ### Optional
 

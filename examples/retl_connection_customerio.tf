@@ -1,7 +1,8 @@
 # Customer.io — RETL connection scoped to Customer.io
 # destinations. `object` is a typed top-level field (ForceNew — changing it
 # recreates the connection). Supported object values are `person` and `event`;
-# supported sync behaviours are `upsert` and `mirror`.
+# supported sync behaviours are `upsert` and `mirror`; `event` supports only
+# `upsert`.
 resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
   source_id      = rudderstack_retl_source_model.users_revenue.id
   destination_id = rudderstack_destination_customerio.example.id

@@ -20,8 +20,17 @@ import (
 // {"object": "..."}. identifiers flow through the base schema; VDM v2 does NOT
 // support field mappings, so this resource has no `mappings`.
 func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
-	for _, object := range []string{"person", "event"} {
-		t.Run(object, func(t *testing.T) {
+	cases := []struct {
+		name          string
+		object        string
+		syncBehaviour string
+	}{
+		{name: "person upsert", object: "person", syncBehaviour: "upsert"},
+		{name: "person mirror", object: "person", syncBehaviour: "mirror"},
+		{name: "event upsert", object: "event", syncBehaviour: "upsert"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
 			svc := &mockService{}
 			enabled := true
 
@@ -30,9 +39,9 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 				DestinationID:     "dest-cio",
 				Enabled:           &enabled,
 				Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-				SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+				SyncBehaviour:     iacretl.SyncBehaviour(tc.syncBehaviour),
 				Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-				DestinationConfig: json.RawMessage(`{"object":"` + object + `"}`),
+				DestinationConfig: json.RawMessage(`{"object":"` + tc.object + `"}`),
 			}
 			created := &iacretl.RETLConnection{
 				ID:                "conn-cio",
@@ -40,9 +49,9 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 				DestinationID:     "dest-cio",
 				Enabled:           true,
 				Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-				SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+				SyncBehaviour:     iacretl.SyncBehaviour(tc.syncBehaviour),
 				Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
-				DestinationConfig: json.RawMessage(`{"object":"` + object + `"}`),
+				DestinationConfig: json.RawMessage(`{"object":"` + tc.object + `"}`),
 			}
 			svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
 			svc.On("GetConnection", mock.Anything, "conn-cio").Return(created, nil).Times(2)
@@ -57,8 +66,8 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 							resource "rudderstack_retl_connection_customerio" "example" {
 								source_id      = "retl-src-1"
 								destination_id = "dest-cio"
-								sync_behaviour = "upsert"
-								object         = "` + object + `"
+								sync_behaviour = "` + tc.syncBehaviour + `"
+								object         = "` + tc.object + `"
 								schedule { type = "manual" }
 								identifiers {
 									from = "email"
@@ -72,8 +81,9 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 								return err
 							}
 							return checkAll(map[string]string{
-								"id":     "conn-cio",
-								"object": object,
+								"id":             "conn-cio",
+								"object":         tc.object,
+								"sync_behaviour": tc.syncBehaviour,
 							}, attrs)
 						},
 					},
@@ -83,6 +93,34 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 			svc.AssertExpectations(t)
 		})
 	}
+}
+
+// Customer.io event objects support only upsert syncs.
+func TestResourceConnectionCustomerIO_RejectsEventObjectWithNonUpsert(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection_customerio" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-cio"
+						sync_behaviour = "mirror"
+						object         = "event"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
+					}
+				`,
+				ExpectError: regexpMatches(`object "event" supports only sync_behaviour "upsert"`),
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
 // VDM v2 does not support field mappings — the resource must reject a

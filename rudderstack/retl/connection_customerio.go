@@ -52,7 +52,7 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror"}, false),
-				Description:  "How records are synced to the destination: `upsert` or `mirror`.",
+				Description:  "How records are synced to the destination: `upsert` or `mirror`. `event` objects support only `upsert`.",
 			},
 		}),
 		CreateContext: createCustomerIOConnection,
@@ -66,11 +66,26 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 	}
 }
 
-// customizeCustomerIOConnectionDiff rejects cursor_column when sync_behaviour
-// is not `upsert`, surfacing the error at plan time instead of an API
-// rejection on apply.
+// customizeCustomerIOConnectionDiff rejects locally-detectable invalid
+// combinations, surfacing the error at plan time instead of an API rejection on
+// apply.
 func customizeCustomerIOConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	return validateCursorColumnUpsertOnly(d)
+	if err := validateCursorColumnUpsertOnly(d); err != nil {
+		return err
+	}
+	return validateCustomerIOObjectSyncBehaviour(d)
+}
+
+func validateCustomerIOObjectSyncBehaviour(d resourceGetter) error {
+	object, _ := d.Get("object").(string)
+	if object != "event" {
+		return nil
+	}
+	sb, _ := d.Get("sync_behaviour").(string)
+	if sb != "" && sb != "upsert" {
+		return fmt.Errorf("object %q supports only sync_behaviour %q, got %q", "event", "upsert", sb)
+	}
+	return nil
 }
 
 func createCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
