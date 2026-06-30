@@ -14,6 +14,11 @@ import (
 	"github.com/rudderlabs/rudder-iac/api/client/retl"
 )
 
+const (
+	customerIOObjectPerson = "person"
+	customerIOObjectEvent  = "event"
+)
+
 // ResourceConnectionCustomerIO returns the schema for
 // `rudderstack_retl_connection_customerio` — a RETL connection scoped to a
 // Customer.io destination using the VDM v2 flow.
@@ -35,26 +40,32 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 			"Carries the destination object as a typed top-level field; ForceNew because the " +
 			"object cannot be changed in place — changing it recreates the connection.",
 		Schema: mergeSchemas(baseConnectionSchema(), map[string]*schema.Schema{
-			// Customer.io supports exactly one object, whose on-the-wire value is
-			// `person` (the `value` from the listObjects API). Restrict to it so
-			// typos fail at plan time instead of on apply. If Customer.io ever
-			// adds objects, extend this slice.
+			// Restrict objects to the Customer.io listObjects values this
+			// resource supports so typos fail at plan time instead of on apply.
 			"object": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"person"}, false),
-				Description:  "Customer.io destination object. Only `person` is supported.",
+				ValidateFunc: validation.StringInSlice([]string{customerIOObjectPerson, customerIOObjectEvent}, false),
+				Description: fmt.Sprintf(
+					"Customer.io destination object: `%s` or `%s`.",
+					customerIOObjectPerson,
+					customerIOObjectEvent,
+				),
 			},
 			// Only upsert and mirror are supported — drop `full` from the base
 			// schema's allowed set so users see a plan-time error instead of an
 			// API rejection on apply.
 			"sync_behaviour": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror"}, false),
-				Description:  "How records are synced to the destination: `upsert` or `mirror`.",
+				Description: fmt.Sprintf(
+					"How records are synced to the destination: `upsert` or `mirror`. Configure for `%s`; omit for `%s` because the backend determines the sync mode.",
+					customerIOObjectPerson,
+					customerIOObjectEvent,
+				),
 			},
 		}),
 		CreateContext: createCustomerIOConnection,
@@ -68,11 +79,29 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 	}
 }
 
-// customizeCustomerIOConnectionDiff rejects cursor_column when sync_behaviour
-// is not `upsert`, surfacing the error at plan time instead of an API
-// rejection on apply.
+// customizeCustomerIOConnectionDiff rejects locally-detectable invalid
+// combinations, surfacing the error at plan time instead of an API rejection on
+// apply.
 func customizeCustomerIOConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	return validateCursorColumnUpsertOnly(d)
+	if err := validateCustomerIOObjectSyncBehaviour(d); err != nil {
+		return err
+	}
+	if err := validateCursorColumnUpsertOnly(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateCustomerIOObjectSyncBehaviour(d resourceGetter) error {
+	object, _ := d.Get("object").(string)
+	if object != customerIOObjectEvent {
+		return nil
+	}
+	sb, _ := d.Get("sync_behaviour").(string)
+	if sb != "" {
+		return fmt.Errorf("sync_behaviour cannot be configured when object is %q; the backend determines the sync mode", customerIOObjectEvent)
+	}
+	return nil
 }
 
 func createCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -91,7 +120,16 @@ func createCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m i
 	}
 	req.DestinationConfig = cfg
 
-	created, err := svc.CreateConnection(ctx, req)
+	var created *retl.RETLConnection
+	if d.Get("object").(string) == customerIOObjectEvent {
+		creator, ok := svc.(syncBehaviourOmittingConnectionCreator)
+		if !ok {
+			return diag.FromErr(fmt.Errorf("RETL client cannot create Customer.io event connections without sync_behaviour"))
+		}
+		created, err = creator.CreateConnectionOmittingSyncBehaviour(ctx, req)
+	} else {
+		created, err = svc.CreateConnection(ctx, req)
+	}
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("could not create RETL connection: %w", err))
 	}
@@ -115,9 +153,6 @@ func readCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(fmt.Errorf("could not read RETL connection: %w", err))
 	}
 
-	if err := storeBaseConnectionToState(d, conn); err != nil {
-		return diag.FromErr(err)
-	}
 	// A missing/empty/malformed object is a hard error (see decodeCustomerIOObject)
 	// rather than a warning — surfacing it at refresh beats masking a broken
 	// connection behind a plan that stays a silent no-op.
@@ -125,8 +160,16 @@ func readCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m int
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if err := storeBaseConnectionToState(d, conn); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("object", object); err != nil {
 		return diag.FromErr(fmt.Errorf("set object: %w", err))
+	}
+	if object == customerIOObjectEvent {
+		if err := d.Set("sync_behaviour", ""); err != nil {
+			return diag.FromErr(fmt.Errorf("clear sync_behaviour: %w", err))
+		}
 	}
 	return nil
 }
