@@ -25,10 +25,11 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 		object              string
 		configSyncBehaviour string
 		apiSyncBehaviour    iacretl.SyncBehaviour
+		wantSyncBehaviour   string
 	}{
-		{name: "person upsert", object: "person", configSyncBehaviour: "upsert", apiSyncBehaviour: iacretl.SyncBehaviourUpsert},
-		{name: "person mirror", object: "person", configSyncBehaviour: "mirror", apiSyncBehaviour: iacretl.SyncBehaviourMirror},
-		{name: "event backend sync", object: "event", apiSyncBehaviour: iacretl.SyncBehaviourUpsert},
+		{name: "person upsert", object: "person", configSyncBehaviour: "upsert", apiSyncBehaviour: iacretl.SyncBehaviourUpsert, wantSyncBehaviour: "upsert"},
+		{name: "person mirror", object: "person", configSyncBehaviour: "mirror", apiSyncBehaviour: iacretl.SyncBehaviourMirror, wantSyncBehaviour: "mirror"},
+		{name: "event backend sync", object: "event", apiSyncBehaviour: iacretl.SyncBehaviourUpsert, wantSyncBehaviour: ""},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -54,7 +55,11 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 				Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 				DestinationConfig: json.RawMessage(`{"object":"` + tc.object + `"}`),
 			}
-			svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
+			if tc.object == "event" {
+				svc.On("CreateConnectionOmittingSyncBehaviour", mock.Anything, createReq).Return(created, nil).Once()
+			} else {
+				svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
+			}
 			svc.On("GetConnection", mock.Anything, "conn-cio").Return(created, nil).Times(2)
 			svc.On("DeleteConnection", mock.Anything, "conn-cio").Return(nil).Once()
 
@@ -84,7 +89,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 							return checkAll(map[string]string{
 								"id":             "conn-cio",
 								"object":         tc.object,
-								"sync_behaviour": string(tc.apiSyncBehaviour),
+								"sync_behaviour": tc.wantSyncBehaviour,
 							}, attrs)
 						},
 					},
@@ -134,32 +139,6 @@ func TestResourceConnectionCustomerIO_RejectsEventObjectWithSyncBehaviour(t *tes
 			svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 		})
 	}
-}
-
-func TestResourceConnectionCustomerIO_RequiresSyncBehaviourForPersonObject(t *testing.T) {
-	svc := &mockService{}
-	resource.UnitTest(t, resource.TestCase{
-		ProviderFactories: providerFactories(svc),
-		Steps: []resource.TestStep{
-			{
-				Config: `
-					provider "rudderstack" { access_token = "tok" }
-					resource "rudderstack_retl_connection_customerio" "example" {
-						source_id      = "retl-src-1"
-						destination_id = "dest-cio"
-						object         = "person"
-						schedule { type = "manual" }
-						identifiers {
-							from = "email"
-							to   = "email"
-						}
-					}
-				`,
-				ExpectError: regexpMatches(`sync_behaviour is required when object is "person"`),
-			},
-		},
-	})
-	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
 // VDM v2 does not support field mappings — the resource must reject a
@@ -354,6 +333,46 @@ func TestResourceConnectionCustomerIO_CursorColumnSurvivesRefresh(t *testing.T) 
 		"cursor_column must round-trip on refresh (no config present)")
 	require.Equal(t, "person", d.Get("object"))
 	svc.AssertExpectations(t)
+}
+
+// Import and refresh both use ReadContext without config. Event connections
+// must not persist the backend-returned sync_behaviour into Terraform state,
+// while person connections keep it as user-configurable state.
+func TestResourceConnectionCustomerIO_ReadSyncBehaviourStateByObject(t *testing.T) {
+	cases := []struct {
+		name              string
+		object            string
+		wantSyncBehaviour string
+	}{
+		{name: "person keeps sync behaviour", object: "person", wantSyncBehaviour: "upsert"},
+		{name: "event clears sync behaviour", object: "event", wantSyncBehaviour: ""},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			svc := &mockService{}
+			conn := &iacretl.RETLConnection{
+				ID:                "conn-cio",
+				SourceID:          "retl-src-1",
+				DestinationID:     "dest-cio",
+				Enabled:           true,
+				Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+				SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+				Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+				DestinationConfig: json.RawMessage(`{"object":"` + tc.object + `"}`),
+			}
+			svc.On("GetConnection", mock.Anything, "conn-cio").Return(conn, nil).Once()
+
+			r := retl.ResourceConnectionCustomerIO()
+			d := r.TestResourceData()
+			d.SetId("conn-cio")
+
+			diags := r.ReadContext(context.Background(), d, &rudderstack.Client{RETLSources: svc})
+			require.False(t, diags.HasError(), "diags=%v", diags)
+			require.Equal(t, tc.object, d.Get("object"))
+			require.Equal(t, tc.wantSyncBehaviour, d.Get("sync_behaviour"))
+			svc.AssertExpectations(t)
+		})
+	}
 }
 
 // cursor_column is only meaningful for incremental upsert syncs. The resource

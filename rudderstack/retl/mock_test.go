@@ -51,6 +51,14 @@ func (m *mockService) CreateConnection(ctx context.Context, req *retl.CreateRETL
 	return nil, args.Error(1)
 }
 
+func (m *mockService) CreateConnectionOmittingSyncBehaviour(ctx context.Context, req *retl.CreateRETLConnectionRequest) (*retl.RETLConnection, error) {
+	args := m.Called(ctx, req)
+	if v := args.Get(0); v != nil {
+		return v.(*retl.RETLConnection), args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
 func (m *mockService) GetConnection(ctx context.Context, id string) (*retl.RETLConnection, error) {
 	args := m.Called(ctx, id)
 	if v := args.Get(0); v != nil {

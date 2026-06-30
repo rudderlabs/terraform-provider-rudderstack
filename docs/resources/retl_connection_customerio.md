@@ -64,7 +64,7 @@ resource "rudderstack_retl_connection_customerio" "model_to_customerio" {
 
 - `cursor_column` (String) Column name for incremental upsert syncs (only valid when sync_behaviour is `upsert`).
 - `enabled` (Boolean) Whether the connection is enabled.
-- `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror`. Required for `person`; omit for `event` because the backend determines the sync mode.
+- `sync_behaviour` (String) How records are synced to the destination: `upsert` or `mirror`. Configure for `person`; omit for `event` because the backend determines the sync mode.
 - `sync_settings` (Block List, Max: 1) (see [below for nested schema](#nestedblock--sync_settings))
 
 ### Read-Only

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
-	iacretl "github.com/rudderlabs/rudder-iac/api/client/retl"
 
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/retl"
 )
@@ -62,7 +61,7 @@ func NewAPIClient(accessToken string, options ...client.Option) (*Client, error)
 		Sources:      api.Sources,
 		Destinations: api.Destinations,
 		Connections:  api.Connections,
-		RETLSources:  iacretl.NewRudderRETLStore(api),
+		RETLSources:  retl.NewService(api),
 		Accounts:     api.Accounts,
 	}, nil
 }

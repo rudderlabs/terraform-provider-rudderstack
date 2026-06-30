@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -60,11 +59,10 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 			"sync_behaviour": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror"}, false),
 				Description: fmt.Sprintf(
-					"How records are synced to the destination: `upsert` or `mirror`. Required for `%s`; omit for `%s` because the backend determines the sync mode.",
+					"How records are synced to the destination: `upsert` or `mirror`. Configure for `%s`; omit for `%s` because the backend determines the sync mode.",
 					customerIOObjectPerson,
 					customerIOObjectEvent,
 				),
@@ -94,29 +92,16 @@ func customizeCustomerIOConnectionDiff(_ context.Context, d *schema.ResourceDiff
 	return nil
 }
 
-func validateCustomerIOObjectSyncBehaviour(d *schema.ResourceDiff) error {
+func validateCustomerIOObjectSyncBehaviour(d resourceGetter) error {
 	object, _ := d.Get("object").(string)
-	syncBehaviourConfigured := resourceDiffHasConfigValue(d, "sync_behaviour")
-
-	switch object {
-	case customerIOObjectPerson:
-		if !syncBehaviourConfigured && d.Id() == "" {
-			return fmt.Errorf("sync_behaviour is required when object is %q", customerIOObjectPerson)
-		}
-	case customerIOObjectEvent:
-		if syncBehaviourConfigured {
-			return fmt.Errorf("sync_behaviour cannot be configured when object is %q; the backend determines the sync mode", customerIOObjectEvent)
-		}
+	if object != customerIOObjectEvent {
+		return nil
+	}
+	sb, _ := d.Get("sync_behaviour").(string)
+	if sb != "" {
+		return fmt.Errorf("sync_behaviour cannot be configured when object is %q; the backend determines the sync mode", customerIOObjectEvent)
 	}
 	return nil
-}
-
-func resourceDiffHasConfigValue(d *schema.ResourceDiff, key string) bool {
-	v, diags := d.GetRawConfigAt(cty.GetAttrPath(key))
-	if diags.HasError() {
-		return false
-	}
-	return !v.IsNull()
 }
 
 func createCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -129,16 +114,22 @@ func createCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m i
 	if err := applyBaseToCreateRequest(d, req); err != nil {
 		return diag.FromErr(err)
 	}
-	if d.Get("object").(string) == customerIOObjectEvent {
-		req.SyncBehaviour = ""
-	}
 	cfg, err := encodeCustomerIOObjectConfig(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	req.DestinationConfig = cfg
 
-	created, err := svc.CreateConnection(ctx, req)
+	var created *retl.RETLConnection
+	if d.Get("object").(string) == customerIOObjectEvent {
+		creator, ok := svc.(syncBehaviourOmittingConnectionCreator)
+		if !ok {
+			return diag.FromErr(fmt.Errorf("RETL client cannot create Customer.io event connections without sync_behaviour"))
+		}
+		created, err = creator.CreateConnectionOmittingSyncBehaviour(ctx, req)
+	} else {
+		created, err = svc.CreateConnection(ctx, req)
+	}
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("could not create RETL connection: %w", err))
 	}
@@ -162,9 +153,6 @@ func readCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(fmt.Errorf("could not read RETL connection: %w", err))
 	}
 
-	if err := storeBaseConnectionToState(d, conn); err != nil {
-		return diag.FromErr(err)
-	}
 	// A missing/empty/malformed object is a hard error (see decodeCustomerIOObject)
 	// rather than a warning — surfacing it at refresh beats masking a broken
 	// connection behind a plan that stays a silent no-op.
@@ -172,8 +160,16 @@ func readCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m int
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if err := storeBaseConnectionToState(d, conn); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("object", object); err != nil {
 		return diag.FromErr(fmt.Errorf("set object: %w", err))
+	}
+	if object == customerIOObjectEvent {
+		if err := d.Set("sync_behaviour", ""); err != nil {
+			return diag.FromErr(fmt.Errorf("clear sync_behaviour: %w", err))
+		}
 	}
 	return nil
 }
