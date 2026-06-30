@@ -21,13 +21,14 @@ import (
 // support field mappings, so this resource has no `mappings`.
 func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 	cases := []struct {
-		name          string
-		object        string
-		syncBehaviour string
+		name                string
+		object              string
+		configSyncBehaviour string
+		apiSyncBehaviour    iacretl.SyncBehaviour
 	}{
-		{name: "person upsert", object: "person", syncBehaviour: "upsert"},
-		{name: "person mirror", object: "person", syncBehaviour: "mirror"},
-		{name: "event upsert", object: "event", syncBehaviour: "upsert"},
+		{name: "person upsert", object: "person", configSyncBehaviour: "upsert", apiSyncBehaviour: iacretl.SyncBehaviourUpsert},
+		{name: "person mirror", object: "person", configSyncBehaviour: "mirror", apiSyncBehaviour: iacretl.SyncBehaviourMirror},
+		{name: "event backend sync", object: "event", apiSyncBehaviour: iacretl.SyncBehaviourUpsert},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -39,7 +40,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 				DestinationID:     "dest-cio",
 				Enabled:           &enabled,
 				Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-				SyncBehaviour:     iacretl.SyncBehaviour(tc.syncBehaviour),
+				SyncBehaviour:     iacretl.SyncBehaviour(tc.configSyncBehaviour),
 				Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 				DestinationConfig: json.RawMessage(`{"object":"` + tc.object + `"}`),
 			}
@@ -49,7 +50,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 				DestinationID:     "dest-cio",
 				Enabled:           true,
 				Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-				SyncBehaviour:     iacretl.SyncBehaviour(tc.syncBehaviour),
+				SyncBehaviour:     tc.apiSyncBehaviour,
 				Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 				DestinationConfig: json.RawMessage(`{"object":"` + tc.object + `"}`),
 			}
@@ -66,7 +67,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 							resource "rudderstack_retl_connection_customerio" "example" {
 								source_id      = "retl-src-1"
 								destination_id = "dest-cio"
-								sync_behaviour = "` + tc.syncBehaviour + `"
+								` + customerIOSyncBehaviourConfig(tc.configSyncBehaviour) + `
 								object         = "` + tc.object + `"
 								schedule { type = "manual" }
 								identifiers {
@@ -83,7 +84,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 							return checkAll(map[string]string{
 								"id":             "conn-cio",
 								"object":         tc.object,
-								"sync_behaviour": tc.syncBehaviour,
+								"sync_behaviour": string(tc.apiSyncBehaviour),
 							}, attrs)
 						},
 					},
@@ -95,8 +96,47 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 	}
 }
 
-// Customer.io event objects support only upsert syncs.
-func TestResourceConnectionCustomerIO_RejectsEventObjectWithNonUpsert(t *testing.T) {
+func customerIOSyncBehaviourConfig(syncBehaviour string) string {
+	if syncBehaviour == "" {
+		return ""
+	}
+	return `sync_behaviour = "` + syncBehaviour + `"`
+}
+
+// Customer.io event objects must not configure sync_behaviour; the backend
+// determines the sync mode.
+func TestResourceConnectionCustomerIO_RejectsEventObjectWithSyncBehaviour(t *testing.T) {
+	for _, syncBehaviour := range []string{"upsert", "mirror"} {
+		t.Run(syncBehaviour, func(t *testing.T) {
+			svc := &mockService{}
+			resource.UnitTest(t, resource.TestCase{
+				ProviderFactories: providerFactories(svc),
+				Steps: []resource.TestStep{
+					{
+						Config: `
+							provider "rudderstack" { access_token = "tok" }
+							resource "rudderstack_retl_connection_customerio" "example" {
+								source_id      = "retl-src-1"
+								destination_id = "dest-cio"
+								sync_behaviour = "` + syncBehaviour + `"
+								object         = "event"
+								schedule { type = "manual" }
+								identifiers {
+									from = "email"
+									to   = "email"
+								}
+							}
+						`,
+						ExpectError: regexpMatches(`sync_behaviour cannot be configured when object is "event"`),
+					},
+				},
+			})
+			svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
+		})
+	}
+}
+
+func TestResourceConnectionCustomerIO_RequiresSyncBehaviourForPersonObject(t *testing.T) {
 	svc := &mockService{}
 	resource.UnitTest(t, resource.TestCase{
 		ProviderFactories: providerFactories(svc),
@@ -107,8 +147,7 @@ func TestResourceConnectionCustomerIO_RejectsEventObjectWithNonUpsert(t *testing
 					resource "rudderstack_retl_connection_customerio" "example" {
 						source_id      = "retl-src-1"
 						destination_id = "dest-cio"
-						sync_behaviour = "mirror"
-						object         = "event"
+						object         = "person"
 						schedule { type = "manual" }
 						identifiers {
 							from = "email"
@@ -116,7 +155,7 @@ func TestResourceConnectionCustomerIO_RejectsEventObjectWithNonUpsert(t *testing
 						}
 					}
 				`,
-				ExpectError: regexpMatches(`object "event" supports only sync_behaviour "upsert"`),
+				ExpectError: regexpMatches(`sync_behaviour is required when object is "person"`),
 			},
 		},
 	})

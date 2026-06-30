@@ -7,7 +7,7 @@ description: |-
 
 # rudderstack_retl_connection_customerio (Resource)
 
-A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Supported object values are `person` and `event`; supported sync behaviours are `upsert` and `mirror`. `event` objects support only `upsert`.
+A RETL (Reverse ETL) connection to a Customer.io destination. The destination `object` is exposed as a typed top-level field. The `object` attribute is `ForceNew` because it cannot be changed in place — changing it recreates the connection. Supported object values are `person` and `event`. Configure `sync_behaviour` (`upsert` or `mirror`) for `person` objects; omit it for `event` objects because the backend determines the sync mode.
 
 ## Example Usage
 

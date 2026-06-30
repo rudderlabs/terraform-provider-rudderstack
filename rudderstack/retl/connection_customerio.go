@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -58,10 +59,15 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 			// API rejection on apply.
 			"sync_behaviour": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror"}, false),
-				Description:  fmt.Sprintf("How records are synced to the destination: `upsert` or `mirror`. `%s` objects support only `upsert`.", customerIOObjectEvent),
+				Description: fmt.Sprintf(
+					"How records are synced to the destination: `upsert` or `mirror`. Required for `%s`; omit for `%s` because the backend determines the sync mode.",
+					customerIOObjectPerson,
+					customerIOObjectEvent,
+				),
 			},
 		}),
 		CreateContext: createCustomerIOConnection,
@@ -79,22 +85,38 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 // combinations, surfacing the error at plan time instead of an API rejection on
 // apply.
 func customizeCustomerIOConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if err := validateCustomerIOObjectSyncBehaviour(d); err != nil {
+		return err
+	}
 	if err := validateCursorColumnUpsertOnly(d); err != nil {
 		return err
 	}
-	return validateCustomerIOObjectSyncBehaviour(d)
+	return nil
 }
 
-func validateCustomerIOObjectSyncBehaviour(d resourceGetter) error {
+func validateCustomerIOObjectSyncBehaviour(d *schema.ResourceDiff) error {
 	object, _ := d.Get("object").(string)
-	if object != customerIOObjectEvent {
-		return nil
-	}
-	sb, _ := d.Get("sync_behaviour").(string)
-	if sb != "" && sb != "upsert" {
-		return fmt.Errorf("object %q supports only sync_behaviour %q, got %q", customerIOObjectEvent, "upsert", sb)
+	syncBehaviourConfigured := resourceDiffHasConfigValue(d, "sync_behaviour")
+
+	switch object {
+	case customerIOObjectPerson:
+		if !syncBehaviourConfigured && d.Id() == "" {
+			return fmt.Errorf("sync_behaviour is required when object is %q", customerIOObjectPerson)
+		}
+	case customerIOObjectEvent:
+		if syncBehaviourConfigured {
+			return fmt.Errorf("sync_behaviour cannot be configured when object is %q; the backend determines the sync mode", customerIOObjectEvent)
+		}
 	}
 	return nil
+}
+
+func resourceDiffHasConfigValue(d *schema.ResourceDiff, key string) bool {
+	v, diags := d.GetRawConfigAt(cty.GetAttrPath(key))
+	if diags.HasError() {
+		return false
+	}
+	return !v.IsNull()
 }
 
 func createCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -106,6 +128,9 @@ func createCustomerIOConnection(ctx context.Context, d *schema.ResourceData, m i
 	req := &retl.CreateRETLConnectionRequest{}
 	if err := applyBaseToCreateRequest(d, req); err != nil {
 		return diag.FromErr(err)
+	}
+	if d.Get("object").(string) == customerIOObjectEvent {
+		req.SyncBehaviour = ""
 	}
 	cfg, err := encodeCustomerIOObjectConfig(d)
 	if err != nil {
