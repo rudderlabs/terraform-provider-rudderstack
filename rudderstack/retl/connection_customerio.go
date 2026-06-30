@@ -14,6 +14,11 @@ import (
 	"github.com/rudderlabs/rudder-iac/api/client/retl"
 )
 
+const (
+	customerIOObjectPerson = "person"
+	customerIOObjectEvent  = "event"
+)
+
 // ResourceConnectionCustomerIO returns the schema for
 // `rudderstack_retl_connection_customerio` — a RETL connection scoped to a
 // Customer.io destination using the VDM v2 flow.
@@ -41,8 +46,12 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"person", "event"}, false),
-				Description:  "Customer.io destination object: `person` or `event`.",
+				ValidateFunc: validation.StringInSlice([]string{customerIOObjectPerson, customerIOObjectEvent}, false),
+				Description: fmt.Sprintf(
+					"Customer.io destination object: `%s` or `%s`.",
+					customerIOObjectPerson,
+					customerIOObjectEvent,
+				),
 			},
 			// Only upsert and mirror are supported — drop `full` from the base
 			// schema's allowed set so users see a plan-time error instead of an
@@ -52,7 +61,7 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror"}, false),
-				Description:  "How records are synced to the destination: `upsert` or `mirror`. `event` objects support only `upsert`.",
+				Description:  fmt.Sprintf("How records are synced to the destination: `upsert` or `mirror`. `%s` objects support only `upsert`.", customerIOObjectEvent),
 			},
 		}),
 		CreateContext: createCustomerIOConnection,
@@ -78,12 +87,12 @@ func customizeCustomerIOConnectionDiff(_ context.Context, d *schema.ResourceDiff
 
 func validateCustomerIOObjectSyncBehaviour(d resourceGetter) error {
 	object, _ := d.Get("object").(string)
-	if object != "event" {
+	if object != customerIOObjectEvent {
 		return nil
 	}
 	sb, _ := d.Get("sync_behaviour").(string)
 	if sb != "" && sb != "upsert" {
-		return fmt.Errorf("object %q supports only sync_behaviour %q, got %q", "event", "upsert", sb)
+		return fmt.Errorf("object %q supports only sync_behaviour %q, got %q", customerIOObjectEvent, "upsert", sb)
 	}
 	return nil
 }
