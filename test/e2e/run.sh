@@ -68,6 +68,7 @@ TFVARS_FILE="$(cd "$(dirname "${TFVARS_FILE}")" && pwd)/$(basename "${TFVARS_FIL
 # ── Discover scenarios (skip _-prefixed helper dirs) ────────────────────────
 ALL_SCENARIOS=()
 for d in "${SCENARIOS_DIR}"/*/; do
+  [[ -d "$d" ]] || continue    # no match → glob stays literal; skip it
   name="$(basename "$d")"
   [[ "$name" == _* ]] && continue
   ALL_SCENARIOS+=("$name")
@@ -154,6 +155,9 @@ provider_installation {
 HCL
 export TF_CLI_CONFIG_FILE="${OVERRIDE_CFG}"
 export TF_IN_AUTOMATION=1
+# TF_IN_AUTOMATION only adjusts messaging; TF_INPUT=0 disables interactive prompts
+# so a missing variable (e.g. absent creds) fails fast instead of hanging.
+export TF_INPUT=0
 echo "==> TF_CLI_CONFIG_FILE=${TF_CLI_CONFIG_FILE}"
 
 # Unique per-invocation token folded into resource names (via the run_id var) so
