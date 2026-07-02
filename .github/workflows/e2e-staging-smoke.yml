@@ -16,7 +16,7 @@ permissions:
 #     (post-merge). Dispatch is NOT available pre-merge: GitHub lists dispatch
 #     workflows from the default branch only.
 #
-# Opt-in (label/manual), never automatic on every push: main.tf uses fixed
+# Opt-in (label/manual), never automatic on every push: scenarios use fixed
 # resource names (tf-e2e-*), so the concurrency group serializes runs.
 on:
   pull_request:
@@ -35,7 +35,9 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'e2e-staging')
     runs-on: ubuntu-latest
     environment: e2e
-    timeout-minutes: 20
+    # Each scenario (customerio, customerio_audience, …) runs a full
+    # init/apply/assert/destroy in turn, so wall time scales with scenario count.
+    timeout-minutes: 30
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
@@ -68,15 +70,16 @@ jobs:
           BQ_DATASET: ${{ vars.RUDDERSTACK_STAGING_BQ_DATASET }}
           BQ_TABLE: ${{ vars.RUDDERSTACK_STAGING_BQ_TABLE }}
           TF_VAR_bq_credentials: ${{ secrets.RUDDERSTACK_STAGING_BQ_CREDENTIALS }}
-          # Customer.io creds are optional — if unset, the BigQuery→Customer.io
-          # chain is skipped (count-gated in main.tf) and the webhook-only smoke runs.
+          # Vendor creds are optional — each scenario runs only when its creds are
+          # present (the run step selects the scenario list below); missing creds
+          # skip that scenario instead of failing the smoke.
           CUSTOMERIO_SITE_ID: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_SITE_ID }}
           CUSTOMERIO_DATACENTER: ${{ vars.RUDDERSTACK_STAGING_CUSTOMERIO_DATACENTER }}
+          CUSTOMERIO_API_KEY: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_API_KEY }}
           TF_VAR_customerio_api_key: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_API_KEY }}
-          # Customer.io Audience creds are optional too — if unset, the
-          # BigQuery→Customer.io Audience chain is skipped (count-gated in main.tf).
           CUSTOMERIO_AUDIENCE_ID: ${{ vars.RUDDERSTACK_STAGING_CUSTOMERIO_AUDIENCE_ID }}
           CUSTOMERIO_AUDIENCE_REGION: ${{ vars.RUDDERSTACK_STAGING_CUSTOMERIO_AUDIENCE_REGION }}
+          CUSTOMERIO_APP_API_KEY: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_APP_API_KEY }}
           TF_VAR_customerio_audience_app_api_key: ${{ secrets.RUDDERSTACK_STAGING_CUSTOMERIO_APP_API_KEY }}
         run: |
           if [ -z "$STAGING_ACCESS_TOKEN" ]; then
@@ -94,4 +97,20 @@ jobs:
           customerio_audience_id     = ${CUSTOMERIO_AUDIENCE_ID:-0}
           customerio_audience_region = "${CUSTOMERIO_AUDIENCE_REGION:-US}"
           EOF
-          bash test/e2e/run.sh test/e2e/secret.tfvars
+          # Select scenarios by available creds: each scenario is a unit that
+          # applies (or fails) — it no longer self-skips — so only run the ones
+          # whose vendor creds are configured on the e2e environment.
+          SCENARIOS=()
+          if [ -n "$CUSTOMERIO_SITE_ID" ] && [ -n "$CUSTOMERIO_API_KEY" ]; then
+            SCENARIOS+=("customerio")
+          fi
+          if [ -n "$CUSTOMERIO_SITE_ID" ] && [ -n "$CUSTOMERIO_API_KEY" ] \
+             && [ -n "$CUSTOMERIO_APP_API_KEY" ] && [ "${CUSTOMERIO_AUDIENCE_ID:-0}" != "0" ]; then
+            SCENARIOS+=("customerio_audience")
+          fi
+          if [ ${#SCENARIOS[@]} -eq 0 ]; then
+            echo "No vendor creds configured on the e2e environment; skipping staging smoke."
+            exit 0
+          fi
+          echo "Running scenarios: ${SCENARIOS[*]}"
+          bash test/e2e/run.sh --tfvars test/e2e/secret.tfvars "${SCENARIOS[@]}"

@@ -1,87 +1,149 @@
 #!/usr/bin/env bash
-# run.sh — Staging smoke runner for the terraform-provider-rudderstack.
+# run.sh — Per-scenario staging smoke runner for terraform-provider-rudderstack.
 #
 # Usage:
-#   ./run.sh [--backfill] [path/to/secret.tfvars]
+#   ./run.sh [--backfill] [--tfvars PATH] [scenario ...]
+#   TFVARS_FILE=path/to.tfvars ./run.sh            # tfvars via env
+#   PAUSE=true ./run.sh customerio                 # hold open before destroy
+#
+# Each scenario is an independent Terraform root module under scenarios/<name>/
+# (see README). With NO scenario args, runs ALL scenarios (skipping _-prefixed
+# helper dirs) sequentially: build provider once → per scenario
+# init → apply → verify outputs → assert no drift → destroy.
+#
+# Keep-going: a failed scenario is destroyed and the run continues; the script
+# exits non-zero at the end if ANY scenario failed. At most one scenario is live
+# in staging at a time.
 #
 # The script:
 #   1. Builds the provider locally (into .bin/) and wires a TF dev-override.
-#   2. Runs terraform apply.
-#   3. Asserts no drift via terraform plan -detailed-exitcode.
-#   4. Prints the created resource IDs from terraform output.
-#   5. On EXIT (success or failure) runs terraform destroy to clean up staging.
+#   2. For each selected scenario, applies, asserts no drift, then destroys.
+#   3. On EXIT (incl. failure) destroys any in-flight scenario to clean up staging.
 #
-# With --backfill the script would trigger and poll a sync on the rETL
-# connection; however, no trigger endpoint currently exists in the
-# rudder-iac client (v0.17.1).  That branch prints a clear TODO and exits
-# non-zero — see the --backfill section below for the tracking comment.
+# With --backfill the script would trigger and poll a sync on an rETL connection;
+# no trigger endpoint exists in the rudder-iac client yet, so that branch prints a
+# TODO and exits non-zero (see the --backfill section below).
 #
 # Prerequisites:
 #   - Go ≥ 1.21
 #   - Terraform ≥ 1.0
-#   - secret.tfvars (or the path supplied as $1 / $TFVARS_FILE) with at least:
+#   - secret.tfvars (or --tfvars / $TFVARS_FILE) with at least:
 #       access_token, bq_project, bq_dataset, bq_table, bq_credentials
-#     Optionally add customerio_api_key + customerio_site_id (+ customerio_datacenter)
-#     to also exercise the BigQuery→Customer.io connection.
+#     plus the creds each selected scenario needs (see README).
 
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+SCENARIOS_DIR="${SCRIPT_DIR}/scenarios"
+BIN_DIR="${SCRIPT_DIR}/.bin"
+PROVIDER_BINARY="${BIN_DIR}/terraform-provider-rudderstack"
 
 # ── Argument parsing ────────────────────────────────────────────────────────
 BACKFILL=false
 TFVARS_FILE="${TFVARS_FILE:-}"   # can also be set in the environment
+REQUESTED=()
 
-args=()
-for arg in "$@"; do
-  case "$arg" in
-    --backfill) BACKFILL=true ;;
-    *) args+=("$arg") ;;
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --backfill) BACKFILL=true; shift ;;
+    --tfvars)   TFVARS_FILE="$2"; shift 2 ;;
+    --tfvars=*) TFVARS_FILE="${1#*=}"; shift ;;
+    -*) echo "ERROR: unknown flag: $1"; exit 1 ;;
+    *)  REQUESTED+=("$1"); shift ;;
   esac
 done
-
-# First non-flag positional arg overrides the var-file path.
-if [[ ${#args[@]} -gt 0 ]]; then
-  TFVARS_FILE="${args[0]}"
-fi
-
-# Resolve relative paths against the script's own directory.
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ -z "${TFVARS_FILE}" ]]; then
   TFVARS_FILE="${SCRIPT_DIR}/secret.tfvars"
 fi
-
 if [[ ! -f "${TFVARS_FILE}" ]]; then
   echo "ERROR: var-file not found: ${TFVARS_FILE}"
-  echo "       Create it (see README) or pass a path as the first argument."
+  echo "       Create it (see README) or pass --tfvars PATH."
+  exit 1
+fi
+# Absolute path — terraform -chdir resolves -var-file relative to the scenario dir.
+TFVARS_FILE="$(cd "$(dirname "${TFVARS_FILE}")" && pwd)/$(basename "${TFVARS_FILE}")"
+
+# ── Discover scenarios (skip _-prefixed helper dirs) ────────────────────────
+ALL_SCENARIOS=()
+for d in "${SCENARIOS_DIR}"/*/; do
+  name="$(basename "$d")"
+  [[ "$name" == _* ]] && continue
+  ALL_SCENARIOS+=("$name")
+done
+if [[ ${#ALL_SCENARIOS[@]} -eq 0 ]]; then
+  echo "ERROR: no scenarios found under ${SCENARIOS_DIR}"
   exit 1
 fi
 
-# Normalize to an absolute path. terraform is invoked with -chdir=<staging dir>,
-# which resolves -var-file relative to that dir — so a relative path (e.g. the
-# CI workflow's "test/e2e/secret.tfvars") would be looked up under the
-# chdir dir and fail. Absolute path is -chdir-proof.
-TFVARS_FILE="$(cd "$(dirname "${TFVARS_FILE}")" && pwd)/$(basename "${TFVARS_FILE}")"
+# ── Resolve requested set (validate names) ──────────────────────────────────
+SCENARIOS=()
+if [[ ${#REQUESTED[@]} -eq 0 ]]; then
+  SCENARIOS=("${ALL_SCENARIOS[@]}")
+else
+  for req in "${REQUESTED[@]}"; do
+    found=false
+    for s in "${ALL_SCENARIOS[@]}"; do
+      [[ "$s" == "$req" ]] && found=true && break
+    done
+    if ! $found; then
+      echo "ERROR: unknown scenario: ${req}"
+      echo "       valid: ${ALL_SCENARIOS[*]}"
+      exit 1
+    fi
+    SCENARIOS+=("$req")
+  done
+fi
 
-# ── Repo root (two levels above test/e2e) ───────────────────────────────────
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+# ── --backfill short-circuit (not yet wired) ────────────────────────────────
+# NOTE: The rudder-iac client does NOT expose a sync-trigger/backfill endpoint.
+# The RETLConnectionStore interface (api/client/retl/retl.go) only covers CRUD +
+# SetConnectionExternalId; there is no Trigger/Run/StartSync method and no HTTP
+# path. Until that endpoint exists (or is confirmed via the public API docs) this
+# branch cannot be wired. What needs confirming:
+#   - HTTP method/path to trigger a manual rETL sync
+#   - polling endpoint + terminal state field
+#   - request/response shape
+# File to watch: api/client/retl/connections.go in the rudder-iac repo.
+if [[ "${BACKFILL}" == "true" ]]; then
+  echo ""
+  echo "ERROR: --backfill is not yet wired."
+  echo "  No sync-trigger endpoint exists in the rudder-iac client"
+  echo "  (api/client/retl/connections.go). The API path + polling contract"
+  echo "  must be confirmed first. See the comment block in run.sh."
+  exit 3
+fi
 
-# ── Provider binary paths ────────────────────────────────────────────────────
-BIN_DIR="${SCRIPT_DIR}/.bin"
-PROVIDER_BINARY="${BIN_DIR}/terraform-provider-rudderstack"
-
-# ── Temp dev-override CLI config ─────────────────────────────────────────────
-# No .tfrc suffix on the template: BSD/macOS mktemp requires the X's at the end.
-# TF_CLI_CONFIG_FILE accepts any path, so the extension is unnecessary.
+# ── Temp dev-override CLI config (cleaned up by the EXIT trap) ───────────────
+# No .tfrc suffix: BSD/macOS mktemp requires the X's at the end. TF_CLI_CONFIG_FILE
+# accepts any path, so the extension is unnecessary.
 OVERRIDE_CFG="$(mktemp "${TMPDIR:-/tmp}/tf-dev-override-XXXXXX")"
-trap 'rm -f "${OVERRIDE_CFG}"' EXIT
+CURRENT_SCENARIO=""
 
-# ── Build the provider ───────────────────────────────────────────────────────
+# ── Cleanup trap (always runs on EXIT) ──────────────────────────────────────
+# Best-effort: destroy any in-flight scenario (set before apply, cleared after a
+# clean destroy) so a mid-run failure doesn't leak staging resources. Errors here
+# must NOT mask the original exit code.
+_cleanup() {
+  local original_exit=$?
+  if [[ -n "${CURRENT_SCENARIO}" ]]; then
+    echo "==> [trap] Destroying in-flight scenario '${CURRENT_SCENARIO}' …"
+    terraform -chdir="${SCENARIOS_DIR}/${CURRENT_SCENARIO}" destroy -auto-approve \
+      -var-file="${TFVARS_FILE}" || true
+  fi
+  rm -f "${OVERRIDE_CFG}"
+  exit "${original_exit}"
+}
+trap '_cleanup' EXIT
+
+# ── Build the provider once ─────────────────────────────────────────────────
 echo "==> Building provider binary …"
 mkdir -p "${BIN_DIR}"
 go build -o "${PROVIDER_BINARY}" "${REPO_ROOT}"
 echo "    Provider written to: ${PROVIDER_BINARY}"
 
-# ── Write dev-override config and export for Terraform ───────────────────────
+# ── Write dev-override config once and export for Terraform ──────────────────
 cat > "${OVERRIDE_CFG}" <<HCL
 provider_installation {
   dev_overrides {
@@ -91,132 +153,91 @@ provider_installation {
 }
 HCL
 export TF_CLI_CONFIG_FILE="${OVERRIDE_CFG}"
+export TF_IN_AUTOMATION=1
 echo "==> TF_CLI_CONFIG_FILE=${TF_CLI_CONFIG_FILE}"
 
-# ── Destroy trap (always runs on EXIT) ───────────────────────────────────────
-# Best-effort: errors here must NOT mask the original script exit code.
-_destroy() {
-  local original_exit=$?
-  echo "==> [trap] Running terraform destroy (cleanup) …"
-  terraform -chdir="${SCRIPT_DIR}" destroy -auto-approve \
-    -var-file="${TFVARS_FILE}" || true
-  echo "==> [trap] Destroy complete."
-  rm -f "${OVERRIDE_CFG}"  # this trap replaces the earlier rm-only trap; fold its cleanup in here
-  exit "${original_exit}"
+# ── Per-scenario runner ─────────────────────────────────────────────────────
+# Returns non-zero on any failure; leaves CURRENT_SCENARIO set so the caller (or
+# the EXIT trap) destroys the partially-applied scenario.
+run_scenario() {
+  local name="$1"
+  local dir="${SCENARIOS_DIR}/${name}"
+  echo ""
+  echo "════════════════════════════════════════════════════════════"
+  echo "==> SCENARIO: ${name}"
+  echo "════════════════════════════════════════════════════════════"
+  CURRENT_SCENARIO="${name}"
+
+  # init wires .terraform/modules for the local bigquery_source module. The
+  # dev-override keeps this offline (rudderstack is the only provider referenced).
+  echo "==> [${name}] terraform init …"
+  terraform -chdir="${dir}" init -input=false
+
+  echo "==> [${name}] terraform apply …"
+  terraform -chdir="${dir}" apply -auto-approve -var-file="${TFVARS_FILE}"
+
+  echo "==> [${name}] verifying standardized outputs …"
+  local out val
+  for out in account_id source_id destination_id connection_id; do
+    val="$(terraform -chdir="${dir}" output -raw "$out" 2>/dev/null || true)"
+    if [[ -z "$val" ]]; then
+      echo "FAIL [${name}]: output '$out' is empty — resource may not have been created."
+      return 1
+    fi
+    echo "    ${out} = ${val}"
+  done
+
+  # terraform plan -detailed-exitcode: 0=no diff, 1=error, 2=diff (drift).
+  echo "==> [${name}] asserting no drift (terraform plan -detailed-exitcode) …"
+  set +e
+  terraform -chdir="${dir}" plan -detailed-exitcode -var-file="${TFVARS_FILE}"
+  local plan_exit=$?
+  set -e
+  case "${plan_exit}" in
+    0) echo "==> [${name}] ASSERT PASSED: plan reports no drift." ;;
+    1) echo "FAIL [${name}]: terraform plan returned an error (exit 1)."; return 1 ;;
+    2) echo "FAIL [${name}]: terraform plan detected drift (exit 2) — provider Read bug."; return 1 ;;
+    *) echo "FAIL [${name}]: terraform plan returned unexpected exit ${plan_exit}."; return 1 ;;
+  esac
+
+  echo "==> [${name}] resource IDs:"
+  terraform -chdir="${dir}" output
+
+  if [[ "${PAUSE:-false}" == "true" ]]; then
+    echo "==> [${name}] PAUSED. Resources are live in staging. Press Enter to destroy."
+    echo "    Inspect in another terminal:"
+    echo "      export TF_CLI_CONFIG_FILE='${TF_CLI_CONFIG_FILE}'"
+    echo "      terraform -chdir='${dir}' show"
+    read -r || true   # blocks; || true prevents set -e from exiting on EOF/signal
+  fi
+
+  echo "==> [${name}] terraform destroy …"
+  terraform -chdir="${dir}" destroy -auto-approve -var-file="${TFVARS_FILE}"
+  CURRENT_SCENARIO=""   # destroyed cleanly — trap must not re-destroy
+  echo "==> [${name}] done."
+  return 0
 }
-trap '_destroy' EXIT
 
-# ── Apply ────────────────────────────────────────────────────────────────────
-echo "==> Running terraform apply …"
-terraform -chdir="${SCRIPT_DIR}" apply -auto-approve \
-  -var-file="${TFVARS_FILE}"
-echo "==> Apply succeeded."
-
-# ── Verify resource IDs are non-empty ────────────────────────────────────────
-echo "==> Verifying resource IDs are non-empty …"
-for out in account_id retl_source_id destination_id connection_id; do
-  val=$(terraform -chdir="${SCRIPT_DIR}" output -raw "$out" 2>/dev/null)
-  if [[ -z "$val" ]]; then
-    echo "FAIL: output '$out' is empty — resource may not have been created."
-    exit 1
-  fi
-  echo "    $out = $val"
-done
-# Customer.io chains are optional — report their IDs only when creds enabled them.
-for out in customerio_destination_id customerio_connection_id \
-           customerio_audience_destination_id customerio_audience_connection_id; do
-  val=$(terraform -chdir="${SCRIPT_DIR}" output -raw "$out" 2>/dev/null)
-  if [[ -n "$val" ]]; then
-    echo "    $out = $val"
-  elif [[ "$out" == *audience* ]]; then
-    echo "    $out = (skipped — no Customer.io Audience creds: set customerio_audience_app_api_key + customerio_audience_id)"
-  else
-    echo "    $out = (skipped — no Customer.io creds)"
+# ── Loop: keep-going, fail-at-end ───────────────────────────────────────────
+FAILED=()
+for name in "${SCENARIOS[@]}"; do
+  # `if !` guards the call so set -e doesn't abort the loop on a graceful failure.
+  if ! run_scenario "${name}"; then
+    FAILED+=("${name}")
+    # run_scenario left CURRENT_SCENARIO set on a graceful failure; destroy it now
+    # and clear so the EXIT trap doesn't double-destroy.
+    if [[ -n "${CURRENT_SCENARIO}" ]]; then
+      echo "==> [${name}] cleaning up failed scenario …"
+      terraform -chdir="${SCENARIOS_DIR}/${name}" destroy -auto-approve \
+        -var-file="${TFVARS_FILE}" || true
+      CURRENT_SCENARIO=""
+    fi
   fi
 done
-echo "==> All resources confirmed created."
 
-# ── Assert: plan must show zero drift ────────────────────────────────────────
-# terraform plan -detailed-exitcode exit codes:
-#   0 = success, no diff (what we want)
-#   1 = error
-#   2 = success, but diff exists (provider Read is wrong / resource drifted)
-echo "==> Asserting no drift (terraform plan -detailed-exitcode) …"
-set +e
-terraform -chdir="${SCRIPT_DIR}" plan -detailed-exitcode \
-  -var-file="${TFVARS_FILE}"
-PLAN_EXIT=$?
-set -e
-
-case "${PLAN_EXIT}" in
-  0)
-    echo "==> ASSERT PASSED: plan reports no drift — provider Read path is correct."
-    ;;
-  1)
-    echo "FAIL: terraform plan returned an error (exit 1)."
-    echo "      Check the output above for details."
-    exit 1
-    ;;
-  2)
-    echo "FAIL: terraform plan detected drift (exit 2)."
-    echo "      At least one resource does not match the control-plane state."
-    echo "      This indicates a bug in a provider Read/Refresh function."
-    exit 2
-    ;;
-  *)
-    echo "FAIL: terraform plan returned unexpected exit code ${PLAN_EXIT}."
-    exit "${PLAN_EXIT}"
-    ;;
-esac
-
-# ── Print created IDs ────────────────────────────────────────────────────────
-echo "==> Resource IDs created in staging:"
-terraform -chdir="${SCRIPT_DIR}" output
-
-# ── Optional backfill / sync trigger ─────────────────────────────────────────
-if [[ "${BACKFILL}" == "true" ]]; then
-  # NOTE: The rudder-iac client (github.com/rudderlabs/rudder-iac,
-  # currently at v0.17.1-0.20260612051227-31f63ee269cf) does NOT expose a
-  # sync-trigger or backfill endpoint.  The RETLConnectionStore interface
-  # (api/client/retl/retl.go) only covers CRUD + SetConnectionExternalId;
-  # there is no Trigger/Run/StartSync method and no corresponding HTTP path.
-  #
-  # Until that endpoint is added to the client (or confirmed via the
-  # RudderStack public API docs), this branch cannot be wired correctly.
-  #
-  # What needs confirming:
-  #   - The HTTP method and path for triggering a manual rETL sync, e.g.:
-  #       POST /v2/retl-connections/{id}/start    (guessed — NOT confirmed)
-  #       POST /v2/retl-connections/{id}/trigger  (guessed — NOT confirmed)
-  #   - The polling endpoint and its terminal state field, e.g.:
-  #       GET  /v2/retl-connections/{id}/sync-status/{syncId}
-  #   - The request/response shape.
-  #
-  # File to watch: api/client/retl/connections.go in the rudder-iac repo.
-  # Once that method exists, replace the block below with the real curl.
-  echo ""
-  echo "ERROR: --backfill is not yet wired."
-  echo ""
-  echo "  No sync-trigger endpoint was found in the rudder-iac client"
-  echo "  (api/client/retl/connections.go, v0.17.1).  The API path and"
-  echo "  polling contract need to be confirmed before this can be"
-  echo "  implemented correctly."
-  echo ""
-  echo "  See the comment block in run.sh (--backfill section) for details."
-  exit 3
+echo ""
+if [[ ${#FAILED[@]} -gt 0 ]]; then
+  echo "==> SMOKE FAILED for: ${FAILED[*]}"
+  exit 1
 fi
-
-# ── Optional hold-open for manual inspection ─────────────────────────────────
-if [[ "${PAUSE:-false}" == "true" ]]; then
-  echo "==> PAUSED. Resources are live in staging. Outputs above."
-  echo ""
-  echo "    To inspect resources in a second terminal, export the provider config first:"
-  echo "      export TF_CLI_CONFIG_FILE='${TF_CLI_CONFIG_FILE}'"
-  echo "      terraform -chdir='${SCRIPT_DIR}' state show rudderstack_account_source_bigquery.acct"
-  echo "      terraform -chdir='${SCRIPT_DIR}' show -json | jq '.values.root_module.resources[] | select(.type==\"rudderstack_account_source_bigquery\") | .values.config'"
-  echo ""
-  echo "    Press Enter to destroy."
-  read -r || true   # blocks here; || true prevents set -e from exiting on EOF/signal
-fi
-
-echo "==> Smoke run complete."
+echo "==> All scenarios passed: ${SCENARIOS[*]}"
