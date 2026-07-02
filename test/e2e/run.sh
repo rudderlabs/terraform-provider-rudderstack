@@ -156,6 +156,13 @@ export TF_CLI_CONFIG_FILE="${OVERRIDE_CFG}"
 export TF_IN_AUTOMATION=1
 echo "==> TF_CLI_CONFIG_FILE=${TF_CLI_CONFIG_FILE}"
 
+# Unique per-invocation token folded into resource names (via the run_id var) so
+# a run never collides with soft-deleted resources whose names the API keeps
+# reserved from earlier runs. Shared across all scenarios in this invocation;
+# each scenario has a distinct name prefix, so one token is enough.
+export TF_VAR_run_id="${TF_VAR_run_id:-$(date +%s)}"
+echo "==> run_id=${TF_VAR_run_id}"
+
 # ── Per-scenario runner ─────────────────────────────────────────────────────
 # Returns non-zero on any failure; leaves CURRENT_SCENARIO set so the caller (or
 # the EXIT trap) destroys the partially-applied scenario.

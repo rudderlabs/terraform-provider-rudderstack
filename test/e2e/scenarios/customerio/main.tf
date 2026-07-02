@@ -5,9 +5,13 @@
 # standardized outputs (account_id, source_id, destination_id, connection_id)
 # that run.sh verifies for every scenario.
 
+locals {
+  base_name = var.run_id == "" ? "tf-e2e-customerio" : "tf-e2e-customerio-${var.run_id}"
+}
+
 module "bq" {
   source         = "../../modules/bigquery_source"
-  name_prefix    = "tf-e2e-customerio"
+  name_prefix    = local.base_name
   bq_project     = var.bq_project
   bq_location    = var.bq_location
   bq_dataset     = var.bq_dataset
@@ -16,7 +20,7 @@ module "bq" {
 }
 
 resource "rudderstack_destination_customerio" "cio" {
-  name = "tf-e2e-customerio"
+  name = local.base_name
   config {
     site_id    = var.customerio_site_id
     api_key    = var.customerio_api_key

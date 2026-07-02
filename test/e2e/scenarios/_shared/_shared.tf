@@ -33,6 +33,16 @@ variable "api_url" {
   default     = "https://api.staging.rudderlabs.com"
 }
 
+# Unique token folded into resource names so a run doesn't collide with
+# soft-deleted resources left by earlier runs (the API keeps deleted
+# destinations' names reserved). run.sh sets this per invocation via
+# TF_VAR_run_id; empty (direct terraform use) yields the clean fixed names.
+variable "run_id" {
+  description = "Unique per-run suffix for resource names. Empty = no suffix."
+  type        = string
+  default     = ""
+}
+
 variable "bq_project" {
   description = "GCP project ID where the BigQuery dataset lives."
   type        = string
