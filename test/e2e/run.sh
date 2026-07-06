@@ -47,7 +47,8 @@ REQUESTED=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --backfill) BACKFILL=true; shift ;;
-    --tfvars)   TFVARS_FILE="$2"; shift 2 ;;
+    --tfvars)   [[ $# -ge 2 ]] || { echo "ERROR: --tfvars requires a path argument"; exit 1; }
+                TFVARS_FILE="$2"; shift 2 ;;
     --tfvars=*) TFVARS_FILE="${1#*=}"; shift ;;
     -*) echo "ERROR: unknown flag: $1"; exit 1 ;;
     *)  REQUESTED+=("$1"); shift ;;
@@ -164,7 +165,7 @@ echo "==> TF_CLI_CONFIG_FILE=${TF_CLI_CONFIG_FILE}"
 # a run never collides with soft-deleted resources whose names the API keeps
 # reserved from earlier runs. Shared across all scenarios in this invocation;
 # each scenario has a distinct name prefix, so one token is enough.
-export TF_VAR_run_id="${TF_VAR_run_id:-$(date +%s)}"
+export TF_VAR_run_id="${TF_VAR_run_id:-$(date +%s)-$$}"
 echo "==> run_id=${TF_VAR_run_id}"
 
 # ── Per-scenario runner ─────────────────────────────────────────────────────
@@ -182,10 +183,16 @@ run_scenario() {
   # init wires .terraform/modules for the local bigquery_source module. The
   # dev-override keeps this offline (rudderstack is the only provider referenced).
   echo "==> [${name}] terraform init …"
-  terraform -chdir="${dir}" init -input=false
+  # NOTE: run_scenario is called as `if ! run_scenario …`, which disables `set -e`
+  # for the whole function body — so every terraform call here must check its own
+  # exit status explicitly (an unchecked failure would fall through and be
+  # misreported as success).
+  terraform -chdir="${dir}" init -input=false \
+    || { echo "FAIL [${name}]: terraform init failed."; return 1; }
 
   echo "==> [${name}] terraform apply …"
-  terraform -chdir="${dir}" apply -auto-approve -var-file="${TFVARS_FILE}"
+  terraform -chdir="${dir}" apply -auto-approve -var-file="${TFVARS_FILE}" \
+    || { echo "FAIL [${name}]: terraform apply failed."; return 1; }
 
   echo "==> [${name}] verifying standardized outputs …"
   local out val
@@ -223,8 +230,14 @@ run_scenario() {
   fi
 
   echo "==> [${name}] terraform destroy …"
-  terraform -chdir="${dir}" destroy -auto-approve -var-file="${TFVARS_FILE}"
-  CURRENT_SCENARIO=""   # destroyed cleanly — trap must not re-destroy
+  if terraform -chdir="${dir}" destroy -auto-approve -var-file="${TFVARS_FILE}"; then
+    CURRENT_SCENARIO=""   # destroyed cleanly — trap must not re-destroy
+  else
+    # Leave CURRENT_SCENARIO set so the loop / EXIT trap retries cleanup, and fail
+    # the scenario instead of silently reporting success with leaked resources.
+    echo "FAIL [${name}]: terraform destroy failed — leaving CURRENT_SCENARIO set for cleanup."
+    return 1
+  fi
   echo "==> [${name}] done."
   return 0
 }

@@ -16,8 +16,9 @@ permissions:
 #     (post-merge). Dispatch is NOT available pre-merge: GitHub lists dispatch
 #     workflows from the default branch only.
 #
-# Opt-in (label/manual), never automatic on every push: scenarios use fixed
-# resource names (tf-e2e-*), so the concurrency group serializes runs.
+# Opt-in (label/manual), never automatic on every push. run.sh folds a per-run
+# token into the tf-e2e-* resource names so runs don't collide by name; the
+# concurrency group still serializes to avoid overlapping staging applies.
 on:
   pull_request:
     types: [labeled, synchronize, reopened]
