@@ -216,6 +216,7 @@ func init() {
 
 	c.Destinations.Register("snowflake_streaming", c.ConfigMeta{
 		APIType:      "SNOWPIPE_STREAMING",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

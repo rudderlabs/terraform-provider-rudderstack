@@ -152,6 +152,7 @@ func init() {
 
 	c.Destinations.Register("redshift", c.ConfigMeta{
 		APIType:      "RS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

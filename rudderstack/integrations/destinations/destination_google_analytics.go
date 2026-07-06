@@ -352,6 +352,7 @@ func init() {
 
 	c.Destinations.Register("google_analytics", c.ConfigMeta{
 		APIType:      "GA",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

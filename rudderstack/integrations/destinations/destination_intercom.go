@@ -130,6 +130,7 @@ func init() {
 
 	c.Destinations.Register("intercom", c.ConfigMeta{
 		APIType:      "INTERCOM",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

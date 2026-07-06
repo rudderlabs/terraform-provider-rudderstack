@@ -118,6 +118,7 @@ func init() {
 
 	c.Destinations.Register("vwo", c.ConfigMeta{
 		APIType:      "VWO",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

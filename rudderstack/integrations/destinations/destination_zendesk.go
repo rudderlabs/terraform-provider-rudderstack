@@ -70,6 +70,7 @@ func init() {
 
 	c.Destinations.Register("zendesk", c.ConfigMeta{
 		APIType:      "ZENDESK",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

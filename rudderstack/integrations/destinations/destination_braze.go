@@ -261,6 +261,7 @@ func init() {
 
 	c.Destinations.Register("braze", c.ConfigMeta{
 		APIType:      "BRAZE",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

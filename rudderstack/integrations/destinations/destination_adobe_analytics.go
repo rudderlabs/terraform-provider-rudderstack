@@ -594,6 +594,7 @@ func init() {
 
 	c.Destinations.Register("adobe_analytics", c.ConfigMeta{
 		APIType:      "ADOBE_ANALYTICS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

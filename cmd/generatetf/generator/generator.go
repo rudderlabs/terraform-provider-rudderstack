@@ -64,7 +64,7 @@ func GenerateImportScript(
 	}
 
 	for _, dst := range destinations {
-		t, cm := configMeta(destinationConfigs, dst.Type)
+		t, cm := configMetaByVersion(destinationConfigs, dst.Type, dst.Version)
 		if cm != nil {
 			foundDestinations[dst.ID] = true
 			destinationTerraformTypes[dst.ID] = t
@@ -159,7 +159,7 @@ func GenerateTerraform(
 	destinationConfigs := configs.Destinations.Entries()
 	generatedDestinationEntries := map[string]*destinationEntry{}
 	for _, dst := range destinations {
-		terraformType, cm := configMeta(destinationConfigs, dst.Type)
+		terraformType, cm := configMetaByVersion(destinationConfigs, dst.Type, dst.Version)
 		if cm != nil {
 			b, err := generateDestination(dst, terraformType, cm)
 			if err != nil {
@@ -433,9 +433,31 @@ func destinationName(destination client.Destination) string {
 
 // configMeta finds a ConfigMeta of a specific api type. Returns the terraform type and the ConfigMeta if found.
 // if not, it returns an empty string and nil.
+//
+// This resolves on APIType alone (first match) and is used for registries that don't
+// carry a meaningful Version yet (sources, accounts). For destinations, use
+// configMetaByVersion instead, since two entries can share an APIType once a second
+// version of the same integration is registered.
 func configMeta(entries map[string]configs.ConfigMeta, apiType string) (string, *configs.ConfigMeta) {
 	for r, e := range entries {
 		if e.APIType == apiType {
+			return r, &e
+		}
+	}
+
+	return "", nil
+}
+
+// configMetaByVersion finds a ConfigMeta matching both apiType and version. Returns the
+// terraform type and the ConfigMeta if found. If not, it returns an empty string and nil.
+//
+// version is mandatory and matched strictly (no coercion of an absent/zero version to v1):
+// this provider relies on the API always reporting a real version on every destination
+// (see INT-6489). A destination whose reported version has no matching registry entry is
+// treated the same as an unsupported apiType: it's skipped by the caller.
+func configMetaByVersion(entries map[string]configs.ConfigMeta, apiType string, version int) (string, *configs.ConfigMeta) {
+	for r, e := range entries {
+		if e.APIType == apiType && e.Version == version {
 			return r, &e
 		}
 	}

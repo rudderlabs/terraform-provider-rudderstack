@@ -59,6 +59,15 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
 					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate),
+					// INT-6494: every bare (suffix-less) destination is registered
+					// with ConfigMeta.Version = 1, so it must send version:1 on the
+					// wire. This test step's automatic post-apply plan check (part
+					// of resource.Test) also asserts there's no plan diff, so this
+					// exercises both halves of the story's "whole-fleet v1" AC.
+					// Requires the backend to echo `version` back on read (INT-6489
+					// Blocker B) — until then this assertion will fail loudly rather
+					// than silently pass.
+					testAccCheckDestinationVersion(resourceName, 1),
 				),
 			},
 			{
@@ -154,6 +163,34 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 		}
 
 		return compareConfig(dest.Config, expectedJSON)
+	}
+}
+
+// testAccCheckDestinationVersion fetches the destination from the API and verifies
+// its reported version matches wantVersion. This depends on the backend always
+// reporting a real version on every destination (INT-6489); the provider does not
+// coerce an absent/zero version to v1 (see cmd/generatetf/generator.configMetaByVersion).
+func testAccCheckDestinationVersion(resourceName string, wantVersion int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		cl, err := newTestAPIClient()
+		if err != nil {
+			return err
+		}
+
+		dest, err := cl.Destinations.Get(context.Background(), rs.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get destination from API: %w", err)
+		}
+
+		if dest.Version != wantVersion {
+			return fmt.Errorf("destination %s: got version %d, want %d", rs.Primary.ID, dest.Version, wantVersion)
+		}
+		return nil
 	}
 }
 

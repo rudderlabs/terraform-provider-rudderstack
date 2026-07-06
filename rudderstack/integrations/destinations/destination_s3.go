@@ -59,6 +59,7 @@ func init() {
 
 	c.Destinations.Register("s3", c.ConfigMeta{
 		APIType:      "S3",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

@@ -175,6 +175,7 @@ func init() {
 
 	c.Destinations.Register("google_pubsub", c.ConfigMeta{
 		APIType:      "GOOGLEPUBSUB",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

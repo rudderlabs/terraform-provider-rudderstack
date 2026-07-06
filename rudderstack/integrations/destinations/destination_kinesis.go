@@ -92,6 +92,7 @@ func init() {
 
 	c.Destinations.Register("kinesis", c.ConfigMeta{
 		APIType:      "KINESIS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

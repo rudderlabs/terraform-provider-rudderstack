@@ -38,9 +38,10 @@ func TestGeneratorTerraform(t *testing.T) {
 
 	destinations := []client.Destination{
 		{
-			ID:   "id-redshift",
-			Name: "name-redshift",
-			Type: "RS",
+			ID:      "id-redshift",
+			Name:    "name-redshift",
+			Type:    "RS",
+			Version: 1,
 			Config: json.RawMessage(`{
 				"host": "example.com",
 				"port": "5439",
@@ -56,9 +57,10 @@ func TestGeneratorTerraform(t *testing.T) {
 			}`),
 		},
 		{
-			ID:   "id-facebook-pixel",
-			Name: "name-facebook-pixel",
-			Type: "FACEBOOK_PIXEL",
+			ID:      "id-facebook-pixel",
+			Name:    "name-facebook-pixel",
+			Type:    "FACEBOOK_PIXEL",
+			Version: 1,
 			Config: json.RawMessage(`{
 				"pixelId": "facebook pixel id",
 				"accessToken": "facebook access token",
@@ -259,9 +261,10 @@ func TestGeneratorTerraformNestedListInListOfObjects(t *testing.T) {
 	t.Run("all items have empty nested list", func(t *testing.T) {
 		destinations := []client.Destination{
 			{
-				ID:   "id-dst-1",
-				Name: "dest-1",
-				Type: "HS",
+				ID:      "id-dst-1",
+				Name:    "dest-1",
+				Type:    "HS",
+				Version: 1,
 				Config: json.RawMessage(`{
 					"authorizationType": "newPrivateAppApi",
 					"apiVersion": "newApi",
@@ -282,9 +285,10 @@ func TestGeneratorTerraformNestedListInListOfObjects(t *testing.T) {
 	t.Run("all items have non-empty nested list", func(t *testing.T) {
 		destinations := []client.Destination{
 			{
-				ID:   "id-dst-2",
-				Name: "dest-2",
-				Type: "HS",
+				ID:      "id-dst-2",
+				Name:    "dest-2",
+				Type:    "HS",
+				Version: 1,
 				Config: json.RawMessage(`{
 					"authorizationType": "newPrivateAppApi",
 					"apiVersion": "newApi",
@@ -311,9 +315,10 @@ func TestGeneratorTerraformNestedListInListOfObjects(t *testing.T) {
 	t.Run("mixed: some items have empty nested list and some have non-empty", func(t *testing.T) {
 		destinations := []client.Destination{
 			{
-				ID:   "id-dst-3",
-				Name: "dest-3",
-				Type: "HS",
+				ID:      "id-dst-3",
+				Name:    "dest-3",
+				Type:    "HS",
+				Version: 1,
 				Config: json.RawMessage(`{
 					"authorizationType": "newPrivateAppApi",
 					"apiVersion": "newApi",
@@ -357,14 +362,16 @@ func TestGeneratorImportScript(t *testing.T) {
 
 	destinations := []client.Destination{
 		{
-			ID:   "id-destination-1",
-			Name: "name-redshift",
-			Type: "RS",
+			ID:      "id-destination-1",
+			Name:    "name-redshift",
+			Type:    "RS",
+			Version: 1,
 		},
 		{
-			ID:   "id-destination-2",
-			Name: "name-facebook-pixel",
-			Type: "FACEBOOK_PIXEL",
+			ID:      "id-destination-2",
+			Name:    "name-facebook-pixel",
+			Type:    "FACEBOOK_PIXEL",
+			Version: 1,
 		},
 		{
 			ID:   "unknown",
@@ -586,21 +593,24 @@ func retlEventStreamingFixtures() ([]client.Source, []client.Destination) {
 	return []client.Source{},
 		[]client.Destination{
 			{
-				ID:     "id-redshift",
-				Name:   "name-redshift",
-				Type:   "RS",
-				Config: json.RawMessage(`{}`),
+				ID:      "id-redshift",
+				Name:    "name-redshift",
+				Type:    "RS",
+				Version: 1,
+				Config:  json.RawMessage(`{}`),
 			},
 			{
-				ID:     "id-facebook-pixel",
-				Name:   "name-facebook-pixel",
-				Type:   "FACEBOOK_PIXEL",
-				Config: json.RawMessage(`{}`),
+				ID:      "id-facebook-pixel",
+				Name:    "name-facebook-pixel",
+				Type:    "FACEBOOK_PIXEL",
+				Version: 1,
+				Config:  json.RawMessage(`{}`),
 			},
 			{
-				ID:   "id-cio-audience",
-				Name: "name-cio-audience",
-				Type: "CUSTOMERIO_AUDIENCE",
+				ID:      "id-cio-audience",
+				Name:    "name-cio-audience",
+				Type:    "CUSTOMERIO_AUDIENCE",
+				Version: 1,
 				// Minimal valid config for the destination_customerio_audience
 				// resource — generator only needs enough to emit *something*.
 				Config: json.RawMessage(`{

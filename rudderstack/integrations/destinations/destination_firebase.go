@@ -111,6 +111,7 @@ func init() {
 
 	c.Destinations.Register("firebase", c.ConfigMeta{
 		APIType:      "FIREBASE",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})
