@@ -218,8 +218,11 @@ run_scenario() {
     *) echo "FAIL [${name}]: terraform plan returned unexpected exit ${plan_exit}."; return 1 ;;
   esac
 
+  # Informational re-print of all outputs. The 4 standardized IDs were already
+  # verified (and printed) above and drift asserted, so this is cosmetic —
+  # keep it explicitly non-fatal rather than letting a stray failure matter.
   echo "==> [${name}] resource IDs:"
-  terraform -chdir="${dir}" output
+  terraform -chdir="${dir}" output || true
 
   if [[ "${PAUSE:-false}" == "true" ]]; then
     echo "==> [${name}] PAUSED. Resources are live in staging. Press Enter to destroy."
