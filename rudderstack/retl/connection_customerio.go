@@ -35,26 +35,31 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 			"Carries the destination object as a typed top-level field; ForceNew because the " +
 			"object cannot be changed in place — changing it recreates the connection.",
 		Schema: mergeSchemas(baseConnectionSchema(), map[string]*schema.Schema{
-			// Customer.io supports exactly one object, whose on-the-wire value is
-			// `person` (the `value` from the listObjects API). Restrict to it so
-			// typos fail at plan time instead of on apply. If Customer.io ever
-			// adds objects, extend this slice.
+			// Customer.io supports the `person` and `event` objects, whose
+			// on-the-wire values are the `value` from the listObjects API.
+			// Restrict to them so typos fail at plan time instead of on apply.
+			// If Customer.io ever adds objects, extend this slice.
 			"object": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"person"}, false),
-				Description:  "Customer.io destination object. Only `person` is supported.",
+				ValidateFunc: validation.StringInSlice([]string{"person", "event"}, false),
+				Description:  "Customer.io destination object: `person` or `event`.",
 			},
-			// Only upsert and mirror are supported — drop `full` from the base
-			// schema's allowed set so users see a plan-time error instead of an
+			// Optional + Computed: single-mode objects (e.g. `event`, which is
+			// always `upsert`) don't expose the mode in HCL — the server stamps
+			// it and Terraform accepts the API-returned value (no perpetual
+			// diff). When set (e.g. for `person`, which supports upsert/mirror)
+			// the user's value is used and drift is detected. `full` is dropped
+			// from the allowed set so users see a plan-time error rather than an
 			// API rejection on apply.
 			"sync_behaviour": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror"}, false),
-				Description:  "How records are synced to the destination: `upsert` or `mirror`.",
+				Description:  "How records are synced to the destination: `upsert` or `mirror`. Optional; computed server-side when omitted (e.g. for the single-mode `event` object).",
 			},
 		}),
 		CreateContext: createCustomerIOConnection,

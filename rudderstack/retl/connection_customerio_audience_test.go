@@ -30,7 +30,7 @@ func TestResourceConnectionCustomerIOAudience_CreateRead(t *testing.T) {
 		DestinationID:     "dest-cio",
 		Enabled:           &enabled,
 		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
+		SyncBehaviour:     syncBehaviourPtr(iacretl.SyncBehaviourMirror),
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
 	}
@@ -97,7 +97,7 @@ func TestResourceConnectionCustomerIOAudience_AudienceIDIsForceNew(t *testing.T)
 		DestinationID:     "dest-cio",
 		Enabled:           &enabled,
 		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
+		SyncBehaviour:     syncBehaviourPtr(iacretl.SyncBehaviourMirror),
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
 	}
@@ -116,7 +116,7 @@ func TestResourceConnectionCustomerIOAudience_AudienceIDIsForceNew(t *testing.T)
 		DestinationID:     "dest-cio",
 		Enabled:           &enabled,
 		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
+		SyncBehaviour:     syncBehaviourPtr(iacretl.SyncBehaviourMirror),
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		DestinationConfig: json.RawMessage(`{"audienceId":99}`),
 	}
@@ -234,7 +234,7 @@ func TestResourceConnectionCustomerIOAudience_IdentifiersAreMutable(t *testing.T
 		DestinationID:     "dest-cio",
 		Enabled:           &enabled,
 		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
+		SyncBehaviour:     syncBehaviourPtr(iacretl.SyncBehaviourMirror),
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		DestinationConfig: json.RawMessage(`{"audienceId":42}`),
 	}

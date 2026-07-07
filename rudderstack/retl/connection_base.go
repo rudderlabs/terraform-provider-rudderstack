@@ -215,7 +215,14 @@ func applyBaseToCreateRequest(d *schema.ResourceData, req *retl.CreateRETLConnec
 	req.DestinationID = d.Get("destination_id").(string)
 	req.Enabled = &enabled
 	req.Schedule = schedule
-	req.SyncBehaviour = retl.SyncBehaviour(d.Get("sync_behaviour").(string))
+	// sync_behaviour is optional on the request: when omitted (e.g. the
+	// single-mode `event` object, declared Optional+Computed) send nil so the
+	// field is dropped from the body and the server defaults it / lets /setup
+	// stamp the destination syncMode.
+	if sb, _ := d.Get("sync_behaviour").(string); sb != "" {
+		v := retl.SyncBehaviour(sb)
+		req.SyncBehaviour = &v
+	}
 	req.Identifiers = mappingsFromState(d, "identifiers")
 
 	if ss, ok := syncSettingsFromState(d); ok {

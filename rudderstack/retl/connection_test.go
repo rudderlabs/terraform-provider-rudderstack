@@ -21,6 +21,10 @@ import (
 
 func regexpMatches(pattern string) *regexp.Regexp { return regexp.MustCompile(pattern) }
 
+// syncBehaviourPtr takes the address of a SyncBehaviour constant for building
+// CreateRETLConnectionRequest fixtures (the request field is *SyncBehaviour).
+func syncBehaviourPtr(s iacretl.SyncBehaviour) *iacretl.SyncBehaviour { return &s }
+
 // jsonMapperConnection returns a fully-populated JSON Mapper connection
 // shared by several tests below.
 func jsonMapperConnection(id string) *iacretl.RETLConnection {
@@ -51,7 +55,7 @@ func TestResourceConnection_JSONMapper_CreateReadUpdateDelete(t *testing.T) {
 		DestinationID: "dest-1",
 		Enabled:       &enabled,
 		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeBasic, EveryMinutes: &every60},
-		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		SyncBehaviour: syncBehaviourPtr(iacretl.SyncBehaviourUpsert),
 		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
 		Mappings:      []iacretl.Mapping{{From: "name", To: "first_name"}},
 		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
@@ -238,7 +242,7 @@ func TestResourceConnection_ObjectMappingAcceptsArbitraryIdentifierTarget(t *tes
 		DestinationID: "dest-1",
 		Enabled:       &enabled,
 		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		SyncBehaviour: syncBehaviourPtr(iacretl.SyncBehaviourUpsert),
 		Identifiers:   []iacretl.Mapping{{From: "email", To: "email"}},
 		Object:        "Contact",
 	}
@@ -293,7 +297,7 @@ func TestResourceConnection_EventNestedFieldsAreForceNew(t *testing.T) {
 		DestinationID: "dest-1",
 		Enabled:       &enabled,
 		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		SyncBehaviour: syncBehaviourPtr(iacretl.SyncBehaviourUpsert),
 		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
 		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
 	}
@@ -312,7 +316,7 @@ func TestResourceConnection_EventNestedFieldsAreForceNew(t *testing.T) {
 		DestinationID: "dest-1",
 		Enabled:       &enabled,
 		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		SyncBehaviour: syncBehaviourPtr(iacretl.SyncBehaviourUpsert),
 		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
 		Event:         &iacretl.Event{Type: iacretl.EventTypeTrack, Name: "user_synced"},
 	}
