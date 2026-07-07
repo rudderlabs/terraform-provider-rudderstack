@@ -31,6 +31,18 @@
 - Release versioning is synchronized across `Makefile`, `rudderstack/provider.go`,
   `examples/main.tf`, and the generated docs via release-please.
 
+## INT-6565 — Confluent Cloud config shape
+
+- Treat Confluent Cloud as a distinct destination schema, not a thin alias of
+  generic Kafka: map only `bootstrapServer`, `topic`, `apiKey`, `apiSecret`,
+  `connectionMode.<source>`, and `consentManagement`.
+- Do not carry generic Kafka fields into the Confluent Cloud destination shape;
+  `hostName`, `port`, SASL, SSL, Avro, SSH, and multi-topic mappings are outside
+  the intended `CONFLUENT_CLOUD` Terraform/API contract.
+- Terraform fields `api_key` and `api_secret` are credentials for Confluent
+  Cloud and should remain marked `Sensitive: true`, matching the integration
+  config's `apiKey` and `apiSecret` secret-key semantics.
+
 ## INT-6562 — Additive Snowflake Parity for Backward Compatibility
 
 - For Snowflake destination parity changes, prefer additive schema/mapping updates so existing configurations keep working.
