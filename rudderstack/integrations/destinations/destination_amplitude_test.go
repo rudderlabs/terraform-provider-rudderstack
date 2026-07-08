@@ -47,6 +47,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				}
 			
 				track_session_events {
+				  web          = true
 				  android      = true
 				  ios          = true
 				  react_native = true
@@ -84,6 +85,38 @@ var amplitudeTestConfigs = []c.TestConfig{
 				}
 			
 				batch_events {
+				  web = true
+				}
+
+				page_views {
+				  web = true
+				}
+
+				page_url_enrichment {
+				  web = true
+				}
+
+				web_vitals {
+				  web = true
+				}
+
+				file_downloads {
+				  web = true
+				}
+
+				frustration_interactions {
+				  web = true
+				}
+
+				network_tracking {
+				  web = true
+				}
+
+				element_interactions {
+				  web = true
+				}
+
+				form_interactions {
 				  web = true
 				}
 							
@@ -248,6 +281,14 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"trackUtmProperties": { "web": true },
 				"unsetParamsReferrerOnNewSession": { "web": true },
 				"batchEvents": { "web": true },
+				"pageViews": { "web": true },
+				"pageUrlEnrichment": { "web": true },
+				"webVitals": { "web": true },
+				"fileDownloads": { "web": true },
+				"frustrationInteractions": { "web": true },
+				"networkTracking": { "web": true },
+				"elementInteractions": { "web": true },
+				"formInteractions": { "web": true },
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [
 				  { "eventName": "one" },
@@ -268,7 +309,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				},
 				"mapDeviceBrand": true,
 				"enableLocationListening": { "android": true, "reactnative": true },
-				"trackSessionEvents": { "android": true, "ios": true, "reactnative": true },
+				"trackSessionEvents": { "web": true, "android": true, "ios": true, "reactnative": true },
 				"useAdvertisingIdForDeviceId": { "android": true, "reactnative": true },
 				"useIdfaAsDeviceId": { "ios": true, "reactnative": true },
 				"consentManagement": {

@@ -12,6 +12,8 @@ https://www.rudderstack.com/docs/destinations/analytics/amplitude
 
 Omit the `sdk_version` block to keep existing Amplitude behavior (version `1`), or set `sdk_version.web` to `2` to opt into version 2. The provider sets no Terraform default — version `1` is applied by the control plane when the field is absent.
 
+When using Amplitude Browser SDK v2, the web-only AutoCapture sub-feature blocks (`page_views`, `page_url_enrichment`, `web_vitals`, `file_downloads`, `frustration_interactions`, `network_tracking`, `element_interactions`, and `form_interactions`) expose the corresponding Browser SDK v2 controls. Omit these blocks to preserve existing control-plane defaults.
+
 ## Example Usage
 
 ```terraform
@@ -44,6 +46,7 @@ resource "rudderstack_destination_amplitude" "example" {
     # }
 
     # track_session_events {
+    #   web          = true
     #   android      = true
     #   ios          = true
     #   react_native = true
@@ -81,6 +84,38 @@ resource "rudderstack_destination_amplitude" "example" {
     # }
 
     # batch_events {
+    #   web = true
+    # }
+
+    # page_views {
+    #   web = true
+    # }
+
+    # page_url_enrichment {
+    #   web = true
+    # }
+
+    # web_vitals {
+    #   web = true
+    # }
+
+    # file_downloads {
+    #   web = true
+    # }
+
+    # frustration_interactions {
+    #   web = true
+    # }
+
+    # network_tracking {
+    #   web = true
+    # }
+
+    # element_interactions {
+    #   web = true
+    # }
+
+    # form_interactions {
     #   web = true
     # }
 
@@ -241,14 +276,21 @@ Optional:
 - `batch_events` (Block List, Max: 1) If this setting is enabled, the events are batched together and uploaded by the Amplitude SDK. (see [below for nested schema](#nestedblock--config--batch_events))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `device_id_from_url_param` (Block List, Max: 1) If this setting is enabled, the Amplitude SDK will parse the URL parameter and set the device ID from `amp_device_id`. (see [below for nested schema](#nestedblock--config--device_id_from_url_param))
+- `element_interactions` (Block List, Max: 1) Enable this setting to capture element interactions automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--element_interactions))
 - `enable_location_listening` (Block List, Max: 1) Enable this setting to activate location listening. (see [below for nested schema](#nestedblock--config--enable_location_listening))
 - `event_filtering` (Block List, Max: 1) This option allows you filter the events you want to send to Amplitude. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `event_upload_period_millis` (Block List, Max: 1) If the batch events settings is enabled, this is the amount of time that the SDK waits to upload the events. (see [below for nested schema](#nestedblock--config--event_upload_period_millis))
 - `event_upload_threshold` (Block List, Max: 1) If the batch events settings is enabled, this is the minimum number of events to batch together by the Amplitude SDK. (see [below for nested schema](#nestedblock--config--event_upload_threshold))
+- `file_downloads` (Block List, Max: 1) Enable this setting to capture file downloads automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--file_downloads))
 - `force_https` (Block List, Max: 1) If this setting is enabled, the events will always be uploaded by the Amplitude SDK to the HTTPS endpoint, otherwise it will use the embedding site's protocol. (see [below for nested schema](#nestedblock--config--force_https))
+- `form_interactions` (Block List, Max: 1) Enable this setting to capture form interactions automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--form_interactions))
+- `frustration_interactions` (Block List, Max: 1) Enable this setting to capture frustration interactions automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--frustration_interactions))
 - `group_type_trait` (String) RudderStack will use this value as `groupType` in the `group` calls.
 - `group_value_trait` (String) RudderStack will use this value as `groupValue` in the `group` calls.
 - `map_device_brand` (Boolean) Enable this setting for RudderStack to send the device brand information (`context.device.brand`) to Amplitude.
+- `network_tracking` (Block List, Max: 1) Enable this setting to capture network requests automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--network_tracking))
+- `page_url_enrichment` (Block List, Max: 1) Enable this setting to enrich page view events with URL properties using Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--page_url_enrichment))
+- `page_views` (Block List, Max: 1) Enable this setting to track page views automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--page_views))
 - `prefer_anonymous_id_for_device_id` (Block List, Max: 1) If this setting is enabled, the device ID will be set as the `anonymousId` generated by RudderStack SDK or by the `anonymousId` set via RudderStack's `setAnonymousId()` method. (see [below for nested schema](#nestedblock--config--prefer_anonymous_id_for_device_id))
 - `residency_server` (String)
 - `save_params_referrer_once_per_session` (Block List, Max: 1) If this setting is enabled, the corresponding tracking of `gclid`, referrer, UTM parameters will be done once per session. (see [below for nested schema](#nestedblock--config--save_params_referrer_once_per_session))
@@ -271,6 +313,7 @@ Optional:
 - `use_idfa_as_device_id` (Block List, Max: 1) Enable this setting to set the IDFA as the device ID. (see [below for nested schema](#nestedblock--config--use_idfa_as_device_id))
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send events to Amplitude via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 - `version_name` (String) The value of this field is set as the `versionName` of the Amplitude SDK.
+- `web_vitals` (Block List, Max: 1) Enable this setting to capture web vitals automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--web_vitals))
 
 <a id="nestedblock--config--batch_events"></a>
 ### Nested Schema for `config.batch_events`
@@ -416,6 +459,14 @@ Optional:
 - `web` (Boolean)
 
 
+<a id="nestedblock--config--element_interactions"></a>
+### Nested Schema for `config.element_interactions`
+
+Optional:
+
+- `web` (Boolean)
+
+
 <a id="nestedblock--config--enable_location_listening"></a>
 ### Nested Schema for `config.enable_location_listening`
 
@@ -456,8 +507,56 @@ Optional:
 - `web` (String)
 
 
+<a id="nestedblock--config--file_downloads"></a>
+### Nested Schema for `config.file_downloads`
+
+Optional:
+
+- `web` (Boolean)
+
+
 <a id="nestedblock--config--force_https"></a>
 ### Nested Schema for `config.force_https`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--form_interactions"></a>
+### Nested Schema for `config.form_interactions`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--frustration_interactions"></a>
+### Nested Schema for `config.frustration_interactions`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--network_tracking"></a>
+### Nested Schema for `config.network_tracking`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--page_url_enrichment"></a>
+### Nested Schema for `config.page_url_enrichment`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--page_views"></a>
+### Nested Schema for `config.page_views`
 
 Optional:
 
@@ -512,6 +611,7 @@ Optional:
 - `android` (Boolean)
 - `ios` (Boolean)
 - `react_native` (Boolean)
+- `web` (Boolean)
 
 
 <a id="nestedblock--config--track_utm_properties"></a>
@@ -556,4 +656,12 @@ Optional:
 - `android` (Boolean)
 - `ios` (Boolean)
 - `react_native` (Boolean)
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--web_vitals"></a>
+### Nested Schema for `config.web_vitals`
+
+Optional:
+
 - `web` (Boolean)

@@ -40,6 +40,14 @@ func init() {
 		c.Simple("trackUtmProperties.web", "track_utm_properties.0.web"),
 		c.Simple("unsetParamsReferrerOnNewSession.web", "unset_params_referrer_on_new_session.0.web"),
 		c.Simple("batchEvents.web", "batch_events.0.web"),
+		c.Simple("pageViews.web", "page_views.0.web"),
+		c.Simple("pageUrlEnrichment.web", "page_url_enrichment.0.web"),
+		c.Simple("webVitals.web", "web_vitals.0.web"),
+		c.Simple("fileDownloads.web", "file_downloads.0.web"),
+		c.Simple("frustrationInteractions.web", "frustration_interactions.0.web"),
+		c.Simple("networkTracking.web", "network_tracking.0.web"),
+		c.Simple("elementInteractions.web", "element_interactions.0.web"),
+		c.Simple("formInteractions.web", "form_interactions.0.web"),
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
 		c.ArrayWithStrings("blacklistedEvents", "eventName", "event_filtering.0.blacklist"),
 		c.Discriminator("eventFilteringOption", c.DiscriminatorValues{
@@ -57,6 +65,7 @@ func init() {
 		c.Simple("mapDeviceBrand", "map_device_brand", c.SkipZeroValue),
 		c.Simple("enableLocationListening.android", "enable_location_listening.0.android"),
 		c.Simple("enableLocationListening.reactnative", "enable_location_listening.0.react_native"),
+		c.Simple("trackSessionEvents.web", "track_session_events.0.web"),
 		c.Simple("trackSessionEvents.android", "track_session_events.0.android"),
 		c.Simple("trackSessionEvents.ios", "track_session_events.0.ios"),
 		c.Simple("trackSessionEvents.reactnative", "track_session_events.0.react_native"),
@@ -334,6 +343,118 @@ func init() {
 				},
 			},
 		},
+		"page_views": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to track page views automatically with Amplitude Browser SDK v2 for web sources.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"page_url_enrichment": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to enrich page view events with URL properties using Amplitude Browser SDK v2 for web sources.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"web_vitals": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to capture web vitals automatically with Amplitude Browser SDK v2 for web sources.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"file_downloads": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to capture file downloads automatically with Amplitude Browser SDK v2 for web sources.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"frustration_interactions": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to capture frustration interactions automatically with Amplitude Browser SDK v2 for web sources.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"network_tracking": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to capture network requests automatically with Amplitude Browser SDK v2 for web sources.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"element_interactions": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to capture element interactions automatically with Amplitude Browser SDK v2 for web sources.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"form_interactions": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable this setting to capture form interactions automatically with Amplitude Browser SDK v2 for web sources.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
 		"event_filtering": {
 			Type:        schema.TypeList,
 			MaxItems:    1,
@@ -444,6 +565,10 @@ func init() {
 			Description: "Enable this setting to track the session events.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
 					"ios": {
 						Type:     schema.TypeBool,
 						Optional: true,
