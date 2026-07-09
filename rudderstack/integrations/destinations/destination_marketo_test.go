@@ -18,6 +18,7 @@ var marketoTestConfigs = []c.TestConfig{
 				create_if_not_exist = true
 				connection_mode {
 					web = "cloud"
+					ios_swift = "cloud"
 					ios = "cloud"
 				}
 			`,
@@ -29,6 +30,7 @@ var marketoTestConfigs = []c.TestConfig{
 				"createIfNotExist": true,
 				"connectionMode": {
 					"web": "cloud",
+					"iosSwift": "cloud",
 					"ios": "cloud"
 				}
 			}`,
@@ -59,6 +61,7 @@ var marketoTestConfigs = []c.TestConfig{
 				]
 				connection_mode {
 					web = "cloud"
+					ios_swift = "cloud"
 					ios = "cloud"
 				}
 				consent_management {
@@ -79,10 +82,20 @@ var marketoTestConfigs = []c.TestConfig{
 							consents = ["one_web", "two_web", "three_web"]
 						}
 					]
+					android_kotlin = [{
+						provider = "ketch"
+						consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+						resolution_strategy = ""
+					}]
 					android = [{
 						provider = "ketch"
 						consents = ["one_android", "two_android", "three_android"]
 						resolution_strategy = ""
+					}]
+					ios_swift = [{
+						provider = "custom"
+						resolution_strategy = "and"
+						consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
 					}]
 					ios = [{
 						provider = "custom"
@@ -158,6 +171,7 @@ var marketoTestConfigs = []c.TestConfig{
 				],
 				"connectionMode": {
 					"web": "cloud",
+					"iosSwift": "cloud",
 					"ios": "cloud"
 				},
 				"consentManagement": {
@@ -208,6 +222,23 @@ var marketoTestConfigs = []c.TestConfig{
 							]
 						}
 					],
+					"androidKotlin": [
+						{
+							"provider": "ketch",
+							"resolutionStrategy": "",
+							"consents": [
+								{
+									"consent": "one_android_kotlin"
+								},
+								{
+									"consent": "two_android_kotlin"
+								},
+								{
+									"consent": "three_android_kotlin"
+								}
+							]
+						}
+					],
 					"android": [
 						{
 							"provider": "ketch",
@@ -221,6 +252,23 @@ var marketoTestConfigs = []c.TestConfig{
 								},
 								{
 									"consent": "three_android"
+								}
+							]
+						}
+					],
+					"iosSwift": [
+						{
+							"provider": "custom",
+							"resolutionStrategy": "and",
+							"consents": [
+								{
+									"consent": "one_ios_swift"
+								},
+								{
+									"consent": "two_ios_swift"
+								},
+								{
+									"consent": "three_ios_swift"
 								}
 							]
 						}

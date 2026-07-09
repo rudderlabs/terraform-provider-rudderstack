@@ -8,6 +8,16 @@ resource "rudderstack_destination_posthog" "example" {
       web = "cloud"
       cloud = "cloud"
       flutter = "cloud"
+      # android = "cloud"
+      # android_kotlin = "cloud"
+      # ios = "cloud"
+      # ios_swift = "cloud"
+      # unity = "cloud"
+      # amp = "cloud"
+      # reactnative = "cloud"
+      # cordova = "cloud"
+      # shopify = "cloud"
+      # warehouse = "cloud"
     }
     # autocapture {
     #   web = false

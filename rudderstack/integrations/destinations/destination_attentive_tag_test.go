@@ -25,7 +25,9 @@ var attentiveTagTestConfigs = []c.TestConfig{
 		TerraformUpdate: `
 				connection_mode {
 					web = "cloud"
+					android_kotlin = "cloud"
 					android = "cloud"
+					ios_swift = "cloud"
 					ios = "cloud"
 					unity = "cloud"
 					reactnative = "cloud"
@@ -44,7 +46,9 @@ var attentiveTagTestConfigs = []c.TestConfig{
 				"apiKey": "key",
 				"connectionMode": {
 					"web": "cloud",
+					"androidKotlin": "cloud",
 					"android": "cloud",
+					"iosSwift": "cloud",
 					"ios": "cloud",
 					"unity": "cloud",
 					"reactnative": "cloud",

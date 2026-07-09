@@ -9,7 +9,9 @@ import (
 func init() {
 	supportedSourceTypes := []string{
 		"android",
+		"androidKotlin",
 		"ios",
+		"iosSwift",
 		"web",
 		"unity",
 		"amp",
@@ -18,6 +20,7 @@ func init() {
 		"reactnative",
 		"flutter",
 		"cordova",
+		"shopify",
 	}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
@@ -28,6 +31,16 @@ func init() {
 		c.Simple("connectionMode.web", "connection_mode.0.web"),
 		c.Simple("connectionMode.cloud", "connection_mode.0.cloud"),
 		c.Simple("connectionMode.flutter", "connection_mode.0.flutter"),
+		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
+		c.Simple("connectionMode.androidKotlin", "connection_mode.0.android_kotlin", c.SkipZeroValue),
+		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
+		c.Simple("connectionMode.iosSwift", "connection_mode.0.ios_swift", c.SkipZeroValue),
+		c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
+		c.Simple("connectionMode.amp", "connection_mode.0.amp", c.SkipZeroValue),
+		c.Simple("connectionMode.reactnative", "connection_mode.0.reactnative", c.SkipZeroValue),
+		c.Simple("connectionMode.cordova", "connection_mode.0.cordova", c.SkipZeroValue),
+		c.Simple("connectionMode.shopify", "connection_mode.0.shopify", c.SkipZeroValue),
+		c.Simple("connectionMode.warehouse", "connection_mode.0.warehouse", c.SkipZeroValue),
 		c.Simple("disableSessionRecording.web", "disable_session_recording.0.web"),
 		c.Simple("capturePageView.web", "capture_page_view.0.web"),
 		c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
@@ -118,6 +131,56 @@ func init() {
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
 					},
 					"cloud": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"android": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"android_kotlin": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"ios": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"ios_swift": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"unity": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"amp": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"reactnative": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"cordova": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"shopify": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"warehouse": {
 						Type:             schema.TypeString,
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
