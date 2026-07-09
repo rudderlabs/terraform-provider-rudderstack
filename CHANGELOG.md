@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.9.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.8.0...v4.9.0) (2026-07-07)
+
+
+### Features
+
+* add Confluent Cloud destination support ([#268](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/268)) ([ff157c8](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/ff157c853fe4d7ef3bf0049d8ddd0971dd00df6f))
+* require non-empty consents in consent management schema [SDK-4965] ([#276](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/276)) ([3b37744](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/3b37744009f759d23f7c9984152018f464509d50))
+
+
+### Miscellaneous
+
+* **e2e:** BigQuery → Customer.io Audience smoke + per-scenario harness refactor ([#288](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/288)) ([fd048e3](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/fd048e36e0b7b42cc0b387ee778fdcd2cba84c40))
+
 ## [4.8.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.7.0...v4.8.0) (2026-06-25)
 
 
