@@ -15,9 +15,7 @@ var posthogTestConfigs = []c.TestConfig{
 				api_key = "api_key"
 				use_v2_group = true
 				connection_mode {
-					web = "cloud"
-					flutter = "cloud"
-					cloud = "cloud"
+					ios_swift = "cloud"
 				}
 			`,
 		APICreate: `{
@@ -25,9 +23,7 @@ var posthogTestConfigs = []c.TestConfig{
 				"teamApiKey": "api_key",
 				"useV2Group": true,
 				"connectionMode": {
-					"web": "cloud",
-					"flutter": "cloud",
-					"cloud": "cloud"
+					"iosSwift": "cloud"
 				}
 			}`,
 		TerraformUpdate: `
