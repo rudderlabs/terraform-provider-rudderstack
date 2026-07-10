@@ -14,7 +14,9 @@ var adjustTestConfigs = []c.TestConfig{
 			app_token = "test_app_token"
 			environment = true
 			connection_mode {
+				android_kotlin = "device"
 				android = "device"
+				ios_swift = "device"
 				ios = "device"
 			}
 			`,
@@ -22,7 +24,9 @@ var adjustTestConfigs = []c.TestConfig{
 				"appToken": "test_app_token",
 				"environment": true,
 				"connectionMode": {
+					"androidKotlin": "device",
 					"android": "device",
+					"iosSwift": "device",
 					"ios": "device"
 				}
 			}`,
@@ -54,7 +58,9 @@ var adjustTestConfigs = []c.TestConfig{
 				whitelist = [ "one", "two", "three" ]
 			}
 			connection_mode {
+				android_kotlin = "cloud"
 				android = "cloud"
+				ios_swift = "cloud"
 				ios = "cloud"
 				unity = "cloud"
 				reactnative = "cloud"
@@ -65,10 +71,20 @@ var adjustTestConfigs = []c.TestConfig{
 				warehouse = "cloud"
 			}
 			consent_management {
+				android_kotlin = [{
+					provider = "ketch"
+					consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+					resolution_strategy = ""
+				}]
 				android = [{
 					provider = "ketch"
 					consents = ["one_android", "two_android", "three_android"]
 					resolution_strategy = ""
+				}]
+				ios_swift = [{
+					provider = "custom"
+					resolution_strategy = "and"
+					consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
 				}]
 				ios = [{
 					provider = "custom"
@@ -144,7 +160,9 @@ var adjustTestConfigs = []c.TestConfig{
 					"eventName": "three"
 				}],
 				"connectionMode": {
+					"androidKotlin": "cloud",
 					"android": "cloud",
+					"iosSwift": "cloud",
 					"ios": "cloud",
 					"unity": "cloud",
 					"reactnative": "cloud",
@@ -155,6 +173,23 @@ var adjustTestConfigs = []c.TestConfig{
 					"warehouse": "cloud"
 				},
 				"consentManagement": {
+					"androidKotlin": [
+						{
+							"provider": "ketch",
+							"resolutionStrategy": "",
+							"consents": [
+								{
+									"consent": "one_android_kotlin"
+								},
+								{
+									"consent": "two_android_kotlin"
+								},
+								{
+									"consent": "three_android_kotlin"
+								}
+							]
+						}
+					],
 					"android": [
 						{
 							"provider": "ketch",
@@ -168,6 +203,23 @@ var adjustTestConfigs = []c.TestConfig{
 								},
 								{
 									"consent": "three_android"
+								}
+							]
+						}
+					],
+					"iosSwift": [
+						{
+							"provider": "custom",
+							"resolutionStrategy": "and",
+							"consents": [
+								{
+									"consent": "one_ios_swift"
+								},
+								{
+									"consent": "two_ios_swift"
+								},
+								{
+									"consent": "three_ios_swift"
 								}
 							]
 						}

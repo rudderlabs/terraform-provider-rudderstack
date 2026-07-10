@@ -23,6 +23,16 @@ resource "rudderstack_destination_posthog" "example" {
       web = "cloud"
       cloud = "cloud"
       flutter = "cloud"
+      # android = "cloud"
+      # android_kotlin = "cloud"
+      # ios = "cloud"
+      # ios_swift = "cloud"
+      # unity = "cloud"
+      # amp = "cloud"
+      # reactnative = "cloud"
+      # cordova = "cloud"
+      # shopify = "cloud"
+      # warehouse = "cloud"
     }
     # autocapture {
     #   web = false
@@ -97,8 +107,18 @@ Optional:
 
 Optional:
 
+- `amp` (String)
+- `android` (String)
+- `android_kotlin` (String)
 - `cloud` (String)
+- `cordova` (String)
 - `flutter` (String)
+- `ios` (String)
+- `ios_swift` (String)
+- `reactnative` (String)
+- `shopify` (String)
+- `unity` (String)
+- `warehouse` (String)
 - `web` (String)
 
 
@@ -125,11 +145,14 @@ Optional:
 
 - `amp` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--amp))
 - `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `android_kotlin` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android_kotlin))
 - `cloud` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud))
 - `cordova` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cordova))
 - `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
 - `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `ios_swift` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios_swift))
 - `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
+- `shopify` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--shopify))
 - `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
 - `warehouse` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--warehouse))
 - `web` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--web))
@@ -146,6 +169,16 @@ Optional:
 
 <a id="nestedatt--config--consent_management--android"></a>
 ### Nested Schema for `config.consent_management.android`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android_kotlin"></a>
+### Nested Schema for `config.consent_management.android_kotlin`
 
 Optional:
 
@@ -194,8 +227,28 @@ Optional:
 - `resolution_strategy` (String)
 
 
+<a id="nestedatt--config--consent_management--ios_swift"></a>
+### Nested Schema for `config.consent_management.ios_swift`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
 <a id="nestedatt--config--consent_management--reactnative"></a>
 ### Nested Schema for `config.consent_management.reactnative`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--shopify"></a>
+### Nested Schema for `config.consent_management.shopify`
 
 Optional:
 

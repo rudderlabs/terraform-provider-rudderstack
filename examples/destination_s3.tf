@@ -27,10 +27,20 @@ resource "rudderstack_destination_s3" "example" {
     # 			consents = ["one_web", "two_web", "three_web"]
     # 		}
     # 	]
+    # 	android_kotlin = [{
+    # 		provider = "ketch"
+    # 		consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+    # 		resolution_strategy = ""
+    # 	}]
     # 	android = [{
     # 		provider = "ketch"
     # 		consents = ["one_android", "two_android", "three_android"]
     # 		resolution_strategy = ""
+    # 	}]
+    # 	ios_swift = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
     # 	}]
     # 	ios = [{
     # 		provider = "custom"

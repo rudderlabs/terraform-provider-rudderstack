@@ -18,7 +18,9 @@ resource "rudderstack_destination_firebase" "example" {
 
   config {
     connection_mode {
+      android_kotlin = "device"
       android = "device"
+      ios_swift = "device"
       ios = "device"
     }
     event_filtering {
@@ -62,8 +64,10 @@ Optional:
 Optional:
 
 - `android` (String)
+- `android_kotlin` (String)
 - `flutter` (String)
 - `ios` (String)
+- `ios_swift` (String)
 - `reactnative` (String)
 - `unity` (String)
 
@@ -74,13 +78,25 @@ Optional:
 Optional:
 
 - `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `android_kotlin` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android_kotlin))
 - `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
 - `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `ios_swift` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios_swift))
 - `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
 - `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
 
 <a id="nestedatt--config--consent_management--android"></a>
 ### Nested Schema for `config.consent_management.android`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android_kotlin"></a>
+### Nested Schema for `config.consent_management.android_kotlin`
 
 Optional:
 
@@ -101,6 +117,16 @@ Optional:
 
 <a id="nestedatt--config--consent_management--ios"></a>
 ### Nested Schema for `config.consent_management.ios`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios_swift"></a>
+### Nested Schema for `config.consent_management.ios_swift`
 
 Optional:
 

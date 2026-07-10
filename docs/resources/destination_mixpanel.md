@@ -83,10 +83,20 @@ resource "rudderstack_destination_mixpanel" example{
     # 			consents = ["one_web", "two_web", "three_web"]
     # 		}
     # 	]
+    # 	android_kotlin = [{
+    # 		provider = "ketch"
+    # 		consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+    # 		resolution_strategy = ""
+    # 	}]
     # 	android = [{
     # 		provider = "ketch"
     # 		consents = ["one_android", "two_android", "three_android"]
     # 		resolution_strategy = ""
+    # 	}]
+    # 	ios_swift = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
     # 	}]
     # 	ios = [{
     # 		provider = "custom"
@@ -233,10 +243,12 @@ Optional:
 
 - `amp` (String)
 - `android` (String)
+- `android_kotlin` (String)
 - `cloud` (String)
 - `cordova` (String)
 - `flutter` (String)
 - `ios` (String)
+- `ios_swift` (String)
 - `reactnative` (String)
 - `shopify` (String)
 - `unity` (String)
@@ -251,10 +263,12 @@ Optional:
 
 - `amp` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--amp))
 - `android` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android))
+- `android_kotlin` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--android_kotlin))
 - `cloud` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cloud))
 - `cordova` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--cordova))
 - `flutter` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--flutter))
 - `ios` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios))
+- `ios_swift` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--ios_swift))
 - `reactnative` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--reactnative))
 - `shopify` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--shopify))
 - `unity` (List of Object) Allows you to specify consent configuration data for multiple providers. (see [below for nested schema](#nestedatt--config--consent_management--unity))
@@ -273,6 +287,16 @@ Optional:
 
 <a id="nestedatt--config--consent_management--android"></a>
 ### Nested Schema for `config.consent_management.android`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--android_kotlin"></a>
+### Nested Schema for `config.consent_management.android_kotlin`
 
 Optional:
 
@@ -313,6 +337,16 @@ Optional:
 
 <a id="nestedatt--config--consent_management--ios"></a>
 ### Nested Schema for `config.consent_management.ios`
+
+Optional:
+
+- `consents` (List of String)
+- `provider` (String)
+- `resolution_strategy` (String)
+
+
+<a id="nestedatt--config--consent_management--ios_swift"></a>
+### Nested Schema for `config.consent_management.ios_swift`
 
 Optional:
 

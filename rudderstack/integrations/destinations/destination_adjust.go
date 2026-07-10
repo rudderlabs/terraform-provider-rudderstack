@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	supportedSourceTypes := []string{"android", "ios", "unity", "reactnative", "flutter", "cordova", "cloud", "warehouse", "shopify"}
+	supportedSourceTypes := []string{"android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "cloud", "warehouse", "shopify"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{
@@ -32,7 +32,9 @@ func init() {
 			"event_filtering.0.blacklist": "blacklistedEvents",
 		}),
 		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
+		c.Simple("connectionMode.androidKotlin", "connection_mode.0.android_kotlin", c.SkipZeroValue),
 		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
+		c.Simple("connectionMode.iosSwift", "connection_mode.0.ios_swift", c.SkipZeroValue),
 		c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
 		c.Simple("connectionMode.reactnative", "connection_mode.0.reactnative", c.SkipZeroValue),
 		c.Simple("connectionMode.flutter", "connection_mode.0.flutter", c.SkipZeroValue),
@@ -162,7 +164,17 @@ func init() {
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud|device)$"),
 					},
+					"android_kotlin": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud|device)$"),
+					},
 					"ios": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud|device)$"),
+					},
+					"ios_swift": {
 						Type:             schema.TypeString,
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("^(cloud|device)$"),
