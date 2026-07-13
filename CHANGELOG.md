@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.10.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.9.0...v4.10.0) (2026-07-10)
+
+
+### Features
+
+* add missing source type support in destinations ([#292](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/292)) ([9fd66af](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/9fd66af65ec790d2305319ae993ee2907ed71626))
+
 ## [4.9.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.8.0...v4.9.0) (2026-07-07)
 
 
