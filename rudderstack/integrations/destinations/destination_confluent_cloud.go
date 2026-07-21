@@ -142,6 +142,7 @@ func init() {
 
 	c.Destinations.Register("confluent_cloud", c.ConfigMeta{
 		APIType:      "CONFLUENT_CLOUD",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: destinationSchema,
 	})
