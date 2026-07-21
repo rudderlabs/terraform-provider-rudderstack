@@ -28,6 +28,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	resourceName := fmt.Sprintf("rudderstack_destination_%s.test", destination)
 	name := RandomName(destination)
 	cfg := testConfigs[0]
+	wantVersion := registeredDestinationVersion(t, destination)
 
 	if PlanOnly() {
 		t.Parallel()
@@ -59,15 +60,13 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
 					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate),
-					// INT-6494: every bare (suffix-less) destination is registered
-					// with ConfigMeta.Version = 1, so it must send version:1 on the
-					// wire. This test step's automatic post-apply plan check (part
-					// of resource.Test) also asserts there's no plan diff, so this
-					// exercises both halves of the story's "whole-fleet v1" AC.
-					// Requires the backend to echo `version` back on read (INT-6489
-					// Blocker B) — until then this assertion will fail loudly rather
-					// than silently pass.
-					testAccCheckDestinationVersion(resourceName, 1),
+					// Exact wire version must match the destination's registered
+					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
+					// The automatic post-apply plan check also asserts no plan
+					// diff. Requires the backend to echo version on read
+					// (Blocker B) — until then this fails loudly rather than
+					// silently passing.
+					testAccCheckDestinationVersion(resourceName, wantVersion),
 				),
 			},
 			{
@@ -164,6 +163,21 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 
 		return compareConfig(dest.Config, expectedJSON)
 	}
+}
+
+// registeredDestinationVersion returns ConfigMeta.Version for the terraform
+// destination type name. Exact match (not >= 1) keeps future _v2 resources
+// correct while still failing if the API returns the wrong version.
+func registeredDestinationVersion(t *testing.T, destination string) int {
+	t.Helper()
+	cm, ok := configs.Destinations.Entries()[destination]
+	if !ok {
+		t.Fatalf("destination %q is not registered", destination)
+	}
+	if cm.Version < 1 {
+		t.Fatalf("destination %q has invalid ConfigMeta.Version %d", destination, cm.Version)
+	}
+	return cm.Version
 }
 
 // testAccCheckDestinationVersion fetches the destination from the API and verifies

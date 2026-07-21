@@ -110,7 +110,8 @@ func TestComposeConfigMeta_AddsAndRemovesProperties(t *testing.T) {
 func TestComposeConfigMeta_PropertiesWithoutNameCannotBeRemoved(t *testing.T) {
 	// Known limitation (documented on Delta.RemovedProperties): properties
 	// built by today's constructors (Simple, Conditional, ...) don't set
-	// Name, so RemovedProperties can't target them.
+	// Name, so RemovedProperties can't target them. Targeting a missing Name
+	// is a hard validation error rather than a silent no-op.
 	base := c.ConfigMeta{
 		APIType: "BASE_TYPE",
 		Version: 1,
@@ -119,11 +120,106 @@ func TestComposeConfigMeta_PropertiesWithoutNameCannotBeRemoved(t *testing.T) {
 		},
 	}
 
-	v2 := ComposeConfigMeta(base, Delta{
-		RemovedProperties: []string{"unnamedField"},
-	}, 2)
+	assert.Panics(t, func() {
+		ComposeConfigMeta(base, Delta{
+			RemovedProperties: []string{"unnamedField"},
+		}, 2)
+	})
 
-	assert.Len(t, v2.Properties, 1, "property without a Name is not removable and must be carried over unchanged")
+	v2 := ComposeConfigMeta(base, Delta{}, 2)
+	assert.Len(t, v2.Properties, 1)
+}
+
+func TestComposeConfigMeta_InvalidDeltaPanics(t *testing.T) {
+	base := baseConfigMetaForComposeTest()
+
+	tests := []struct {
+		name  string
+		delta Delta
+		msg   string
+	}{
+		{
+			name:  "unknown removed key",
+			delta: Delta{Removed: []string{"missing_field"}},
+			msg:   `Removed schema key "missing_field" does not exist on base`,
+		},
+		{
+			name:  "unknown renamed key",
+			delta: Delta{Renamed: map[string]string{"missing_field": "x"}},
+			msg:   `Renamed schema key "missing_field" does not exist on base`,
+		},
+		{
+			name: "removed and renamed overlap",
+			delta: Delta{
+				Removed: []string{"renamed_field"},
+				Renamed: map[string]string{"renamed_field": "renamed_field_v2"},
+			},
+			msg: `schema key "renamed_field" cannot be both Removed and Renamed`,
+		},
+		{
+			name: "chained renames",
+			delta: Delta{
+				Renamed: map[string]string{
+					"kept_field":    "renamed_field",
+					"renamed_field": "renamed_field_v2",
+				},
+			},
+			msg: "chained Renamed is not supported",
+		},
+		{
+			name: "duplicate rename targets",
+			delta: Delta{
+				Renamed: map[string]string{
+					"kept_field":    "shared_target",
+					"renamed_field": "shared_target",
+				},
+			},
+			msg: `duplicate Renamed target "shared_target"`,
+		},
+		{
+			name: "rename into retained key",
+			delta: Delta{
+				Renamed: map[string]string{"renamed_field": "kept_field"},
+			},
+			msg: `Renamed target "kept_field" collides with retained base schema key`,
+		},
+		{
+			name: "added key already exists",
+			delta: Delta{
+				Added: map[string]*schema.Schema{
+					"kept_field": {Type: schema.TypeBool, Optional: true},
+				},
+			},
+			msg: `Added schema key "kept_field" already exists on base`,
+		},
+		{
+			name: "added key collides with rename target",
+			delta: Delta{
+				Renamed: map[string]string{"renamed_field": "renamed_field_v2"},
+				Added: map[string]*schema.Schema{
+					"renamed_field_v2": {Type: schema.TypeBool, Optional: true},
+				},
+			},
+			msg: `Added schema key "renamed_field_v2" collides with Renamed target`,
+		},
+		{
+			name:  "unknown removed property",
+			delta: Delta{RemovedProperties: []string{"no_such_prop"}},
+			msg:   `RemovedProperties name "no_such_prop" does not match a named base property`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var panicked any
+			func() {
+				defer func() { panicked = recover() }()
+				ComposeConfigMeta(base, tt.delta, 2)
+			}()
+			require.NotNil(t, panicked, "expected panic")
+			assert.Contains(t, fmtPanic(panicked), tt.msg)
+		})
+	}
 }
 
 func TestAllRegisteredDestinationsHaveExplicitVersion(t *testing.T) {
@@ -154,4 +250,15 @@ func propertyNames(props []c.ConfigProperty) []string {
 		}
 	}
 	return names
+}
+
+func fmtPanic(p any) string {
+	switch v := p.(type) {
+	case error:
+		return v.Error()
+	case string:
+		return v
+	default:
+		return ""
+	}
 }

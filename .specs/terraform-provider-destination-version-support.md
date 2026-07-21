@@ -36,6 +36,7 @@ Refinement of the original story. All decisions below were validated against the
 * `configMetaByVersion(entries, apiType, version int)` — **new**, mandatory version filter. Used by destination callers (lines 67, 162). Signature: `func configMetaByVersion(entries map[string]configs.ConfigMeta, apiType string, version int) (string, *configs.ConfigMeta)`.
 * `configMetaByVersion` matches strictly on `e.APIType == apiType && e.Version == version`. **No coercion of** `version == 0` — see §6.
 * Destination call sites become `configMetaByVersion(destinationConfigs, dst.Type, dst.Version)`.
+* When lookup fails, both `GenerateTerraform` and `GenerateImportScript` log a shared reason from `unsupportedDestinationReason`: unknown API type vs known API type with unsupported/absent version (lists sorted available versions). Import generation must not skip destinations silently.
 * Source call sites stay `configMeta(sourceConfigs, src.Type)`.
 
 ## 6\. `absent version on the wire` — owned by [INT-6489](https://linear.app/rudderstack/issue/INT-6489/public-api-contract-version-on-rudder-api-dtos-migrate-proxy-and), not this story
@@ -64,8 +65,9 @@ Refinement of the original story. All decisions below were validated against the
   ```go
   func ComposeConfigMeta(base c.ConfigMeta, delta Delta, version int) c.ConfigMeta
   ```
-  * Clones `base.ConfigSchema` (shallow map copy) and `base.Properties` (slice copy).
-  * Applies `Renamed` (delete old key, insert under new key — safe on shallow-copied map), `Added` (insert new `*schema.Schema`), `Removed` (delete keys) to the schema map.
+  * Clones `base.ConfigSchema` (shallow map copy) and `base.Properties` (slice copy). `SettingsSchema` / `Settings` are shared with base (destinations do not use them today; cloning them is out of scope).
+  * Validates the full delta before mutation and panics with a deterministic message on invalid input (unknown Removed/Renamed/RemovedProperties keys, Removed/Renamed source overlap, chained renames, duplicate rename targets, collisions with retained or Added keys) — same class of fail-fast as `Destinations.Register`.
+  * Applies `Renamed` from original base values in sorted old-key order (delete old key, insert under new key), then `Added`, then `Removed` (Removed applied before Renamed in the helper). Map iteration order must not affect the result.
   * Applies `AddedProperties` / `RemovedProperties` to the Properties slice.
   * Sets `result.Version = version`.
   * Returns `ConfigMeta` by value (matches `Registry.Register` signature).
@@ -90,7 +92,9 @@ Refinement of the original story. All decisions below were validated against the
 | Existing `generator_test.go` destination fixtures bumped to `Version: 1` | `cmd/generatetf/generator/generator_test.go` | Unit (edit existing) | Blocker A |
 | `populateDestinationFromState` sets `destination.Version = cm.Version` | `rudderstack/resource_destination_test.go` (new case) | Unit | Blocker A |
 | `Destinations.Register` panics on `Version == 0` and on duplicate `(apiType, version)` | `rudderstack/configs/registries_test.go` (new cases) | Unit | Blocker A |
-| `ComposeConfigMeta`: base + delta → expected ConfigMeta; base unchanged after | `rudderstack/integrations/destinations/compose_test.go` (new) | Unit | Blocker A |
+| `ComposeConfigMeta`: base + delta → expected ConfigMeta; base unchanged after; invalid deltas panic | `rudderstack/integrations/destinations/compose_test.go` (new) | Unit | Blocker A |
+| `unsupportedDestinationReason` + skip logs in HCL/import generators | `cmd/generatetf/generator/generator_version_test.go` | Unit | Blocker A |
+| Acc destination version check uses registered `ConfigMeta.Version` (exact) | `internal/testutil/acc/destinations.go` | Acceptance helper | Blocker B |
 | Braze applies with `version: 1` in request body, no plan diff before/after provider upgrade | `rudderstack/resource_destination_test.go` | Acceptance, `RUDDERSTACK_ACCESS_TOKEN`-gated | Blocker B |
 
 ## 10\. Updated acceptance criteria

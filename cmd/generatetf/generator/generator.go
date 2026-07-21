@@ -69,6 +69,8 @@ func GenerateImportScript(
 			foundDestinations[dst.ID] = true
 			destinationTerraformTypes[dst.ID] = t
 			lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_destination_%s.%s" "%s"`, t, destinationName(dst), dst.ID))
+		} else {
+			logger.Printf("skipping destination '%s': %s", dst.ID, unsupportedDestinationReason(destinationConfigs, dst.Type, dst.Version))
 		}
 	}
 
@@ -170,7 +172,7 @@ func GenerateTerraform(
 				generatedDestinationEntries[dst.ID] = &destinationEntry{terraformType: terraformType, destination: dst}
 			}
 		} else {
-			logger.Printf("could not generate resource block for destination '%s': type '%s' is not supported", dst.ID, dst.Type)
+			logger.Printf("could not generate resource block for destination '%s': %s", dst.ID, unsupportedDestinationReason(destinationConfigs, dst.Type, dst.Version))
 		}
 	}
 
@@ -454,7 +456,7 @@ func configMeta(entries map[string]configs.ConfigMeta, apiType string) (string, 
 // version is mandatory and matched strictly (no coercion of an absent/zero version to v1):
 // this provider relies on the API always reporting a real version on every destination
 // (see INT-6489). A destination whose reported version has no matching registry entry is
-// treated the same as an unsupported apiType: it's skipped by the caller.
+// skipped by the caller; use unsupportedDestinationReason to explain why.
 func configMetaByVersion(entries map[string]configs.ConfigMeta, apiType string, version int) (string, *configs.ConfigMeta) {
 	for r, e := range entries {
 		if e.APIType == apiType && e.Version == version {
@@ -463,6 +465,33 @@ func configMetaByVersion(entries map[string]configs.ConfigMeta, apiType string, 
 	}
 
 	return "", nil
+}
+
+// unsupportedDestinationReason explains why configMetaByVersion returned no match.
+// It distinguishes an unknown API type from a known API type whose reported version
+// has no registry entry, and lists the sorted versions that are registered.
+func unsupportedDestinationReason(entries map[string]configs.ConfigMeta, apiType string, version int) string {
+	available := make([]int, 0)
+	seen := make(map[int]bool)
+	for _, e := range entries {
+		if e.APIType != apiType {
+			continue
+		}
+		if seen[e.Version] {
+			continue
+		}
+		seen[e.Version] = true
+		available = append(available, e.Version)
+	}
+	if len(available) == 0 {
+		return fmt.Sprintf("type '%s' is not supported", apiType)
+	}
+	sort.Ints(available)
+	parts := make([]string, len(available))
+	for i, v := range available {
+		parts[i] = fmt.Sprintf("%d", v)
+	}
+	return fmt.Sprintf("type '%s' version %d is not supported (available versions: %s)", apiType, version, strings.Join(parts, ", "))
 }
 
 // generateConfigBlock generate a source or destination config block from an API config JSON
