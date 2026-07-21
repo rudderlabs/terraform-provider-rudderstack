@@ -21,6 +21,30 @@ func TestSimpleConfigProperty(t *testing.T) {
 	assert.JSONEq(t, `{ "p": true, "t": { "s": "123" } }`, s)
 }
 
+func TestSimpleWithDefaultConfigProperty(t *testing.T) {
+	p := configs.SimpleWithDefault("a.b", "t.0.s", 2)
+
+	// state has a value: it is passed through
+	a, err := p.FromStateFunc(`{ "p": true }`, `{ "t": [ { "s": 1 } ] }`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{ "p": true, "a": { "b": 1 } }`, a)
+
+	// state has no value: the default is written to the API config
+	a, err = p.FromStateFunc(`{ "p": true }`, `{}`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{ "p": true, "a": { "b": 2 } }`, a)
+
+	// state has an empty block: the default is written to the API config
+	a, err = p.FromStateFunc(`{ "p": true }`, `{ "t": [] }`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{ "p": true, "a": { "b": 2 } }`, a)
+
+	// the API value is copied back into state
+	s, err := p.ToStateFunc(`{ "p": true }`, `{ "a": { "b": 2 } }`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{ "p": true, "t": [ { "s": 2 } ] }`, s)
+}
+
 func TestConditionalTrue(t *testing.T) {
 	p := configs.Conditional("a.b", "t.s", func(state string) bool {
 		return true

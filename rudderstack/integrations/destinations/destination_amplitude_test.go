@@ -19,7 +19,8 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"apiSecret": "abc123",
 				"trackCategorizedPages": true,
 				"trackNamedPages": true,
-				"residencyServer": "standard"
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
 			}`,
 		TerraformUpdate: `
 				api_key = "123abc"
@@ -532,6 +533,34 @@ var amplitudeTestConfigs = []c.TestConfig{
 					]
 				},
 				"residencyServer": "EU"
+			}`,
+	},
+	{
+		TerraformCreate: `
+				api_key = "123abc"
+
+				sdk_version {}
+			`,
+		APICreate: `{
+				"apiKey": "123abc",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
+			}`,
+		TerraformUpdate: `
+				api_key = "123abc"
+
+				sdk_version {
+				  web = 1
+				}
+			`,
+		APIUpdate: `{
+				"apiKey": "123abc",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 1 }
 			}`,
 	},
 }
