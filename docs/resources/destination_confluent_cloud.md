@@ -225,4 +225,3 @@ Optional:
 - `consents` (List of String)
 - `provider` (String)
 - `resolution_strategy` (String)
-

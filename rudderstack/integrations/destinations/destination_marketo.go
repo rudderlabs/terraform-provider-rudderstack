@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	supportedSourceTypes := []string{"web", "android", "ios", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
+	supportedSourceTypes := []string{"web", "android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{
@@ -18,7 +18,9 @@ func init() {
 		c.Simple("createIfNotExist", "create_if_not_exist"),
 		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 		c.Simple("connectionMode.ios", "connection_mode.0.ios", c.SkipZeroValue),
+		c.Simple("connectionMode.iosSwift", "connection_mode.0.ios_swift", c.SkipZeroValue),
 		c.Simple("connectionMode.android", "connection_mode.0.android", c.SkipZeroValue),
+		c.Simple("connectionMode.androidKotlin", "connection_mode.0.android_kotlin", c.SkipZeroValue),
 		c.Simple("connectionMode.reactnative", "connection_mode.0.react_native", c.SkipZeroValue),
 		c.Simple("connectionMode.unity", "connection_mode.0.unity", c.SkipZeroValue),
 		c.Simple("connectionMode.amp", "connection_mode.0.amp", c.SkipZeroValue),
@@ -149,7 +151,17 @@ func init() {
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
 					},
+					"ios_swift": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
 					"android": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),
+					},
+					"android_kotlin": {
 						Type:             schema.TypeString,
 						Optional:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].*)|^(cloud)$"),

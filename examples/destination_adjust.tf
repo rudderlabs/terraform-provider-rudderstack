@@ -6,7 +6,9 @@ resource "rudderstack_destination_adjust" "example" {
     # delay = "5"
     environment = true
     connection_mode {
+      android_kotlin = "device"
       android = "device"
+      ios_swift = "device"
       ios     = "device"
     }
     # custom_mappings = [
@@ -34,10 +36,20 @@ resource "rudderstack_destination_adjust" "example" {
     #    # blacklist = ["one", "two", "three"]
     # }
     # consent_management {
+    # 	android_kotlin = [{
+    # 		provider = "ketch"
+    # 		consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+    # 		resolution_strategy = ""
+    # 	}]
     # 	android = [{
     # 		provider = "ketch"
     # 		consents = ["one_android", "two_android", "three_android"]
     # 		resolution_strategy = ""
+    # 	}]
+    # 	ios_swift = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
     # 	}]
     # 	ios = [{
     # 		provider = "custom"
