@@ -173,9 +173,25 @@ func sensitiveStatePaths(prefix string, configSchema map[string]*schema.Schema) 
 		if nestedSchema == nil {
 			continue
 		}
+		if schemaContainsSensitiveFieldsForTest(nestedSchema) {
+			paths = append(paths, path, path+".#", path+".0.%")
+		}
 		paths = append(paths, sensitiveStatePaths(path+".0", nestedSchema)...)
 	}
 	return paths
+}
+
+func schemaContainsSensitiveFieldsForTest(configSchema map[string]*schema.Schema) bool {
+	for _, sch := range configSchema {
+		if sch.Sensitive {
+			return true
+		}
+		nestedSchema := nestedSchemaForTest(sch)
+		if nestedSchema != nil && schemaContainsSensitiveFieldsForTest(nestedSchema) {
+			return true
+		}
+	}
+	return false
 }
 
 // testAccCheckDestinationDestroy verifies all destinations created by the test

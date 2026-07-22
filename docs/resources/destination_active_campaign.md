@@ -143,7 +143,7 @@ Optional:
 
 - `actid` (String) Enter your ActID here. To obtain the ActID unique to your ActiveCampaign account, go to Settings > Tracking > Event Tracking API.
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
-- `event_key` (String) Enter the event key unique to your ActiveCampaign account. To obtain the event key, go to your ActiveCampaign account > Settings > Tracking > Event Tracking.
+- `event_key` (String, Sensitive) Enter the event key unique to your ActiveCampaign account. To obtain the event key, go to your ActiveCampaign account > Settings > Tracking > Event Tracking.
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`

@@ -142,7 +142,7 @@ resource "rudderstack_destination_intercom" "example" {
 
 Required:
 
-- `api_key` (String) Enter your Intercom access token.
+- `api_key` (String, Sensitive) Enter your Intercom access token.
 - `app_id` (String) Enter your app ID.
 
 Optional:
@@ -150,8 +150,8 @@ Optional:
 - `collect_context` (Boolean) Enable this setting to include the user context along with your identify calls.
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `event_filtering` (Block List, Max: 1) Use this setting to determine which events should be blocked or allowed to flow through. (see [below for nested schema](#nestedblock--config--event_filtering))
-- `mobile_api_key_android` (String) Enter the Android API Key.
-- `mobile_api_key_ios` (String) Enter the iOS API Key.
+- `mobile_api_key_android` (String, Sensitive) Enter the Android API Key.
+- `mobile_api_key_ios` (String, Sensitive) Enter the iOS API Key.
 - `send_anonymous_id` (Boolean) Enable this setting to send anonymousId as the secondary userId.
 - `update_last_request_at` (Boolean) Enable this setting to send the last seen information with the current time.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through device mode, that is, using the native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))

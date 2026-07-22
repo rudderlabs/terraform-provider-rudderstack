@@ -35,6 +35,7 @@ func init() {
 		"api_key": {
 			Type:             schema.TypeString,
 			Required:         true,
+			Sensitive:        true,
 			Description:      "Enter your Intercom access token.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
@@ -47,12 +48,14 @@ func init() {
 		"mobile_api_key_android": {
 			Type:             schema.TypeString,
 			Optional:         true,
+			Sensitive:        true,
 			Description:      "Enter the Android API Key.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
 		"mobile_api_key_ios": {
 			Type:             schema.TypeString,
 			Optional:         true,
+			Sensitive:        true,
 			Description:      "Enter the iOS API Key.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
