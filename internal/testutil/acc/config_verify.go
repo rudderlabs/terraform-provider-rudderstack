@@ -38,6 +38,29 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string) error {
 	return nil
 }
 
+// compareConfigIgnoringTopLevelFields applies the same subset comparison as compareConfig,
+// after removing top-level fields that the API intentionally redacts on reads.
+func compareConfigIgnoringTopLevelFields(actualRaw json.RawMessage, expectedJSON string, ignoredFields []string) error {
+	expectedJSON = strings.TrimSpace(expectedJSON)
+	if len(ignoredFields) == 0 || expectedJSON == "" || expectedJSON == "{}" {
+		return compareConfig(actualRaw, expectedJSON)
+	}
+
+	var expected map[string]any
+	if err := json.Unmarshal([]byte(expectedJSON), &expected); err != nil {
+		return fmt.Errorf("failed to unmarshal expected config JSON: %w", err)
+	}
+	for _, field := range ignoredFields {
+		delete(expected, field)
+	}
+
+	filteredExpected, err := json.Marshal(expected)
+	if err != nil {
+		return fmt.Errorf("failed to marshal expected config JSON: %w", err)
+	}
+	return compareConfig(actualRaw, string(filteredExpected))
+}
+
 // compareFields recursively checks that every key in expected exists in actual with the
 // correct value. It collects all mismatches rather than failing on the first one.
 func compareFields(prefix string, expected, actual map[string]any, mismatches *[]string) {

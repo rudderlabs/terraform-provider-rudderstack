@@ -58,7 +58,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate, cfg.APIReadRedactedFields),
 				),
 			},
 			{
@@ -66,13 +66,14 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate, cfg.APIReadRedactedFields),
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: cfg.ImportStateVerifyIgnore,
 			},
 		},
 	})
@@ -132,7 +133,7 @@ func testAccCheckDestinationExists(resourceName string) resource.TestCheckFunc {
 
 // testAccCheckDestinationAPIConfig fetches the destination from the API and verifies
 // its config contains all expected fields from the test's API JSON.
-func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resource.TestCheckFunc {
+func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, redactedFields []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if expectedJSON == "" {
 			return nil
@@ -153,7 +154,7 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		return compareConfig(dest.Config, expectedJSON)
+		return compareConfigIgnoringTopLevelFields(dest.Config, expectedJSON, redactedFields)
 	}
 }
 

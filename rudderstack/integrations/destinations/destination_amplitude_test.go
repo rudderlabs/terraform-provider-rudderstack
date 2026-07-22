@@ -21,6 +21,8 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"trackNamedPages": true,
 				"residencyServer": "standard"
 			}`,
+		APIReadRedactedFields:   []string{"apiSecret"},
+		ImportStateVerifyIgnore: []string{"config.0.api_secret"},
 		TerraformUpdate: `
 				api_key = "123abc"
 				api_secret = "abc123"
