@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
 // compareConfig verifies that actualRaw contains all fields specified in expectedJSON.
@@ -38,27 +42,84 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string) error {
 	return nil
 }
 
-// compareConfigIgnoringTopLevelFields applies the same subset comparison as compareConfig,
-// after removing top-level fields that the API intentionally redacts on reads.
-func compareConfigIgnoringTopLevelFields(actualRaw json.RawMessage, expectedJSON string, ignoredFields []string) error {
+func compareDestinationReadConfig(cm configs.ConfigMeta, actualRaw json.RawMessage, expectedJSON string) error {
 	expectedJSON = strings.TrimSpace(expectedJSON)
-	if len(ignoredFields) == 0 || expectedJSON == "" || expectedJSON == "{}" {
-		return compareConfig(actualRaw, expectedJSON)
+	if expectedJSON == "" || expectedJSON == "{}" {
+		return nil
 	}
 
-	var expected map[string]any
-	if err := json.Unmarshal([]byte(expectedJSON), &expected); err != nil {
-		return fmt.Errorf("failed to unmarshal expected config JSON: %w", err)
-	}
-	for _, field := range ignoredFields {
-		delete(expected, field)
-	}
-
-	filteredExpected, err := json.Marshal(expected)
+	expectedState, err := cm.APIToState(expectedJSON)
 	if err != nil {
-		return fmt.Errorf("failed to marshal expected config JSON: %w", err)
+		return fmt.Errorf("failed to convert expected config JSON to state: %w", err)
 	}
-	return compareConfig(actualRaw, string(filteredExpected))
+
+	expectedStateProps := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(expectedState), &expectedStateProps); err != nil {
+		return fmt.Errorf("failed to unmarshal expected state JSON: %w", err)
+	}
+
+	filteredStateProps := removeSensitiveStateValues(cm.ConfigSchema, expectedStateProps)
+	if len(filteredStateProps) == 0 {
+		return nil
+	}
+
+	filteredState, err := json.Marshal(filteredStateProps)
+	if err != nil {
+		return fmt.Errorf("failed to marshal expected state JSON: %w", err)
+	}
+
+	filteredExpected, err := cm.StateToAPI(string(filteredState))
+	if err != nil {
+		return fmt.Errorf("failed to convert expected state JSON to config: %w", err)
+	}
+
+	return compareConfig(actualRaw, filteredExpected)
+}
+
+func removeSensitiveStateValues(configSchema map[string]*schema.Schema, props map[string]interface{}) map[string]interface{} {
+	filtered := make(map[string]interface{}, len(props))
+	for key, value := range props {
+		sch, exists := configSchema[key]
+		if !exists {
+			filtered[key] = value
+			continue
+		}
+		if sch.Sensitive {
+			continue
+		}
+
+		nestedSchema := nestedSchemaForTest(sch)
+		if nestedSchema == nil {
+			filtered[key] = value
+			continue
+		}
+
+		list, ok := value.([]interface{})
+		if !ok {
+			filtered[key] = value
+			continue
+		}
+
+		filteredList := make([]interface{}, 0, len(list))
+		for _, item := range list {
+			itemMap, ok := item.(map[string]interface{})
+			if !ok {
+				filteredList = append(filteredList, item)
+				continue
+			}
+			filteredList = append(filteredList, removeSensitiveStateValues(nestedSchema, itemMap))
+		}
+		filtered[key] = filteredList
+	}
+	return filtered
+}
+
+func nestedSchemaForTest(sch *schema.Schema) map[string]*schema.Schema {
+	resource, ok := sch.Elem.(*schema.Resource)
+	if !ok {
+		return nil
+	}
+	return resource.Schema
 }
 
 // compareFields recursively checks that every key in expected exists in actual with the

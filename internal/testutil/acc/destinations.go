@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
@@ -27,7 +28,9 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 
 	resourceName := fmt.Sprintf("rudderstack_destination_%s.test", destination)
 	name := RandomName(destination)
+	cm := configs.Destinations.Entries()[destination]
 	cfg := testConfigs[0]
+	importStateVerifyIgnore := sensitiveStatePaths("config.0", cm.ConfigSchema)
 
 	if PlanOnly() {
 		t.Parallel()
@@ -58,7 +61,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate, cfg.APIReadRedactedFields),
+					testAccCheckDestinationAPIConfig(cm, resourceName, cfg.APICreate),
 				),
 			},
 			{
@@ -66,14 +69,14 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate, cfg.APIReadRedactedFields),
+					testAccCheckDestinationAPIConfig(cm, resourceName, cfg.APIUpdate),
 				),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: cfg.ImportStateVerifyIgnore,
+				ImportStateVerifyIgnore: importStateVerifyIgnore,
 			},
 		},
 	})
@@ -133,7 +136,7 @@ func testAccCheckDestinationExists(resourceName string) resource.TestCheckFunc {
 
 // testAccCheckDestinationAPIConfig fetches the destination from the API and verifies
 // its config contains all expected fields from the test's API JSON.
-func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, redactedFields []string) resource.TestCheckFunc {
+func testAccCheckDestinationAPIConfig(cm configs.ConfigMeta, resourceName, expectedJSON string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if expectedJSON == "" {
 			return nil
@@ -154,8 +157,25 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, redacte
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		return compareConfigIgnoringTopLevelFields(dest.Config, expectedJSON, redactedFields)
+		return compareDestinationReadConfig(cm, dest.Config, expectedJSON)
 	}
+}
+
+func sensitiveStatePaths(prefix string, configSchema map[string]*schema.Schema) []string {
+	var paths []string
+	for key, sch := range configSchema {
+		path := prefix + "." + key
+		if sch.Sensitive {
+			paths = append(paths, path)
+		}
+
+		nestedSchema := nestedSchemaForTest(sch)
+		if nestedSchema == nil {
+			continue
+		}
+		paths = append(paths, sensitiveStatePaths(path+".0", nestedSchema)...)
+	}
+	return paths
 }
 
 // testAccCheckDestinationDestroy verifies all destinations created by the test

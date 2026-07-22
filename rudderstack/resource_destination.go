@@ -252,6 +252,14 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 		return err
 	}
 
+	if existing, ok := d.GetOk("config"); ok {
+		if list, ok := existing.([]interface{}); ok && len(list) > 0 {
+			if priorMap, ok := list[0].(map[string]interface{}); ok {
+				properties = preserveSensitiveConfigValues(cm.ConfigSchema, properties, priorMap)
+			}
+		}
+	}
+
 	if len(properties) > 0 {
 		if err := d.Set("config", []interface{}{properties}); err != nil {
 			return err
@@ -263,4 +271,74 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 	}
 
 	return nil
+}
+
+func preserveSensitiveConfigValues(configSchema map[string]*schema.Schema, apiProps, priorProps map[string]interface{}) map[string]interface{} {
+	merged := make(map[string]interface{}, len(apiProps))
+	for key, value := range apiProps {
+		merged[key] = value
+	}
+
+	for key, sch := range configSchema {
+		priorValue, exists := priorProps[key]
+		if !exists {
+			continue
+		}
+		if sch.Sensitive {
+			merged[key] = priorValue
+			continue
+		}
+
+		nestedSchema := nestedResourceSchema(sch)
+		if nestedSchema == nil {
+			continue
+		}
+
+		apiList, apiOK := merged[key].([]interface{})
+		priorList, priorOK := priorValue.([]interface{})
+		if (!apiOK || len(apiList) == 0) && priorOK && schemaContainsSensitiveFields(nestedSchema) {
+			merged[key] = priorValue
+			continue
+		}
+		if !apiOK || !priorOK {
+			continue
+		}
+
+		nestedList := make([]interface{}, len(apiList))
+		copy(nestedList, apiList)
+		for i := range nestedList {
+			if i >= len(priorList) {
+				break
+			}
+			apiMap, apiOK := nestedList[i].(map[string]interface{})
+			priorMap, priorOK := priorList[i].(map[string]interface{})
+			if !apiOK || !priorOK {
+				continue
+			}
+			nestedList[i] = preserveSensitiveConfigValues(nestedSchema, apiMap, priorMap)
+		}
+		merged[key] = nestedList
+	}
+
+	return merged
+}
+
+func nestedResourceSchema(sch *schema.Schema) map[string]*schema.Schema {
+	resource, ok := sch.Elem.(*schema.Resource)
+	if !ok {
+		return nil
+	}
+	return resource.Schema
+}
+
+func schemaContainsSensitiveFields(configSchema map[string]*schema.Schema) bool {
+	for _, sch := range configSchema {
+		if sch.Sensitive {
+			return true
+		}
+		if nestedSchema := nestedResourceSchema(sch); nestedSchema != nil && schemaContainsSensitiveFields(nestedSchema) {
+			return true
+		}
+	}
+	return false
 }
