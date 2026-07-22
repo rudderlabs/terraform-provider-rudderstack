@@ -60,3 +60,10 @@
 
 - `GetCommonConfigMeta` contributes only `consent_management` mappings for declared source types; warehouse controls and other destination-level fields must be mapped in the destination integration itself.
 - Snowflake `supportedSourceTypes` directly gates which nested `consent_management` source-type blocks are exposed in Terraform; omitted source types (for example Android Kotlin / iOS Swift) silently drop corresponding nested keys.
+
+## SDK-5015 — Amplitude web AutoCapture config fields
+
+- Amplitude browser-scoped destination settings use one-element `TypeList` blocks with a `web` leaf and direct nested mappings such as `c.Simple("<apiKey>.web", "<field>.0.web", ...)`; v2 AutoCapture sub-features follow the same shape rather than introducing a new schema style.
+- The v2 AutoCapture mappings are `pageViews.web` <-> `page_views.0.web`, `pageUrlEnrichment.web` <-> `page_url_enrichment.0.web`, `webVitals.web` <-> `web_vitals.0.web`, `fileDownloads.web` <-> `file_downloads.0.web`, `frustrationInteractions.web` <-> `frustration_interactions.0.web`, `networkTracking.web` <-> `network_tracking.0.web`, `elementInteractions.web` <-> `element_interactions.0.web`, and `formInteractions.web` <-> `form_interactions.0.web`.
+- These Amplitude AutoCapture fields are optional and omit Terraform defaults so absent configuration preserves control-plane/default dashboard behavior; use `SkipZeroValue`-style omission instead of forcing false values for unmanaged destinations.
+- `track_session_events` is the mixed-source Amplitude block extended with a `web` element; browser-only settings such as `sdk_version`, `use_native_sdk`, and AutoCapture sub-features remain web-leaf blocks.
