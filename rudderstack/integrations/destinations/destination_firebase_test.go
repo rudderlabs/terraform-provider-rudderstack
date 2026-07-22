@@ -12,7 +12,9 @@ var firebaseTestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
 			connection_mode {
+				android_kotlin = "device"
 				android = "device"
+				ios_swift = "device"
 				ios = "device"
 			}
 			event_filtering {
@@ -21,7 +23,9 @@ var firebaseTestConfigs = []c.TestConfig{
 			`,
 		APICreate: `{
 				"connectionMode": {
+					"androidKotlin": "device",
 					"android": "device",
+					"iosSwift": "device",
 					"ios": "device"
 				},
 				"whitelistedEvents": [
@@ -36,7 +40,9 @@ var firebaseTestConfigs = []c.TestConfig{
 			}`,
 		TerraformUpdate: `
 			connection_mode {
+				android_kotlin = "device"
 				android = "device"
+				ios_swift = "device"
 				ios = "device"
 				unity = "device"
 				reactnative = "device"
@@ -48,7 +54,9 @@ var firebaseTestConfigs = []c.TestConfig{
 			`,
 		APIUpdate: `{
 				"connectionMode": {
+					"androidKotlin": "device",
 					"android": "device",
+					"iosSwift": "device",
 					"ios": "device",
 					"unity": "device",
 					"reactnative": "device",

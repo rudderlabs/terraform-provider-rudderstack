@@ -15,9 +15,7 @@ var posthogTestConfigs = []c.TestConfig{
 				api_key = "api_key"
 				use_v2_group = true
 				connection_mode {
-					web = "cloud"
-					flutter = "cloud"
-					cloud = "cloud"
+					ios_swift = "cloud"
 				}
 			`,
 		APICreate: `{
@@ -25,9 +23,7 @@ var posthogTestConfigs = []c.TestConfig{
 				"teamApiKey": "api_key",
 				"useV2Group": true,
 				"connectionMode": {
-					"web": "cloud",
-					"flutter": "cloud",
-					"cloud": "cloud"
+					"iosSwift": "cloud"
 				}
 			}`,
 		TerraformUpdate: `
@@ -38,6 +34,16 @@ var posthogTestConfigs = []c.TestConfig{
 					web = "device"
 					flutter = "cloud"
 					cloud = "cloud"
+					android = "cloud"
+					android_kotlin = "cloud"
+					ios = "cloud"
+					ios_swift = "cloud"
+					unity = "cloud"
+					amp = "cloud"
+					reactnative = "cloud"
+					cordova = "cloud"
+					shopify = "cloud"
+					warehouse = "cloud"
 				}
 				event_filtering {
 					blacklist = ["event3", "event4"]
@@ -73,7 +79,17 @@ var posthogTestConfigs = []c.TestConfig{
 				"connectionMode": {
 					"web": "device",
 					"flutter": "cloud",
-					"cloud": "cloud"
+					"cloud": "cloud",
+					"android": "cloud",
+					"androidKotlin": "cloud",
+					"ios": "cloud",
+					"iosSwift": "cloud",
+					"unity": "cloud",
+					"amp": "cloud",
+					"reactnative": "cloud",
+					"cordova": "cloud",
+					"shopify": "cloud",
+					"warehouse": "cloud"
 				},
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [

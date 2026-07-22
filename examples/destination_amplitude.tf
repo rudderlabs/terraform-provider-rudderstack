@@ -68,36 +68,38 @@ resource "rudderstack_destination_amplitude" "example" {
     #   web = true
     # }
 
-    # page_views {
-    #   web = true
-    # }
+    # auto_capture {
+    #   page_views {
+    #     web = true
+    #   }
 
-    # page_url_enrichment {
-    #   web = true
-    # }
+    #   page_url_enrichment {
+    #     web = true
+    #   }
 
-    # web_vitals {
-    #   web = true
-    # }
+    #   web_vitals {
+    #     web = true
+    #   }
 
-    # file_downloads {
-    #   web = true
-    # }
+    #   file_downloads {
+    #     web = true
+    #   }
 
-    # frustration_interactions {
-    #   web = true
-    # }
+    #   frustration_interactions {
+    #     web = true
+    #   }
 
-    # network_tracking {
-    #   web = true
-    # }
+    #   network_tracking {
+    #     web = true
+    #   }
 
-    # element_interactions {
-    #   web = true
-    # }
+    #   element_interactions {
+    #     web = true
+    #   }
 
-    # form_interactions {
-    #   web = true
+    #   form_interactions {
+    #     web = true
+    #   }
     # }
 
     # map_device_brand = true
@@ -161,10 +163,20 @@ resource "rudderstack_destination_amplitude" "example" {
     # 			consents = ["one_web", "two_web", "three_web"]
     # 		}
     # 	]
+    # 	android_kotlin = [{
+    # 		provider = "ketch"
+    # 		consents = ["one_android_kotlin", "two_android_kotlin", "three_android_kotlin"]
+    # 		resolution_strategy = ""
+    # 	}]
     # 	android = [{
     # 		provider = "ketch"
     # 		consents = ["one_android", "two_android", "three_android"]
     # 		resolution_strategy = ""
+    # 	}]
+    # 	ios_swift = [{
+    # 		provider = "custom"
+    # 		resolution_strategy = "and"
+    # 		consents = ["one_ios_swift", "two_ios_swift", "three_ios_swift"]
     # 	}]
     # 	ios = [{
     # 		provider = "custom"
