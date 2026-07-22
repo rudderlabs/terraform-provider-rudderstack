@@ -88,36 +88,38 @@ var amplitudeTestConfigs = []c.TestConfig{
 				  web = true
 				}
 
-				page_views {
-				  web = true
-				}
+				auto_capture {
+				  page_views {
+				    web = true
+				  }
 
-				page_url_enrichment {
-				  web = true
-				}
+				  page_url_enrichment {
+				    web = true
+				  }
 
-				web_vitals {
-				  web = true
-				}
+				  web_vitals {
+				    web = true
+				  }
 
-				file_downloads {
-				  web = true
-				}
+				  file_downloads {
+				    web = true
+				  }
 
-				frustration_interactions {
-				  web = true
-				}
+				  frustration_interactions {
+				    web = true
+				  }
 
-				network_tracking {
-				  web = true
-				}
+				  network_tracking {
+				    web = true
+				  }
 
-				element_interactions {
-				  web = true
-				}
+				  element_interactions {
+				    web = true
+				  }
 
-				form_interactions {
-				  web = true
+				  form_interactions {
+				    web = true
+				  }
 				}
 							
 				map_device_brand = true
