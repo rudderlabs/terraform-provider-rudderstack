@@ -103,6 +103,7 @@ func init() {
 
 	c.Destinations.Register("LINKEDIN_INSIGHT_TAG", c.ConfigMeta{
 		APIType:      "LINKEDIN_INSIGHT_TAG",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

@@ -120,6 +120,7 @@ func init() {
 
 	c.Destinations.Register("statsig", c.ConfigMeta{
 		APIType:      "STATSIG",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

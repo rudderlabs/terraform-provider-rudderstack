@@ -194,6 +194,7 @@ func init() {
 
 	c.Destinations.Register("customerio", c.ConfigMeta{
 		APIType:      "CUSTOMERIO",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

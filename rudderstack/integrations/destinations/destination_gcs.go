@@ -46,6 +46,7 @@ func init() {
 
 	c.Destinations.Register("gcs", c.ConfigMeta{
 		APIType:      "GCS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

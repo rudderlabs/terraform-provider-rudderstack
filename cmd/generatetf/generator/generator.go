@@ -64,11 +64,13 @@ func GenerateImportScript(
 	}
 
 	for _, dst := range destinations {
-		t, cm := configMeta(destinationConfigs, dst.Type)
+		t, cm := configMetaByVersion(destinationConfigs, dst.Type, dst.Version)
 		if cm != nil {
 			foundDestinations[dst.ID] = true
 			destinationTerraformTypes[dst.ID] = t
 			lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_destination_%s.%s" "%s"`, t, destinationName(dst), dst.ID))
+		} else {
+			logger.Printf("skipping destination '%s': %s", dst.ID, unsupportedDestinationReason(destinationConfigs, dst.Type, dst.Version))
 		}
 	}
 
@@ -159,7 +161,7 @@ func GenerateTerraform(
 	destinationConfigs := configs.Destinations.Entries()
 	generatedDestinationEntries := map[string]*destinationEntry{}
 	for _, dst := range destinations {
-		terraformType, cm := configMeta(destinationConfigs, dst.Type)
+		terraformType, cm := configMetaByVersion(destinationConfigs, dst.Type, dst.Version)
 		if cm != nil {
 			b, err := generateDestination(dst, terraformType, cm)
 			if err != nil {
@@ -170,7 +172,7 @@ func GenerateTerraform(
 				generatedDestinationEntries[dst.ID] = &destinationEntry{terraformType: terraformType, destination: dst}
 			}
 		} else {
-			logger.Printf("could not generate resource block for destination '%s': type '%s' is not supported", dst.ID, dst.Type)
+			logger.Printf("could not generate resource block for destination '%s': %s", dst.ID, unsupportedDestinationReason(destinationConfigs, dst.Type, dst.Version))
 		}
 	}
 
@@ -433,6 +435,11 @@ func destinationName(destination client.Destination) string {
 
 // configMeta finds a ConfigMeta of a specific api type. Returns the terraform type and the ConfigMeta if found.
 // if not, it returns an empty string and nil.
+//
+// This resolves on APIType alone (first match) and is used for registries that don't
+// carry a meaningful Version yet (sources, accounts). For destinations, use
+// configMetaByVersion instead, since two entries can share an APIType once a second
+// version of the same integration is registered.
 func configMeta(entries map[string]configs.ConfigMeta, apiType string) (string, *configs.ConfigMeta) {
 	for r, e := range entries {
 		if e.APIType == apiType {
@@ -441,6 +448,50 @@ func configMeta(entries map[string]configs.ConfigMeta, apiType string) (string, 
 	}
 
 	return "", nil
+}
+
+// configMetaByVersion finds a ConfigMeta matching both apiType and version. Returns the
+// terraform type and the ConfigMeta if found. If not, it returns an empty string and nil.
+//
+// version is mandatory and matched strictly (no coercion of an absent/zero version to v1):
+// this provider relies on the API always reporting a real version on every destination
+// (see INT-6489). A destination whose reported version has no matching registry entry is
+// skipped by the caller; use unsupportedDestinationReason to explain why.
+func configMetaByVersion(entries map[string]configs.ConfigMeta, apiType string, version int) (string, *configs.ConfigMeta) {
+	for r, e := range entries {
+		if e.APIType == apiType && e.Version == version {
+			return r, &e
+		}
+	}
+
+	return "", nil
+}
+
+// unsupportedDestinationReason explains why configMetaByVersion returned no match.
+// It distinguishes an unknown API type from a known API type whose reported version
+// has no registry entry, and lists the sorted versions that are registered.
+func unsupportedDestinationReason(entries map[string]configs.ConfigMeta, apiType string, version int) string {
+	available := make([]int, 0)
+	seen := make(map[int]bool)
+	for _, e := range entries {
+		if e.APIType != apiType {
+			continue
+		}
+		if seen[e.Version] {
+			continue
+		}
+		seen[e.Version] = true
+		available = append(available, e.Version)
+	}
+	if len(available) == 0 {
+		return fmt.Sprintf("type '%s' is not supported", apiType)
+	}
+	sort.Ints(available)
+	parts := make([]string, len(available))
+	for i, v := range available {
+		parts[i] = fmt.Sprintf("%d", v)
+	}
+	return fmt.Sprintf("type '%s' version %d is not supported (available versions: %s)", apiType, version, strings.Join(parts, ", "))
 }
 
 // generateConfigBlock generate a source or destination config block from an API config JSON

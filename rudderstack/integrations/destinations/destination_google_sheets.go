@@ -65,6 +65,7 @@ func init() {
 
 	c.Destinations.Register("google_sheets", c.ConfigMeta{
 		APIType:      "GOOGLESHEETS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

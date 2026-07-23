@@ -87,6 +87,7 @@ func init() {
 
 	c.Destinations.Register("google_tag_manager", c.ConfigMeta{
 		APIType:      "GTM",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

@@ -382,6 +382,7 @@ func init() {
 
 	c.Destinations.Register("iterable", c.ConfigMeta{
 		APIType:      "ITERABLE",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

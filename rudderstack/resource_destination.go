@@ -203,6 +203,7 @@ func resourceDestinationImportState(cm configs.ConfigMeta) schema.StateContextFu
 func populateDestinationFromState(cm configs.ConfigMeta, destination *client.Destination, d *schema.ResourceData) error {
 	destination.ID = d.Id()
 	destination.Type = cm.APIType
+	destination.Version = cm.Version
 	destination.Name = d.Get("name").(string)
 	destination.IsEnabled = d.Get("enabled").(bool)
 

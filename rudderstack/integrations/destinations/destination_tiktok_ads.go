@@ -222,6 +222,7 @@ func init() {
 
 	c.Destinations.Register("tiktok_ads", c.ConfigMeta{
 		APIType:      "TIKTOK_ADS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

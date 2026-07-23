@@ -345,6 +345,7 @@ func init() {
 
 	c.Destinations.Register("http", c.ConfigMeta{
 		APIType:      "HTTP",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

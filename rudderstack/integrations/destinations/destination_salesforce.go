@@ -66,6 +66,7 @@ func init() {
 
 	c.Destinations.Register("salesforce", c.ConfigMeta{
 		APIType:      "SALESFORCE",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

@@ -175,6 +175,7 @@ func init() {
 
 	c.Destinations.Register("kafka", c.ConfigMeta{
 		APIType:      "KAFKA",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

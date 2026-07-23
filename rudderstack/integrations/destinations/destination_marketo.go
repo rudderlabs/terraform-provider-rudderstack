@@ -217,6 +217,7 @@ func init() {
 
 	c.Destinations.Register("marketo", c.ConfigMeta{
 		APIType:      "MARKETO",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

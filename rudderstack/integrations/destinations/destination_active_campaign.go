@@ -53,6 +53,7 @@ func init() {
 
 	c.Destinations.Register("active_campaign", c.ConfigMeta{
 		APIType:      "ACTIVE_CAMPAIGN",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

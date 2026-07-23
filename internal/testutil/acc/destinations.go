@@ -28,6 +28,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	resourceName := fmt.Sprintf("rudderstack_destination_%s.test", destination)
 	name := RandomName(destination)
 	cfg := testConfigs[0]
+	wantVersion := registeredDestinationVersion(t, destination)
 
 	if PlanOnly() {
 		t.Parallel()
@@ -59,6 +60,13 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
 					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate),
+					// Exact wire version must match the destination's registered
+					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
+					// The automatic post-apply plan check also asserts no plan
+					// diff. Requires the backend to echo version on read
+					// (Blocker B) — until then this fails loudly rather than
+					// silently passing.
+					testAccCheckDestinationVersion(resourceName, wantVersion),
 				),
 			},
 			{
@@ -154,6 +162,49 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 		}
 
 		return compareConfig(dest.Config, expectedJSON)
+	}
+}
+
+// registeredDestinationVersion returns ConfigMeta.Version for the terraform
+// destination type name. Exact match (not >= 1) keeps future _v2 resources
+// correct while still failing if the API returns the wrong version.
+func registeredDestinationVersion(t *testing.T, destination string) int {
+	t.Helper()
+	cm, ok := configs.Destinations.Entries()[destination]
+	if !ok {
+		t.Fatalf("destination %q is not registered", destination)
+	}
+	if cm.Version < 1 {
+		t.Fatalf("destination %q has invalid ConfigMeta.Version %d", destination, cm.Version)
+	}
+	return cm.Version
+}
+
+// testAccCheckDestinationVersion fetches the destination from the API and verifies
+// its reported version matches wantVersion. This depends on the backend always
+// reporting a real version on every destination (INT-6489); the provider does not
+// coerce an absent/zero version to v1 (see cmd/generatetf/generator.configMetaByVersion).
+func testAccCheckDestinationVersion(resourceName string, wantVersion int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		cl, err := newTestAPIClient()
+		if err != nil {
+			return err
+		}
+
+		dest, err := cl.Destinations.Get(context.Background(), rs.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get destination from API: %w", err)
+		}
+
+		if dest.Version != wantVersion {
+			return fmt.Errorf("destination %s: got version %d, want %d", rs.Primary.ID, dest.Version, wantVersion)
+		}
+		return nil
 	}
 }
 
