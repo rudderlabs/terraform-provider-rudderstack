@@ -30,4 +30,7 @@ func TestProviderAccountRegistration(t *testing.T) {
 	if _, ok := p.ResourcesMap["rudderstack_connection"]; !ok {
 		t.Error("expected rudderstack_connection in ResourcesMap, but it is missing")
 	}
+	if _, ok := p.ResourcesMap["rudderstack_transformation_connection"]; !ok {
+		t.Error("expected rudderstack_transformation_connection in ResourcesMap, but it is missing")
+	}
 }
