@@ -609,6 +609,32 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"sdkVersion": { "web": 1 }
 			}`,
 	},
+	{
+		TerraformCreate: `
+				api_key = "123abc"
+
+				sdk_version {
+				  web = 1
+				}
+			`,
+		APICreate: `{
+				"apiKey": "123abc",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 1 }
+			}`,
+		TerraformUpdate: `
+				api_key = "123abc"
+			`,
+		APIUpdate: `{
+				"apiKey": "123abc",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
+			}`,
+	},
 }
 
 func TestDestinationResourceAmplitude(t *testing.T) {
