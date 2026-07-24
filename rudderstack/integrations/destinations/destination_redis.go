@@ -79,6 +79,7 @@ func init() {
 
 	c.Destinations.Register("redis", c.ConfigMeta{
 		APIType:      "REDIS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

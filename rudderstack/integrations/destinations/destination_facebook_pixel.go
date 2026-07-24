@@ -204,6 +204,7 @@ func init() {
 
 	c.Destinations.Register("facebook_pixel", c.ConfigMeta{
 		APIType:      "FACEBOOK_PIXEL",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

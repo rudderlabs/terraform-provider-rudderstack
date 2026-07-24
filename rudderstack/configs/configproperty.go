@@ -13,6 +13,12 @@ import (
 type ConfigProperty struct {
 	ToStateFunc   ToStateFunc
 	FromStateFunc FromStateFunc
+	// Name is an optional, stable identifier for this property, used by
+	// destinations.ComposeConfigMeta to remove a property when composing a new
+	// version's ConfigMeta from a base. It has no effect on state/API mapping.
+	// Existing constructors (Simple, Conditional, ...) leave it unset; set it
+	// explicitly on properties you may need to remove in a future version.
+	Name string
 }
 
 // FromStateFunc modifies am API config json object using terraform state information

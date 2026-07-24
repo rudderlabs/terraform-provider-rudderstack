@@ -134,6 +134,7 @@ func init() {
 
 	c.Destinations.Register("attentive_tag", c.ConfigMeta{
 		APIType:      "ATTENTIVE_TAG",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

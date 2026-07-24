@@ -103,6 +103,7 @@ func init() {
 
 	c.Destinations.Register("qualtrics", c.ConfigMeta{
 		APIType:      "QUALTRICS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

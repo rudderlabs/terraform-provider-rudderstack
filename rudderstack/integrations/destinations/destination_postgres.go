@@ -121,6 +121,7 @@ func init() {
 
 	c.Destinations.Register("postgres", c.ConfigMeta{
 		APIType:      "POSTGRES",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

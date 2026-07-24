@@ -225,6 +225,7 @@ func init() {
 
 	c.Destinations.Register("adjust", c.ConfigMeta{
 		APIType:      "ADJ",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

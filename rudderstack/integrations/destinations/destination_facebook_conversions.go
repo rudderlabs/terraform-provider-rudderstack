@@ -140,6 +140,7 @@ func init() {
 
 	c.Destinations.Register("facebook_conversions", c.ConfigMeta{
 		APIType:      "FACEBOOK_CONVERSIONS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

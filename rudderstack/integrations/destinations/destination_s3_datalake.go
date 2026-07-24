@@ -130,6 +130,7 @@ func init() {
 
 	c.Destinations.Register("s3_datalake", c.ConfigMeta{
 		APIType:      "S3_DATALAKE",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

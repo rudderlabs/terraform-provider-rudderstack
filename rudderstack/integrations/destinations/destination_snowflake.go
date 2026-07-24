@@ -441,6 +441,7 @@ func init() {
 
 	c.Destinations.Register("snowflake", c.ConfigMeta{
 		APIType:      "SNOWFLAKE",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

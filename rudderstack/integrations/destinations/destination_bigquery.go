@@ -260,6 +260,7 @@ func init() {
 
 	c.Destinations.Register("bigquery", c.ConfigMeta{
 		APIType:      "BQ",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})
