@@ -12,6 +12,8 @@ https://www.rudderstack.com/docs/destinations/analytics/amplitude
 
 Omit the `sdk_version` block to keep existing Amplitude behavior (version `1`), or set `sdk_version.web` to `2` to opt into version 2. The provider sets no Terraform default — version `1` is applied by the control plane when the field is absent.
 
+When using Amplitude Browser SDK v2, the web-only AutoCapture sub-feature blocks (`page_views`, `page_url_enrichment`, `web_vitals`, `file_downloads`, `frustration_interactions`, `network_tracking`, `element_interactions`, and `form_interactions`) inside the `auto_capture` block expose the corresponding Browser SDK v2 controls. Omit these blocks to preserve existing control-plane defaults.
+
 ## Example Usage
 
 {{tffile "examples/destination_amplitude.tf"}}

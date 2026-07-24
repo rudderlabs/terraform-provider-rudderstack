@@ -47,6 +47,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				}
 			
 				track_session_events {
+				  web          = true
 				  android      = true
 				  ios          = true
 				  react_native = true
@@ -85,6 +86,40 @@ var amplitudeTestConfigs = []c.TestConfig{
 			
 				batch_events {
 				  web = true
+				}
+
+				auto_capture {
+				  page_views {
+				    web = true
+				  }
+
+				  page_url_enrichment {
+				    web = true
+				  }
+
+				  web_vitals {
+				    web = true
+				  }
+
+				  file_downloads {
+				    web = true
+				  }
+
+				  frustration_interactions {
+				    web = true
+				  }
+
+				  network_tracking {
+				    web = true
+				  }
+
+				  element_interactions {
+				    web = true
+				  }
+
+				  form_interactions {
+				    web = true
+				  }
 				}
 							
 				map_device_brand = true
@@ -258,6 +293,14 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"trackUtmProperties": { "web": true },
 				"unsetParamsReferrerOnNewSession": { "web": true },
 				"batchEvents": { "web": true },
+				"enablePageViewsAutoCapture": { "web": true },
+				"enablePageUrlEnrichmentAutoCapture": { "web": true },
+				"enableWebVitalsAutoCapture": { "web": true },
+				"enableFileDownloadsAutoCapture": { "web": true },
+				"enableFrustrationInteractionsAutoCapture": { "web": true },
+				"enableNetworkTrackingAutoCapture": { "web": true },
+				"enableElementInteractionsAutoCapture": { "web": true },
+				"enableFormInteractionsAutoCapture": { "web": true },
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [
 				  { "eventName": "one" },
@@ -278,7 +321,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				},
 				"mapDeviceBrand": true,
 				"enableLocationListening": { "android": true, "reactnative": true },
-				"trackSessionEvents": { "android": true, "ios": true, "reactnative": true },
+				"trackSessionEvents": { "web": true, "android": true, "ios": true, "reactnative": true },
 				"useAdvertisingIdForDeviceId": { "android": true, "reactnative": true },
 				"useIdfaAsDeviceId": { "ios": true, "reactnative": true },
 				"consentManagement": {
