@@ -163,6 +163,7 @@ func init() {
 
 	c.Destinations.Register("linkedin_ads", c.ConfigMeta{
 		APIType:      "LINKEDIN_ADS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

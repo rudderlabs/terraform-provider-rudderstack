@@ -416,6 +416,7 @@ func init() {
 
 	c.Destinations.Register("mixpanel", c.ConfigMeta{
 		APIType:      "MP",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

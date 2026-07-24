@@ -8,7 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
+	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/integrations/destinations"
 )
@@ -216,4 +219,46 @@ func TestResourceDestinationConsentManagementAllowsDistinctAndPerSourceType(t *t
 			},
 		},
 	})
+}
+
+func TestPopulateDestinationFromState_SetsVersionFromConfigMeta(t *testing.T) {
+	cm := configs.ConfigMeta{
+		APIType:    "TEST",
+		Version:    2,
+		SkipConfig: true,
+	}
+
+	d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{
+		"name":    "test-destination",
+		"enabled": true,
+	})
+
+	destination := &client.Destination{}
+	require.NoError(t, populateDestinationFromState(cm, destination, d))
+
+	assert.Equal(t, "TEST", destination.Type)
+	assert.Equal(t, 2, destination.Version)
+}
+
+func TestPopulateDestinationFromState_NoVersionSetsZero(t *testing.T) {
+	// A destination registered without an explicit Version can't actually
+	// exist in the real Destinations registry (Register panics on Version==0,
+	// see rudderstack/configs/registries.go), but populateDestinationFromState
+	// itself has no opinion on that — it just forwards cm.Version verbatim.
+	// This documents that behavior for a directly-constructed ConfigMeta, as
+	// used by other tests in this file (e.g. consent-management tests above).
+	cm := configs.ConfigMeta{
+		APIType:    "TEST",
+		SkipConfig: true,
+	}
+
+	d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{
+		"name":    "test-destination",
+		"enabled": true,
+	})
+
+	destination := &client.Destination{}
+	require.NoError(t, populateDestinationFromState(cm, destination, d))
+
+	assert.Equal(t, 0, destination.Version)
 }

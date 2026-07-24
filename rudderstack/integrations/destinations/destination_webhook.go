@@ -60,6 +60,7 @@ func init() {
 
 	c.Destinations.Register("webhook", c.ConfigMeta{
 		APIType:      "WEBHOOK",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

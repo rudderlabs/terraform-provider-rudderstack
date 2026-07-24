@@ -70,6 +70,7 @@ func init() {
 
 	c.Destinations.Register("customerio_audience", c.ConfigMeta{
 		APIType:      "CUSTOMERIO_AUDIENCE",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: s,
 	})

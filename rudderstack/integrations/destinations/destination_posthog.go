@@ -325,6 +325,7 @@ func init() {
 
 	c.Destinations.Register("posthog", c.ConfigMeta{
 		APIType:      "POSTHOG",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

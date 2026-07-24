@@ -256,6 +256,7 @@ func init() {
 
 	c.Destinations.Register("hs", c.ConfigMeta{
 		APIType:      "HS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: destinationSchema,
 	})

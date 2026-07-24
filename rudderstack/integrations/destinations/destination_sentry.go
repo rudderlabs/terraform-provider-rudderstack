@@ -153,6 +153,7 @@ func init() {
 
 	c.Destinations.Register("sentry", c.ConfigMeta{
 		APIType:      "SENTRY",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

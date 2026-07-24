@@ -640,6 +640,7 @@ func init() {
 
 	c.Destinations.Register("amplitude", c.ConfigMeta{
 		APIType:      "AM",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

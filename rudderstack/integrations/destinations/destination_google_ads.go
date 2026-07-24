@@ -174,6 +174,7 @@ func init() {
 
 	c.Destinations.Register("google_ads", c.ConfigMeta{
 		APIType:      "GOOGLEADS",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

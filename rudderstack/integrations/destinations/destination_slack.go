@@ -107,6 +107,7 @@ func init() {
 
 	c.Destinations.Register("slack", c.ConfigMeta{
 		APIType:      "SLACK",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

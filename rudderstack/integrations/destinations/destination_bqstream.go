@@ -144,6 +144,7 @@ func init() {
 
 	c.Destinations.Register("bqstream", c.ConfigMeta{
 		APIType:      "BQSTREAM",
+		Version:      1,
 		Properties:   properties,
 		ConfigSchema: schema,
 	})

@@ -5,7 +5,12 @@ import (
 )
 
 type ConfigMeta struct {
-	APIType        string
+	APIType string
+	// Version is the major version of the underlying integration definition
+	// (e.g. 1, 2, ...). It is only meaningful for destinations today; sources
+	// and accounts leave it at the zero value. See rudderstack/configs/registries.go
+	// for the registration-time guards enforced on this field for destinations.
+	Version        int
 	SkipConfig     bool
 	ConfigSchema   map[string]*schema.Schema
 	Properties     []ConfigProperty
