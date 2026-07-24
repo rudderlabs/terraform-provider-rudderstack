@@ -63,6 +63,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
 					testAccCheckDestinationAPIConfig(cm, resourceName, cfg.APICreate),
+					testAccCheckDestinationVersion(resourceName, wantVersion),
 				),
 			},
 			{
@@ -71,6 +72,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
 					testAccCheckDestinationAPIConfig(cm, resourceName, cfg.APIUpdate),
+					testAccCheckDestinationVersion(resourceName, wantVersion),
 				),
 			},
 			{
@@ -193,6 +195,8 @@ func schemaContainsSensitiveFieldsForTest(configSchema map[string]*schema.Schema
 		}
 	}
 	return false
+}
+
 // registeredDestinationVersion returns ConfigMeta.Version for the terraform
 // destination type name. Exact match (not >= 1) keeps future _v2 resources
 // correct while still failing if the API returns the wrong version.
