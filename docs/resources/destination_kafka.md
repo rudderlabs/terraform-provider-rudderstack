@@ -135,6 +135,7 @@ resource "rudderstack_destination_kafka" "example" {
 ### Optional
 
 - `enabled` (Boolean) An enabled destination allows data to be sent to it.
+- `transformation_id` (String) ID of a published transformation to attach to this destination. The transformation must be published before it can be attached. A destination can have at most one transformation. Omit or clear the value to detach.
 
 ### Read-Only
 
