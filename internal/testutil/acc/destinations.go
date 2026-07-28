@@ -201,7 +201,7 @@ func testAccCheckDestinationVersion(resourceName string, wantVersion int) resour
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		if dest.Version != wantVersion {
+		if dest.Version != int64(wantVersion) {
 			return fmt.Errorf("destination %s: got version %d, want %d", rs.Primary.ID, dest.Version, wantVersion)
 		}
 		return nil
