@@ -30,7 +30,11 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	name := RandomName(destination)
 	cfg := testConfigs[0]
 	wantVersion := registeredDestinationVersion(t, destination)
-	redactedFields := redactedAPIConfigKeys(configs.Destinations.Entries()[destination])
+	cm := configs.Destinations.Entries()[destination]
+	redactedFields := redactedAPIConfigKeys(cm)
+	// Secrets are redacted from responses, so they can't be verified on import
+	// (there is no prior state to preserve them from) — ignore them there.
+	importIgnore := sensitiveStateAttrPaths(cm)
 
 	if PlanOnly() {
 		t.Parallel()
@@ -80,9 +84,10 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: importIgnore,
 			},
 		},
 	})
@@ -166,6 +171,20 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, redacte
 
 		return compareConfig(dest.Config, expectedJSON, redactedFields)
 	}
+}
+
+// sensitiveStateAttrPaths returns the terraform state attribute paths of the
+// destination's Sensitive (secret) config fields, e.g. "config.0.api_secret".
+// Import can't verify these: the backend redacts them from responses, so an
+// imported resource has no value to compare against the pre-import state.
+func sensitiveStateAttrPaths(cm configs.ConfigMeta) []string {
+	var paths []string
+	for key, sch := range cm.ConfigSchema {
+		if sch != nil && sch.Sensitive {
+			paths = append(paths, "config.0."+key)
+		}
+	}
+	return paths
 }
 
 // redactedAPIConfigKeys returns the set of top-level API config keys the backend
