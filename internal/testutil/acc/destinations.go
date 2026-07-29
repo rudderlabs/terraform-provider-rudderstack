@@ -181,7 +181,7 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, redacte
 // the pre-import state.
 func sensitiveStateAttrPaths(cm configs.ConfigMeta) []string {
 	var paths []string
-	for _, p := range cm.SensitiveConfigPaths() {
+	for _, p := range cm.SensitiveImportIgnorePaths() {
 		paths = append(paths, "config.0."+p)
 	}
 	return paths

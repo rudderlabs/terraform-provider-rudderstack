@@ -48,6 +48,47 @@ func sensitivePaths(sch map[string]*schema.Schema, prefix string) []string {
 	return out
 }
 
+// SensitiveImportIgnorePaths returns config-relative attribute prefixes to skip
+// on ImportStateVerify because the backend redacts their values. A block whose
+// fields are ALL Sensitive collapses to empty on import (its .# / .0.% structural
+// attributes differ), so it is returned wholesale as a prefix; a block with some
+// non-secret fields returns only its sensitive leaves so the rest stays verified.
+func (cm *ConfigMeta) SensitiveImportIgnorePaths() []string {
+	paths, _ := sensitiveImportPaths(cm.ConfigSchema, "")
+	return paths
+}
+
+func sensitiveImportPaths(sch map[string]*schema.Schema, prefix string) (paths []string, allSensitive bool) {
+	allSensitive = len(sch) > 0
+	for key, s := range sch {
+		if s == nil {
+			allSensitive = false
+			continue
+		}
+		path := key
+		if prefix != "" {
+			path = prefix + "." + key
+		}
+		if s.Sensitive {
+			paths = append(paths, path)
+			continue
+		}
+		res, ok := s.Elem.(*schema.Resource)
+		if !ok || res == nil {
+			allSensitive = false
+			continue
+		}
+		sub, subAll := sensitiveImportPaths(res.Schema, path+".0")
+		if subAll {
+			paths = append(paths, path) // whole block redacted → ignore it wholesale
+		} else {
+			paths = append(paths, sub...)
+			allSensitive = false
+		}
+	}
+	return paths, allSensitive
+}
+
 func (cm *ConfigMeta) StateToAPI(state string) (string, error) {
 	api := "{}"
 

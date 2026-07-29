@@ -57,6 +57,36 @@ func TestRedactedAPIConfigKeys_Nested(t *testing.T) {
 	assert.False(t, got["bucketName"], "non-sensitive nested field should not be redacted")
 }
 
+// A block whose fields are all Sensitive collapses on import and is ignored
+// wholesale; a block with a non-secret field ignores only its sensitive leaf.
+func TestSensitiveImportIgnorePaths(t *testing.T) {
+	cm := configs.ConfigMeta{
+		ConfigSchema: map[string]*schema.Schema{
+			"key_based_authentication": {
+				Type: schema.TypeList,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"access_key":    {Type: schema.TypeString, Sensitive: true},
+					"access_key_id": {Type: schema.TypeString, Sensitive: true},
+				}},
+			},
+			"s3": {
+				Type: schema.TypeList,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"access_key": {Type: schema.TypeString, Sensitive: true},
+					"bucket":     {Type: schema.TypeString},
+				}},
+			},
+			"api_secret": {Type: schema.TypeString, Sensitive: true},
+		},
+	}
+
+	got := cm.SensitiveImportIgnorePaths()
+	assert.Contains(t, got, "key_based_authentication", "all-secret block ignored wholesale")
+	assert.Contains(t, got, "s3.0.access_key", "partial block ignores only the secret leaf")
+	assert.NotContains(t, got, "s3", "partial block must not be ignored wholesale")
+	assert.Contains(t, got, "api_secret")
+}
+
 func TestRedactedAPIConfigKeys_NoSensitiveFields(t *testing.T) {
 	cm := configs.ConfigMeta{
 		ConfigSchema: map[string]*schema.Schema{"api_key": {Type: schema.TypeString}},
