@@ -3,6 +3,7 @@ package acc
 import (
 	"context"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"os"
@@ -29,6 +30,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	name := RandomName(destination)
 	cfg := testConfigs[0]
 	wantVersion := registeredDestinationVersion(t, destination)
+	redactedFields := redactedAPIConfigKeys(configs.Destinations.Entries()[destination])
 
 	if PlanOnly() {
 		t.Parallel()
@@ -59,7 +61,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate, redactedFields),
 					// Exact wire version must match the destination's registered
 					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
 					// The automatic post-apply plan check also asserts no plan
@@ -74,7 +76,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate, redactedFields),
 				),
 			},
 			{
@@ -139,8 +141,9 @@ func testAccCheckDestinationExists(resourceName string) resource.TestCheckFunc {
 }
 
 // testAccCheckDestinationAPIConfig fetches the destination from the API and verifies
-// its config contains all expected fields from the test's API JSON.
-func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resource.TestCheckFunc {
+// its config contains all expected fields from the test's API JSON. redactedFields
+// are secret API keys the backend omits from responses and must not be asserted.
+func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, redactedFields map[string]bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if expectedJSON == "" {
 			return nil
@@ -161,8 +164,51 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		return compareConfig(dest.Config, expectedJSON)
+		return compareConfig(dest.Config, expectedJSON, redactedFields)
 	}
+}
+
+// redactedAPIConfigKeys returns the set of top-level API config keys the backend
+// redacts from responses: those that map from a Sensitive (secret) schema field.
+// The backend stopped returning secrets on read (security hardening), so config
+// verification must not assert their presence.
+//
+// The API key for each Sensitive terraform field is discovered by running a
+// sentinel value through the destination's real state->API transform — the same
+// path the provider uses — so no separate mapping needs to be maintained.
+func redactedAPIConfigKeys(cm configs.ConfigMeta) map[string]bool {
+	const sentinel = "__acc_redacted_sentinel__"
+
+	state := map[string]any{}
+	for key, sch := range cm.ConfigSchema {
+		if sch != nil && sch.Sensitive {
+			state[key] = sentinel
+		}
+	}
+	if len(state) == 0 {
+		return nil
+	}
+
+	stateJSON, err := json.Marshal(state)
+	if err != nil {
+		return nil
+	}
+	apiJSON, err := cm.StateToAPI(string(stateJSON))
+	if err != nil {
+		return nil
+	}
+	var api map[string]any
+	if err := json.Unmarshal([]byte(apiJSON), &api); err != nil {
+		return nil
+	}
+
+	out := map[string]bool{}
+	for k, v := range api {
+		if s, ok := v.(string); ok && s == sentinel {
+			out[k] = true
+		}
+	}
+	return out
 }
 
 // registeredDestinationVersion returns ConfigMeta.Version for the terraform

@@ -167,6 +167,6 @@ func testAccCheckAccountAPIOptions(resourceName, expectedOptionsJSON string) res
 			return fmt.Errorf("failed to get account from API: %w", err)
 		}
 
-		return compareConfig(acc.Options, expectedOptionsJSON)
+		return compareConfig(acc.Options, expectedOptionsJSON, nil)
 	}
 }

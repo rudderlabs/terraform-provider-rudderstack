@@ -10,7 +10,11 @@ import (
 // compareConfig verifies that actualRaw contains all fields specified in expectedJSON.
 // Extra fields in the actual config are allowed (the API may add defaults).
 // Returns nil if expectedJSON is empty (nothing to verify).
-func compareConfig(actualRaw json.RawMessage, expectedJSON string) error {
+//
+// redactedFields lists top-level API config keys the backend intentionally omits
+// from responses (secret/Sensitive fields — a security-hardening change). An
+// expected field in that set that is absent from actual is not a mismatch.
+func compareConfig(actualRaw json.RawMessage, expectedJSON string, redactedFields map[string]bool) error {
 	expectedJSON = strings.TrimSpace(expectedJSON)
 	if expectedJSON == "" || expectedJSON == "{}" {
 		return nil
@@ -27,7 +31,7 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string) error {
 	}
 
 	var mismatches []string
-	compareFields("", expected, actual, &mismatches)
+	compareFields("", expected, actual, redactedFields, &mismatches)
 
 	if len(mismatches) > 0 {
 		expectedPretty, _ := json.MarshalIndent(expected, "", "  ")
@@ -40,7 +44,7 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string) error {
 
 // compareFields recursively checks that every key in expected exists in actual with the
 // correct value. It collects all mismatches rather than failing on the first one.
-func compareFields(prefix string, expected, actual map[string]any, mismatches *[]string) {
+func compareFields(prefix string, expected, actual map[string]any, redactedFields map[string]bool, mismatches *[]string) {
 	for key, expectedVal := range expected {
 		path := key
 		if prefix != "" {
@@ -49,11 +53,18 @@ func compareFields(prefix string, expected, actual map[string]any, mismatches *[
 
 		actualVal, exists := actual[key]
 		if !exists {
+			// The backend redacts secret fields from API responses, so a field
+			// absent here that maps from a Sensitive schema field is expected —
+			// not a mismatch. (Keyed by exact path; only top-level secrets are
+			// modelled, which is where redaction applies.)
+			if redactedFields[path] {
+				continue
+			}
 			*mismatches = append(*mismatches, fmt.Sprintf("  missing field %q: expected %v", path, expectedVal))
 			continue
 		}
 
-		compareValue(path, expectedVal, actualVal, mismatches)
+		compareValue(path, expectedVal, actualVal, redactedFields, mismatches)
 	}
 }
 
@@ -61,11 +72,11 @@ func compareFields(prefix string, expected, actual map[string]any, mismatches *[
 //   - objects: all expected keys must exist in actual, but extra actual keys are allowed
 //   - arrays: all expected elements must exist in actual at the same indexes, but extra actual
 //     elements are allowed; objects within arrays also use subset semantics
-func compareValue(path string, expectedVal, actualVal any, mismatches *[]string) {
+func compareValue(path string, expectedVal, actualVal any, redactedFields map[string]bool, mismatches *[]string) {
 	switch ev := expectedVal.(type) {
 	case map[string]any:
 		if av, ok := actualVal.(map[string]any); ok {
-			compareFields(path, ev, av, mismatches)
+			compareFields(path, ev, av, redactedFields, mismatches)
 		} else {
 			*mismatches = append(*mismatches, fmt.Sprintf("  field %q: expected object, got %T", path, actualVal))
 		}
@@ -79,7 +90,7 @@ func compareValue(path string, expectedVal, actualVal any, mismatches *[]string)
 			*mismatches = append(*mismatches, fmt.Sprintf("  field %q: expected array length >= %d, got %d", path, len(ev), len(av)))
 		}
 		for i := 0; i < len(ev) && i < len(av); i++ {
-			compareValue(fmt.Sprintf("%s[%d]", path, i), ev[i], av[i], mismatches)
+			compareValue(fmt.Sprintf("%s[%d]", path, i), ev[i], av[i], redactedFields, mismatches)
 		}
 	default:
 		if !reflect.DeepEqual(expectedVal, actualVal) {
