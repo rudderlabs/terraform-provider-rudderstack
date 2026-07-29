@@ -253,6 +253,22 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 		return err
 	}
 
+	// The backend redacts Sensitive (secret) fields from API responses, so they
+	// come back absent. Preserve the value already in state rather than clearing
+	// it — otherwise every secret field shows perpetual drift on the post-apply
+	// plan. (Top-level fields only, which is where secrets live.)
+	for key, sch := range cm.ConfigSchema {
+		if sch == nil || !sch.Sensitive {
+			continue
+		}
+		if v, ok := properties[key]; ok && v != nil && v != "" {
+			continue // backend did return a value — trust it
+		}
+		if cur, ok := d.GetOk("config.0." + key); ok {
+			properties[key] = cur
+		}
+	}
+
 	if len(properties) > 0 {
 		if err := d.Set("config", []interface{}{properties}); err != nil {
 			return err
