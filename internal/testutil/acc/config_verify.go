@@ -51,15 +51,17 @@ func compareFields(prefix string, expected, actual map[string]any, redactedField
 			path = prefix + "." + key
 		}
 
+		// The backend redacts secret fields from API responses — either omitting
+		// them or returning them blanked in place (e.g. a Sensitive list whose
+		// values are emptied). Don't verify a redacted field at all, present or
+		// absent. (redactedFields holds top-level API keys, which is where
+		// redaction applies.)
+		if redactedFields[path] {
+			continue
+		}
+
 		actualVal, exists := actual[key]
 		if !exists {
-			// The backend redacts secret fields from API responses, so a field
-			// absent here that maps from a Sensitive schema field is expected —
-			// not a mismatch. (Keyed by exact path; only top-level secrets are
-			// modelled, which is where redaction applies.)
-			if redactedFields[path] {
-				continue
-			}
 			*mismatches = append(*mismatches, fmt.Sprintf("  missing field %q: expected %v", path, expectedVal))
 			continue
 		}

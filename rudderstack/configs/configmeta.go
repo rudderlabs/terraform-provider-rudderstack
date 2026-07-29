@@ -18,6 +18,36 @@ type ConfigMeta struct {
 	Settings       []ConfigProperty
 }
 
+// SensitiveConfigPaths returns the terraform state paths of every Sensitive
+// (secret) field in the config schema, descending into nested blocks — e.g.
+// "api_secret", "s3.0.access_key", "headers". A Sensitive field terminates the
+// descent: the whole subtree is treated as the secret. Used to handle the
+// backend redacting secrets from API responses (read/verify/import).
+func (cm *ConfigMeta) SensitiveConfigPaths() []string {
+	return sensitivePaths(cm.ConfigSchema, "")
+}
+
+func sensitivePaths(sch map[string]*schema.Schema, prefix string) []string {
+	var out []string
+	for key, s := range sch {
+		if s == nil {
+			continue
+		}
+		path := key
+		if prefix != "" {
+			path = prefix + "." + key
+		}
+		if s.Sensitive {
+			out = append(out, path)
+			continue
+		}
+		if res, ok := s.Elem.(*schema.Resource); ok && res != nil {
+			out = append(out, sensitivePaths(res.Schema, path+".0")...)
+		}
+	}
+	return out
+}
+
 func (cm *ConfigMeta) StateToAPI(state string) (string, error) {
 	api := "{}"
 

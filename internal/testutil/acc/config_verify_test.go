@@ -30,6 +30,33 @@ func TestRedactedAPIConfigKeys(t *testing.T) {
 	assert.False(t, got["apiKey"], "non-sensitive field's API key should not be marked redacted")
 }
 
+// A Sensitive field nested inside a block must still be discovered (its flat
+// API key derived through the transform).
+func TestRedactedAPIConfigKeys_Nested(t *testing.T) {
+	cm := configs.ConfigMeta{
+		ConfigSchema: map[string]*schema.Schema{
+			"s3": {
+				Type: schema.TypeList,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"access_key":    {Type: schema.TypeString, Sensitive: true},
+					"access_key_id": {Type: schema.TypeString, Sensitive: true},
+					"bucket":        {Type: schema.TypeString},
+				}},
+			},
+		},
+		Properties: []configs.ConfigProperty{
+			configs.Simple("accessKey", "s3.0.access_key"),
+			configs.Simple("accessKeyID", "s3.0.access_key_id"),
+			configs.Simple("bucketName", "s3.0.bucket"),
+		},
+	}
+
+	got := redactedAPIConfigKeys(cm)
+	assert.True(t, got["accessKey"], "nested sensitive field's API key should be redacted")
+	assert.True(t, got["accessKeyID"], "nested sensitive field's API key should be redacted")
+	assert.False(t, got["bucketName"], "non-sensitive nested field should not be redacted")
+}
+
 func TestRedactedAPIConfigKeys_NoSensitiveFields(t *testing.T) {
 	cm := configs.ConfigMeta{
 		ConfigSchema: map[string]*schema.Schema{"api_key": {Type: schema.TypeString}},
@@ -56,11 +83,12 @@ func TestCompareConfig_SkipsRedactedSecret(t *testing.T) {
 	require.Error(t, err, "a non-redacted missing field must still fail")
 	assert.Contains(t, err.Error(), "residencyServer")
 
-	// A redacted field that IS present and wrong should still be checked.
-	err = compareConfig(
-		json.RawMessage(`{"apiKey":"abc","apiSecret":"wrong"}`),
+	// Redacted fields aren't verified at all — the backend may return them
+	// blanked in place (e.g. a Sensitive list emptied), so present-but-different
+	// is tolerated too.
+	require.NoError(t, compareConfig(
+		json.RawMessage(`{"apiKey":"abc","apiSecret":""}`),
 		`{"apiKey":"abc","apiSecret":"right"}`,
 		redacted,
-	)
-	require.Error(t, err, "a present redacted field with a wrong value must still fail")
+	), "a redacted field returned blanked must not fail")
 }

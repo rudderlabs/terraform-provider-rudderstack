@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/tidwall/sjson"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -248,25 +249,22 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 		return err
 	}
 
+	// The backend redacts Sensitive (secret) fields from API responses — omitting
+	// them or returning them blanked — so APIToState can't recover them. Restore
+	// each from the value already in state, else Terraform sees perpetual drift on
+	// the post-apply plan. Nested paths ("s3.0.access_key") and whole Sensitive
+	// collections ("headers") are handled via sjson.
+	for _, p := range cm.SensitiveConfigPaths() {
+		if cur, ok := d.GetOk("config.0." + p); ok {
+			if updated, serr := sjson.Set(state, p, cur); serr == nil {
+				state = updated
+			}
+		}
+	}
+
 	properties := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(state), &properties); err != nil {
 		return err
-	}
-
-	// The backend redacts Sensitive (secret) fields from API responses, so they
-	// come back absent. Preserve the value already in state rather than clearing
-	// it — otherwise every secret field shows perpetual drift on the post-apply
-	// plan. (Top-level fields only, which is where secrets live.)
-	for key, sch := range cm.ConfigSchema {
-		if sch == nil || !sch.Sensitive {
-			continue
-		}
-		if v, ok := properties[key]; ok && v != nil && v != "" {
-			continue // backend did return a value — trust it
-		}
-		if cur, ok := d.GetOk("config.0." + key); ok {
-			properties[key] = cur
-		}
 	}
 
 	if len(properties) > 0 {
