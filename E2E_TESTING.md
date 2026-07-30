@@ -52,8 +52,8 @@ grep -rB1 -A2 --include='*_test.go' "acc.PlanOnly()" rudderstack/integrations
 2. **Pre-check** — In full CRUD mode, `TestAccPreCheck` aborts the test if `RUDDERSTACK_ACCESS_TOKEN` is unset. In plan-only mode, `ensureDummyToken` sets `RUDDERSTACK_ACCESS_TOKEN=plan-only-dummy-token` via `os.Setenv` (chosen over `t.Setenv` so `t.Parallel()` still works).
 3. **Random name** — `RandomName("<integration>")` prefixes resources with `tf-acc-` and a random 62-bit int, so leftover resources from a failed run can be identified and cleaned up by name prefix.
 4. **Test steps** — destinations and sources run the full lifecycle:
-   - Step 1: Apply `TerraformCreate` HCL. Check resource exists in API, then subset-match its `Config` JSON against `APICreate`.
-   - Step 2: Apply `TerraformUpdate` HCL. Re-check, subset-match against `APIUpdate`.
+   - Step 1: Apply `TerraformCreate` HCL. Check resource exists in API, then subset-match its `Config` JSON against `APICreateResponse` when set, otherwise `APICreate` (minus any `APICreatePrunedKeys`).
+   - Step 2: Apply `TerraformUpdate` HCL. Re-check, subset-match against `APIUpdateResponse` when set, otherwise `APIUpdate` (minus any `APIUpdatePrunedKeys`).
    - Step 3: `ImportStateVerify` — Terraform imports by ID and asserts the resulting state matches the in-memory state. For sources, `write_key` is excluded (computed, not returned on import).
    - Cleanup: `CheckDestroy` — verifies Delete handler ran (soft-delete tolerant for sources/destinations; strict for connections).
 

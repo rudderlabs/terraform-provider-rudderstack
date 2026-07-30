@@ -60,3 +60,10 @@
 
 - `GetCommonConfigMeta` contributes only `consent_management` mappings for declared source types; warehouse controls and other destination-level fields must be mapped in the destination integration itself.
 - Snowflake `supportedSourceTypes` directly gates which nested `consent_management` source-type blocks are exposed in Terraform; omitted source types (for example Android Kotlin / iOS Swift) silently drop corresponding nested keys.
+
+## ACT2-463 — Pruned destination response fixtures
+
+- Destination runtime reads should continue relying on `resourceDestinationRead` + `ConfigMeta.APIToState`: only declared `ConfigMeta.Properties` from API responses are written into Terraform state, so unknown stale API fields are ignored without preserving or globally masking absent fields.
+- Destination tests can model pruned GET responses separately from outbound Create/Update payloads by using optional `configs.TestConfig.APICreateResponse` / `APIUpdateResponse` expectations that default to `APICreate` / `APIUpdate`.
+- Keep mock-backed Create/Update request matching strict against `APICreate` / `APIUpdate`; only live/mock GET response assertions should use response-specific JSON when pruning creates a real request-vs-response divergence.
+- Do not mark Terraform schema-backed destination fields as pruned merely because they are absent from the current destConfig allowlist: mocking schema-backed fields as absent from GET responses causes post-apply plan diffs and violates the no-diff acceptance criterion.

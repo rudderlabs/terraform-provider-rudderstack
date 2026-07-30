@@ -59,7 +59,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.DestinationAPICreateResponse()),
 					// Exact wire version must match the destination's registered
 					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
 					// The automatic post-apply plan check also asserts no plan
@@ -74,7 +74,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.DestinationAPIUpdateResponse()),
 				),
 			},
 			{
