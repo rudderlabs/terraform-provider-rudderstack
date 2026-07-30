@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/tidwall/sjson"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -246,6 +247,30 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 	state, err := cm.APIToState(string(destination.Config))
 	if err != nil {
 		return err
+	}
+
+	// The backend redacts Sensitive (secret) fields from API responses. We
+	// deliberately do NOT re-fill them from config: an unreadable secret can't be
+	// reconciled with the backend, so keeping config authoritative means every
+	// plan re-asserts it — a perpetual diff on secret fields (BREAKING_CHANGES.md).
+	//
+	// Explicitly blank each scalar secret so it reads back empty consistently:
+	// the API omits scalars entirely, and d.Set with an omitted nested field would
+	// otherwise RETAIN the prior value (hiding the diff for nested secrets).
+	// Sensitive collections (e.g. webhook `headers`) are excluded — the backend
+	// returns them present-but-blanked, so they already read back empty.
+	//
+	// Only blank a secret that is actually set in config: blanking an unset path
+	// would fabricate it (and, for an all-secret block, the block itself), creating
+	// a spurious diff on destinations that don't use that field (e.g. a Kinesis
+	// destination using IAM-role auth instead of key-based auth).
+	for _, p := range cm.SensitiveScalarPaths() {
+		if _, ok := d.GetOk("config.0." + p); !ok {
+			continue
+		}
+		if updated, serr := sjson.Set(state, p, ""); serr == nil {
+			state = updated
+		}
 	}
 
 	properties := make(map[string]interface{})

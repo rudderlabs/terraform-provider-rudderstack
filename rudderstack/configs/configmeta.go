@@ -18,6 +18,74 @@ type ConfigMeta struct {
 	Settings       []ConfigProperty
 }
 
+// SensitiveConfigPaths returns the terraform state paths of every Sensitive
+// (secret) field in the config schema, descending into nested blocks — e.g.
+// "api_secret", "s3.0.access_key", "headers". Used to derive the redacted API
+// keys the backend omits from responses.
+func (cm *ConfigMeta) SensitiveConfigPaths() []string {
+	paths, _ := collectSensitivePaths(cm.ConfigSchema, "", false, false)
+	return paths
+}
+
+// SensitiveScalarPaths is like SensitiveConfigPaths but only scalar (TypeString)
+// secrets. Used to explicitly blank secrets the backend omits from responses on
+// read — a Sensitive collection (e.g. webhook `headers`) is excluded because the
+// backend returns it present-but-blanked, so it flows through without forcing.
+func (cm *ConfigMeta) SensitiveScalarPaths() []string {
+	paths, _ := collectSensitivePaths(cm.ConfigSchema, "", false, true)
+	return paths
+}
+
+// SensitiveImportIgnorePaths is like SensitiveConfigPaths but collapses a block
+// whose fields are ALL Sensitive to the block path itself. Such a block reads
+// back empty and its .# / .0.% structural attributes differ on ImportStateVerify,
+// so it must be ignored wholesale; blocks with non-secret fields still return only
+// their sensitive leaves so the rest stays verified.
+func (cm *ConfigMeta) SensitiveImportIgnorePaths() []string {
+	paths, _ := collectSensitivePaths(cm.ConfigSchema, "", true, false)
+	return paths
+}
+
+// collectSensitivePaths walks the schema returning Sensitive field paths.
+//   - collapseBlocks: a block whose every field is Sensitive is returned as the
+//     block path instead of its leaves.
+//   - scalarOnly: skip Sensitive fields that aren't scalar strings.
+//
+// The second return reports whether the given schema level is entirely Sensitive
+// (used for the collapse decision).
+func collectSensitivePaths(sch map[string]*schema.Schema, prefix string, collapseBlocks, scalarOnly bool) (paths []string, allSensitive bool) {
+	allSensitive = len(sch) > 0
+	for key, s := range sch {
+		if s == nil {
+			allSensitive = false
+			continue
+		}
+		path := key
+		if prefix != "" {
+			path = prefix + "." + key
+		}
+		if s.Sensitive {
+			if !scalarOnly || s.Type == schema.TypeString {
+				paths = append(paths, path)
+			}
+			continue
+		}
+		res, ok := s.Elem.(*schema.Resource)
+		if !ok || res == nil {
+			allSensitive = false
+			continue
+		}
+		sub, subAll := collectSensitivePaths(res.Schema, path+".0", collapseBlocks, scalarOnly)
+		if collapseBlocks && subAll {
+			paths = append(paths, path)
+		} else {
+			paths = append(paths, sub...)
+			allSensitive = allSensitive && subAll
+		}
+	}
+	return paths, allSensitive
+}
+
 func (cm *ConfigMeta) StateToAPI(state string) (string, error) {
 	api := "{}"
 

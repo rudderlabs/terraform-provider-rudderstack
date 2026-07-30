@@ -151,7 +151,7 @@ func testAccCheckSourceAPIConfig(resourceName, expectedJSON string) resource.Tes
 			return fmt.Errorf("failed to get source from API: %w", err)
 		}
 
-		return compareConfig(src.Config, expectedJSON)
+		return compareConfig(src.Config, expectedJSON, nil)
 	}
 }
 

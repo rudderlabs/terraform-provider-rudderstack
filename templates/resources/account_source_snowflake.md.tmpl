@@ -1,0 +1,17 @@
+---
+page_title: "rudderstack_account_source_snowflake Resource - terraform-provider-rudderstack"
+subcategory: ""
+description: |-
+
+---
+
+# rudderstack_account_source_snowflake (Resource)
+
+This resource represents a Snowflake rETL account for storing warehouse credentials used in reverse-ETL pipelines. Snowflake supports two authentication methods, selected via `authentication_type`: `keyPair` (supply `private_key`, optionally `private_key_passphrase`) or `password` (supply `password`). For more information check
+https://www.rudderstack.com/docs/sources/reverse-etl/snowflake/
+
+## Example Usage
+
+{{tffile "examples/account_source_snowflake.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

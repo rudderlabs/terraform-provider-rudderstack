@@ -2,6 +2,7 @@ package rudderstack
 
 import (
 	"context"
+	"encoding/json"
 	"regexp"
 	"testing"
 
@@ -261,4 +262,52 @@ func TestPopulateDestinationFromState_NoVersionSetsZero(t *testing.T) {
 	require.NoError(t, populateDestinationFromState(cm, destination, d))
 
 	assert.Equal(t, 0, destination.Version)
+}
+
+// Under always-diff, storeDestinationToState does NOT re-fill redacted secrets from
+// config: the backend returns them empty and state reflects that, so config stays
+// authoritative and every plan re-asserts the secret (a perpetual diff — see
+// BREAKING_CHANGES.md). This holds for nested secrets too.
+func TestStoreDestinationToState_LeavesRedactedSecretsEmpty(t *testing.T) {
+	cm := configs.ConfigMeta{
+		APIType: "TEST",
+		ConfigSchema: map[string]*schema.Schema{
+			"api_key":    {Type: schema.TypeString, Optional: true},
+			"api_secret": {Type: schema.TypeString, Optional: true, Sensitive: true},
+			"s3": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"bucket":     {Type: schema.TypeString, Optional: true},
+					"access_key": {Type: schema.TypeString, Optional: true, Sensitive: true},
+				}},
+			},
+		},
+		Properties: []configs.ConfigProperty{
+			configs.Simple("apiKey", "api_key"),
+			configs.Simple("apiSecret", "api_secret"),
+			configs.Simple("bucketName", "s3.0.bucket"),
+			configs.Simple("accessKey", "s3.0.access_key"),
+		},
+	}
+
+	d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{
+		"name":    "test-destination",
+		"enabled": true,
+		"config": []interface{}{map[string]interface{}{
+			"api_key":    "pub",
+			"api_secret": "shh",
+			"s3":         []interface{}{map[string]interface{}{"bucket": "b", "access_key": "nested-shh"}},
+		}},
+	})
+
+	// Redacted response: secrets absent, non-secrets present.
+	dest := &client.Destination{ID: "d1", Name: "test-destination", Config: json.RawMessage(`{"apiKey":"pub","bucketName":"b"}`)}
+	require.NoError(t, storeDestinationToState(cm, dest, d))
+
+	assert.Equal(t, "", d.Get("config.0.api_secret"), "redacted top-level secret left empty in state")
+	assert.Equal(t, "", d.Get("config.0.s3.0.access_key"), "redacted nested secret left empty in state")
+	assert.Equal(t, "pub", d.Get("config.0.api_key"))
+	assert.Equal(t, "b", d.Get("config.0.s3.0.bucket"))
 }

@@ -35,6 +35,7 @@ func init() {
 		"api_key": {
 			Type:             schema.TypeString,
 			Required:         true,
+			Sensitive:        true,
 			Description:      "Enter your Intercom access token.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
