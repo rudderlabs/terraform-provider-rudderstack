@@ -12,6 +12,8 @@ https://www.rudderstack.com/docs/destinations/analytics/amplitude
 
 Omit the `sdk_version` block to keep existing Amplitude behavior (version `1`), or set `sdk_version.web` to `2` to opt into version 2. The provider sets no Terraform default — version `1` is applied by the control plane when the field is absent.
 
+When using Amplitude Browser SDK v2, the web-only AutoCapture sub-feature blocks (`page_views`, `page_url_enrichment`, `web_vitals`, `file_downloads`, `frustration_interactions`, `network_tracking`, `element_interactions`, and `form_interactions`) inside the `auto_capture` block expose the corresponding Browser SDK v2 controls. Omit these blocks to preserve existing control-plane defaults.
+
 ## Example Usage
 
 ```terraform
@@ -44,6 +46,7 @@ resource "rudderstack_destination_amplitude" "example" {
     # }
 
     # track_session_events {
+    #   web          = true
     #   android      = true
     #   ios          = true
     #   react_native = true
@@ -82,6 +85,40 @@ resource "rudderstack_destination_amplitude" "example" {
 
     # batch_events {
     #   web = true
+    # }
+
+    # auto_capture {
+    #   page_views {
+    #     web = true
+    #   }
+
+    #   page_url_enrichment {
+    #     web = true
+    #   }
+
+    #   web_vitals {
+    #     web = true
+    #   }
+
+    #   file_downloads {
+    #     web = true
+    #   }
+
+    #   frustration_interactions {
+    #     web = true
+    #   }
+
+    #   network_tracking {
+    #     web = true
+    #   }
+
+    #   element_interactions {
+    #     web = true
+    #   }
+
+    #   form_interactions {
+    #     web = true
+    #   }
     # }
 
     # map_device_brand = true
@@ -248,6 +285,7 @@ Required:
 Optional:
 
 - `api_secret` (String, Sensitive) Enter the Amplitude API Secret key required for user deletion.
+- `auto_capture` (Block List, Max: 1) Configure the AutoCapture settings of Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--auto_capture))
 - `batch_events` (Block List, Max: 1) If this setting is enabled, the events are batched together and uploaded by the Amplitude SDK. (see [below for nested schema](#nestedblock--config--batch_events))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `device_id_from_url_param` (Block List, Max: 1) If this setting is enabled, the Amplitude SDK will parse the URL parameter and set the device ID from `amp_device_id`. (see [below for nested schema](#nestedblock--config--device_id_from_url_param))
@@ -281,6 +319,85 @@ Optional:
 - `use_idfa_as_device_id` (Block List, Max: 1) Enable this setting to set the IDFA as the device ID. (see [below for nested schema](#nestedblock--config--use_idfa_as_device_id))
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send events to Amplitude via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 - `version_name` (String) The value of this field is set as the `versionName` of the Amplitude SDK.
+
+<a id="nestedblock--config--auto_capture"></a>
+### Nested Schema for `config.auto_capture`
+
+Optional:
+
+- `element_interactions` (Block List, Max: 1) Enable this setting to capture element interactions automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--auto_capture--element_interactions))
+- `file_downloads` (Block List, Max: 1) Enable this setting to capture file downloads automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--auto_capture--file_downloads))
+- `form_interactions` (Block List, Max: 1) Enable this setting to capture form interactions automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--auto_capture--form_interactions))
+- `frustration_interactions` (Block List, Max: 1) Enable this setting to capture frustration interactions automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--auto_capture--frustration_interactions))
+- `network_tracking` (Block List, Max: 1) Enable this setting to capture network requests automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--auto_capture--network_tracking))
+- `page_url_enrichment` (Block List, Max: 1) Enable this setting to enrich page view events with URL properties using Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--auto_capture--page_url_enrichment))
+- `page_views` (Block List, Max: 1) Enable this setting to track page views automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--auto_capture--page_views))
+- `web_vitals` (Block List, Max: 1) Enable this setting to capture web vitals automatically with Amplitude Browser SDK v2 for web sources. (see [below for nested schema](#nestedblock--config--auto_capture--web_vitals))
+
+<a id="nestedblock--config--auto_capture--element_interactions"></a>
+### Nested Schema for `config.auto_capture.element_interactions`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--auto_capture--file_downloads"></a>
+### Nested Schema for `config.auto_capture.file_downloads`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--auto_capture--form_interactions"></a>
+### Nested Schema for `config.auto_capture.form_interactions`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--auto_capture--frustration_interactions"></a>
+### Nested Schema for `config.auto_capture.frustration_interactions`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--auto_capture--network_tracking"></a>
+### Nested Schema for `config.auto_capture.network_tracking`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--auto_capture--page_url_enrichment"></a>
+### Nested Schema for `config.auto_capture.page_url_enrichment`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--auto_capture--page_views"></a>
+### Nested Schema for `config.auto_capture.page_views`
+
+Optional:
+
+- `web` (Boolean)
+
+
+<a id="nestedblock--config--auto_capture--web_vitals"></a>
+### Nested Schema for `config.auto_capture.web_vitals`
+
+Optional:
+
+- `web` (Boolean)
+
+
 
 <a id="nestedblock--config--batch_events"></a>
 ### Nested Schema for `config.batch_events`
@@ -544,6 +661,7 @@ Optional:
 - `android` (Boolean)
 - `ios` (Boolean)
 - `react_native` (Boolean)
+- `web` (Boolean)
 
 
 <a id="nestedblock--config--track_utm_properties"></a>
