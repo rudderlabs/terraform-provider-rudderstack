@@ -28,7 +28,8 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	resourceName := fmt.Sprintf("rudderstack_destination_%s.test", destination)
 	name := RandomName(destination)
 	cfg := testConfigs[0]
-	wantVersion := registeredDestinationVersion(t, destination)
+	cm := registeredDestinationConfigMeta(t, destination)
+	wantVersion := cm.Version
 
 	if PlanOnly() {
 		t.Parallel()
@@ -59,7 +60,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.DestinationAPICreateResponse()),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.DestinationAPICreateResponse(), cm),
 					// Exact wire version must match the destination's registered
 					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
 					// The automatic post-apply plan check also asserts no plan
@@ -74,7 +75,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.DestinationAPIUpdateResponse()),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.DestinationAPIUpdateResponse(), cm),
 				),
 			},
 			{
@@ -140,7 +141,7 @@ func testAccCheckDestinationExists(resourceName string) resource.TestCheckFunc {
 
 // testAccCheckDestinationAPIConfig fetches the destination from the API and verifies
 // its config contains all expected fields from the test's API JSON.
-func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resource.TestCheckFunc {
+func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, cm configs.ConfigMeta) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if expectedJSON == "" {
 			return nil
@@ -161,14 +162,15 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		return compareConfig(dest.Config, expectedJSON)
+		return compareDestinationConfig(dest.Config, expectedJSON, cm)
 	}
 }
 
-// registeredDestinationVersion returns ConfigMeta.Version for the terraform
-// destination type name. Exact match (not >= 1) keeps future _v2 resources
-// correct while still failing if the API returns the wrong version.
-func registeredDestinationVersion(t *testing.T, destination string) int {
+// registeredDestinationConfigMeta returns ConfigMeta for the terraform destination
+// type name and validates that destination acceptance tests use an exact wire
+// version. Exact match (not >= 1) keeps future _v2 resources correct while still
+// failing if the API returns the wrong version.
+func registeredDestinationConfigMeta(t *testing.T, destination string) configs.ConfigMeta {
 	t.Helper()
 	cm, ok := configs.Destinations.Entries()[destination]
 	if !ok {
@@ -177,7 +179,7 @@ func registeredDestinationVersion(t *testing.T, destination string) int {
 	if cm.Version < 1 {
 		t.Fatalf("destination %q has invalid ConfigMeta.Version %d", destination, cm.Version)
 	}
-	return cm.Version
+	return cm
 }
 
 // testAccCheckDestinationVersion fetches the destination from the API and verifies

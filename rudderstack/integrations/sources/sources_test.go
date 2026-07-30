@@ -402,6 +402,9 @@ func TestAccSourceCustomerio(t *testing.T) {
 }
 
 func TestAccSourceFacebookLeadAds(t *testing.T) {
+	if !acc.PlanOnly() {
+		t.Skip("facebook_lead_ads is not available in the shared acceptance-test account")
+	}
 	acc.AccAssertSource(t, "facebook_lead_ads", emptyTestConfigs)
 }
 
