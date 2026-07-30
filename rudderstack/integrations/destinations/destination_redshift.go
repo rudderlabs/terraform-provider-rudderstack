@@ -131,6 +131,7 @@ func init() {
 					"access_key_id": {
 						Type:             schema.TypeString,
 						Optional:         true,
+						Sensitive:        true,
 						Description:      "Enter your AWS access key ID.",
 						ValidateDiagFunc: c.StringMatchesRegexp("(^env[.].+)|^(.{1,100})$"),
 					},

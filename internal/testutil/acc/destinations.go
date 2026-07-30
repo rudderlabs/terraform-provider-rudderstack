@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
@@ -79,12 +80,77 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: destinationImportStateVerifyIgnore(cm),
 			},
 		},
 	})
+}
+
+func destinationImportStateVerifyIgnore(cm configs.ConfigMeta) []string {
+	return sensitiveImportStateVerifyIgnore("config.0", cm.ConfigSchema)
+}
+
+func sensitiveImportStateVerifyIgnore(prefix string, schemaMap map[string]*schema.Schema) []string {
+	ignored := []string{}
+	for key, fieldSchema := range schemaMap {
+		path := prefix + "." + key
+		if fieldSchema.Sensitive {
+			ignored = append(ignored, path)
+			if nestedResource, ok := fieldSchema.Elem.(*schema.Resource); ok {
+				ignored = append(ignored, path+".#", path+".0.%")
+				ignored = append(ignored, allImportStateVerifyPaths(path+".0", nestedResource.Schema)...)
+			}
+			continue
+		}
+
+		nestedResource, ok := fieldSchema.Elem.(*schema.Resource)
+		if !ok {
+			continue
+		}
+
+		nestedIgnored := sensitiveImportStateVerifyIgnore(path+".0", nestedResource.Schema)
+		if len(nestedIgnored) == 0 {
+			continue
+		}
+
+		if allSchemaFieldsSensitive(nestedResource.Schema) {
+			ignored = append(ignored, path+".#", path+".0.%")
+		}
+		ignored = append(ignored, nestedIgnored...)
+	}
+	return ignored
+}
+
+func allImportStateVerifyPaths(prefix string, schemaMap map[string]*schema.Schema) []string {
+	paths := []string{}
+	for key, fieldSchema := range schemaMap {
+		path := prefix + "." + key
+		paths = append(paths, path)
+
+		nestedResource, ok := fieldSchema.Elem.(*schema.Resource)
+		if !ok {
+			continue
+		}
+
+		paths = append(paths, path+".#", path+".0.%")
+		paths = append(paths, allImportStateVerifyPaths(path+".0", nestedResource.Schema)...)
+	}
+	return paths
+}
+
+func allSchemaFieldsSensitive(schemaMap map[string]*schema.Schema) bool {
+	if len(schemaMap) == 0 {
+		return false
+	}
+	for _, fieldSchema := range schemaMap {
+		if !fieldSchema.Sensitive {
+			return false
+		}
+	}
+	return true
 }
 
 // RandomName generates a unique resource name with a tf-acc- prefix for test isolation.
