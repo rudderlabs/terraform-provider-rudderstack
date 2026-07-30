@@ -63,3 +63,7 @@
 
 - Full destination resource tests and docs generation can be environment-blocked when Terraform CLI auto-install fails with HTTP 403 before test/doc logic executes.
 - In this failure mode, compile-only checks (for example `go test ./rudderstack/integrations/destinations -run '^$' -count=1`) can still validate build integrity, but they do not replace behavior/doc validation.
+
+## ACT2-463 — Shared E2E account source entitlement
+
+- The shared Terraform provider E2E account rejects live CRUD for the `facebook_lead_ads` source with HTTP 403 (`source "facebook_lead_ads" is not available for your account`). Keep unit and plan-only validation for that source, but do not treat full live CRUD failure in that account as a product regression unless the account entitlement changes.
