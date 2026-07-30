@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -252,6 +253,7 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 	if err := json.Unmarshal([]byte(state), &properties); err != nil {
 		return err
 	}
+	properties = mergeDestinationConfigWithPriorState(properties, cm, d)
 
 	if len(properties) > 0 {
 		if err := d.Set("config", []interface{}{properties}); err != nil {
@@ -264,4 +266,172 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 	}
 
 	return nil
+}
+
+func mergeDestinationConfigWithPriorState(properties map[string]interface{}, cm configs.ConfigMeta, d *schema.ResourceData) map[string]interface{} {
+	merged := make(map[string]interface{}, len(properties))
+	for key, value := range properties {
+		merged[key] = value
+	}
+
+	prior := priorDestinationConfig(d)
+	if prior == nil {
+		return merged
+	}
+
+	mergeDestinationConfigMap(merged, prior, cm.ConfigSchema)
+	return merged
+}
+
+func priorDestinationConfig(d *schema.ResourceData) map[string]interface{} {
+	existing := d.Get("config")
+	list, ok := existing.([]interface{})
+	if !ok || len(list) == 0 {
+		return nil
+	}
+
+	prior, ok := list[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	return prior
+}
+
+func mergeDestinationConfigMap(merged, prior map[string]interface{}, schemaMap map[string]*schema.Schema) {
+	for key, fieldSchema := range schemaMap {
+		priorValue, ok := prior[key]
+		if !ok {
+			continue
+		}
+
+		apiValue, hasAPIValue := merged[key]
+		if value, preserve := preservedDestinationConfigValue(apiValue, priorValue, fieldSchema, hasAPIValue); preserve {
+			merged[key] = value
+		}
+	}
+}
+
+func preservedDestinationConfigValue(apiValue, priorValue interface{}, fieldSchema *schema.Schema, hasAPIValue bool) (interface{}, bool) {
+	if fieldSchema.Sensitive {
+		return priorValue, true
+	}
+
+	nestedSchema, hasNestedSchema := nestedDestinationConfigSchema(fieldSchema)
+	if hasNestedSchema {
+		if hasAPIValue {
+			return mergeNestedDestinationConfigValue(apiValue, priorValue, nestedSchema)
+		}
+		return preservedNestedDestinationConfigValue(priorValue, nestedSchema)
+	}
+
+	if !hasAPIValue && isEmptyDestinationConfigCollection(priorValue) {
+		return priorValue, true
+	}
+
+	return nil, false
+}
+
+func nestedDestinationConfigSchema(fieldSchema *schema.Schema) (map[string]*schema.Schema, bool) {
+	resource, ok := fieldSchema.Elem.(*schema.Resource)
+	if !ok {
+		return nil, false
+	}
+
+	return resource.Schema, true
+}
+
+func mergeNestedDestinationConfigValue(apiValue, priorValue interface{}, schemaMap map[string]*schema.Schema) (interface{}, bool) {
+	switch prior := priorValue.(type) {
+	case []interface{}:
+		api, ok := apiValue.([]interface{})
+		if !ok {
+			return nil, false
+		}
+
+		merged := make([]interface{}, len(api))
+		copy(merged, api)
+		preserved := false
+		for index := range api {
+			if index >= len(prior) {
+				continue
+			}
+
+			apiItem, apiOK := api[index].(map[string]interface{})
+			priorItem, priorOK := prior[index].(map[string]interface{})
+			if !apiOK || !priorOK {
+				continue
+			}
+
+			mergedItem := make(map[string]interface{}, len(apiItem))
+			for key, value := range apiItem {
+				mergedItem[key] = value
+			}
+			mergeDestinationConfigMap(mergedItem, priorItem, schemaMap)
+			if !reflect.DeepEqual(mergedItem, apiItem) {
+				preserved = true
+			}
+			merged[index] = mergedItem
+		}
+
+		return merged, preserved
+	case map[string]interface{}:
+		api, ok := apiValue.(map[string]interface{})
+		if !ok {
+			return nil, false
+		}
+
+		merged := make(map[string]interface{}, len(api))
+		for key, value := range api {
+			merged[key] = value
+		}
+		mergeDestinationConfigMap(merged, prior, schemaMap)
+		return merged, !reflect.DeepEqual(merged, api)
+	default:
+		return nil, false
+	}
+}
+
+func preservedNestedDestinationConfigValue(priorValue interface{}, schemaMap map[string]*schema.Schema) (interface{}, bool) {
+	switch prior := priorValue.(type) {
+	case []interface{}:
+		merged := make([]interface{}, 0, len(prior))
+		for _, item := range prior {
+			priorItem, ok := item.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			mergedItem := map[string]interface{}{}
+			mergeDestinationConfigMap(mergedItem, priorItem, schemaMap)
+			if len(mergedItem) > 0 {
+				merged = append(merged, mergedItem)
+			}
+		}
+
+		if len(merged) > 0 {
+			return merged, true
+		}
+	case map[string]interface{}:
+		merged := map[string]interface{}{}
+		mergeDestinationConfigMap(merged, prior, schemaMap)
+		if len(merged) > 0 {
+			return merged, true
+		}
+	}
+
+	return nil, false
+}
+
+func isEmptyDestinationConfigCollection(value interface{}) bool {
+	switch v := value.(type) {
+	case []interface{}:
+		return len(v) == 0
+	case map[string]interface{}:
+		return len(v) == 0
+	case *schema.Set:
+		return v.Len() == 0
+	default:
+		return false
+	}
 }

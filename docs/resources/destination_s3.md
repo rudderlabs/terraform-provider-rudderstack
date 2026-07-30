@@ -143,7 +143,7 @@ Required:
 Optional:
 
 - `access_key` (String, Sensitive) Enter your AWS secret access key.
-- `access_key_id` (String) Enter your AWS access key ID.
+- `access_key_id` (String, Sensitive) Enter your AWS access key ID.
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `enable_sse` (Boolean) This setting enables server-side encryption.
 - `prefix` (String) Enter a prefix which RudderStack associates as the path prefix to all the files stored in your S3 bucket.

@@ -142,7 +142,7 @@ resource "rudderstack_destination_intercom" "example" {
 
 Required:
 
-- `api_key` (String) Enter your Intercom access token.
+- `api_key` (String, Sensitive) Enter your Intercom access token.
 - `app_id` (String) Enter your app ID.
 
 Optional:

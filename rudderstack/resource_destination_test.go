@@ -2,6 +2,7 @@ package rudderstack
 
 import (
 	"context"
+	"encoding/json"
 	"regexp"
 	"testing"
 
@@ -261,4 +262,134 @@ func TestPopulateDestinationFromState_NoVersionSetsZero(t *testing.T) {
 	require.NoError(t, populateDestinationFromState(cm, destination, d))
 
 	assert.Equal(t, 0, destination.Version)
+}
+
+func TestStoreDestinationToStatePreservesPrunedSensitiveAndEmptyConfigValues(t *testing.T) {
+	cm := configs.ConfigMeta{
+		APIType: "TEST",
+		ConfigSchema: map[string]*schema.Schema{
+			"api_secret": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			"url": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"labels": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"headers": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"value": {
+							Type:      schema.TypeString,
+							Optional:  true,
+							Sensitive: true,
+						},
+					},
+				},
+			},
+			"key_based_authentication": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"access_key_id": {
+							Type:      schema.TypeString,
+							Optional:  true,
+							Sensitive: true,
+						},
+						"access_key": {
+							Type:      schema.TypeString,
+							Optional:  true,
+							Sensitive: true,
+						},
+					},
+				},
+			},
+			"non_secret": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
+		Properties: []configs.ConfigProperty{
+			configs.Simple("apiSecret", "api_secret"),
+			configs.Simple("url", "url"),
+			configs.ArrayWithStrings("labels", "value", "labels"),
+			configs.ArrayWithObjects("headers", "headers", map[string]any{
+				"name":  "name",
+				"value": "value",
+			}),
+			configs.ArrayWithObjects("keyBasedAuthentication", "key_based_authentication", map[string]any{
+				"accessKeyID": "access_key_id",
+				"accessKey":   "access_key",
+			}),
+			configs.Simple("nonSecret", "non_secret"),
+		},
+	}
+
+	d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{
+		"name":    "test-destination",
+		"enabled": true,
+		"config": []interface{}{
+			map[string]interface{}{
+				"api_secret": "prior-api-secret",
+				"url":        "https://old.example.com",
+				"labels":     []interface{}{},
+				"headers": []interface{}{
+					map[string]interface{}{
+						"name":  "Authorization",
+						"value": "prior-header-secret",
+					},
+				},
+				"key_based_authentication": []interface{}{
+					map[string]interface{}{
+						"access_key_id": "prior-access-key-id",
+						"access_key":    "prior-access-key",
+					},
+				},
+				"non_secret": "prior-non-secret",
+			},
+		},
+	})
+
+	destination := &client.Destination{
+		ID:        "destination-id",
+		Name:      "test-destination",
+		IsEnabled: true,
+		Config: json.RawMessage(`{
+			"url": "https://new.example.com",
+			"nonSecret": "api-non-secret",
+			"headers": [
+				{
+					"name": "Authorization",
+					"value": ""
+				}
+			]
+		}`),
+	}
+
+	require.NoError(t, storeDestinationToState(cm, destination, d))
+
+	assert.Equal(t, "prior-api-secret", d.Get("config.0.api_secret"))
+	assert.Equal(t, "https://new.example.com", d.Get("config.0.url"))
+	assert.Equal(t, 0, d.Get("config.0.labels.#"))
+	assert.Equal(t, "Authorization", d.Get("config.0.headers.0.name"))
+	assert.Equal(t, "prior-header-secret", d.Get("config.0.headers.0.value"))
+	assert.Equal(t, "prior-access-key-id", d.Get("config.0.key_based_authentication.0.access_key_id"))
+	assert.Equal(t, "prior-access-key", d.Get("config.0.key_based_authentication.0.access_key"))
+	assert.Equal(t, "api-non-secret", d.Get("config.0.non_secret"))
 }
