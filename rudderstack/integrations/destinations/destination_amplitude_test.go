@@ -19,7 +19,8 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"apiSecret": "abc123",
 				"trackCategorizedPages": true,
 				"trackNamedPages": true,
-				"residencyServer": "standard"
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
 			}`,
 		TerraformUpdate: `
 				api_key = "123abc"
@@ -588,4 +589,101 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 
 func TestAccDestinationAmplitude(t *testing.T) {
 	acc.AccAssertDestination(t, "amplitude", amplitudeTestConfigs)
+}
+
+func TestDestinationResourceAmplitudeSdkVersionEmptyBlock(t *testing.T) {
+	cmt.AssertDestination(t, "amplitude", []c.TestConfig{
+		{
+			TerraformCreate: `
+				api_key = "123abc"
+
+				sdk_version {}
+			`,
+			APICreate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
+			}`,
+			TerraformUpdate: `
+				api_key = "123abc"
+
+				sdk_version {
+				  web = 1
+				}
+			`,
+			APIUpdate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 1 }
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceAmplitudeSdkVersionExplicitThenOmitted(t *testing.T) {
+	cmt.AssertDestination(t, "amplitude", []c.TestConfig{
+		{
+			TerraformCreate: `
+				api_key = "123abc"
+
+				sdk_version {
+				  web = 1
+				}
+			`,
+			APICreate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 1 }
+			}`,
+			TerraformUpdate: `
+				api_key = "123abc"
+			`,
+			APIUpdate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 1 }
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceAmplitudeSdkVersionOmitted(t *testing.T) {
+	cmt.AssertDestination(t, "amplitude", []c.TestConfig{
+		{
+			TerraformCreate: `
+				api_key = "123abc"
+			`,
+			APICreate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
+			}`,
+			TerraformUpdate: `
+				api_key = "123abc"
+			`,
+			APIUpdate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
+			}`,
+		},
+	})
 }

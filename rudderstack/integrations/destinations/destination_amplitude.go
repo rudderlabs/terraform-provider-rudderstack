@@ -22,7 +22,7 @@ func init() {
 		c.Simple("trackProductsOnce", "track_products_once", c.SkipZeroValue),
 		c.Simple("trackRevenuePerProduct", "track_revenue_per_product", c.SkipZeroValue),
 		c.Simple("versionName", "version_name", c.SkipZeroValue),
-		c.Simple("sdkVersion.web", "sdk_version.0.web", c.SkipZeroValue),
+		c.SimpleWithDefault("sdkVersion.web", "sdk_version.0.web", 2),
 		c.ArrayWithStrings("traitsToIncrement", "traits", "traits_to_increment"),
 		c.ArrayWithStrings("traitsToSetOnce", "traits", "traits_to_set_once"),
 		c.ArrayWithStrings("traitsToAppend", "traits", "traits_to_append"),
@@ -147,13 +147,15 @@ func init() {
 			Type:        schema.TypeList,
 			MaxItems:    1,
 			Optional:    true,
-			Description: "Choose the Amplitude Browser SDK version to load for web (JavaScript) sources. Version `1` is used when this block is omitted.",
+			Computed:    true,
+			Description: "Choose the Amplitude Browser SDK version to load for web (JavaScript) sources. Defaults to `2` when this block is omitted.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"web": {
 						Type:             schema.TypeInt,
-						Required:         true,
-						Description:      "Amplitude Browser SDK version for web sources. Valid values are `1` and `2`.",
+						Optional:         true,
+						Default:          2,
+						Description:      "Amplitude Browser SDK version for web sources. Valid values are `1` and `2`. Defaults to `2`.",
 						ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 2)),
 					},
 				},
