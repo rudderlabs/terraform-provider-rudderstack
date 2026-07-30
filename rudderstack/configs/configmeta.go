@@ -2,8 +2,12 @@ package configs
 
 import (
 	"encoding/json"
+	"sort"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 type ConfigMeta struct {
@@ -45,6 +49,95 @@ func (cm *ConfigMeta) APIToState(api string) (string, error) {
 	}
 
 	return filterJSONToSchema(state, cm.ConfigSchema)
+}
+
+func (cm *ConfigMeta) APIToStatePreservingWriteOnly(api, priorState string) (string, error) {
+	state, err := cm.APIToState(api)
+	if err != nil {
+		return state, err
+	}
+
+	for _, path := range WriteOnlyStatePaths(cm.ConfigSchema) {
+		prior := gjson.Get(priorState, path)
+		if !prior.Exists() {
+			continue
+		}
+
+		state, err = sjson.Set(state, path, prior.Value())
+		if err != nil {
+			return state, err
+		}
+	}
+
+	return filterJSONToSchema(state, cm.ConfigSchema)
+}
+
+func WriteOnlyStatePaths(configSchema map[string]*schema.Schema) []string {
+	pathSet := map[string]struct{}{}
+	collectWriteOnlyStatePaths("", configSchema, pathSet)
+
+	paths := make([]string, 0, len(pathSet))
+	for path := range pathSet {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	return paths
+}
+
+func collectWriteOnlyStatePaths(prefix string, configSchema map[string]*schema.Schema, paths map[string]struct{}) {
+	for key, fieldSchema := range configSchema {
+		if fieldSchema == nil {
+			continue
+		}
+
+		path := key
+		if prefix != "" {
+			path = prefix + "." + key
+		}
+
+		if fieldSchema.Sensitive || schemaKeyLooksWriteOnly(key) {
+			paths[path] = struct{}{}
+			continue
+		}
+
+		resource, ok := fieldSchema.Elem.(*schema.Resource)
+		if !ok {
+			continue
+		}
+
+		switch fieldSchema.Type {
+		case schema.TypeList, schema.TypeSet:
+			collectWriteOnlyStatePaths(path+".0", resource.Schema, paths)
+		case schema.TypeMap:
+			collectWriteOnlyStatePaths(path, resource.Schema, paths)
+		default:
+			collectWriteOnlyStatePaths(path, resource.Schema, paths)
+		}
+	}
+}
+
+func schemaKeyLooksWriteOnly(key string) bool {
+	normalized := strings.NewReplacer("_", "", "-", "").Replace(strings.ToLower(key))
+	writeOnlyTokens := []string{
+		"apikey",
+		"apisecret",
+		"apitoken",
+		"accesstoken",
+		"refreshtoken",
+		"accesskey",
+		"privatekey",
+		"password",
+		"secret",
+		"token",
+		"credential",
+		"certificate",
+	}
+	for _, token := range writeOnlyTokens {
+		if strings.Contains(normalized, token) {
+			return true
+		}
+	}
+	return false
 }
 
 func (cm *ConfigMeta) SettingsStateToAPI(state string) (string, error) {

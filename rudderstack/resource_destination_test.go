@@ -275,6 +275,55 @@ func TestResourceDestinationReadFiltersStaleConfigFields(t *testing.T) {
 	assert.NotContains(t, attributes, "config.0.objects.0.stale_object")
 }
 
+func TestResourceDestinationReadPreservesWriteOnlyConfigFields(t *testing.T) {
+	cm := testDestinationWriteOnlyConfigMeta()
+	destinations := &stubDestinationsService{
+		getFunc: func(_ context.Context, id string) (*client.Destination, error) {
+			assert.Equal(t, "dst-id", id)
+			return &client.Destination{
+				ID:        "dst-id",
+				Type:      cm.APIType,
+				Version:   cm.Version,
+				Name:      "example",
+				IsEnabled: true,
+				Config: json.RawMessage(`{
+					"apiUrl": "https://example.com",
+					"headers": [{ "from": "x-header", "to": "" }]
+				}`),
+			}, nil
+		},
+	}
+	d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{
+		"name":    "before-read",
+		"enabled": true,
+		"config": []interface{}{
+			map[string]interface{}{
+				"api_key": "existing-api-key",
+				"api_url": "https://old.example.com",
+				"headers": []interface{}{
+					map[string]interface{}{"from": "x-header", "to": "existing-header-value"},
+				},
+				"stale": "should-not-survive",
+			},
+		},
+	})
+	d.SetId("dst-id")
+
+	diags := resourceDestinationRead(cm)(context.Background(), d, &Client{Destinations: destinations})
+	require.False(t, diags.HasError(), "unexpected diagnostics: %#v", diags)
+
+	assert.Equal(t, "https://example.com", d.Get("config.0.api_url"))
+	assert.Equal(t, "existing-api-key", d.Get("config.0.api_key"))
+	headers, ok := d.Get("config.0.headers").([]interface{})
+	require.True(t, ok)
+	require.Len(t, headers, 1)
+	header, ok := headers[0].(map[string]interface{})
+	require.True(t, ok)
+	assert.Equal(t, "x-header", header["from"])
+	assert.Equal(t, "existing-header-value", header["to"])
+	assert.Empty(t, d.Get("config.0.stale"))
+}
+
 func TestResourceDestinationUpdateDoesNotRoundTripStaleConfigFields(t *testing.T) {
 	cm := testDestinationStaleFieldConfigMeta()
 	getCalls := 0
@@ -395,6 +444,45 @@ func testDestinationStaleFieldConfigMeta() configs.ConfigMeta {
 					NestedKey:    "value",
 				},
 			}),
+		},
+	}
+}
+
+func testDestinationWriteOnlyConfigMeta() configs.ConfigMeta {
+	return configs.ConfigMeta{
+		APIType: "TEST_DESTINATION",
+		Version: 1,
+		ConfigSchema: map[string]*schema.Schema{
+			"api_key": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"api_url": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"headers": {
+				Type:      schema.TypeList,
+				Optional:  true,
+				Sensitive: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"from": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"to": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+		},
+		Properties: []configs.ConfigProperty{
+			configs.Simple("apiKey", "api_key"),
+			configs.Simple("apiUrl", "api_url"),
+			configs.Simple("headers", "headers"),
 		},
 	}
 }

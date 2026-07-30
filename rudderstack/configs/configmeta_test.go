@@ -3,6 +3,7 @@ package configs_test
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -133,4 +134,114 @@ func TestConfigMetaAPIToStateIgnoresUnmappedNestedFields(t *testing.T) {
 			"nested_values": ["kept-nested"]
 		}]
 	}`, state)
+}
+
+func TestConfigMetaAPIToStatePreservingWriteOnly(t *testing.T) {
+	cm := configs.ConfigMeta{
+		ConfigSchema: map[string]*schema.Schema{
+			"api_key": {
+				Type: schema.TypeString,
+			},
+			"api_url": {
+				Type: schema.TypeString,
+			},
+			"nested": {
+				Type: schema.TypeList,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"access_key_id": {
+						Type: schema.TypeString,
+					},
+					"name": {
+						Type: schema.TypeString,
+					},
+				}},
+			},
+			"headers": {
+				Type:      schema.TypeList,
+				Sensitive: true,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"from": {
+						Type: schema.TypeString,
+					},
+					"to": {
+						Type: schema.TypeString,
+					},
+				}},
+			},
+			"stale": {
+				Type: schema.TypeString,
+			},
+		},
+		Properties: []configs.ConfigProperty{
+			configs.Simple("apiKey", "api_key"),
+			configs.Simple("apiUrl", "api_url"),
+			configs.Simple("nested.accessKeyID", "nested.0.access_key_id"),
+			configs.Simple("nested.name", "nested.0.name"),
+			configs.Simple("headers", "headers"),
+			configs.Simple("stale", "stale"),
+		},
+	}
+
+	state, err := cm.APIToStatePreservingWriteOnly(`{
+		"apiUrl": "https://example.com",
+		"nested": { "name": "kept" },
+		"headers": [{ "from": "x-header", "to": "" }]
+	}`, `{
+		"api_key": "kept-secret",
+		"nested": [{ "access_key_id": "kept-access-key-id", "name": "old-name" }],
+		"headers": [{ "from": "x-header", "to": "kept-header-value" }],
+		"stale": "should-not-be-preserved"
+	}`)
+	require.NoError(t, err)
+
+	assert.JSONEq(t, `{
+		"api_key": "kept-secret",
+		"api_url": "https://example.com",
+		"nested": [{ "access_key_id": "kept-access-key-id", "name": "kept" }],
+		"headers": [{ "from": "x-header", "to": "kept-header-value" }]
+	}`, state)
+}
+
+func TestWriteOnlyStatePaths(t *testing.T) {
+	paths := configs.WriteOnlyStatePaths(map[string]*schema.Schema{
+		"api_key": {
+			Type: schema.TypeString,
+		},
+		"event_key": {
+			Type: schema.TypeString,
+		},
+		"password": {
+			Type: schema.TypeString,
+		},
+		"headers": {
+			Type:      schema.TypeList,
+			Sensitive: true,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"from": {
+					Type: schema.TypeString,
+				},
+				"to": {
+					Type: schema.TypeString,
+				},
+			}},
+		},
+		"auth": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"access_key_id": {
+					Type: schema.TypeString,
+				},
+				"name": {
+					Type: schema.TypeString,
+				},
+			}},
+		},
+	})
+
+	assert.Equal(t, []string{
+		"api_key",
+		"auth.0.access_key_id",
+		"headers",
+		"password",
+	}, paths)
 }

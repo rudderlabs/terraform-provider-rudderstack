@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/tidwall/sjson"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -82,9 +83,10 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: destinationWriteOnlyTerraformStatePaths(cm),
 			},
 		},
 	})
@@ -165,7 +167,7 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, cm conf
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		ignoredPaths, err := sensitiveAPIConfigPaths(cm)
+		ignoredPaths, err := writeOnlyAPIConfigPaths(cm)
 		if err != nil {
 			return err
 		}
@@ -188,8 +190,11 @@ func registeredDestinationConfigMeta(t *testing.T, destination string) configs.C
 	return cm
 }
 
-func sensitiveAPIConfigPaths(cm configs.ConfigMeta) ([]string, error) {
-	state, markers := sensitiveStateForSchema(cm.ConfigSchema)
+func writeOnlyAPIConfigPaths(cm configs.ConfigMeta) ([]string, error) {
+	state, markers, err := writeOnlyStateForSchema(cm.ConfigSchema)
+	if err != nil {
+		return nil, err
+	}
 	if len(markers) == 0 {
 		return nil, nil
 	}
@@ -219,51 +224,25 @@ func sensitiveAPIConfigPaths(cm configs.ConfigMeta) ([]string, error) {
 	return paths, nil
 }
 
-func sensitiveStateForSchema(configSchema map[string]*schema.Schema) (map[string]any, map[string]struct{}) {
+func writeOnlyStateForSchema(configSchema map[string]*schema.Schema) (map[string]any, map[string]struct{}, error) {
 	markers := map[string]struct{}{}
-	state := sensitiveStateObject(configSchema, markers)
-	return state, markers
-}
+	stateJSON := "{}"
 
-func sensitiveStateObject(configSchema map[string]*schema.Schema, markers map[string]struct{}) map[string]any {
-	state := map[string]any{}
-	for key, fieldSchema := range configSchema {
-		value, ok := sensitiveStateValue(fieldSchema, markers)
-		if ok {
-			state[key] = value
-		}
-	}
-	return state
-}
-
-func sensitiveStateValue(fieldSchema *schema.Schema, markers map[string]struct{}) (any, bool) {
-	if fieldSchema == nil {
-		return nil, false
-	}
-
-	if nestedResource, ok := fieldSchema.Elem.(*schema.Resource); ok {
-		nestedState := sensitiveStateObject(nestedResource.Schema, markers)
-		if len(nestedState) == 0 {
-			return nil, false
-		}
-
-		switch fieldSchema.Type {
-		case schema.TypeList, schema.TypeSet:
-			return []any{nestedState}, true
-		case schema.TypeMap:
-			return nestedState, true
-		default:
-			return nestedState, true
-		}
-	}
-
-	if fieldSchema.Sensitive {
+	for _, path := range configs.WriteOnlyStatePaths(configSchema) {
 		marker := fmt.Sprintf("__rudder_tf_sensitive_%d__", len(markers))
 		markers[marker] = struct{}{}
-		return marker, true
+		nextState, err := sjson.Set(stateJSON, path, marker)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to set write-only marker at %q: %w", path, err)
+		}
+		stateJSON = nextState
 	}
 
-	return nil, false
+	var state map[string]any
+	if err := json.Unmarshal([]byte(stateJSON), &state); err != nil {
+		return nil, nil, fmt.Errorf("failed to unmarshal write-only marker state: %w", err)
+	}
+	return state, markers, nil
 }
 
 func collectMarkerPaths(prefix string, value any, markers map[string]struct{}, paths map[string]struct{}) {
@@ -285,6 +264,16 @@ func collectMarkerPaths(prefix string, value any, markers map[string]struct{}, p
 			paths[prefix] = struct{}{}
 		}
 	}
+}
+
+func destinationWriteOnlyTerraformStatePaths(cm configs.ConfigMeta) []string {
+	statePaths := configs.WriteOnlyStatePaths(cm.ConfigSchema)
+	paths := make([]string, 0, len(statePaths))
+	for _, path := range statePaths {
+		paths = append(paths, "config.0."+path)
+	}
+	sort.Strings(paths)
+	return paths
 }
 
 // testAccCheckDestinationVersion fetches the destination from the API and verifies
