@@ -69,19 +69,22 @@ func TestGeneratorTerraform(t *testing.T) {
 				"advancedMapping": true,
 				"testDestination": true,
 				"testEventCode": "...",
+				"staleFacebookTopLevel": "should not be generated",
 				"eventsToEvents": [
-				  { "from": "a1", "to": "b1" },
+				  { "from": "a1", "to": "b1", "staleMappingField": "should not be generated" },
 				  { "from": "a2", "to": "b2" }
 				],
-				"legacyConversionPixelId": { "from": "from", "to": "to" },
-				"useNativeSDK": { "web": true },
+				"legacyConversionPixelId": { "from": "from", "to": "to", "staleNestedField": "should not be generated" },
+				"useNativeSDK": { "web": true, "android": true },
 				"consentManagement": {
 					"web": [
 						{
 							"provider": "oneTrust",
+							"staleConsentManagementField": "should not be generated",
 							"consents": [
 								{
-									"consent": "one_web"
+									"consent": "one_web",
+									"staleConsentField": "should not be generated"
 								},
 								{
 									"consent": "two_web"
@@ -238,7 +241,10 @@ resource "rudderstack_connection" "cnxn_id-connection-2" {
 
 	data, err := generator.GenerateTerraform(sources, destinations, connections, nil, nil)
 	require.NoError(t, err)
-	assert.Equal(t, expected, string(data))
+	output := string(data)
+	assert.Equal(t, expected, output)
+	assert.NotContains(t, output, "stale")
+	assert.NotContains(t, output, "android")
 }
 
 // TestGeneratorTerraformNestedListInListOfObjects tests ctyValue handling for a list of objects
