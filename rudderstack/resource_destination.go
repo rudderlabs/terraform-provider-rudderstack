@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -75,6 +76,7 @@ func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema 
 	}
 
 	if !cm.SkipConfig {
+		attachSecretDiffSuppress(cm.ConfigSchema)
 		s["config"] = &schema.Schema{
 			Type:     schema.TypeList,
 			Optional: cm.SkipConfig,
@@ -89,6 +91,38 @@ func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema 
 	}
 
 	return s
+}
+
+// attachSecretDiffSuppress makes top-level Sensitive scalar fields tolerate the
+// backend redacting them from responses: on read the value comes back empty, and
+// this suppresses the resulting empty(state)->configured(config) diff so it does
+// not show as perpetual drift. Nested secrets and Sensitive collections are NOT
+// handled here — DiffSuppressFunc can't reliably suppress block .# / nested-element
+// diffs — so those are preserved from state on read instead (storeDestinationToState).
+func attachSecretDiffSuppress(sch map[string]*schema.Schema) {
+	for _, s := range sch {
+		if s == nil || !s.Sensitive || s.Type != schema.TypeString {
+			continue
+		}
+		existing := s.DiffSuppressFunc
+		s.DiffSuppressFunc = func(k, oldV, newV string, d *schema.ResourceData) bool {
+			if oldV == "" && newV != "" {
+				return true
+			}
+			return existing != nil && existing(k, oldV, newV, d)
+		}
+	}
+}
+
+// isDiffSuppressedSecret reports whether a sensitive config path is a top-level
+// scalar handled by attachSecretDiffSuppress (and therefore must NOT also be
+// preserved on read).
+func isDiffSuppressedSecret(cm configs.ConfigMeta, path string) bool {
+	if strings.Contains(path, ".") {
+		return false
+	}
+	s := cm.ConfigSchema[path]
+	return s != nil && s.Sensitive && s.Type == schema.TypeString
 }
 
 func resourceDestinationCreate(cm configs.ConfigMeta) schema.CreateContextFunc {
@@ -253,8 +287,13 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 	// them or returning them blanked — so APIToState can't recover them. Restore
 	// each from the value already in state, else Terraform sees perpetual drift on
 	// the post-apply plan. Nested paths ("s3.0.access_key") and whole Sensitive
-	// collections ("headers") are handled via sjson.
+	// collections ("headers") are handled via sjson. Top-level scalar secrets are
+	// instead handled by DiffSuppressFunc (attachSecretDiffSuppress) and skipped
+	// here so their value is not persisted into state from the config.
 	for _, p := range cm.SensitiveConfigPaths() {
+		if isDiffSuppressedSecret(cm, p) {
+			continue
+		}
 		if cur, ok := d.GetOk("config.0." + p); ok {
 			if updated, serr := sjson.Set(state, p, cur); serr == nil {
 				state = updated

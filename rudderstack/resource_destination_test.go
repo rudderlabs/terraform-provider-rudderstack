@@ -264,34 +264,61 @@ func TestPopulateDestinationFromState_NoVersionSetsZero(t *testing.T) {
 	assert.Equal(t, 0, destination.Version)
 }
 
-// The backend redacts Sensitive fields from responses. storeDestinationToState
-// must keep the secret already in state rather than clear it, else the field
-// shows perpetual plan drift.
-func TestStoreDestinationToState_PreservesRedactedSecret(t *testing.T) {
+// A NESTED redacted secret is preserved from state on read (top-level scalars are
+// handled by DiffSuppressFunc instead — see TestTopLevelSecretUsesDiffSuppress).
+func TestStoreDestinationToState_PreservesNestedRedactedSecret(t *testing.T) {
 	cm := configs.ConfigMeta{
 		APIType: "TEST",
 		ConfigSchema: map[string]*schema.Schema{
-			"api_key":    {Type: schema.TypeString, Optional: true},
-			"api_secret": {Type: schema.TypeString, Optional: true, Sensitive: true},
+			"s3": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"bucket":     {Type: schema.TypeString, Optional: true},
+					"access_key": {Type: schema.TypeString, Optional: true, Sensitive: true},
+				}},
+			},
 		},
 		Properties: []configs.ConfigProperty{
-			configs.Simple("apiKey", "api_key"),
-			configs.Simple("apiSecret", "api_secret"),
+			configs.Simple("bucketName", "s3.0.bucket"),
+			configs.Simple("accessKey", "s3.0.access_key"),
 		},
 	}
 
 	d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{
 		"name":    "test-destination",
 		"enabled": true,
-		"config": []interface{}{
-			map[string]interface{}{"api_key": "pub", "api_secret": "shh"},
-		},
+		"config": []interface{}{map[string]interface{}{
+			"s3": []interface{}{map[string]interface{}{"bucket": "b", "access_key": "shh"}},
+		}},
 	})
 
-	// Simulate a redacted response: apiSecret absent, apiKey present.
-	dest := &client.Destination{ID: "d1", Name: "test-destination", Config: json.RawMessage(`{"apiKey":"pub"}`)}
+	// Redacted response: accessKey absent, bucketName present.
+	dest := &client.Destination{ID: "d1", Name: "test-destination", Config: json.RawMessage(`{"bucketName":"b"}`)}
 	require.NoError(t, storeDestinationToState(cm, dest, d))
 
-	assert.Equal(t, "shh", d.Get("config.0.api_secret"), "redacted secret must be preserved from state")
-	assert.Equal(t, "pub", d.Get("config.0.api_key"))
+	assert.Equal(t, "shh", d.Get("config.0.s3.0.access_key"), "nested redacted secret must be preserved")
+	assert.Equal(t, "b", d.Get("config.0.s3.0.bucket"))
+}
+
+// A top-level scalar secret is handled by DiffSuppressFunc (empty->set suppressed,
+// real change not), and excluded from the read-preserve path.
+func TestTopLevelSecretUsesDiffSuppress(t *testing.T) {
+	cm := configs.ConfigMeta{
+		APIType: "TEST",
+		ConfigSchema: map[string]*schema.Schema{
+			"api_secret": {Type: schema.TypeString, Optional: true, Sensitive: true},
+		},
+		Properties: []configs.ConfigProperty{configs.Simple("apiSecret", "api_secret")},
+	}
+
+	resourceDestinationSchema(cm) // attaches the suppress func
+
+	sup := cm.ConfigSchema["api_secret"].DiffSuppressFunc
+	require.NotNil(t, sup, "top-level scalar secret must get a DiffSuppressFunc")
+	assert.True(t, sup("config.0.api_secret", "", "shh", nil), "redacted empty->configured must be suppressed")
+	assert.False(t, sup("config.0.api_secret", "old", "new", nil), "a real secret change must not be suppressed")
+
+	assert.True(t, isDiffSuppressedSecret(cm, "api_secret"), "top-level scalar secret is owned by DiffSuppressFunc, not preserve")
 }
