@@ -56,6 +56,7 @@ func New() *schema.Provider {
 func resourcesMap() map[string]*schema.Resource {
 	resources := map[string]*schema.Resource{
 		"rudderstack_connection":                          resourceConnection(),
+		"rudderstack_transformation_connection":           resourceTransformationConnection(),
 		"rudderstack_retl_source_model":                   retl.ResourceModel(),
 		"rudderstack_retl_source_table":                   retl.ResourceTable(),
 		"rudderstack_retl_connection":                     retl.ResourceConnection(),

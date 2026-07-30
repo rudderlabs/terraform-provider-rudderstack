@@ -5,16 +5,18 @@ import (
 
 	"github.com/rudderlabs/rudder-iac/api/client"
 	iacretl "github.com/rudderlabs/rudder-iac/api/client/retl"
+	"github.com/rudderlabs/rudder-iac/api/client/transformations"
 
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/retl"
 )
 
 type Client struct {
-	Sources      SourcesService
-	Destinations DestinationsService
-	Connections  ConnectionsService
-	RETLSources  retl.Service
-	Accounts     AccountsService
+	Sources                   SourcesService
+	Destinations              DestinationsService
+	Connections               ConnectionsService
+	RETLSources               retl.Service
+	Accounts                  AccountsService
+	TransformationConnections TransformationConnectionsService
 }
 
 // RETLSourcesClient satisfies retl.ClientProvider so the RETL resources in the
@@ -52,6 +54,14 @@ type AccountsService interface {
 	Delete(ctx context.Context, id string) error
 }
 
+// TransformationConnectionsService is the narrow subset of the upstream
+// transformations store used to associate a transformation with a destination.
+type TransformationConnectionsService interface {
+	GetTransformation(ctx context.Context, id string) (*transformations.Transformation, error)
+	ConnectToDestination(ctx context.Context, id string, req *transformations.ConnectToDestinationRequest) (*transformations.Transformation, error)
+	DisconnectFromDestination(ctx context.Context, id string, req *transformations.ConnectToDestinationRequest) (*transformations.Transformation, error)
+}
+
 func NewAPIClient(accessToken string, options ...client.Option) (*Client, error) {
 	api, err := client.New(accessToken, options...)
 	if err != nil {
@@ -59,10 +69,11 @@ func NewAPIClient(accessToken string, options ...client.Option) (*Client, error)
 	}
 
 	return &Client{
-		Sources:      api.Sources,
-		Destinations: api.Destinations,
-		Connections:  api.Connections,
-		RETLSources:  iacretl.NewRudderRETLStore(api),
-		Accounts:     api.Accounts,
+		Sources:                   api.Sources,
+		Destinations:              api.Destinations,
+		Connections:               api.Connections,
+		RETLSources:               iacretl.NewRudderRETLStore(api),
+		Accounts:                  api.Accounts,
+		TransformationConnections: transformations.NewRudderTransformationStore(api),
 	}, nil
 }
