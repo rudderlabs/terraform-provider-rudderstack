@@ -10,7 +10,7 @@ import (
 // compareConfig verifies that actualRaw contains all fields specified in expectedJSON.
 // Extra fields in the actual config are allowed (the API may add defaults).
 // Returns nil if expectedJSON is empty (nothing to verify).
-func compareConfig(actualRaw json.RawMessage, expectedJSON string) error {
+func compareConfig(actualRaw json.RawMessage, expectedJSON string, ignoredPaths ...string) error {
 	expectedJSON = strings.TrimSpace(expectedJSON)
 	if expectedJSON == "" || expectedJSON == "{}" {
 		return nil
@@ -27,7 +27,11 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string) error {
 	}
 
 	var mismatches []string
-	compareFields("", expected, actual, &mismatches)
+	ignoredPathSet := make(map[string]struct{}, len(ignoredPaths))
+	for _, path := range ignoredPaths {
+		ignoredPathSet[path] = struct{}{}
+	}
+	compareFields("", expected, actual, ignoredPathSet, &mismatches)
 
 	if len(mismatches) > 0 {
 		expectedPretty, _ := json.MarshalIndent(expected, "", "  ")
@@ -40,11 +44,15 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string) error {
 
 // compareFields recursively checks that every key in expected exists in actual with the
 // correct value. It collects all mismatches rather than failing on the first one.
-func compareFields(prefix string, expected, actual map[string]any, mismatches *[]string) {
+func compareFields(prefix string, expected, actual map[string]any, ignoredPaths map[string]struct{}, mismatches *[]string) {
 	for key, expectedVal := range expected {
 		path := key
 		if prefix != "" {
 			path = prefix + "." + key
+		}
+
+		if ignoredPathCoversValue(path, expectedVal, ignoredPaths) {
+			continue
 		}
 
 		actualVal, exists := actual[key]
@@ -53,7 +61,7 @@ func compareFields(prefix string, expected, actual map[string]any, mismatches *[
 			continue
 		}
 
-		compareValue(path, expectedVal, actualVal, mismatches)
+		compareValue(path, expectedVal, actualVal, ignoredPaths, mismatches)
 	}
 }
 
@@ -61,11 +69,11 @@ func compareFields(prefix string, expected, actual map[string]any, mismatches *[
 //   - objects: all expected keys must exist in actual, but extra actual keys are allowed
 //   - arrays: all expected elements must exist in actual at the same indexes, but extra actual
 //     elements are allowed; objects within arrays also use subset semantics
-func compareValue(path string, expectedVal, actualVal any, mismatches *[]string) {
+func compareValue(path string, expectedVal, actualVal any, ignoredPaths map[string]struct{}, mismatches *[]string) {
 	switch ev := expectedVal.(type) {
 	case map[string]any:
 		if av, ok := actualVal.(map[string]any); ok {
-			compareFields(path, ev, av, mismatches)
+			compareFields(path, ev, av, ignoredPaths, mismatches)
 		} else {
 			*mismatches = append(*mismatches, fmt.Sprintf("  field %q: expected object, got %T", path, actualVal))
 		}
@@ -76,14 +84,53 @@ func compareValue(path string, expectedVal, actualVal any, mismatches *[]string)
 			return
 		}
 		if len(av) < len(ev) {
-			*mismatches = append(*mismatches, fmt.Sprintf("  field %q: expected array length >= %d, got %d", path, len(ev), len(av)))
+			ignoredExpectedValues := 0
+			for i := len(av); i < len(ev); i++ {
+				if ignoredPathCoversValue(fmt.Sprintf("%s[%d]", path, i), ev[i], ignoredPaths) {
+					ignoredExpectedValues++
+				}
+			}
+			if len(av)+ignoredExpectedValues < len(ev) {
+				*mismatches = append(*mismatches, fmt.Sprintf("  field %q: expected array length >= %d, got %d", path, len(ev), len(av)))
+			}
 		}
 		for i := 0; i < len(ev) && i < len(av); i++ {
-			compareValue(fmt.Sprintf("%s[%d]", path, i), ev[i], av[i], mismatches)
+			compareValue(fmt.Sprintf("%s[%d]", path, i), ev[i], av[i], ignoredPaths, mismatches)
 		}
 	default:
 		if !reflect.DeepEqual(expectedVal, actualVal) {
 			*mismatches = append(*mismatches, fmt.Sprintf("  field %q: expected %v (%T), got %v (%T)", path, expectedVal, expectedVal, actualVal, actualVal))
 		}
+	}
+}
+
+func ignoredPathCoversValue(path string, expectedVal any, ignoredPaths map[string]struct{}) bool {
+	if _, ok := ignoredPaths[path]; ok {
+		return true
+	}
+
+	switch ev := expectedVal.(type) {
+	case map[string]any:
+		if len(ev) == 0 {
+			return false
+		}
+		for key, value := range ev {
+			if !ignoredPathCoversValue(path+"."+key, value, ignoredPaths) {
+				return false
+			}
+		}
+		return true
+	case []any:
+		if len(ev) == 0 {
+			return false
+		}
+		for i, value := range ev {
+			if !ignoredPathCoversValue(fmt.Sprintf("%s[%d]", path, i), value, ignoredPaths) {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
 	}
 }

@@ -243,7 +243,16 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 		}
 	}
 
-	state, err := cm.APIToState(string(destination.Config))
+	priorState := "{}"
+	if c := d.Get("config.0"); c != nil {
+		priorStateBytes, err := json.Marshal(c)
+		if err != nil {
+			return err
+		}
+		priorState = string(priorStateBytes)
+	}
+
+	state, err := cm.APIToStatePreservingWriteOnly(string(destination.Config), priorState)
 	if err != nil {
 		return err
 	}

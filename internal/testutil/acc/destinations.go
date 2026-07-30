@@ -3,14 +3,18 @@ package acc
 import (
 	"context"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/tidwall/sjson"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -28,7 +32,8 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	resourceName := fmt.Sprintf("rudderstack_destination_%s.test", destination)
 	name := RandomName(destination)
 	cfg := testConfigs[0]
-	wantVersion := registeredDestinationVersion(t, destination)
+	cm := registeredDestinationConfigMeta(t, destination)
+	wantVersion := cm.Version
 
 	if PlanOnly() {
 		t.Parallel()
@@ -59,7 +64,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate, cm),
 					// Exact wire version must match the destination's registered
 					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
 					// The automatic post-apply plan check also asserts no plan
@@ -74,13 +79,14 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate, cm),
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: destinationWriteOnlyTerraformStatePaths(cm),
 			},
 		},
 	})
@@ -140,7 +146,7 @@ func testAccCheckDestinationExists(resourceName string) resource.TestCheckFunc {
 
 // testAccCheckDestinationAPIConfig fetches the destination from the API and verifies
 // its config contains all expected fields from the test's API JSON.
-func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resource.TestCheckFunc {
+func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, cm configs.ConfigMeta) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if expectedJSON == "" {
 			return nil
@@ -161,14 +167,18 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		return compareConfig(dest.Config, expectedJSON)
+		ignoredPaths, err := writeOnlyAPIConfigPaths(cm)
+		if err != nil {
+			return err
+		}
+		return compareConfig(dest.Config, expectedJSON, ignoredPaths...)
 	}
 }
 
-// registeredDestinationVersion returns ConfigMeta.Version for the terraform
-// destination type name. Exact match (not >= 1) keeps future _v2 resources
+// registeredDestinationConfigMeta returns ConfigMeta for the terraform
+// destination type name. Exact version match (not >= 1) keeps future _v2 resources
 // correct while still failing if the API returns the wrong version.
-func registeredDestinationVersion(t *testing.T, destination string) int {
+func registeredDestinationConfigMeta(t *testing.T, destination string) configs.ConfigMeta {
 	t.Helper()
 	cm, ok := configs.Destinations.Entries()[destination]
 	if !ok {
@@ -177,7 +187,150 @@ func registeredDestinationVersion(t *testing.T, destination string) int {
 	if cm.Version < 1 {
 		t.Fatalf("destination %q has invalid ConfigMeta.Version %d", destination, cm.Version)
 	}
-	return cm.Version
+	return cm
+}
+
+func writeOnlyAPIConfigPaths(cm configs.ConfigMeta) ([]string, error) {
+	state, markers, err := writeOnlyStateForSchema(cm.ConfigSchema)
+	if err != nil {
+		return nil, err
+	}
+	if len(markers) == 0 {
+		return nil, nil
+	}
+
+	stateBytes, err := json.Marshal(state)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal sensitive test state: %w", err)
+	}
+
+	apiConfig, err := cm.StateToAPI(string(stateBytes))
+	if err != nil {
+		return nil, fmt.Errorf("failed to map sensitive test state to API config: %w", err)
+	}
+
+	var apiValue any
+	if err := json.Unmarshal([]byte(apiConfig), &apiValue); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal sensitive API config: %w", err)
+	}
+
+	pathSet := map[string]struct{}{}
+	collectMarkerPaths("", apiValue, markers, pathSet)
+	paths := make([]string, 0, len(pathSet))
+	for path := range pathSet {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	return paths, nil
+}
+
+func writeOnlyStateForSchema(configSchema map[string]*schema.Schema) (map[string]any, map[string]struct{}, error) {
+	markers := map[string]struct{}{}
+	stateJSON := "{}"
+
+	for _, path := range configs.WriteOnlyStatePaths(configSchema) {
+		marker := fmt.Sprintf("__rudder_tf_sensitive_%d__", len(markers))
+		markers[marker] = struct{}{}
+		nextState, err := sjson.Set(stateJSON, path, marker)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to set write-only marker at %q: %w", path, err)
+		}
+		stateJSON = nextState
+	}
+
+	var state map[string]any
+	if err := json.Unmarshal([]byte(stateJSON), &state); err != nil {
+		return nil, nil, fmt.Errorf("failed to unmarshal write-only marker state: %w", err)
+	}
+	return state, markers, nil
+}
+
+func collectMarkerPaths(prefix string, value any, markers map[string]struct{}, paths map[string]struct{}) {
+	switch typedValue := value.(type) {
+	case map[string]any:
+		for key, child := range typedValue {
+			path := key
+			if prefix != "" {
+				path = prefix + "." + key
+			}
+			collectMarkerPaths(path, child, markers, paths)
+		}
+	case []any:
+		for i, child := range typedValue {
+			collectMarkerPaths(fmt.Sprintf("%s[%d]", prefix, i), child, markers, paths)
+		}
+	case string:
+		for marker := range markers {
+			if strings.Contains(typedValue, marker) {
+				paths[prefix] = struct{}{}
+				return
+			}
+		}
+	}
+}
+
+func destinationWriteOnlyTerraformStatePaths(cm configs.ConfigMeta) []string {
+	statePaths := configs.WriteOnlyStatePaths(cm.ConfigSchema)
+	pathSet := map[string]struct{}{}
+	for _, path := range statePaths {
+		pathSet["config.0."+path] = struct{}{}
+	}
+	collectWriteOnlyTerraformBlockStatePaths("config.0", cm.ConfigSchema, pathSet)
+
+	paths := make([]string, 0, len(pathSet))
+	for path := range pathSet {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	return paths
+}
+
+func collectWriteOnlyTerraformBlockStatePaths(
+	prefix string,
+	configSchema map[string]*schema.Schema,
+	paths map[string]struct{},
+) {
+	for key, fieldSchema := range configSchema {
+		if fieldSchema == nil {
+			continue
+		}
+
+		resource, ok := fieldSchema.Elem.(*schema.Resource)
+		if !ok {
+			continue
+		}
+
+		path := prefix + "." + key
+		if writeOnlyResourceSchema(resource.Schema) {
+			paths[path] = struct{}{}
+			if fieldSchema.Type == schema.TypeList || fieldSchema.Type == schema.TypeSet {
+				paths[path+".#"] = struct{}{}
+				paths[path+".0.%"] = struct{}{}
+			}
+			continue
+		}
+
+		if fieldSchema.Type == schema.TypeList || fieldSchema.Type == schema.TypeSet {
+			collectWriteOnlyTerraformBlockStatePaths(path+".0", resource.Schema, paths)
+		} else {
+			collectWriteOnlyTerraformBlockStatePaths(path, resource.Schema, paths)
+		}
+	}
+}
+
+func writeOnlyResourceSchema(configSchema map[string]*schema.Schema) bool {
+	if len(configSchema) == 0 {
+		return false
+	}
+
+	writeOnlyPaths := configs.WriteOnlyStatePaths(configSchema)
+	directWriteOnlyFields := map[string]struct{}{}
+	for _, path := range writeOnlyPaths {
+		key := strings.Split(path, ".")[0]
+		directWriteOnlyFields[key] = struct{}{}
+	}
+
+	return len(directWriteOnlyFields) == len(configSchema)
 }
 
 // testAccCheckDestinationVersion fetches the destination from the API and verifies

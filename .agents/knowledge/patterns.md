@@ -60,3 +60,9 @@
 
 - `GetCommonConfigMeta` contributes only `consent_management` mappings for declared source types; warehouse controls and other destination-level fields must be mapped in the destination integration itself.
 - Snowflake `supportedSourceTypes` directly gates which nested `consent_management` source-type blocks are exposed in Terraform; omitted source types (for example Android Kotlin / iOS Swift) silently drop corresponding nested keys.
+
+## DAW-4034 — Declared config mapping boundary
+
+- `ConfigMeta.APIToState` and `ConfigMeta.StateToAPI` already start from an empty JSON object and apply only declared `ConfigProperty` mappings, so Terraform reads/writes destination config through the explicit provider schema instead of preserving arbitrary Public API fields.
+- The HCL generator follows the same declared boundary by passing API destination config through `APIToState` and then `ConfigSchema`; stale or undocumented fields should be filtered by coverage around this translation path rather than by adding a second generic sanitizer around `destination.Config`.
+- Avoid removing guessed stale integration schema fields without a canonical source of truth because that would be a breaking Terraform schema change; prefer defensive regression tests that prove undeclared API fields do not leak into state, update payloads, or generated HCL.
