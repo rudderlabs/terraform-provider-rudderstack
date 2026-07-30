@@ -32,7 +32,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	cfg := testConfigs[0]
 	wantVersion := registeredDestinationVersion(t, destination)
 	cm := configs.Destinations.Entries()[destination]
-	redactedFields := redactedAPIConfigKeys(cm)
+	redactedFields := redactedAPIConfigKeys(t, cm)
 	// Secrets are redacted from responses, so they can't be verified on import
 	// (there is no prior state to preserve them from) — ignore them there.
 	importIgnore := sensitiveStateAttrPaths(cm)
@@ -196,7 +196,12 @@ func sensitiveStateAttrPaths(cm configs.ConfigMeta) []string {
 // setting a sentinel at its state path and running the destination's real
 // state->API transform — the same path the provider uses — so no mapping is kept
 // by hand. A "contains" match tolerates transforms that wrap the value (e.g. PEM).
-func redactedAPIConfigKeys(cm configs.ConfigMeta) map[string]bool {
+//
+// Derivation failures are fatal rather than silently returning nil: a swallowed
+// error would regress the suite to a confusing "missing field" with no hint that
+// redaction detection is what broke.
+func redactedAPIConfigKeys(t *testing.T, cm configs.ConfigMeta) map[string]bool {
+	t.Helper()
 	const sentinel = "accRedactedSecretSentinel"
 
 	paths := cm.SensitiveConfigPaths()
@@ -206,11 +211,14 @@ func redactedAPIConfigKeys(cm configs.ConfigMeta) map[string]bool {
 
 	stateJSON := "{}"
 	for _, p := range paths {
-		stateJSON, _ = sjson.Set(stateJSON, p, sentinel)
+		var err error
+		if stateJSON, err = sjson.Set(stateJSON, p, sentinel); err != nil {
+			t.Fatalf("redactedAPIConfigKeys: sjson.Set(%q): %v", p, err)
+		}
 	}
 	apiJSON, err := cm.StateToAPI(stateJSON)
 	if err != nil {
-		return nil
+		t.Fatalf("redactedAPIConfigKeys: StateToAPI failed for %q: %v", cm.APIType, err)
 	}
 
 	out := map[string]bool{}

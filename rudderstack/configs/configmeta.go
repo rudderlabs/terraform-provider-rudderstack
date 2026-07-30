@@ -20,45 +20,28 @@ type ConfigMeta struct {
 
 // SensitiveConfigPaths returns the terraform state paths of every Sensitive
 // (secret) field in the config schema, descending into nested blocks — e.g.
-// "api_secret", "s3.0.access_key", "headers". A Sensitive field terminates the
-// descent: the whole subtree is treated as the secret. Used to handle the
-// backend redacting secrets from API responses (read/verify/import).
+// "api_secret", "s3.0.access_key", "headers". Every secret is a leaf/field
+// path. Used for per-secret read-preserve and redacted-API-key derivation.
 func (cm *ConfigMeta) SensitiveConfigPaths() []string {
-	return sensitivePaths(cm.ConfigSchema, "")
-}
-
-func sensitivePaths(sch map[string]*schema.Schema, prefix string) []string {
-	var out []string
-	for key, s := range sch {
-		if s == nil {
-			continue
-		}
-		path := key
-		if prefix != "" {
-			path = prefix + "." + key
-		}
-		if s.Sensitive {
-			out = append(out, path)
-			continue
-		}
-		if res, ok := s.Elem.(*schema.Resource); ok && res != nil {
-			out = append(out, sensitivePaths(res.Schema, path+".0")...)
-		}
-	}
-	return out
-}
-
-// SensitiveImportIgnorePaths returns config-relative attribute prefixes to skip
-// on ImportStateVerify because the backend redacts their values. A block whose
-// fields are ALL Sensitive collapses to empty on import (its .# / .0.% structural
-// attributes differ), so it is returned wholesale as a prefix; a block with some
-// non-secret fields returns only its sensitive leaves so the rest stays verified.
-func (cm *ConfigMeta) SensitiveImportIgnorePaths() []string {
-	paths, _ := sensitiveImportPaths(cm.ConfigSchema, "")
+	paths, _ := collectSensitivePaths(cm.ConfigSchema, "", false)
 	return paths
 }
 
-func sensitiveImportPaths(sch map[string]*schema.Schema, prefix string) (paths []string, allSensitive bool) {
+// SensitiveImportIgnorePaths is like SensitiveConfigPaths but collapses a block
+// whose fields are ALL Sensitive to the block path itself. Such a block reads
+// back empty and its .# / .0.% structural attributes differ on ImportStateVerify,
+// so it must be ignored wholesale; blocks with non-secret fields still return only
+// their sensitive leaves so the rest stays verified.
+func (cm *ConfigMeta) SensitiveImportIgnorePaths() []string {
+	paths, _ := collectSensitivePaths(cm.ConfigSchema, "", true)
+	return paths
+}
+
+// collectSensitivePaths walks the schema returning Sensitive field paths. When
+// collapseBlocks is true, a block whose every field is Sensitive is returned as
+// the block path instead of its leaves. The second return reports whether the
+// given schema level is entirely Sensitive (used for the collapse decision).
+func collectSensitivePaths(sch map[string]*schema.Schema, prefix string, collapseBlocks bool) (paths []string, allSensitive bool) {
 	allSensitive = len(sch) > 0
 	for key, s := range sch {
 		if s == nil {
@@ -78,12 +61,12 @@ func sensitiveImportPaths(sch map[string]*schema.Schema, prefix string) (paths [
 			allSensitive = false
 			continue
 		}
-		sub, subAll := sensitiveImportPaths(res.Schema, path+".0")
-		if subAll {
-			paths = append(paths, path) // whole block redacted → ignore it wholesale
+		sub, subAll := collectSensitivePaths(res.Schema, path+".0", collapseBlocks)
+		if collapseBlocks && subAll {
+			paths = append(paths, path)
 		} else {
 			paths = append(paths, sub...)
-			allSensitive = false
+			allSensitive = allSensitive && subAll
 		}
 	}
 	return paths, allSensitive

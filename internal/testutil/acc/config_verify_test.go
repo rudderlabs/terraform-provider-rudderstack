@@ -25,7 +25,7 @@ func TestRedactedAPIConfigKeys(t *testing.T) {
 		},
 	}
 
-	got := redactedAPIConfigKeys(cm)
+	got := redactedAPIConfigKeys(t, cm)
 	assert.True(t, got["apiSecret"], "sensitive field's API key should be marked redacted")
 	assert.False(t, got["apiKey"], "non-sensitive field's API key should not be marked redacted")
 }
@@ -51,7 +51,7 @@ func TestRedactedAPIConfigKeys_Nested(t *testing.T) {
 		},
 	}
 
-	got := redactedAPIConfigKeys(cm)
+	got := redactedAPIConfigKeys(t, cm)
 	assert.True(t, got["accessKey"], "nested sensitive field's API key should be redacted")
 	assert.True(t, got["accessKeyID"], "nested sensitive field's API key should be redacted")
 	assert.False(t, got["bucketName"], "non-sensitive nested field should not be redacted")
@@ -92,7 +92,7 @@ func TestRedactedAPIConfigKeys_NoSensitiveFields(t *testing.T) {
 		ConfigSchema: map[string]*schema.Schema{"api_key": {Type: schema.TypeString}},
 		Properties:   []configs.ConfigProperty{configs.Simple("apiKey", "api_key")},
 	}
-	assert.Empty(t, redactedAPIConfigKeys(cm))
+	assert.Empty(t, redactedAPIConfigKeys(t, cm))
 }
 
 // A redacted secret absent from the response is fine; any other missing field is not.
