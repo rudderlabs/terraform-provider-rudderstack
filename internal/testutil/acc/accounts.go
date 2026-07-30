@@ -41,16 +41,18 @@ import (
 // In full mode (TF_ACC=1): runs Create → Update → Import → Destroy against the real API,
 // and verifies the account options match the expected JSON from test configs.
 //
-// The import step ignores "config.0.credentials" because the API never returns secrets —
-// they cannot be reconstructed from state on import. The ignore list is hardcoded here:
-// all current account types expose their secret as a single top-level "credentials"
-// attribute. Extend this helper if a future account type names its secret differently.
+// The import step ignores every Sensitive (secret) field because the API never returns
+// secrets — they cannot be reconstructed from state on import. The ignore list is derived
+// from the account type's own ConfigMeta (its Sensitive schema fields), so each warehouse
+// contributes exactly its own secrets: BigQuery -> config.0.credentials, Postgres ->
+// config.0.password, Snowflake -> config.0.{password,private_key,private_key_passphrase}.
 func AccAssertAccount(t *testing.T, accountType string, testConfigs []configs.TestConfig) {
 	t.Helper()
 
 	resourceName := fmt.Sprintf("rudderstack_account_source_%s.test", accountType)
 	name := RandomName(accountType)
 	cfg := testConfigs[0]
+	importIgnore := accountImportVerifyIgnore(accountType)
 
 	if PlanOnly() {
 		t.Parallel()
@@ -100,10 +102,24 @@ func AccAssertAccount(t *testing.T, accountType string, testConfigs []configs.Te
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"config.0.credentials"},
+				ImportStateVerifyIgnore: importIgnore,
 			},
 		},
 	})
+}
+
+// accountImportVerifyIgnore returns the state paths of the account type's secret
+// (Sensitive) fields, prefixed with "config.0." because they live inside the
+// resource's config {} block. These are excluded from ImportStateVerify since the
+// API never returns secrets, so they read back empty on import.
+func accountImportVerifyIgnore(accountType string) []string {
+	cm := configs.Accounts.Entries()[accountType]
+	sensitive := cm.SensitiveImportIgnorePaths()
+	ignore := make([]string, 0, len(sensitive))
+	for _, p := range sensitive {
+		ignore = append(ignore, "config.0."+p)
+	}
+	return ignore
 }
 
 // testAccAccountConfig generates the Terraform HCL for an account source resource.
