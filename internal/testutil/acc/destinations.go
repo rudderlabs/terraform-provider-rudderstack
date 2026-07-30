@@ -60,6 +60,10 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDestinationConfig(destination, name, cfg.TerraformCreate),
+				// Secrets are redacted from responses, so config stays authoritative
+				// and every plan re-asserts them → a non-empty post-apply plan is
+				// expected for destinations that have a secret (BREAKING_CHANGES.md).
+				ExpectNonEmptyPlan: len(redactedFields) > 0,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -77,7 +81,8 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				),
 			},
 			{
-				Config: testAccDestinationConfig(destination, name+"-updated", cfg.TerraformUpdate),
+				Config:             testAccDestinationConfig(destination, name+"-updated", cfg.TerraformUpdate),
+				ExpectNonEmptyPlan: len(redactedFields) > 0,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
