@@ -122,6 +122,7 @@ func schemaKeyLooksWriteOnly(key string) bool {
 		"apikey",
 		"apisecret",
 		"apitoken",
+		"eventkey",
 		"accesstoken",
 		"refreshtoken",
 		"accesskey",

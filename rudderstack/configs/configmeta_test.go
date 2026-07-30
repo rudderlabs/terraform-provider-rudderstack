@@ -241,6 +241,7 @@ func TestWriteOnlyStatePaths(t *testing.T) {
 	assert.Equal(t, []string{
 		"api_key",
 		"auth.0.access_key_id",
+		"event_key",
 		"headers",
 		"password",
 	}, paths)

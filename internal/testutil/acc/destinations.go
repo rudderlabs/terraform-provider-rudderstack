@@ -260,20 +260,77 @@ func collectMarkerPaths(prefix string, value any, markers map[string]struct{}, p
 			collectMarkerPaths(fmt.Sprintf("%s[%d]", prefix, i), child, markers, paths)
 		}
 	case string:
-		if _, ok := markers[typedValue]; ok {
-			paths[prefix] = struct{}{}
+		for marker := range markers {
+			if strings.Contains(typedValue, marker) {
+				paths[prefix] = struct{}{}
+				return
+			}
 		}
 	}
 }
 
 func destinationWriteOnlyTerraformStatePaths(cm configs.ConfigMeta) []string {
 	statePaths := configs.WriteOnlyStatePaths(cm.ConfigSchema)
-	paths := make([]string, 0, len(statePaths))
+	pathSet := map[string]struct{}{}
 	for _, path := range statePaths {
-		paths = append(paths, "config.0."+path)
+		pathSet["config.0."+path] = struct{}{}
+	}
+	collectWriteOnlyTerraformBlockStatePaths("config.0", cm.ConfigSchema, pathSet)
+
+	paths := make([]string, 0, len(pathSet))
+	for path := range pathSet {
+		paths = append(paths, path)
 	}
 	sort.Strings(paths)
 	return paths
+}
+
+func collectWriteOnlyTerraformBlockStatePaths(
+	prefix string,
+	configSchema map[string]*schema.Schema,
+	paths map[string]struct{},
+) {
+	for key, fieldSchema := range configSchema {
+		if fieldSchema == nil {
+			continue
+		}
+
+		resource, ok := fieldSchema.Elem.(*schema.Resource)
+		if !ok {
+			continue
+		}
+
+		path := prefix + "." + key
+		if writeOnlyResourceSchema(resource.Schema) {
+			paths[path] = struct{}{}
+			if fieldSchema.Type == schema.TypeList || fieldSchema.Type == schema.TypeSet {
+				paths[path+".#"] = struct{}{}
+				paths[path+".0.%"] = struct{}{}
+			}
+			continue
+		}
+
+		if fieldSchema.Type == schema.TypeList || fieldSchema.Type == schema.TypeSet {
+			collectWriteOnlyTerraformBlockStatePaths(path+".0", resource.Schema, paths)
+		} else {
+			collectWriteOnlyTerraformBlockStatePaths(path, resource.Schema, paths)
+		}
+	}
+}
+
+func writeOnlyResourceSchema(configSchema map[string]*schema.Schema) bool {
+	if len(configSchema) == 0 {
+		return false
+	}
+
+	writeOnlyPaths := configs.WriteOnlyStatePaths(configSchema)
+	directWriteOnlyFields := map[string]struct{}{}
+	for _, path := range writeOnlyPaths {
+		key := strings.Split(path, ".")[0]
+		directWriteOnlyFields[key] = struct{}{}
+	}
+
+	return len(directWriteOnlyFields) == len(configSchema)
 }
 
 // testAccCheckDestinationVersion fetches the destination from the API and verifies

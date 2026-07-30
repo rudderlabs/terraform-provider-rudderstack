@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -76,6 +78,10 @@ func TestWriteOnlyAPIConfigPaths(t *testing.T) {
 					},
 				}},
 			},
+			"private_key": {
+				Type:      schema.TypeString,
+				Sensitive: true,
+			},
 		},
 		Properties: []configs.ConfigProperty{
 			configs.Simple("apiKey", "api_key"),
@@ -84,6 +90,18 @@ func TestWriteOnlyAPIConfigPaths(t *testing.T) {
 			configs.Simple("headers", "headers"),
 			configs.Simple("auth.accessKey", "auth.0.access_key"),
 			configs.Simple("auth.id", "auth.0.id"),
+			{
+				FromStateFunc: func(config, state string) (string, error) {
+					v := gjson.Get(state, "private_key")
+					if !v.Exists() {
+						return config, nil
+					}
+					return sjson.Set(config, "privateKey", "-----BEGIN PRIVATE KEY-----\n"+v.String()+"\n-----END PRIVATE KEY-----")
+				},
+				ToStateFunc: func(state, config string) (string, error) {
+					return state, nil
+				},
+			},
 		},
 	}
 
@@ -92,7 +110,7 @@ func TestWriteOnlyAPIConfigPaths(t *testing.T) {
 		t.Fatalf("expected write-only path derivation to succeed, got %v", err)
 	}
 
-	expected := []string{"apiKey", "auth.accessKey", "headers"}
+	expected := []string{"apiKey", "auth.accessKey", "eventKey", "headers", "privateKey"}
 	if !reflect.DeepEqual(paths, expected) {
 		t.Fatalf("expected paths %v, got %v", expected, paths)
 	}
@@ -119,11 +137,33 @@ func TestDestinationWriteOnlyTerraformStatePaths(t *testing.T) {
 					},
 				}},
 			},
+			"key_based_authentication": {
+				Type: schema.TypeList,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"access_key_id": {
+						Type:      schema.TypeString,
+						Sensitive: true,
+					},
+					"access_key": {
+						Type:      schema.TypeString,
+						Sensitive: true,
+					},
+				}},
+			},
 		},
 	}
 
 	paths := destinationWriteOnlyTerraformStatePaths(cm)
-	expected := []string{"config.0.api_key", "config.0.headers"}
+	expected := []string{
+		"config.0.api_key",
+		"config.0.event_key",
+		"config.0.headers",
+		"config.0.key_based_authentication",
+		"config.0.key_based_authentication.#",
+		"config.0.key_based_authentication.0.%",
+		"config.0.key_based_authentication.0.access_key",
+		"config.0.key_based_authentication.0.access_key_id",
+	}
 	if !reflect.DeepEqual(paths, expected) {
 		t.Fatalf("expected paths %v, got %v", expected, paths)
 	}
