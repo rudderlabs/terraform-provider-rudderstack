@@ -21,6 +21,9 @@ import (
 
 func AssertDestination(t *testing.T, destination string, testConfigs []configs.TestConfig) {
 	cm := configs.Destinations.Entries()[destination]
+	// Secrets are blanked on read (they are redacted from API responses), so a
+	// step that sets a secret plans a perpetual diff. See BREAKING_CHANGES.md.
+	redactedFields := testutil.RedactedScalarAPIKeys(t, cm)
 	destinations := &mockDestinationsService{}
 
 	destinations.On("Create", mock.Anything, mock.MatchedBy(func(d *client.Destination) bool {
@@ -60,7 +63,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 		Type:      cm.APIType,
 		Name:      "example",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APICreate),
+		Config:    json.RawMessage(testutil.BlankAPISecrets(testConfigs[0].APICreate, redactedFields)),
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Times(3)
@@ -70,7 +73,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APIUpdate),
+		Config:    json.RawMessage(testutil.BlankAPISecrets(testConfigs[0].APIUpdate, redactedFields)),
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Twice()
@@ -101,6 +104,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 						}
 					}
 				`, destination, testConfigs[0].TerraformCreate),
+				ExpectNonEmptyPlan: testutil.ConfigHasRedactedSecret(testConfigs[0].APICreate, redactedFields),
 				Check: func(state *terraform.State) error {
 					resources := state.RootModule().Resources
 					resource, ok := resources[fmt.Sprintf("rudderstack_destination_%s.example", destination)]
@@ -130,6 +134,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 						}
 					}
 				`, destination, testConfigs[0].TerraformUpdate),
+				ExpectNonEmptyPlan: testutil.ConfigHasRedactedSecret(testConfigs[0].APIUpdate, redactedFields),
 				Check: func(state *terraform.State) error {
 					resources := state.RootModule().Resources
 					resource, ok := resources[fmt.Sprintf("rudderstack_destination_%s.example", destination)]

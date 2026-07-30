@@ -11,10 +11,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
+	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -32,7 +31,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	cfg := testConfigs[0]
 	wantVersion := registeredDestinationVersion(t, destination)
 	cm := configs.Destinations.Entries()[destination]
-	redactedFields := redactedAPIConfigKeys(t, cm)
+	redactedFields := testutil.RedactedAPIConfigKeys(t, cm)
 	// Secrets are redacted from responses, so they can't be verified on import
 	// (there is no prior state to preserve them from) — ignore them there.
 	importIgnore := sensitiveStateAttrPaths(cm)
@@ -62,8 +61,9 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Config: testAccDestinationConfig(destination, name, cfg.TerraformCreate),
 				// Secrets are redacted from responses, so config stays authoritative
 				// and every plan re-asserts them → a non-empty post-apply plan is
-				// expected for destinations that have a secret (BREAKING_CHANGES.md).
-				ExpectNonEmptyPlan: len(redactedFields) > 0,
+				// expected, but only when this step's config actually sets a secret
+				// (BREAKING_CHANGES.md).
+				ExpectNonEmptyPlan: testutil.ConfigHasRedactedSecret(cfg.APICreate, redactedFields),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
@@ -82,7 +82,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 			},
 			{
 				Config:             testAccDestinationConfig(destination, name+"-updated", cfg.TerraformUpdate),
-				ExpectNonEmptyPlan: len(redactedFields) > 0,
+				ExpectNonEmptyPlan: testutil.ConfigHasRedactedSecret(cfg.APIUpdate, redactedFields),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
@@ -190,50 +190,6 @@ func sensitiveStateAttrPaths(cm configs.ConfigMeta) []string {
 		paths = append(paths, "config.0."+p)
 	}
 	return paths
-}
-
-// redactedAPIConfigKeys returns the set of top-level API config keys the backend
-// redacts from responses: those that map from a Sensitive (secret) schema field.
-// The backend stopped returning secrets on read (security hardening), so config
-// verification must not assert them.
-//
-// The API key for each Sensitive field (including nested ones) is discovered by
-// setting a sentinel at its state path and running the destination's real
-// state->API transform — the same path the provider uses — so no mapping is kept
-// by hand. A "contains" match tolerates transforms that wrap the value (e.g. PEM).
-//
-// Derivation failures are fatal rather than silently returning nil: a swallowed
-// error would regress the suite to a confusing "missing field" with no hint that
-// redaction detection is what broke.
-func redactedAPIConfigKeys(t *testing.T, cm configs.ConfigMeta) map[string]bool {
-	t.Helper()
-	const sentinel = "accRedactedSecretSentinel"
-
-	paths := cm.SensitiveConfigPaths()
-	if len(paths) == 0 {
-		return nil
-	}
-
-	stateJSON := "{}"
-	for _, p := range paths {
-		var err error
-		if stateJSON, err = sjson.Set(stateJSON, p, sentinel); err != nil {
-			t.Fatalf("redactedAPIConfigKeys: sjson.Set(%q): %v", p, err)
-		}
-	}
-	apiJSON, err := cm.StateToAPI(stateJSON)
-	if err != nil {
-		t.Fatalf("redactedAPIConfigKeys: StateToAPI failed for %q: %v", cm.APIType, err)
-	}
-
-	out := map[string]bool{}
-	gjson.Parse(apiJSON).ForEach(func(k, v gjson.Result) bool {
-		if strings.Contains(v.String(), sentinel) {
-			out[k.String()] = true
-		}
-		return true
-	})
-	return out
 }
 
 // registeredDestinationVersion returns ConfigMeta.Version for the terraform

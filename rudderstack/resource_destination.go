@@ -259,7 +259,15 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 	// otherwise RETAIN the prior value (hiding the diff for nested secrets).
 	// Sensitive collections (e.g. webhook `headers`) are excluded — the backend
 	// returns them present-but-blanked, so they already read back empty.
+	//
+	// Only blank a secret that is actually set in config: blanking an unset path
+	// would fabricate it (and, for an all-secret block, the block itself), creating
+	// a spurious diff on destinations that don't use that field (e.g. a Kinesis
+	// destination using IAM-role auth instead of key-based auth).
 	for _, p := range cm.SensitiveScalarPaths() {
+		if _, ok := d.GetOk("config.0." + p); !ok {
+			continue
+		}
 		if updated, serr := sjson.Set(state, p, ""); serr == nil {
 			state = updated
 		}
