@@ -52,6 +52,17 @@ func TestWriteOnlyAPIConfigPaths(t *testing.T) {
 			"event_key": {
 				Type: schema.TypeString,
 			},
+			"event_key_map": {
+				Type: schema.TypeList,
+				Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+					"from": {
+						Type: schema.TypeString,
+					},
+					"to": {
+						Type: schema.TypeString,
+					},
+				}},
+			},
 			"api_url": {
 				Type: schema.TypeString,
 			},
@@ -86,6 +97,10 @@ func TestWriteOnlyAPIConfigPaths(t *testing.T) {
 		Properties: []configs.ConfigProperty{
 			configs.Simple("apiKey", "api_key"),
 			configs.Simple("eventKey", "event_key"),
+			configs.ArrayWithObjects("eventKeyMap", "event_key_map", map[string]interface{}{
+				"from": "from",
+				"to":   "to",
+			}),
 			configs.Simple("apiUrl", "api_url"),
 			configs.Simple("headers", "headers"),
 			configs.Simple("auth.accessKey", "auth.0.access_key"),

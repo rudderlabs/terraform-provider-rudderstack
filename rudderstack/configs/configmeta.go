@@ -134,6 +134,12 @@ func schemaKeyLooksWriteOnly(key string) bool {
 		"certificate",
 	}
 	for _, token := range writeOnlyTokens {
+		if token == "eventkey" {
+			if normalized == token {
+				return true
+			}
+			continue
+		}
 		if strings.Contains(normalized, token) {
 			return true
 		}

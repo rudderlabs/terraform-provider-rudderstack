@@ -210,6 +210,17 @@ func TestWriteOnlyStatePaths(t *testing.T) {
 		"event_key": {
 			Type: schema.TypeString,
 		},
+		"event_key_map": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+				"from": {
+					Type: schema.TypeString,
+				},
+				"to": {
+					Type: schema.TypeString,
+				},
+			}},
+		},
 		"password": {
 			Type: schema.TypeString,
 		},
