@@ -3,13 +3,16 @@ package acc
 import (
 	"context"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
@@ -28,7 +31,8 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	resourceName := fmt.Sprintf("rudderstack_destination_%s.test", destination)
 	name := RandomName(destination)
 	cfg := testConfigs[0]
-	wantVersion := registeredDestinationVersion(t, destination)
+	cm := registeredDestinationConfigMeta(t, destination)
+	wantVersion := cm.Version
 
 	if PlanOnly() {
 		t.Parallel()
@@ -59,7 +63,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate, cm),
 					// Exact wire version must match the destination's registered
 					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
 					// The automatic post-apply plan check also asserts no plan
@@ -74,7 +78,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate, cm),
 				),
 			},
 			{
@@ -140,7 +144,7 @@ func testAccCheckDestinationExists(resourceName string) resource.TestCheckFunc {
 
 // testAccCheckDestinationAPIConfig fetches the destination from the API and verifies
 // its config contains all expected fields from the test's API JSON.
-func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resource.TestCheckFunc {
+func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, cm configs.ConfigMeta) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if expectedJSON == "" {
 			return nil
@@ -161,14 +165,18 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		return compareConfig(dest.Config, expectedJSON)
+		ignoredPaths, err := sensitiveAPIConfigPaths(cm)
+		if err != nil {
+			return err
+		}
+		return compareConfig(dest.Config, expectedJSON, ignoredPaths...)
 	}
 }
 
-// registeredDestinationVersion returns ConfigMeta.Version for the terraform
-// destination type name. Exact match (not >= 1) keeps future _v2 resources
+// registeredDestinationConfigMeta returns ConfigMeta for the terraform
+// destination type name. Exact version match (not >= 1) keeps future _v2 resources
 // correct while still failing if the API returns the wrong version.
-func registeredDestinationVersion(t *testing.T, destination string) int {
+func registeredDestinationConfigMeta(t *testing.T, destination string) configs.ConfigMeta {
 	t.Helper()
 	cm, ok := configs.Destinations.Entries()[destination]
 	if !ok {
@@ -177,7 +185,106 @@ func registeredDestinationVersion(t *testing.T, destination string) int {
 	if cm.Version < 1 {
 		t.Fatalf("destination %q has invalid ConfigMeta.Version %d", destination, cm.Version)
 	}
-	return cm.Version
+	return cm
+}
+
+func sensitiveAPIConfigPaths(cm configs.ConfigMeta) ([]string, error) {
+	state, markers := sensitiveStateForSchema(cm.ConfigSchema)
+	if len(markers) == 0 {
+		return nil, nil
+	}
+
+	stateBytes, err := json.Marshal(state)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal sensitive test state: %w", err)
+	}
+
+	apiConfig, err := cm.StateToAPI(string(stateBytes))
+	if err != nil {
+		return nil, fmt.Errorf("failed to map sensitive test state to API config: %w", err)
+	}
+
+	var apiValue any
+	if err := json.Unmarshal([]byte(apiConfig), &apiValue); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal sensitive API config: %w", err)
+	}
+
+	pathSet := map[string]struct{}{}
+	collectMarkerPaths("", apiValue, markers, pathSet)
+	paths := make([]string, 0, len(pathSet))
+	for path := range pathSet {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	return paths, nil
+}
+
+func sensitiveStateForSchema(configSchema map[string]*schema.Schema) (map[string]any, map[string]struct{}) {
+	markers := map[string]struct{}{}
+	state := sensitiveStateObject(configSchema, markers)
+	return state, markers
+}
+
+func sensitiveStateObject(configSchema map[string]*schema.Schema, markers map[string]struct{}) map[string]any {
+	state := map[string]any{}
+	for key, fieldSchema := range configSchema {
+		value, ok := sensitiveStateValue(fieldSchema, markers)
+		if ok {
+			state[key] = value
+		}
+	}
+	return state
+}
+
+func sensitiveStateValue(fieldSchema *schema.Schema, markers map[string]struct{}) (any, bool) {
+	if fieldSchema == nil {
+		return nil, false
+	}
+
+	if nestedResource, ok := fieldSchema.Elem.(*schema.Resource); ok {
+		nestedState := sensitiveStateObject(nestedResource.Schema, markers)
+		if len(nestedState) == 0 {
+			return nil, false
+		}
+
+		switch fieldSchema.Type {
+		case schema.TypeList, schema.TypeSet:
+			return []any{nestedState}, true
+		case schema.TypeMap:
+			return nestedState, true
+		default:
+			return nestedState, true
+		}
+	}
+
+	if fieldSchema.Sensitive {
+		marker := fmt.Sprintf("__rudder_tf_sensitive_%d__", len(markers))
+		markers[marker] = struct{}{}
+		return marker, true
+	}
+
+	return nil, false
+}
+
+func collectMarkerPaths(prefix string, value any, markers map[string]struct{}, paths map[string]struct{}) {
+	switch typedValue := value.(type) {
+	case map[string]any:
+		for key, child := range typedValue {
+			path := key
+			if prefix != "" {
+				path = prefix + "." + key
+			}
+			collectMarkerPaths(path, child, markers, paths)
+		}
+	case []any:
+		for i, child := range typedValue {
+			collectMarkerPaths(fmt.Sprintf("%s[%d]", prefix, i), child, markers, paths)
+		}
+	case string:
+		if _, ok := markers[typedValue]; ok {
+			paths[prefix] = struct{}{}
+		}
+	}
 }
 
 // testAccCheckDestinationVersion fetches the destination from the API and verifies
