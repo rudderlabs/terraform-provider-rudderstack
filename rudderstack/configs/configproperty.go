@@ -40,6 +40,24 @@ func Simple(apiKey, terraformKey string, filters ...ValueFilter) ConfigProperty 
 	}
 }
 
+// SimpleWithDefault returns a ConfigProperty that maps an API config key to a
+// terraform config key like Simple, but writes defaultValue to the API config
+// when terraform state holds no value for the key. Pair it with an Optional and
+// Computed schema field, so the injected value is read back into state without
+// producing a permanent diff.
+func SimpleWithDefault(apiKey, terraformKey string, defaultValue interface{}) ConfigProperty {
+	return ConfigProperty{
+		FromStateFunc: func(config, state string) (string, error) {
+			value := defaultValue
+			if v := gjson.Get(state, terraformKey); v.Exists() && v.Value() != nil {
+				value = v.Value()
+			}
+			return sjson.Set(config, apiKey, value)
+		},
+		ToStateFunc: copyToState(apiKey, terraformKey),
+	}
+}
+
 type ValueFilter func(a interface{}) bool
 
 type APINestedObject struct {

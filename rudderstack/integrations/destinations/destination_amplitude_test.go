@@ -19,7 +19,8 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"apiSecret": "abc123",
 				"trackCategorizedPages": true,
 				"trackNamedPages": true,
-				"residencyServer": "standard"
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
 			}`,
 		TerraformUpdate: `
 				api_key = "123abc"
@@ -47,6 +48,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				}
 			
 				track_session_events {
+				  web          = true
 				  android      = true
 				  ios          = true
 				  react_native = true
@@ -85,6 +87,40 @@ var amplitudeTestConfigs = []c.TestConfig{
 			
 				batch_events {
 				  web = true
+				}
+
+				auto_capture {
+				  page_views {
+				    web = true
+				  }
+
+				  page_url_enrichment {
+				    web = true
+				  }
+
+				  web_vitals {
+				    web = true
+				  }
+
+				  file_downloads {
+				    web = true
+				  }
+
+				  frustration_interactions {
+				    web = true
+				  }
+
+				  network_tracking {
+				    web = true
+				  }
+
+				  element_interactions {
+				    web = true
+				  }
+
+				  form_interactions {
+				    web = true
+				  }
 				}
 							
 				map_device_brand = true
@@ -258,6 +294,14 @@ var amplitudeTestConfigs = []c.TestConfig{
 				"trackUtmProperties": { "web": true },
 				"unsetParamsReferrerOnNewSession": { "web": true },
 				"batchEvents": { "web": true },
+				"enablePageViewsAutoCapture": { "web": true },
+				"enablePageUrlEnrichmentAutoCapture": { "web": true },
+				"enableWebVitalsAutoCapture": { "web": true },
+				"enableFileDownloadsAutoCapture": { "web": true },
+				"enableFrustrationInteractionsAutoCapture": { "web": true },
+				"enableNetworkTrackingAutoCapture": { "web": true },
+				"enableElementInteractionsAutoCapture": { "web": true },
+				"enableFormInteractionsAutoCapture": { "web": true },
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [
 				  { "eventName": "one" },
@@ -278,7 +322,7 @@ var amplitudeTestConfigs = []c.TestConfig{
 				},
 				"mapDeviceBrand": true,
 				"enableLocationListening": { "android": true, "reactnative": true },
-				"trackSessionEvents": { "android": true, "ios": true, "reactnative": true },
+				"trackSessionEvents": { "web": true, "android": true, "ios": true, "reactnative": true },
 				"useAdvertisingIdForDeviceId": { "android": true, "reactnative": true },
 				"useIdfaAsDeviceId": { "ios": true, "reactnative": true },
 				"consentManagement": {
@@ -545,4 +589,101 @@ func TestDestinationResourceAmplitude(t *testing.T) {
 
 func TestAccDestinationAmplitude(t *testing.T) {
 	acc.AccAssertDestination(t, "amplitude", amplitudeTestConfigs)
+}
+
+func TestDestinationResourceAmplitudeSdkVersionEmptyBlock(t *testing.T) {
+	cmt.AssertDestination(t, "amplitude", []c.TestConfig{
+		{
+			TerraformCreate: `
+				api_key = "123abc"
+
+				sdk_version {}
+			`,
+			APICreate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
+			}`,
+			TerraformUpdate: `
+				api_key = "123abc"
+
+				sdk_version {
+				  web = 1
+				}
+			`,
+			APIUpdate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 1 }
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceAmplitudeSdkVersionExplicitThenOmitted(t *testing.T) {
+	cmt.AssertDestination(t, "amplitude", []c.TestConfig{
+		{
+			TerraformCreate: `
+				api_key = "123abc"
+
+				sdk_version {
+				  web = 1
+				}
+			`,
+			APICreate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 1 }
+			}`,
+			TerraformUpdate: `
+				api_key = "123abc"
+			`,
+			APIUpdate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 1 }
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceAmplitudeSdkVersionOmitted(t *testing.T) {
+	cmt.AssertDestination(t, "amplitude", []c.TestConfig{
+		{
+			TerraformCreate: `
+				api_key = "123abc"
+			`,
+			APICreate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
+			}`,
+			TerraformUpdate: `
+				api_key = "123abc"
+			`,
+			APIUpdate: `{
+				"apiKey": "123abc",
+				"apiSecret": "",
+				"trackCategorizedPages": true,
+				"trackNamedPages": true,
+				"residencyServer": "standard",
+				"sdkVersion": { "web": 2 }
+			}`,
+		},
+	})
 }
