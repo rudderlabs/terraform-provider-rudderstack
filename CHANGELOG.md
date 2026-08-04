@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.11.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.10.0...v4.11.0) (2026-07-30)
+
+
+### Features
+
+* add Amplitude Browser SDK v2 auto_capture fields ([6859a48](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/6859a4871eb16d9df047d0032388f8248a5a4608))
+* **amplitude:** add Browser SDK v2 auto_capture fields ([#298](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/298)) ([6859a48](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/6859a4871eb16d9df047d0032388f8248a5a4608))
+* **amplitude:** default sdk_version to browser sdk v2 ([#294](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/294)) ([5024fa0](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/5024fa0438952838a0c2dc931b2c8320ff3ab9bb))
+* destination version scaffolding for ConfigMeta and generatetf (INT-6494) ([#289](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/289)) ([6f0a77f](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/6f0a77fdc232f5ccc7f5c267c1f6c72b77c2e16b))
+
 ## [4.10.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.9.0...v4.10.0) (2026-07-10)
 
 
