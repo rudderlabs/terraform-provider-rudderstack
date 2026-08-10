@@ -391,6 +391,10 @@ var googleAnalytics4TestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
+		APIUpdatePrunedKeys: []string{
+			"blockPageViewEvent",
+			"sendUserId",
+		},
 	},
 }
 

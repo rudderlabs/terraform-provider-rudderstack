@@ -268,6 +268,18 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 		return err
 	}
 
+	// config-backend also prunes non-secret keys it doesn't declare for the
+	// destination definition (e.g. Amplitude's Browser SDK v1 settings once
+	// sdkVersion is 2). Those come back absent from the response, so keep what
+	// state already holds — otherwise the field reads as unset and every plan
+	// shows a diff against unchanged HCL. Only keys missing entirely are carried
+	// over; anything the response does return still wins.
+	for key, prior := range priorDestinationConfig(d) {
+		if _, ok := properties[key]; !ok {
+			properties[key] = prior
+		}
+	}
+
 	if len(properties) > 0 {
 		if err := d.Set("config", []interface{}{properties}); err != nil {
 			return err
@@ -279,4 +291,15 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 	}
 
 	return nil
+}
+
+// priorDestinationConfig returns the config block already in state, or nil on a
+// fresh import (where there is nothing to preserve).
+func priorDestinationConfig(d *schema.ResourceData) map[string]interface{} {
+	list, ok := d.Get("config").([]interface{})
+	if !ok || len(list) == 0 {
+		return nil
+	}
+	prior, _ := list[0].(map[string]interface{})
+	return prior
 }

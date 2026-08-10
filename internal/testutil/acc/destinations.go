@@ -33,9 +33,15 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	wantVersion := registeredDestinationVersion(t, destination)
 	cm := configs.Destinations.Entries()[destination]
 	redactedFields := redactedAPIConfigKeys(t, cm)
+	// The backend also prunes non-secret keys it doesn't declare for the
+	// destination definition. Those are per-destination facts, so the test
+	// declares them; they join the redacted set for that step's assertion.
+	createSkip := withPrunedKeys(redactedFields, cfg.APICreatePrunedKeys)
+	updateSkip := withPrunedKeys(redactedFields, cfg.APIUpdatePrunedKeys)
 	// Secrets are redacted from responses, so they can't be verified on import
 	// (there is no prior state to preserve them from) — ignore them there.
-	importIgnore := sensitiveStateAttrPaths(cm)
+	// Pruned keys are absent for the same reason: nothing to preserve from.
+	importIgnore := append(sensitiveStateAttrPaths(cm), prunedStateAttrPaths(t, cm, cfg)...)
 
 	if PlanOnly() {
 		t.Parallel()
@@ -66,7 +72,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate, redactedFields),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate, createSkip),
 					// Exact wire version must match the destination's registered
 					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
 					// The automatic post-apply plan check also asserts no plan
@@ -81,7 +87,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate, redactedFields),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate, updateSkip),
 				),
 			},
 			{
@@ -183,6 +189,69 @@ func sensitiveStateAttrPaths(cm configs.ConfigMeta) []string {
 	var paths []string
 	for _, p := range cm.SensitiveImportIgnorePaths() {
 		paths = append(paths, "config.0."+p)
+	}
+	return paths
+}
+
+// withPrunedKeys returns redacted plus the declared pruned API keys. Both are
+// keys the response won't carry, so config verification treats them alike; they
+// are kept as separate inputs because redaction is derived from the schema while
+// pruning is a per-destination backend fact the test declares.
+func withPrunedKeys(redacted map[string]bool, prunedKeys []string) map[string]bool {
+	if len(prunedKeys) == 0 {
+		return redacted
+	}
+	out := make(map[string]bool, len(redacted)+len(prunedKeys))
+	for k := range redacted {
+		out[k] = true
+	}
+	for _, k := range prunedKeys {
+		out[k] = true
+	}
+	return out
+}
+
+// prunedStateAttrPaths returns the terraform state attribute paths of the
+// destination's pruned API keys, e.g. "config.0.device_id_from_url_param".
+// The state path is derived by running the pruned keys through the destination's
+// real API->state transform rather than guessed from the key name.
+func prunedStateAttrPaths(t *testing.T, cm configs.ConfigMeta, cfg configs.TestConfig) []string {
+	t.Helper()
+
+	seen := map[string]bool{}
+	var paths []string
+	for _, step := range []struct {
+		apiJSON string
+		keys    []string
+	}{
+		{cfg.APICreate, cfg.APICreatePrunedKeys},
+		{cfg.APIUpdate, cfg.APIUpdatePrunedKeys},
+	} {
+		if len(step.keys) == 0 {
+			continue
+		}
+		prunedJSON := "{}"
+		for _, k := range step.keys {
+			v := gjson.Get(step.apiJSON, k)
+			if !v.Exists() {
+				t.Fatalf("prunedStateAttrPaths: pruned key %q is not in the expected API JSON for %q — remove it or fix the name", k, cm.APIType)
+			}
+			var err error
+			if prunedJSON, err = sjson.SetRaw(prunedJSON, k, v.Raw); err != nil {
+				t.Fatalf("prunedStateAttrPaths: sjson.SetRaw(%q): %v", k, err)
+			}
+		}
+		stateJSON, err := cm.APIToState(prunedJSON)
+		if err != nil {
+			t.Fatalf("prunedStateAttrPaths: APIToState failed for %q: %v", cm.APIType, err)
+		}
+		gjson.Parse(stateJSON).ForEach(func(k, _ gjson.Result) bool {
+			if p := "config.0." + k.String(); !seen[p] {
+				seen[p] = true
+				paths = append(paths, p)
+			}
+			return true
+		})
 	}
 	return paths
 }

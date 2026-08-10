@@ -295,3 +295,55 @@ func TestStoreDestinationToState_PreservesRedactedSecret(t *testing.T) {
 	assert.Equal(t, "shh", d.Get("config.0.api_secret"), "redacted secret must be preserved from state")
 	assert.Equal(t, "pub", d.Get("config.0.api_key"))
 }
+
+// config-backend prunes non-secret keys it doesn't declare for the destination
+// definition. storeDestinationToState must keep the pruned value already in
+// state, else the field reads as unset and every plan shows a diff.
+func TestStoreDestinationToState_PreservesPrunedField(t *testing.T) {
+	cm := configs.ConfigMeta{
+		APIType: "TEST",
+		ConfigSchema: map[string]*schema.Schema{
+			"api_key":   {Type: schema.TypeString, Optional: true},
+			"track_all": {Type: schema.TypeBool, Optional: true},
+		},
+		Properties: []configs.ConfigProperty{
+			configs.Simple("apiKey", "api_key"),
+			configs.Simple("trackAll", "track_all"),
+		},
+	}
+
+	d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{
+		"name":    "test-destination",
+		"enabled": true,
+		"config": []interface{}{
+			map[string]interface{}{"api_key": "pub", "track_all": true},
+		},
+	})
+
+	// Simulate a pruned response: trackAll absent, apiKey present.
+	dest := &client.Destination{ID: "d1", Name: "test-destination", Config: json.RawMessage(`{"apiKey":"pub"}`)}
+	require.NoError(t, storeDestinationToState(cm, dest, d))
+
+	assert.Equal(t, true, d.Get("config.0.track_all"), "pruned field must be preserved from state")
+	assert.Equal(t, "pub", d.Get("config.0.api_key"))
+}
+
+// A value the response DOES return always wins over prior state — carry-over
+// must not mask a real change made outside terraform.
+func TestStoreDestinationToState_ResponseWinsOverPriorState(t *testing.T) {
+	cm := configs.ConfigMeta{
+		APIType:      "TEST",
+		ConfigSchema: map[string]*schema.Schema{"api_key": {Type: schema.TypeString, Optional: true}},
+		Properties:   []configs.ConfigProperty{configs.Simple("apiKey", "api_key")},
+	}
+
+	d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{
+		"name":   "test-destination",
+		"config": []interface{}{map[string]interface{}{"api_key": "stale"}},
+	})
+
+	dest := &client.Destination{ID: "d1", Name: "test-destination", Config: json.RawMessage(`{"apiKey":"changed-in-ui"}`)}
+	require.NoError(t, storeDestinationToState(cm, dest, d))
+
+	assert.Equal(t, "changed-in-ui", d.Get("config.0.api_key"), "drift must still surface")
+}

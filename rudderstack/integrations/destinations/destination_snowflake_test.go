@@ -455,6 +455,12 @@ var snowflakeTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
+		APICreatePrunedKeys: []string{
+			"additionalProperties",
+		},
+		APIUpdatePrunedKeys: []string{
+			"additionalProperties",
+		},
 	},
 }
 

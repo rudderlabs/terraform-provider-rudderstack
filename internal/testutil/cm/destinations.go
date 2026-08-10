@@ -21,6 +21,10 @@ import (
 
 func AssertDestination(t *testing.T, destination string, testConfigs []configs.TestConfig) {
 	cm := configs.Destinations.Entries()[destination]
+	cfg := testConfigs[0]
+	// GETs return what the backend echoes back: the request minus pruned keys.
+	createResponse := cfg.APICreateResponse()
+	updateResponse := cfg.APIUpdateResponse()
 	destinations := &mockDestinationsService{}
 
 	destinations.On("Create", mock.Anything, mock.MatchedBy(func(d *client.Destination) bool {
@@ -28,13 +32,13 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 			d.ID == "" &&
 			d.Name == "example" &&
 			d.IsEnabled &&
-			testutil.JSONEq(string(d.Config), testConfigs[0].APICreate)
+			testutil.JSONEq(string(d.Config), cfg.APICreate)
 	})).Return(&client.Destination{
 		ID:        "some-id",
 		Type:      cm.APIType,
 		Name:      "example",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APICreate),
+		Config:    json.RawMessage(createResponse),
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
@@ -44,13 +48,13 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 			d.ID == "some-id" &&
 			d.Name == "example-updated" &&
 			d.IsEnabled &&
-			testutil.JSONEq(string(d.Config), testConfigs[0].APIUpdate)
+			testutil.JSONEq(string(d.Config), cfg.APIUpdate)
 	})).Return(&client.Destination{
 		ID:        "some-id",
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APIUpdate),
+		Config:    json.RawMessage(updateResponse),
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil)
@@ -60,7 +64,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 		Type:      cm.APIType,
 		Name:      "example",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APICreate),
+		Config:    json.RawMessage(createResponse),
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Times(3)
@@ -70,7 +74,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 		Type:      cm.APIType,
 		Name:      "example-updated",
 		IsEnabled: true,
-		Config:    json.RawMessage(testConfigs[0].APIUpdate),
+		Config:    json.RawMessage(updateResponse),
 		CreatedAt: testutil.TimePtr(time.Date(2010, 1, 2, 3, 4, 5, 0, time.UTC)),
 		UpdatedAt: testutil.TimePtr(time.Date(2010, 2, 2, 3, 4, 5, 0, time.UTC)),
 	}, nil).Twice()

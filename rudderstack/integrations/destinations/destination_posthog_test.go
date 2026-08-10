@@ -126,6 +126,9 @@ var posthogTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
+		APIUpdatePrunedKeys: []string{
+			"propertyBlacklist",
+		},
 	},
 }
 
