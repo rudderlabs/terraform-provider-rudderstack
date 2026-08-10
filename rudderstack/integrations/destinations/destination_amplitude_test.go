@@ -35,17 +35,8 @@ var amplitudeTestConfigs = []c.TestConfig{
 				track_products_once       = true
 				track_revenue_per_product = true
 			
-				track_gclid {
-				  web = true
-				}
 			
-				track_referrer {
-				  web = true
-				}
 			
-				track_utm_properties {
-				  web = true
-				}
 			
 				track_session_events {
 				  web          = true
@@ -69,25 +60,10 @@ var amplitudeTestConfigs = []c.TestConfig{
 				  web = true
 				}
 			
-				device_id_from_url_param {
-				  web = true
-				}
 			
-				force_https {
-				  web = true
-				}
 			
-				save_params_referrer_once_per_session {
-				  web = true
-				}
 			
-				unset_params_referrer_on_new_session {
-				  web = true
-				}
 			
-				batch_events {
-				  web = true
-				}
 
 				auto_capture {
 				  page_views {
@@ -286,14 +262,6 @@ var amplitudeTestConfigs = []c.TestConfig{
 				  "reactnative": true
 				},
 				"preferAnonymousIdForDeviceId": { "web": true },
-				"deviceIdFromUrlParam": { "web": true },
-				"forceHttps": { "web": true },
-				"trackGclid": { "web": true },
-				"trackReferrer": { "web": true },
-				"saveParamsReferrerOncePerSession": { "web": true },
-				"trackUtmProperties": { "web": true },
-				"unsetParamsReferrerOnNewSession": { "web": true },
-				"batchEvents": { "web": true },
 				"enablePageViewsAutoCapture": { "web": true },
 				"enablePageUrlEnrichmentAutoCapture": { "web": true },
 				"enableWebVitalsAutoCapture": { "web": true },

@@ -16,8 +16,6 @@ func init() {
 		c.Simple("reportSuiteIds", "report_suite_ids"),
 		c.Simple("sslHeartbeat", "ssl_heartbeat"),
 		c.Simple("heartbeatTrackingServerUrl", "heartbeat_tracking_server_url", c.SkipZeroValue),
-		c.Simple("useUtf8Charset", "use_utf8_charset"),
-		c.Simple("useSecureServerSide", "use_secure_server_side"),
 		c.Simple("proxyNormalUrl", "proxy_normal_url", c.SkipZeroValue),
 		c.Simple("proxyHeartbeatUrl", "proxy_heartbeat_url", c.SkipZeroValue),
 		c.ArrayWithObjects("eventsToTypes", "events_to_types", map[string]interface{}{
@@ -40,13 +38,10 @@ func init() {
 			"to":   "to",
 		}),
 		c.Simple("contextDataPrefix", "context_data_prefix", c.SkipZeroValue),
-		c.Simple("useLegacyLinkName", "use_legacy_link_name"),
-		c.Simple("pageNameFallbackTostring", "page_name_fallback_tostring"),
 		c.ArrayWithObjects("mobileEventMapping", "mobile_event_mapping", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
-		c.Simple("sendFalseValues", "send_false_values"),
 		c.ArrayWithObjects("eVarMapping", "e_var_mapping", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
@@ -133,18 +128,6 @@ func init() {
 			Optional:         true,
 			Description:      "Enter your Heartbeat Tracking Server URL",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
-		},
-		"use_utf8_charset": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     true,
-			Description: "Use UTF-8 charset",
-		},
-		"use_secure_server_side": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     true,
-			Description: "Use Secure URL for Server-side",
 		},
 		"proxy_normal_url": {
 			Type:             schema.TypeString,
@@ -271,18 +254,6 @@ func init() {
 			Description:      "Enter your prefix to add before all contextData property.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 		},
-		"use_legacy_link_name": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     true,
-			Description: "Check to use Legacy LinkName",
-		},
-		"page_name_fallback_tostring": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     true,
-			Description: "Check to allow Page Name Fallback to Screen",
-		},
 		"mobile_event_mapping": {
 			Type:        schema.TypeList,
 			Optional:    true,
@@ -304,12 +275,6 @@ func init() {
 					},
 				},
 			},
-		},
-		"send_false_values": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     true,
-			Description: "Check to allow sending false value from properties",
 		},
 		"e_var_mapping": {
 			Type:        schema.TypeList,

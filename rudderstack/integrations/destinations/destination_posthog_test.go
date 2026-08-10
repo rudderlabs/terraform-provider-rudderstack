@@ -63,14 +63,6 @@ var posthogTestConfigs = []c.TestConfig{
 				enable_local_storage_persistence {
 					web = true
 				}
-				property_blacklist = [
-					{
-						property = "property1"
-					},
-					{
-						property = "property2"
-					}
-				]
 			`,
 		APIUpdate: `{
 				"yourInstance": "https://app.posthog.com",
@@ -114,16 +106,6 @@ var posthogTestConfigs = []c.TestConfig{
 				},
 				"enableLocalStoragePersistence": {
 					"web": true
-				},
-				"propertyBlacklist": {
-					"web": [
-						{
-							"property": "property1"
-						},
-						{
-							"property": "property2"
-						}
-					]
 				}
 			}`,
 	},

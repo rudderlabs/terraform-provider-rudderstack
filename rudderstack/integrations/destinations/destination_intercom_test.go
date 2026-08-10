@@ -36,7 +36,6 @@ var intercomTestConfigs = []c.TestConfig{
 				event_filtering {
 					blacklist = [ "one", "two", "three" ]
 				}
-				collect_context = true
 				send_anonymous_id = true
 				update_last_request_at = false
 				consent_management {
@@ -133,7 +132,6 @@ var intercomTestConfigs = []c.TestConfig{
 				"mobileApiKeyIOS": {
 				  "ios": "ios-key"
 				},
-				"collectContext":true,
 				"sendAnonymousId":true,
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [{

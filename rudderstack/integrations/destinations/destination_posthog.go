@@ -50,9 +50,6 @@ func init() {
 			"key":   "key",
 			"value": "value",
 		}),
-		c.ArrayWithObjects("propertyBlacklist.web", "property_blacklist", map[string]interface{}{
-			"property": "property",
-		}),
 		c.Simple("personProfiles.web", "person_profiles.0.web"),
 
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),
@@ -281,21 +278,6 @@ func init() {
 						Type:             schema.TypeString,
 						Required:         true,
 						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,500})$"),
-					},
-				},
-			},
-		},
-		"property_blacklist": {
-			Type:        schema.TypeList,
-			ConfigMode:  schema.SchemaConfigModeAttr,
-			Optional:    true,
-			Description: "Use this setting to enable property blacklist.",
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"property": {
-						Type:             schema.TypeString,
-						Required:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
 					},
 				},
 			},
