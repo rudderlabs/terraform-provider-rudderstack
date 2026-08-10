@@ -541,6 +541,20 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 				"timestampOption": "disabled",
 				"productIdentifier": "name"
 			  }`,
+		APICreatePrunedKeys: []string{
+			"pageNameFallbackTostring",
+			"sendFalseValues",
+			"useLegacyLinkName",
+			"useSecureServerSide",
+			"useUtf8Charset",
+		},
+		APIUpdatePrunedKeys: []string{
+			"pageNameFallbackTostring",
+			"sendFalseValues",
+			"useLegacyLinkName",
+			"useSecureServerSide",
+			"useUtf8Charset",
+		},
 	},
 }
 

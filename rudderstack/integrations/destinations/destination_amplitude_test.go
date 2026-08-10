@@ -580,6 +580,16 @@ var amplitudeTestConfigs = []c.TestConfig{
 				},
 				"residencyServer": "EU"
 			}`,
+		APIUpdatePrunedKeys: []string{
+			"batchEvents",
+			"deviceIdFromUrlParam",
+			"forceHttps",
+			"saveParamsReferrerOncePerSession",
+			"trackGclid",
+			"trackReferrer",
+			"trackUtmProperties",
+			"unsetParamsReferrerOnNewSession",
+		},
 	},
 }
 

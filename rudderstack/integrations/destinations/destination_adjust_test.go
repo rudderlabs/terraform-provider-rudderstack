@@ -362,6 +362,9 @@ var adjustTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
+		APIUpdatePrunedKeys: []string{
+			"partnerParamKeys",
+		},
 	},
 }
 

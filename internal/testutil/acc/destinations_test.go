@@ -77,5 +77,56 @@ func TestDestinationImportStateVerifyIgnoreIncludesSensitiveConfigPaths(t *testi
 		"config.0.sensitive_headers.0.%",
 		"config.0.sensitive_headers.0.from",
 		"config.0.sensitive_headers.0.to",
-	}, destinationImportStateVerifyIgnore(cm))
+	}, destinationImportStateVerifyIgnore(cm, configs.EmptyTestConfig))
+}
+
+func TestDestinationImportStateVerifyIgnoreIncludesPrunedResponseConfigPaths(t *testing.T) {
+	cm := configs.ConfigMeta{
+		ConfigSchema: map[string]*schema.Schema{
+			"partner_param_keys": {
+				Type: schema.TypeList,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"from": {
+							Type: schema.TypeString,
+						},
+						"to": {
+							Type: schema.TypeString,
+						},
+					},
+				},
+			},
+			"request_only_flag": {
+				Type: schema.TypeBool,
+			},
+		},
+		Properties: []configs.ConfigProperty{
+			configs.ArrayWithObjects("partnerParamKeys", "partner_param_keys", map[string]interface{}{
+				"from": "from",
+				"to":   "to",
+			}),
+			configs.Simple("requestOnlyFlag", "request_only_flag"),
+		},
+	}
+	cfg := configs.TestConfig{
+		APIUpdate: `{
+			"partnerParamKeys": [
+				{
+					"from": "userId",
+					"to": "user_id"
+				}
+			],
+			"requestOnlyFlag": true,
+			"kept": "value"
+		}`,
+		APIUpdatePrunedKeys: []string{"partnerParamKeys", "requestOnlyFlag"},
+	}
+
+	require.ElementsMatch(t, []string{
+		"config.0.partner_param_keys.#",
+		"config.0.partner_param_keys.0.%",
+		"config.0.partner_param_keys.0.from",
+		"config.0.partner_param_keys.0.to",
+		"config.0.request_only_flag",
+	}, destinationImportStateVerifyIgnore(cm, cfg))
 }

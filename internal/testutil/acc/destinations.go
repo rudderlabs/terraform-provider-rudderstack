@@ -3,9 +3,11 @@ package acc
 import (
 	"context"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 
@@ -83,14 +85,105 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: destinationImportStateVerifyIgnore(cm),
+				ImportStateVerifyIgnore: destinationImportStateVerifyIgnore(cm, cfg),
 			},
 		},
 	})
 }
 
-func destinationImportStateVerifyIgnore(cm configs.ConfigMeta) []string {
-	return sensitiveImportStateVerifyIgnore("config.0", cm.ConfigSchema)
+func destinationImportStateVerifyIgnore(cm configs.ConfigMeta, cfg configs.TestConfig) []string {
+	ignored := sensitiveImportStateVerifyIgnore("config.0", cm.ConfigSchema)
+	ignored = append(ignored, prunedAPIKeysImportStateVerifyIgnore("config.0", cm, cfg.APICreate, cfg.APICreatePrunedKeys)...)
+	ignored = append(ignored, prunedAPIKeysImportStateVerifyIgnore("config.0", cm, cfg.APIUpdate, cfg.APIUpdatePrunedKeys)...)
+	return uniqueSortedStrings(ignored)
+}
+
+func prunedAPIKeysImportStateVerifyIgnore(prefix string, cm configs.ConfigMeta, apiJSON string, prunedKeys []string) []string {
+	if strings.TrimSpace(apiJSON) == "" || len(prunedKeys) == 0 {
+		return nil
+	}
+
+	apiConfig := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(apiJSON), &apiConfig); err != nil {
+		return nil
+	}
+
+	prunedAPIConfig := map[string]interface{}{}
+	for _, key := range prunedKeys {
+		value, ok := apiConfig[key]
+		if ok {
+			prunedAPIConfig[key] = value
+		}
+	}
+	if len(prunedAPIConfig) == 0 {
+		return nil
+	}
+
+	prunedAPIJSON, err := json.Marshal(prunedAPIConfig)
+	if err != nil {
+		return nil
+	}
+	stateJSON, err := cm.APIToState(string(prunedAPIJSON))
+	if err != nil {
+		return nil
+	}
+
+	stateConfig := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(stateJSON), &stateConfig); err != nil {
+		return nil
+	}
+
+	ignored := []string{}
+	for key, value := range stateConfig {
+		ignored = append(ignored, flattenedImportStateVerifyPaths(prefix+"."+key, value)...)
+	}
+	return ignored
+}
+
+func flattenedImportStateVerifyPaths(prefix string, value interface{}) []string {
+	switch v := value.(type) {
+	case []interface{}:
+		paths := []string{prefix + ".#"}
+		for index, item := range v {
+			itemPrefix := fmt.Sprintf("%s.%d", prefix, index)
+			if _, ok := item.(map[string]interface{}); ok {
+				paths = append(paths, itemPrefix+".%")
+			}
+			paths = append(paths, flattenedImportStateVerifyPaths(itemPrefix, item)...)
+		}
+		return paths
+	case map[string]interface{}:
+		paths := []string{prefix + ".%"}
+		keys := make([]string, 0, len(v))
+		for key := range v {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			paths = append(paths, flattenedImportStateVerifyPaths(prefix+"."+key, v[key])...)
+		}
+		return paths
+	default:
+		return []string{prefix}
+	}
+}
+
+func uniqueSortedStrings(values []string) []string {
+	if len(values) == 0 {
+		return values
+	}
+
+	seen := map[string]struct{}{}
+	unique := make([]string, 0, len(values))
+	for _, value := range values {
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		unique = append(unique, value)
+	}
+	sort.Strings(unique)
+	return unique
 }
 
 func sensitiveImportStateVerifyIgnore(prefix string, schemaMap map[string]*schema.Schema) []string {

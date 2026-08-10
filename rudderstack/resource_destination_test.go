@@ -264,7 +264,7 @@ func TestPopulateDestinationFromState_NoVersionSetsZero(t *testing.T) {
 	assert.Equal(t, 0, destination.Version)
 }
 
-func TestStoreDestinationToStatePreservesPrunedSensitiveAndEmptyConfigValues(t *testing.T) {
+func TestStoreDestinationToStatePreservesPrunedConfigValues(t *testing.T) {
 	cm := configs.ConfigMeta{
 		APIType: "TEST",
 		ConfigSchema: map[string]*schema.Schema{
@@ -324,6 +324,10 @@ func TestStoreDestinationToStatePreservesPrunedSensitiveAndEmptyConfigValues(t *
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"request_only": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		Properties: []configs.ConfigProperty{
 			configs.Simple("apiSecret", "api_secret"),
@@ -338,6 +342,7 @@ func TestStoreDestinationToStatePreservesPrunedSensitiveAndEmptyConfigValues(t *
 				"accessKey":   "access_key",
 			}),
 			configs.Simple("nonSecret", "non_secret"),
+			configs.Simple("requestOnly", "request_only"),
 		},
 	}
 
@@ -361,7 +366,8 @@ func TestStoreDestinationToStatePreservesPrunedSensitiveAndEmptyConfigValues(t *
 						"access_key":    "prior-access-key",
 					},
 				},
-				"non_secret": "prior-non-secret",
+				"non_secret":   "prior-non-secret",
+				"request_only": "prior-request-only",
 			},
 		},
 	})
@@ -392,4 +398,5 @@ func TestStoreDestinationToStatePreservesPrunedSensitiveAndEmptyConfigValues(t *
 	assert.Equal(t, "prior-access-key-id", d.Get("config.0.key_based_authentication.0.access_key_id"))
 	assert.Equal(t, "prior-access-key", d.Get("config.0.key_based_authentication.0.access_key"))
 	assert.Equal(t, "api-non-secret", d.Get("config.0.non_secret"))
+	assert.Equal(t, "prior-request-only", d.Get("config.0.request_only"))
 }

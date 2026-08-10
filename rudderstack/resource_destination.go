@@ -317,16 +317,16 @@ func preservedDestinationConfigValue(apiValue, priorValue interface{}, fieldSche
 		return priorValue, true
 	}
 
+	if !hasAPIValue && shouldPreservePriorDestinationConfigValue(priorValue) {
+		return priorValue, true
+	}
+
 	nestedSchema, hasNestedSchema := nestedDestinationConfigSchema(fieldSchema)
 	if hasNestedSchema {
 		if hasAPIValue {
 			return mergeNestedDestinationConfigValue(apiValue, priorValue, nestedSchema)
 		}
 		return preservedNestedDestinationConfigValue(priorValue, nestedSchema)
-	}
-
-	if !hasAPIValue && isEmptyDestinationConfigCollection(priorValue) {
-		return priorValue, true
 	}
 
 	return nil, false
@@ -423,15 +423,18 @@ func preservedNestedDestinationConfigValue(priorValue interface{}, schemaMap map
 	return nil, false
 }
 
-func isEmptyDestinationConfigCollection(value interface{}) bool {
-	switch v := value.(type) {
+func shouldPreservePriorDestinationConfigValue(value interface{}) bool {
+	switch value.(type) {
 	case []interface{}:
-		return len(v) == 0
+		return true
 	case map[string]interface{}:
-		return len(v) == 0
+		return true
 	case *schema.Set:
-		return v.Len() == 0
+		return true
 	default:
-		return false
+		if value == nil {
+			return false
+		}
+		return !reflect.ValueOf(value).IsZero()
 	}
 }

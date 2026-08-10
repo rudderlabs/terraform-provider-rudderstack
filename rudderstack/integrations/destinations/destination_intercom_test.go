@@ -397,6 +397,9 @@ var intercomTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
+		APIUpdatePrunedKeys: []string{
+			"collectContext",
+		},
 	},
 }
 
