@@ -11,6 +11,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
 	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -29,6 +31,11 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 	name := RandomName(destination)
 	cfg := testConfigs[0]
 	wantVersion := registeredDestinationVersion(t, destination)
+	cm := configs.Destinations.Entries()[destination]
+	redactedFields := redactedAPIConfigKeys(t, cm)
+	// Secrets are redacted from responses, so they can't be verified on import
+	// (there is no prior state to preserve them from) — ignore them there.
+	importIgnore := sensitiveStateAttrPaths(cm)
 
 	if PlanOnly() {
 		t.Parallel()
@@ -59,7 +66,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate, redactedFields),
 					// Exact wire version must match the destination's registered
 					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
 					// The automatic post-apply plan check also asserts no plan
@@ -74,13 +81,14 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate),
+					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate, redactedFields),
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: importIgnore,
 			},
 		},
 	})
@@ -139,8 +147,9 @@ func testAccCheckDestinationExists(resourceName string) resource.TestCheckFunc {
 }
 
 // testAccCheckDestinationAPIConfig fetches the destination from the API and verifies
-// its config contains all expected fields from the test's API JSON.
-func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resource.TestCheckFunc {
+// its config contains all expected fields from the test's API JSON. redactedFields
+// are secret API keys the backend omits from responses and must not be asserted.
+func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, redactedFields map[string]bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if expectedJSON == "" {
 			return nil
@@ -161,8 +170,65 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string) resourc
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		return compareConfig(dest.Config, expectedJSON)
+		return compareConfig(dest.Config, expectedJSON, redactedFields)
 	}
+}
+
+// sensitiveStateAttrPaths returns the terraform state attribute paths of the
+// destination's Sensitive (secret) config fields, e.g. "config.0.api_secret"
+// or "config.0.s3.0.access_key". Import can't verify these: the backend redacts
+// them from responses, so an imported resource has no value to compare against
+// the pre-import state.
+func sensitiveStateAttrPaths(cm configs.ConfigMeta) []string {
+	var paths []string
+	for _, p := range cm.SensitiveImportIgnorePaths() {
+		paths = append(paths, "config.0."+p)
+	}
+	return paths
+}
+
+// redactedAPIConfigKeys returns the set of top-level API config keys the backend
+// redacts from responses: those that map from a Sensitive (secret) schema field.
+// The backend stopped returning secrets on read (security hardening), so config
+// verification must not assert them.
+//
+// The API key for each Sensitive field (including nested ones) is discovered by
+// setting a sentinel at its state path and running the destination's real
+// state->API transform — the same path the provider uses — so no mapping is kept
+// by hand. A "contains" match tolerates transforms that wrap the value (e.g. PEM).
+//
+// Derivation failures are fatal rather than silently returning nil: a swallowed
+// error would regress the suite to a confusing "missing field" with no hint that
+// redaction detection is what broke.
+func redactedAPIConfigKeys(t *testing.T, cm configs.ConfigMeta) map[string]bool {
+	t.Helper()
+	const sentinel = "accRedactedSecretSentinel"
+
+	paths := cm.SensitiveConfigPaths()
+	if len(paths) == 0 {
+		return nil
+	}
+
+	stateJSON := "{}"
+	for _, p := range paths {
+		var err error
+		if stateJSON, err = sjson.Set(stateJSON, p, sentinel); err != nil {
+			t.Fatalf("redactedAPIConfigKeys: sjson.Set(%q): %v", p, err)
+		}
+	}
+	apiJSON, err := cm.StateToAPI(stateJSON)
+	if err != nil {
+		t.Fatalf("redactedAPIConfigKeys: StateToAPI failed for %q: %v", cm.APIType, err)
+	}
+
+	out := map[string]bool{}
+	gjson.Parse(apiJSON).ForEach(func(k, v gjson.Result) bool {
+		if strings.Contains(v.String(), sentinel) {
+			out[k.String()] = true
+		}
+		return true
+	})
+	return out
 }
 
 // registeredDestinationVersion returns ConfigMeta.Version for the terraform

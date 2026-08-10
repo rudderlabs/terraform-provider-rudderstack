@@ -62,6 +62,7 @@ func init() {
 		"ca_certificate": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Sensitive:   true,
 			Description: "Enter the certificate which needs to be verified while establishing a secure connection. Skip setting this if Root CA of your server can be verified with any client, e.g. AWS Elasticache.",
 			// ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},

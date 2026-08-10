@@ -537,7 +537,7 @@ func testAccCheckRETLSourceConfig(resourceName, expectedJSON string) resource.Te
 		if err != nil {
 			return fmt.Errorf("failed to marshal RETL source config: %w", err)
 		}
-		return compareConfig(actual, expectedJSON)
+		return compareConfig(actual, expectedJSON, nil)
 	}
 }
 
@@ -567,7 +567,7 @@ func testAccCheckRETLConnectionConfig(resourceName, expectedJSON string) resourc
 		if err != nil {
 			return fmt.Errorf("failed to marshal RETL connection: %w", err)
 		}
-		return compareConfig(actual, expectedJSON)
+		return compareConfig(actual, expectedJSON, nil)
 	}
 }
 

@@ -2,6 +2,7 @@ package rudderstack
 
 import (
 	"context"
+	"encoding/json"
 	"regexp"
 	"testing"
 
@@ -261,4 +262,36 @@ func TestPopulateDestinationFromState_NoVersionSetsZero(t *testing.T) {
 	require.NoError(t, populateDestinationFromState(cm, destination, d))
 
 	assert.Equal(t, int64(0), destination.Version)
+}
+
+// The backend redacts Sensitive fields from responses. storeDestinationToState
+// must keep the secret already in state rather than clear it, else the field
+// shows perpetual plan drift.
+func TestStoreDestinationToState_PreservesRedactedSecret(t *testing.T) {
+	cm := configs.ConfigMeta{
+		APIType: "TEST",
+		ConfigSchema: map[string]*schema.Schema{
+			"api_key":    {Type: schema.TypeString, Optional: true},
+			"api_secret": {Type: schema.TypeString, Optional: true, Sensitive: true},
+		},
+		Properties: []configs.ConfigProperty{
+			configs.Simple("apiKey", "api_key"),
+			configs.Simple("apiSecret", "api_secret"),
+		},
+	}
+
+	d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{
+		"name":    "test-destination",
+		"enabled": true,
+		"config": []interface{}{
+			map[string]interface{}{"api_key": "pub", "api_secret": "shh"},
+		},
+	})
+
+	// Simulate a redacted response: apiSecret absent, apiKey present.
+	dest := &client.Destination{ID: "d1", Name: "test-destination", Config: json.RawMessage(`{"apiKey":"pub"}`)}
+	require.NoError(t, storeDestinationToState(cm, dest, d))
+
+	assert.Equal(t, "shh", d.Get("config.0.api_secret"), "redacted secret must be preserved from state")
+	assert.Equal(t, "pub", d.Get("config.0.api_key"))
 }

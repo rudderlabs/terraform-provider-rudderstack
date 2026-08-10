@@ -402,6 +402,14 @@ func TestAccSourceCustomerio(t *testing.T) {
 }
 
 func TestAccSourceFacebookLeadAds(t *testing.T) {
+	// facebook_lead_ads is a beta, catalog-hidden source (options.hidden:true in
+	// rudder-integrations-config). config-backend's resource gate (#6468, on by
+	// default) rejects API creation of hidden definitions with a 403 "not
+	// available for your account", so the live CRUD path can't run. Keep
+	// plan-only coverage (schema/HCL, zero API calls); skip the live API path.
+	if !acc.PlanOnly() {
+		t.Skip("skipping: facebook_lead_ads is catalog-hidden; backend resource gate blocks API creation")
+	}
 	acc.AccAssertSource(t, "facebook_lead_ads", emptyTestConfigs)
 }
 
