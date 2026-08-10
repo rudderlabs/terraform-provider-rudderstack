@@ -51,7 +51,7 @@ func TestResourceConnection_JSONMapper_CreateReadUpdateDelete(t *testing.T) {
 		DestinationID: "dest-1",
 		Enabled:       &enabled,
 		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeBasic, EveryMinutes: &every60},
-		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		SyncBehaviour: ptr(iacretl.SyncBehaviourUpsert),
 		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
 		Mappings:      []iacretl.Mapping{{From: "name", To: "first_name"}},
 		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
@@ -238,7 +238,7 @@ func TestResourceConnection_ObjectMappingAcceptsArbitraryIdentifierTarget(t *tes
 		DestinationID: "dest-1",
 		Enabled:       &enabled,
 		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		SyncBehaviour: ptr(iacretl.SyncBehaviourUpsert),
 		Identifiers:   []iacretl.Mapping{{From: "email", To: "email"}},
 		Object:        "Contact",
 	}
@@ -293,7 +293,7 @@ func TestResourceConnection_EventNestedFieldsAreForceNew(t *testing.T) {
 		DestinationID: "dest-1",
 		Enabled:       &enabled,
 		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		SyncBehaviour: ptr(iacretl.SyncBehaviourUpsert),
 		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
 		Event:         &iacretl.Event{Type: iacretl.EventTypeIdentify},
 	}
@@ -312,7 +312,7 @@ func TestResourceConnection_EventNestedFieldsAreForceNew(t *testing.T) {
 		DestinationID: "dest-1",
 		Enabled:       &enabled,
 		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		SyncBehaviour: ptr(iacretl.SyncBehaviourUpsert),
 		Identifiers:   []iacretl.Mapping{{From: "email", To: "user_id"}},
 		Event:         &iacretl.Event{Type: iacretl.EventTypeTrack, Name: "user_synced"},
 	}

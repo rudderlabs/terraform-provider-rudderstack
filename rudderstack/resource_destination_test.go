@@ -237,7 +237,7 @@ func TestPopulateDestinationFromState_SetsVersionFromConfigMeta(t *testing.T) {
 	require.NoError(t, populateDestinationFromState(cm, destination, d))
 
 	assert.Equal(t, "TEST", destination.Type)
-	assert.Equal(t, 2, destination.Version)
+	assert.Equal(t, int64(2), destination.Version)
 }
 
 func TestPopulateDestinationFromState_NoVersionSetsZero(t *testing.T) {
@@ -260,5 +260,5 @@ func TestPopulateDestinationFromState_NoVersionSetsZero(t *testing.T) {
 	destination := &client.Destination{}
 	require.NoError(t, populateDestinationFromState(cm, destination, d))
 
-	assert.Equal(t, 0, destination.Version)
+	assert.Equal(t, int64(0), destination.Version)
 }

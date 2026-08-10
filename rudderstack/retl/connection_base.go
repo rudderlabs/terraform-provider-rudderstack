@@ -215,7 +215,11 @@ func applyBaseToCreateRequest(d *schema.ResourceData, req *retl.CreateRETLConnec
 	req.DestinationID = d.Get("destination_id").(string)
 	req.Enabled = &enabled
 	req.Schedule = schedule
-	req.SyncBehaviour = retl.SyncBehaviour(d.Get("sync_behaviour").(string))
+	// rudder-iac >= v0.19.0 made CreateRETLConnectionRequest.SyncBehaviour a
+	// pointer. Take the address unconditionally to preserve the prior wire
+	// behaviour (the value, including "", is still sent).
+	sb := retl.SyncBehaviour(d.Get("sync_behaviour").(string))
+	req.SyncBehaviour = &sb
 	req.Identifiers = mappingsFromState(d, "identifiers")
 
 	if ss, ok := syncSettingsFromState(d); ok {
