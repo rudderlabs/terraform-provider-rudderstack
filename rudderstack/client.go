@@ -36,6 +36,14 @@ type DestinationsService interface {
 	Get(ctx context.Context, id string) (*client.Destination, error)
 	Update(ctx context.Context, destination *client.Destination) (*client.Destination, error)
 	Delete(ctx context.Context, id string) error
+
+	// Destination-side transformation link (rudder-iac >= v0.19.0). A destination
+	// has at most one attached transformation; ConnectTransformation replaces any
+	// existing link. GetTransformation returns client.ErrResourceNotFound when
+	// nothing is attached.
+	GetTransformation(ctx context.Context, destinationID string) (*client.DestinationTransformation, error)
+	ConnectTransformation(ctx context.Context, destinationID, transformationID string) (*client.DestinationTransformation, error)
+	DisconnectTransformation(ctx context.Context, destinationID string) error
 }
 
 type ConnectionsService interface {

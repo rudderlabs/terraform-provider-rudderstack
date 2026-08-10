@@ -71,6 +71,13 @@ func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema 
 			Computed:    true,
 			Description: "Time when the resource was last updated, in ISO 8601 format.",
 		},
+		"transformation_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Description: "ID of a published transformation to attach to this destination. " +
+				"The transformation must be published before it can be attached. A destination " +
+				"can have at most one transformation. Omit or clear the value to detach.",
+		},
 	}
 
 	if !cm.SkipConfig {
@@ -110,8 +117,36 @@ func resourceDestinationCreate(cm configs.ConfigMeta) schema.CreateContextFunc {
 
 		d.SetId(destination.ID)
 
+		// The transformation link is a separate endpoint, not part of the destination
+		// create body — attach it after the destination exists. Mirrors rudder-iac's
+		// destination handler.
+		if newID := d.Get("transformation_id").(string); newID != "" {
+			if err := reconcileTransformationLink(ctx, c, destination.ID, "", newID); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
 		return resourceDestinationRead(cm)(ctx, d, m)
 	}
+}
+
+// reconcileTransformationLink brings the destination's attached transformation from
+// oldID to newID. Empty string means "no transformation". Mirrors rudder-iac's
+// syncTransformationLink. ponytail: one small helper beside the resource, no shared pkg.
+func reconcileTransformationLink(ctx context.Context, c *Client, destinationID, oldID, newID string) error {
+	if oldID == newID {
+		return nil
+	}
+	if newID == "" {
+		if err := c.Destinations.DisconnectTransformation(ctx, destinationID); err != nil {
+			return fmt.Errorf("disconnecting transformation from destination %s: %w", destinationID, err)
+		}
+		return nil
+	}
+	if _, err := c.Destinations.ConnectTransformation(ctx, destinationID, newID); err != nil {
+		return fmt.Errorf("connecting transformation %s to destination %s: %w", newID, destinationID, err)
+	}
+	return nil
 }
 
 func resourceDestinationRead(cm configs.ConfigMeta) schema.ReadContextFunc {
@@ -135,6 +170,23 @@ func resourceDestinationRead(cm configs.ConfigMeta) schema.ReadContextFunc {
 
 		if err := storeDestinationToState(cm, destination, d); err != nil {
 			return diag.FromErr(err)
+		}
+
+		// GET /destinations/{id} does not embed the transformation link, so read it
+		// separately. A not-found means nothing is attached (empty), and also lets
+		// drift (out-of-band attach/detach) surface on the next plan.
+		transformation, err := c.Destinations.GetTransformation(ctx, id)
+		switch {
+		case err == nil:
+			if err := d.Set("transformation_id", transformation.TransformationID); err != nil {
+				return diag.FromErr(err)
+			}
+		case errors.Is(err, client.ErrResourceNotFound):
+			if err := d.Set("transformation_id", ""); err != nil {
+				return diag.FromErr(err)
+			}
+		default:
+			return diag.FromErr(fmt.Errorf("reading transformation link for destination %s: %w", id, err))
 		}
 
 		return diag.Diagnostics{}
@@ -161,6 +213,13 @@ func resourceDestinationUpdate(cm configs.ConfigMeta) schema.UpdateContextFunc {
 
 		d.SetId(destination.ID)
 
+		if d.HasChange("transformation_id") {
+			oldID, newID := d.GetChange("transformation_id")
+			if err := reconcileTransformationLink(ctx, c, destination.ID, oldID.(string), newID.(string)); err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
 		return resourceDestinationRead(cm)(ctx, d, m)
 	}
 }
@@ -170,6 +229,17 @@ func resourceDestinationDelete(cm configs.ConfigMeta) schema.DeleteContextFunc {
 		c, ok := m.(*Client)
 		if !ok {
 			return diag.FromErr(fmt.Errorf("API client is not configured"))
+		}
+
+		// Detach any linked transformation first, mirroring rudder-iac's destination
+		// handler. Not-found is fine — the link may already be gone or cascade-deleted.
+		if d.Get("transformation_id").(string) != "" {
+			if err := c.Destinations.DisconnectTransformation(ctx, d.Id()); err != nil {
+				var apiErr *client.APIError
+				if !errors.Is(err, client.ErrResourceNotFound) && !(errors.As(err, &apiErr) && apiErr.HTTPStatusCode == 404) {
+					return diag.FromErr(fmt.Errorf("disconnecting transformation from destination %s: %w", d.Id(), err))
+				}
+			}
 		}
 
 		if err := c.Destinations.Delete(ctx, d.Id()); err != nil {
@@ -242,6 +312,12 @@ func storeDestinationToState(cm configs.ConfigMeta, destination *client.Destinat
 		if err := d.Set("updated_at", updatedAt); err != nil {
 			return err
 		}
+	}
+
+	// SkipConfig destinations have no "config" attribute in their schema, so
+	// there is nothing to write back (and d.Set("config", ...) would fail).
+	if cm.SkipConfig {
+		return nil
 	}
 
 	state, err := cm.APIToState(string(destination.Config))

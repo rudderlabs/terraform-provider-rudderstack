@@ -173,3 +173,20 @@ func (m *mockDestinationsService) Delete(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
+
+func (m *mockDestinationsService) GetTransformation(ctx context.Context, destinationID string) (*client.DestinationTransformation, error) {
+	args := m.Called(ctx, destinationID)
+	t, _ := args.Get(0).(*client.DestinationTransformation)
+	return t, args.Error(1)
+}
+
+func (m *mockDestinationsService) ConnectTransformation(ctx context.Context, destinationID, transformationID string) (*client.DestinationTransformation, error) {
+	args := m.Called(ctx, destinationID, transformationID)
+	t, _ := args.Get(0).(*client.DestinationTransformation)
+	return t, args.Error(1)
+}
+
+func (m *mockDestinationsService) DisconnectTransformation(ctx context.Context, destinationID string) error {
+	args := m.Called(ctx, destinationID)
+	return args.Error(0)
+}
