@@ -64,13 +64,13 @@ func GenerateImportScript(
 	}
 
 	for _, dst := range destinations {
-		t, cm := configMetaByVersion(destinationConfigs, dst.Type, dst.Version)
+		t, cm := configMetaByVersion(destinationConfigs, dst.Type, int(dst.Version))
 		if cm != nil {
 			foundDestinations[dst.ID] = true
 			destinationTerraformTypes[dst.ID] = t
 			lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_destination_%s.%s" "%s"`, t, destinationName(dst), dst.ID))
 		} else {
-			logger.Printf("skipping destination '%s': %s", dst.ID, unsupportedDestinationReason(destinationConfigs, dst.Type, dst.Version))
+			logger.Printf("skipping destination '%s': %s", dst.ID, unsupportedDestinationReason(destinationConfigs, dst.Type, int(dst.Version)))
 		}
 	}
 
@@ -161,7 +161,7 @@ func GenerateTerraform(
 	destinationConfigs := configs.Destinations.Entries()
 	generatedDestinationEntries := map[string]*destinationEntry{}
 	for _, dst := range destinations {
-		terraformType, cm := configMetaByVersion(destinationConfigs, dst.Type, dst.Version)
+		terraformType, cm := configMetaByVersion(destinationConfigs, dst.Type, int(dst.Version))
 		if cm != nil {
 			b, err := generateDestination(dst, terraformType, cm)
 			if err != nil {
@@ -172,7 +172,7 @@ func GenerateTerraform(
 				generatedDestinationEntries[dst.ID] = &destinationEntry{terraformType: terraformType, destination: dst}
 			}
 		} else {
-			logger.Printf("could not generate resource block for destination '%s': %s", dst.ID, unsupportedDestinationReason(destinationConfigs, dst.Type, dst.Version))
+			logger.Printf("could not generate resource block for destination '%s': %s", dst.ID, unsupportedDestinationReason(destinationConfigs, dst.Type, int(dst.Version)))
 		}
 	}
 

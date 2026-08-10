@@ -28,7 +28,7 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 		DestinationID:     "dest-cio",
 		Enabled:           &enabled,
 		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+		SyncBehaviour:     ptr(iacretl.SyncBehaviourUpsert),
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		DestinationConfig: json.RawMessage(`{"object":"person"}`),
 	}
@@ -186,7 +186,7 @@ func TestResourceConnectionCustomerIO_CursorColumnCreateRead(t *testing.T) {
 		DestinationID:     "dest-cio",
 		Enabled:           &enabled,
 		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+		SyncBehaviour:     ptr(iacretl.SyncBehaviourUpsert),
 		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
 		CursorColumn:      "updated_at",
 		DestinationConfig: json.RawMessage(`{"object":"person"}`),
