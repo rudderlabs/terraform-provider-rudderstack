@@ -82,19 +82,25 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 }
 
 // An event connection omits `syncBehaviour` from the create payload and stores
-// whatever the backend stamps on the connection. The value below is only the
-// mock's stand-in for that backend choice — the resource must round-trip it
-// without a diff regardless of which behaviour the backend picks.
+// whatever the backend stamps on the connection. The fixtures mirror the real
+// flow: event objects require a `name` identifier alongside the usual ones, and
+// the backend answers the create by stamping `upsert`. The resource must
+// round-trip that value without a diff — it stores what comes back rather than
+// asserting a particular behaviour, so the test would still hold if the backend
+// default moved.
 func TestResourceConnectionCustomerIO_EventCreateReadAndNoDiff(t *testing.T) {
 	svc := &mockService{}
 	enabled := true
 
 	createReq := &iacretl.CreateRETLConnectionRequest{
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           &enabled,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-cio",
+		Enabled:       &enabled,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		Identifiers: []iacretl.Mapping{
+			{From: "email", To: "email"},
+			{From: "event_name", To: "name"},
+		},
 		DestinationConfig: json.RawMessage(`{"object":"event"}`),
 	}
 	body, err := json.Marshal(createReq)
@@ -102,13 +108,16 @@ func TestResourceConnectionCustomerIO_EventCreateReadAndNoDiff(t *testing.T) {
 	require.NotContains(t, string(body), "syncBehaviour")
 
 	created := &iacretl.RETLConnection{
-		ID:                "conn-cio-event",
-		SourceID:          "retl-src-1",
-		DestinationID:     "dest-cio",
-		Enabled:           true,
-		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
-		SyncBehaviour:     iacretl.SyncBehaviourMirror,
-		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		ID:            "conn-cio-event",
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-cio",
+		Enabled:       true,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers: []iacretl.Mapping{
+			{From: "email", To: "email"},
+			{From: "event_name", To: "name"},
+		},
 		DestinationConfig: json.RawMessage(`{"object":"event"}`),
 	}
 	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
@@ -126,6 +135,10 @@ func TestResourceConnectionCustomerIO_EventCreateReadAndNoDiff(t *testing.T) {
 				from = "email"
 				to   = "email"
 			}
+			identifiers {
+				from = "event_name"
+				to   = "name"
+			}
 		}
 	`
 
@@ -142,7 +155,7 @@ func TestResourceConnectionCustomerIO_EventCreateReadAndNoDiff(t *testing.T) {
 					return checkAll(map[string]string{
 						"id":             "conn-cio-event",
 						"object":         "event",
-						"sync_behaviour": "mirror",
+						"sync_behaviour": "upsert",
 					}, attrs)
 				},
 			},

@@ -51,4 +51,11 @@ resource "rudderstack_retl_connection_customerio" "model_to_customerio_event" {
     from = "email"
     to   = "email"
   }
+
+  # Event objects additionally require a `name` identifier carrying the event
+  # name — the API rejects the connection without it.
+  identifiers {
+    from = "event_name"
+    to   = "name"
+  }
 }
