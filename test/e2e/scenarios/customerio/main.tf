@@ -29,8 +29,9 @@ resource "rudderstack_destination_customerio" "cio" {
 }
 
 # Customer.io is a VDM v2 / "destination-specific flow": the object must travel
-# inside the API's destinationConfig as {"object":"person"}, which only the typed
-# resource packs. manual schedule so no syncs fire.
+# inside the API's destinationConfig as {"object":"..."}, which only the typed
+# resource packs. Both supported objects are exercised against the same
+# destination — manual schedule so no syncs fire.
 resource "rudderstack_retl_connection_customerio" "to_customerio" {
   source_id      = module.bq.source_id
   destination_id = rudderstack_destination_customerio.cio.id
@@ -44,6 +45,39 @@ resource "rudderstack_retl_connection_customerio" "to_customerio" {
   identifiers {
     from = "email"
     to   = "email"
+  }
+}
+
+# object = "event". Unlike `person`, the event sync mode is chosen by the
+# backend, so `sync_behaviour` is omitted from config and stamped into state on
+# apply. This connection exists to put that claim in front of the real API: the
+# create must be accepted without `syncBehaviour`, and the drift assertion
+# run.sh performs after apply (terraform plan -detailed-exitcode) must stay at
+# exit 0, which is what proves the Optional+Computed round-trip does not produce
+# a perpetual diff. Unit tests can only assert this against a mock that returns
+# whatever the fixtures say.
+resource "rudderstack_retl_connection_customerio" "to_customerio_event" {
+  source_id      = module.bq.source_id
+  destination_id = rudderstack_destination_customerio.cio.id
+  object         = "event"
+
+  schedule {
+    type = "manual"
+  }
+
+  identifiers {
+    from = "email"
+    to   = "email"
+  }
+
+  # Event objects additionally require a `name` identifier carrying the event
+  # name — the API rejects the connection without it. The schedule is manual so
+  # no sync ever runs; the mapping only has to name a column that really exists
+  # on the source table, and `user_id` is its primary key (see
+  # modules/bigquery_source).
+  identifiers {
+    from = "user_id"
+    to   = "name"
   }
 }
 
@@ -63,6 +97,11 @@ output "destination_id" {
 }
 
 output "connection_id" {
-  description = "ID of the created BigQuery→Customer.io rETL connection."
+  description = "ID of the created BigQuery→Customer.io rETL connection (object = person)."
   value       = rudderstack_retl_connection_customerio.to_customerio.id
+}
+
+output "event_connection_id" {
+  description = "ID of the created BigQuery→Customer.io rETL connection (object = event)."
+  value       = rudderstack_retl_connection_customerio.to_customerio_event.id
 }
