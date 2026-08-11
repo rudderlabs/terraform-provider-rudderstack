@@ -14,6 +14,14 @@ import (
 	"github.com/rudderlabs/rudder-iac/api/client/retl"
 )
 
+// Customer.io destination objects, as returned by the listObjects API. Sync
+// behaviours are not Customer.io-specific — they come from the RETL framework
+// (retl.SyncBehaviour*).
+const (
+	customerIOObjectPerson = "person"
+	customerIOObjectEvent  = "event"
+)
+
 // ResourceConnectionCustomerIO returns the schema for
 // `rudderstack_retl_connection_customerio` — a RETL connection scoped to a
 // Customer.io destination using the VDM v2 flow.
@@ -35,26 +43,33 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 			"Carries the destination object as a typed top-level field; ForceNew because the " +
 			"object cannot be changed in place — changing it recreates the connection.",
 		Schema: mergeSchemas(baseConnectionSchema(), map[string]*schema.Schema{
-			// Customer.io supports exactly one object, whose on-the-wire value is
-			// `person` (the `value` from the listObjects API). Restrict to it so
-			// typos fail at plan time instead of on apply. If Customer.io ever
-			// adds objects, extend this slice.
+			// Customer.io supports `person` and `event` as on-the-wire object values
+			// from the listObjects API. Restrict to those values so typos fail at
+			// plan time instead of on apply.
 			"object": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"person"}, false),
-				Description:  "Customer.io destination object. Only `person` is supported.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					customerIOObjectPerson,
+					customerIOObjectEvent,
+				}, false),
+				Description: "Customer.io destination object: `person` or `event`.",
 			},
 			// Only upsert and mirror are supported — drop `full` from the base
 			// schema's allowed set so users see a plan-time error instead of an
-			// API rejection on apply.
+			// API rejection on apply. Optional+Computed lets the backend stamp the
+			// event sync mode without causing perpetual diffs.
 			"sync_behaviour": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror"}, false),
-				Description:  "How records are synced to the destination: `upsert` or `mirror`.",
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					string(retl.SyncBehaviourUpsert),
+					string(retl.SyncBehaviourMirror),
+				}, false),
+				Description: "How records are synced to the destination. Required for `person` (`upsert` or `mirror`); must be omitted for `event`, where the sync mode is determined by the backend and written to state after apply.",
 			},
 		}),
 		CreateContext: createCustomerIOConnection,
@@ -68,10 +83,31 @@ func ResourceConnectionCustomerIO() *schema.Resource {
 	}
 }
 
-// customizeCustomerIOConnectionDiff rejects cursor_column when sync_behaviour
-// is not `upsert`, surfacing the error at plan time instead of an API
-// rejection on apply.
+// customizeCustomerIOConnectionDiff enforces Customer.io's object-specific
+// sync_behaviour rules at plan time: person sync mode is user-configured and
+// required, while event sync mode is determined by the backend and must be
+// omitted from config.
+//
+// cursor_column is deliberately not gated on `object` — it is valid for both
+// objects, subject only to the cross-flow rule that it requires
+// sync_behaviour="upsert" (validateCursorColumnUpsertOnly). For events the sync
+// behaviour is unknown until the backend stamps it, so the rule can only be
+// enforced once a value is in state.
 func customizeCustomerIOConnectionDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	object, _ := d.Get("object").(string)
+	syncBehaviourConfigured := rawConfigAttributeSet(d.GetRawConfig(), "sync_behaviour")
+
+	switch object {
+	case customerIOObjectEvent:
+		if syncBehaviourConfigured {
+			return fmt.Errorf("sync_behaviour must be omitted when object is %q; Customer.io event sync mode is determined by the backend", customerIOObjectEvent)
+		}
+	case customerIOObjectPerson:
+		if !syncBehaviourConfigured {
+			return fmt.Errorf("sync_behaviour is required when object is %q", customerIOObjectPerson)
+		}
+	}
+
 	return validateCursorColumnUpsertOnly(d)
 }
 
