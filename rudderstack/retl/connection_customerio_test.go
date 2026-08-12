@@ -81,6 +81,285 @@ func TestResourceConnectionCustomerIO_CreateRead(t *testing.T) {
 	svc.AssertExpectations(t)
 }
 
+// An event connection omits `syncBehaviour` from the create payload and stores
+// whatever the backend stamps on the connection. The fixtures mirror the real
+// flow: event objects require a `name` identifier alongside the usual ones, and
+// the backend answers the create by stamping `upsert`. The resource must
+// round-trip that value without a diff — it stores what comes back rather than
+// asserting a particular behaviour, so the test would still hold if the backend
+// default moved.
+func TestResourceConnectionCustomerIO_EventCreateReadAndNoDiff(t *testing.T) {
+	svc := &mockService{}
+	enabled := true
+
+	createReq := &iacretl.CreateRETLConnectionRequest{
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-cio",
+		Enabled:       &enabled,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		Identifiers: []iacretl.Mapping{
+			{From: "email", To: "email"},
+			{From: "event_name", To: "name"},
+		},
+		DestinationConfig: json.RawMessage(`{"object":"event"}`),
+	}
+	body, err := json.Marshal(createReq)
+	require.NoError(t, err)
+	require.NotContains(t, string(body), "syncBehaviour")
+
+	created := &iacretl.RETLConnection{
+		ID:            "conn-cio-event",
+		SourceID:      "retl-src-1",
+		DestinationID: "dest-cio",
+		Enabled:       true,
+		Schedule:      iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour: iacretl.SyncBehaviourUpsert,
+		Identifiers: []iacretl.Mapping{
+			{From: "email", To: "email"},
+			{From: "event_name", To: "name"},
+		},
+		DestinationConfig: json.RawMessage(`{"object":"event"}`),
+	}
+	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-cio-event").Return(created, nil)
+	svc.On("DeleteConnection", mock.Anything, "conn-cio-event").Return(nil).Once()
+
+	config := `
+		provider "rudderstack" { access_token = "tok" }
+		resource "rudderstack_retl_connection_customerio" "example" {
+			source_id      = "retl-src-1"
+			destination_id = "dest-cio"
+			object         = "event"
+			schedule { type = "manual" }
+			identifiers {
+				from = "email"
+				to   = "email"
+			}
+			identifiers {
+				from = "event_name"
+				to   = "name"
+			}
+		}
+	`
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection_customerio.example")
+					if err != nil {
+						return err
+					}
+					return checkAll(map[string]string{
+						"id":             "conn-cio-event",
+						"object":         "event",
+						"sync_behaviour": "upsert",
+					}, attrs)
+				},
+			},
+			{
+				Config:   config,
+				PlanOnly: true,
+			},
+		},
+	})
+
+	svc.AssertExpectations(t)
+}
+
+func TestResourceConnectionCustomerIO_RejectsSyncBehaviourForEvent(t *testing.T) {
+	for _, syncBehaviour := range []string{"mirror", "upsert"} {
+		t.Run(syncBehaviour, func(t *testing.T) {
+			svc := &mockService{}
+			resource.UnitTest(t, resource.TestCase{
+				ProviderFactories: providerFactories(svc),
+				Steps: []resource.TestStep{
+					{
+						Config: `
+							provider "rudderstack" { access_token = "tok" }
+							resource "rudderstack_retl_connection_customerio" "example" {
+								source_id      = "retl-src-1"
+								destination_id = "dest-cio"
+								sync_behaviour = "` + syncBehaviour + `"
+								object         = "event"
+								schedule { type = "manual" }
+								identifiers {
+									from = "email"
+									to   = "email"
+								}
+							}
+						`,
+						ExpectError: regexpMatches(`sync_behaviour must be omitted when object is "event"`),
+					},
+				},
+			})
+			svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
+		})
+	}
+}
+
+func TestResourceConnectionCustomerIO_RequiresSyncBehaviourForPerson(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection_customerio" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-cio"
+						object         = "person"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
+					}
+				`,
+				ExpectError: regexpMatches(`sync_behaviour is required when object is "person"`),
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
+}
+
+// Deleting `sync_behaviour` from an EXISTING person connection must fail the
+// plan, not silently become a no-op. This is the case Optional+Computed makes
+// dangerous: with a value already in state the SDK happily serves it back for a
+// config that no longer sets it, so d.Get cannot tell the two apart and only the
+// raw-config check (rawConfigAttributeSet) catches the removal.
+// TestResourceConnectionCustomerIO_RequiresSyncBehaviourForPerson covers the
+// create path, where state is empty and any implementation would work.
+func TestResourceConnectionCustomerIO_PersonRejectsDroppingSyncBehaviour(t *testing.T) {
+	svc := &mockService{}
+	enabled := true
+
+	createReq := &iacretl.CreateRETLConnectionRequest{
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           &enabled,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     ptr(iacretl.SyncBehaviourUpsert),
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		DestinationConfig: json.RawMessage(`{"object":"person"}`),
+	}
+	created := &iacretl.RETLConnection{
+		ID:                "conn-cio-person",
+		SourceID:          "retl-src-1",
+		DestinationID:     "dest-cio",
+		Enabled:           true,
+		Schedule:          iacretl.Schedule{Type: iacretl.ScheduleTypeManual},
+		SyncBehaviour:     iacretl.SyncBehaviourUpsert,
+		Identifiers:       []iacretl.Mapping{{From: "email", To: "email"}},
+		DestinationConfig: json.RawMessage(`{"object":"person"}`),
+	}
+	svc.On("CreateConnection", mock.Anything, createReq).Return(created, nil).Once()
+	svc.On("GetConnection", mock.Anything, "conn-cio-person").Return(created, nil)
+	svc.On("DeleteConnection", mock.Anything, "conn-cio-person").Return(nil).Once()
+
+	const head = `
+		provider "rudderstack" { access_token = "tok" }
+		resource "rudderstack_retl_connection_customerio" "example" {
+			source_id      = "retl-src-1"
+			destination_id = "dest-cio"
+			object         = "person"
+`
+	const tail = `
+			schedule { type = "manual" }
+			identifiers {
+				from = "email"
+				to   = "email"
+			}
+		}
+	`
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				Config: head + `			sync_behaviour = "upsert"` + tail,
+				Check: func(s *terraform.State) error {
+					attrs, err := resourceAttrs(s, "rudderstack_retl_connection_customerio.example")
+					if err != nil {
+						return err
+					}
+					return checkAll(map[string]string{"sync_behaviour": "upsert"}, attrs)
+				},
+			},
+			{
+				Config:      head + tail,
+				PlanOnly:    true,
+				ExpectError: regexpMatches(`sync_behaviour is required when object is "person"`),
+			},
+		},
+	})
+
+	svc.AssertExpectations(t)
+}
+
+func TestResourceConnectionCustomerIO_AcceptsPersonMirrorSyncBehaviour(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection_customerio" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-cio"
+						sync_behaviour = "mirror"
+						object         = "person"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
+					}
+				`,
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
+}
+
+// cursor_column is valid for both objects — it is gated on sync_behaviour
+// ("upsert" only), not on `object`. Since an event connection's sync behaviour
+// is unknown until the backend stamps it, the plan must go through rather than
+// pre-emptively rejecting the column.
+func TestResourceConnectionCustomerIO_AcceptsCursorColumnForEvent(t *testing.T) {
+	svc := &mockService{}
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: providerFactories(svc),
+		Steps: []resource.TestStep{
+			{
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				Config: `
+					provider "rudderstack" { access_token = "tok" }
+					resource "rudderstack_retl_connection_customerio" "example" {
+						source_id      = "retl-src-1"
+						destination_id = "dest-cio"
+						object         = "event"
+						cursor_column  = "updated_at"
+						schedule { type = "manual" }
+						identifiers {
+							from = "email"
+							to   = "email"
+						}
+					}
+				`,
+			},
+		},
+	})
+	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
+}
+
 // VDM v2 does not support field mappings — the resource must reject a
 // `mappings` block at plan time (unknown argument) rather than silently
 // accept it.
@@ -115,9 +394,9 @@ func TestResourceConnectionCustomerIO_RejectsMappings(t *testing.T) {
 	svc.AssertNotCalled(t, "CreateConnection", mock.Anything, mock.Anything)
 }
 
-// CustomerIO supports exactly one object — `person` (the listObjects value).
-// The resource must reject any other object value at plan time rather than
-// letting the server fail on apply.
+// Customer.io supports only the documented listObjects values (`person` and
+// `event`). The resource must reject any other object value at plan time rather
+// than letting the server fail on apply.
 func TestResourceConnectionCustomerIO_RejectsUnknownObject(t *testing.T) {
 	svc := &mockService{}
 	resource.UnitTest(t, resource.TestCase{

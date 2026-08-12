@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -126,11 +127,15 @@ func baseConnectionSchema() map[string]*schema.Schema {
 			},
 		},
 		"sync_behaviour": {
-			Type:         schema.TypeString,
-			Required:     true,
-			ForceNew:     true,
-			ValidateFunc: validation.StringInSlice([]string{"upsert", "mirror", "full"}, false),
-			Description:  "How records are synced to the destination: `upsert`, `mirror`, or `full`.",
+			Type:     schema.TypeString,
+			Required: true,
+			ForceNew: true,
+			ValidateFunc: validation.StringInSlice([]string{
+				string(retl.SyncBehaviourUpsert),
+				string(retl.SyncBehaviourMirror),
+				string(retl.SyncBehaviourFull),
+			}, false),
+			Description: "How records are synced to the destination: `upsert`, `mirror`, or `full`.",
 		},
 		"identifiers": {
 			Type:     schema.TypeList,
@@ -175,10 +180,26 @@ func validateCursorColumnUpsertOnly(d resourceGetter) error {
 	if cursor == "" {
 		return nil
 	}
-	if sb, _ := d.Get("sync_behaviour").(string); sb != "" && sb != "upsert" {
-		return fmt.Errorf("cursor_column is only valid when sync_behaviour is %q, got %q", "upsert", sb)
+	upsert := string(retl.SyncBehaviourUpsert)
+	if sb, _ := d.Get("sync_behaviour").(string); sb != "" && sb != upsert {
+		return fmt.Errorf("cursor_column is only valid when sync_behaviour is %q, got %q", upsert, sb)
 	}
 	return nil
+}
+
+// rawConfigAttributeSet reports whether a top-level attribute is present in the
+// raw HCL config, as opposed to merely carrying a value in state or a
+// Computed default. Optional+Computed attributes are indistinguishable through
+// d.Get — a backend-stamped value looks exactly like a user-written one — so
+// any "must be omitted from config" / "must be set in config" rule has to be
+// decided off d.GetRawConfig(). Lives here rather than in a single resource
+// file because the distinction is a framework concern, not a
+// destination-specific one.
+func rawConfigAttributeSet(raw cty.Value, name string) bool {
+	if !raw.IsKnown() || raw.IsNull() || !raw.Type().IsObjectType() || !raw.Type().HasAttribute(name) {
+		return false
+	}
+	return !raw.GetAttr(name).IsNull()
 }
 
 // mergeSchemas combines a base map with overrides. Overrides win on key
@@ -216,10 +237,14 @@ func applyBaseToCreateRequest(d *schema.ResourceData, req *retl.CreateRETLConnec
 	req.Enabled = &enabled
 	req.Schedule = schedule
 	// rudder-iac >= v0.19.0 made CreateRETLConnectionRequest.SyncBehaviour a
-	// pointer. Take the address unconditionally to preserve the prior wire
-	// behaviour (the value, including "", is still sent).
-	sb := retl.SyncBehaviour(d.Get("sync_behaviour").(string))
-	req.SyncBehaviour = &sb
+	// pointer, so leaving it nil omits `syncBehaviour` from the wire payload.
+	// Resources that make sync_behaviour optional (Customer.io event objects)
+	// rely on that omission; every other resource keeps it Required, so the
+	// value is always sent.
+	if sb, _ := d.Get("sync_behaviour").(string); sb != "" {
+		syncBehaviour := retl.SyncBehaviour(sb)
+		req.SyncBehaviour = &syncBehaviour
+	}
 	req.Identifiers = mappingsFromState(d, "identifiers")
 
 	if ss, ok := syncSettingsFromState(d); ok {
