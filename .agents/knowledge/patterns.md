@@ -60,3 +60,9 @@
 
 - `GetCommonConfigMeta` contributes only `consent_management` mappings for declared source types; warehouse controls and other destination-level fields must be mapped in the destination integration itself.
 - Snowflake `supportedSourceTypes` directly gates which nested `consent_management` source-type blocks are exposed in Terraform; omitted source types (for example Android Kotlin / iOS Swift) silently drop corresponding nested keys.
+
+## INT-6957 — Snowflake empty namespace omission
+
+- Snowflake `namespace` is optional and mapped with `c.Simple("namespace", "namespace", c.SkipZeroValue)`, so Terraform intentionally omits unset or empty-string namespaces from API create/update payloads.
+- `configs.SkipZeroValue` treating empty strings as zero values means Terraform-created Snowflake destinations can persist with `namespace` absent rather than `namespace: ""`; backend or webapp immutable-field comparisons must account for that absent-vs-empty distinction instead of requiring a provider payload change.
+- Existing Snowflake destination create/update payload tests encode this behavior by omitting `namespace` when it is unset.
