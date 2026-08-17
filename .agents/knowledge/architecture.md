@@ -68,3 +68,8 @@
 
 - The provider maintains separate destination integrations for standard Snowflake and Snowflake Streaming, each with its own implementation/tests/docs surfaces.
 - When task input points to `src/configurations/destinations/snowflake` (non-streaming), changes should be scoped to the standard Snowflake destination unless explicitly requested otherwise.
+
+## DEX-512 — LinkedIn Ads destination source of truth
+
+- The Terraform provider already contains `rudderstack_destination_linkedin_ads` with registry key `linkedin_ads`, API type `LINKEDIN_ADS`, version 1, tests, examples, template, and generated docs; treat these provider surfaces as the source-of-truth reference for downstream CLI onboarding rather than duplicating provider changes.
+- For LinkedIn Ads CLI onboarding, the canonical CLI destination type should be `linkedin_ads`, while the upstream `rudder-integrations-config` destination directory is expected to be `linkedIn_ads`, so automation should not assume a direct lowercase directory-name match.
