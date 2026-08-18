@@ -3,6 +3,9 @@ package destinations_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -14,6 +17,8 @@ var customerioTestConfigs = []c.TestConfig{
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
 				datacenter = "US"
+				api_version = "v2"
+				user_id_mapping = "id"
 
 				use_native_sdk {
 					web     = true
@@ -46,6 +51,8 @@ var customerioTestConfigs = []c.TestConfig{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "US",
+				"apiVersion": "v2",
+				"userIdMapping": "id",
 				"useNativeSDK": {
 					"web": true,
 					"android": true,
@@ -72,6 +79,8 @@ var customerioTestConfigs = []c.TestConfig{
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
 				datacenter = "EU"
+				api_version = "v2"
+				user_id_mapping = "id"
 				device_token_event_name = "name"
 
 				event_filtering {
@@ -151,6 +160,8 @@ var customerioTestConfigs = []c.TestConfig{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "EU",
+				"apiVersion": "v2",
+				"userIdMapping": "id",
 				"deviceTokenEventName": "name",
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [{
@@ -385,6 +396,20 @@ var customerioTestConfigs = []c.TestConfig{
 
 func TestDestinationResourceCustomerIO(t *testing.T) {
 	cmt.AssertDestination(t, "customerio", customerioTestConfigs)
+}
+
+func TestCustomerIODefaultAPIVersionStateToAPI(t *testing.T) {
+	cm := c.Destinations.Entries()["customerio"]
+
+	api, err := cm.StateToAPI(`{
+		"api_version": "v1",
+		"user_id_mapping": ""
+	}`)
+	require.NoError(t, err)
+
+	assert.JSONEq(t, `{
+		"apiVersion": "v1"
+	}`, api)
 }
 
 func TestAccDestinationCustomerIO(t *testing.T) {

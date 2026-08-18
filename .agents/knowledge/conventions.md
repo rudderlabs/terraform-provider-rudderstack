@@ -47,3 +47,8 @@
 
 - For Snowflake destination parity changes, prefer additive schema/mapping updates so existing configurations keep working.
 - Handle OneTrust/Ketch consent solely through the unified `consent_management` block (via `GetCommonConfigMeta`). Do **not** add standalone `one_trust_cookie_categories` / `ketch_consent_purposes` blocks for Snowflake even when those keys appear in the upstream destination schema — the unified block already covers those providers, and standalone blocks would diverge from how every other destination handles consent.
+
+## INT-7014 — Customer.io v2 mapping ownership
+
+- Keep Customer.io `user_id_mapping` optional in the Terraform provider even when `api_version = "v2"`; the conditional requirement belongs to the `rudder-integrations-config` schema, while transformer retains an unset-value fallback for safety.
+- Avoid adding destination-specific Terraform `CustomizeDiff` validation for the Customer.io v2/userIdMapping dependency unless provider-level enforcement is explicitly requested.
