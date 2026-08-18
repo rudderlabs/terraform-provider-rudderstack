@@ -51,8 +51,8 @@ func init() {
 		"authorization_type": {
 			Type:             schema.TypeString,
 			Required:         true,
-			Description:      "Authorization type: API Key (legacy) or Private Apps.",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(legacyApiKey|newPrivateAppApi)$"),
+			Description:      "Authorization type. Only Private Apps (`newPrivateAppApi`) is supported.",
+			ValidateDiagFunc: c.StringMatchesRegexp("^(newPrivateAppApi)$"),
 		},
 		"api_version": {
 			Type:             schema.TypeString,
@@ -64,7 +64,8 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Sensitive:        true,
-			Description:      "Your API Key (Settings -> Integrations -> API Key). Required when Authorization Type is API Key.",
+			Deprecated:       "HubSpot API-key authorization is no longer supported. Use authorization_type = \"newPrivateAppApi\" with access_token instead.",
+			Description:      "Deprecated compatibility field for legacy HubSpot API-key configurations. HubSpot API-key authorization is no longer supported; use `access_token` with Private Apps instead.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
 		"access_token": {

@@ -1,10 +1,19 @@
 package destinations_test
 
 import (
+	"context"
+	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
+	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -12,9 +21,9 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 	{
 		// Create: single event, no event_properties
 		TerraformCreate: `
-				authorization_type = "legacyApiKey"
+				authorization_type = "newPrivateAppApi"
 				api_version        = "newApi"
-				api_key            = "my-api-key"
+				access_token       = "my-access-token"
 				lookup_field       = "email"
 
 				hubspot_events = [
@@ -26,9 +35,9 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 				]
 			`,
 		APICreate: `{
-				"authorizationType": "legacyApiKey",
+				"authorizationType": "newPrivateAppApi",
 				"apiVersion": "newApi",
-				"apiKey": "my-api-key",
+				"accessToken": "my-access-token",
 				"lookupField": "email",
 				"hubspotEvents": [
 					{
@@ -40,9 +49,9 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 			}`,
 		// Update: multiple events, some with event_properties and some without
 		TerraformUpdate: `
-				authorization_type = "legacyApiKey"
+				authorization_type = "newPrivateAppApi"
 				api_version        = "newApi"
-				api_key            = "my-api-key"
+				access_token       = "my-access-token"
 				lookup_field       = "email"
 
 				hubspot_events = [
@@ -68,9 +77,9 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 				]
 			`,
 		APIUpdate: `{
-				"authorizationType": "legacyApiKey",
+				"authorizationType": "newPrivateAppApi",
 				"apiVersion": "newApi",
-				"apiKey": "my-api-key",
+				"accessToken": "my-access-token",
 				"lookupField": "email",
 				"hubspotEvents": [
 					{
@@ -94,15 +103,15 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 var hsTestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
-				authorization_type = "legacyApiKey"
+				authorization_type = "newPrivateAppApi"
 				api_version        = "newApi"
-				api_key            = "my-api-key"
+				access_token       = "my-access-token"
 				lookup_field       = "email"
 			`,
 		APICreate: `{
-				"authorizationType": "legacyApiKey",
+				"authorizationType": "newPrivateAppApi",
 				"apiVersion": "newApi",
-				"apiKey": "my-api-key",
+				"accessToken": "my-access-token",
 				"lookupField": "email"
 			}`,
 		TerraformUpdate: `
@@ -429,6 +438,66 @@ func TestDestinationResourceHsHubspotEvents(t *testing.T) {
 
 func TestDestinationResourceHs(t *testing.T) {
 	cmt.AssertDestination(t, "hs", hsTestConfigs)
+}
+
+func TestDestinationResourceHsRejectsLegacyAuthorizationType(t *testing.T) {
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"rudderstack": func() (*schema.Provider, error) {
+				return rudderstack.NewWithConfigureClientFunc(func(_ context.Context, _ *schema.ResourceData) (*rudderstack.Client, diag.Diagnostics) {
+					return &rudderstack.Client{}, diag.Diagnostics{}
+				}), nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				PlanOnly: true,
+				Config: `
+					provider "rudderstack" {
+						access_token = "some-access-token"
+					}
+
+					resource "rudderstack_destination_hs" "example" {
+						name = "example"
+
+						config {
+							authorization_type = "legacyApiKey"
+							api_version        = "newApi"
+							api_key            = "my-api-key"
+							lookup_field       = "email"
+						}
+					}
+				`,
+				ExpectError: regexp.MustCompile(`authorization_type.*newPrivateAppApi`),
+			},
+		},
+	})
+}
+
+func TestDestinationResourceHsLegacyAPIKeyStateCompatibility(t *testing.T) {
+	cm := c.Destinations.Entries()["hs"]
+
+	state, err := cm.APIToState(`{
+		"authorizationType": "legacyApiKey",
+		"apiVersion": "newApi",
+		"apiKey": "my-api-key",
+		"lookupField": "email"
+	}`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"authorization_type": "legacyApiKey",
+		"api_version": "newApi",
+		"api_key": "my-api-key",
+		"lookup_field": "email"
+	}`, state)
+
+	api, err := cm.StateToAPI(`{
+		"api_key": "my-api-key"
+	}`)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"apiKey": "my-api-key"
+	}`, api)
 }
 
 func TestAccDestinationHsHubspotEvents(t *testing.T) {
