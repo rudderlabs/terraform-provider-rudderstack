@@ -63,3 +63,7 @@
 
 - Full destination resource tests and docs generation can be environment-blocked when Terraform CLI auto-install fails with HTTP 403 before test/doc logic executes.
 - In this failure mode, compile-only checks (for example `go test ./rudderstack/integrations/destinations -run '^$' -count=1`) can still validate build integrity, but they do not replace behavior/doc validation.
+
+## INT-7014 — Customer.io docs regeneration scope
+
+- Running `make docs` for a focused Customer.io update can also regenerate unrelated destination docs with sensitivity-marker changes (observed for ActiveCampaign `event_key`, Intercom `api_key`, Redis `ca_certificate`, and Redshift/S3/S3 Datalake `access_key_id`); keep only the intended Customer.io doc diff unless the broader sensitivity changes are in scope.

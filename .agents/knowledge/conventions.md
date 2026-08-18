@@ -53,3 +53,8 @@
 - HubSpot no longer supports new `legacyApiKey` authorization, so Terraform should rely on `access_token` for supported configuration and should not expose `authorization_type` as a normal configurable field; keep only compatibility handling needed for legacy API/state payloads.
 - If legacy authorization is still encountered in Terraform/API compatibility paths, reject `authorization_type = "legacyApiKey"` while leaving the `api_key` field Optional+Sensitive and mapped with `c.Simple("apiKey", "api_key", c.SkipZeroValue)`.
 - Keeping the `api_key` state/API mapping preserves decode/import behavior for legacy remote HubSpot destinations that still contain `apiKey`, avoiding noisy diffs or state breakage during migration.
+
+## INT-7014 — Customer.io v2 mapping ownership
+
+- Keep Customer.io `user_id_mapping` optional in the Terraform provider even when `api_version = "v2"`; the conditional requirement belongs to the `rudder-integrations-config` schema, while transformer retains an unset-value fallback for safety.
+- Avoid adding destination-specific Terraform `CustomizeDiff` validation for the Customer.io v2/userIdMapping dependency unless provider-level enforcement is explicitly requested.

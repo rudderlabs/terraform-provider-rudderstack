@@ -13,6 +13,8 @@ func init() {
 	properties := []c.ConfigProperty{
 		c.Simple("siteID", "site_id"),
 		c.Simple("apiKey", "api_key"),
+		c.Simple("apiVersion", "api_version"),
+		c.Simple("userIdMapping", "user_id_mapping", c.SkipZeroValue),
 		c.Simple("deviceTokenEventName", "device_token_event_name", c.SkipZeroValue),
 		c.Simple("datacenter", "datacenter"),
 		c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
@@ -47,6 +49,19 @@ func init() {
 			Sensitive:        true,
 			Description:      "Enter your Customer.io API key.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
+		},
+		"api_version": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Default:          "v1",
+			Description:      "Customer.io event-stream API version. `v1` uses the existing per-endpoint behavior; `v2` uses the unified /v2/batch event-stream API.",
+			ValidateDiagFunc: c.StringMatchesRegexp("^(v1|v2)$"),
+		},
+		"user_id_mapping": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Description:      "Customer.io identifier that receives the RudderStack `userId` when `api_version` is `v2`.",
+			ValidateDiagFunc: c.StringMatchesRegexp("^(id|email|phone|cio_id)$"),
 		},
 		"device_token_event_name": {
 			Type:             schema.TypeString,
