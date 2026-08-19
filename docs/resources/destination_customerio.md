@@ -23,8 +23,8 @@ resource "rudderstack_destination_customerio" "example" {
 
     # datacenter = "US"
 
-    # api_version = "v1" # Set to "v2" to use Customer.io's unified event-stream API.
-    # user_id_mapping = "id" # Required when api_version is "v2". Valid values: id, email, phone, cio_id.
+    # api_version = "v1" # Cloud-mode delivery only. Set to "v2" to use Customer.io's unified API.
+    # user_id_mapping = "id" # Cloud-mode delivery only. Required when api_version is "v2". Valid values: id, email, phone, cio_id.
 
     # use_native_sdk {
     #   web     = true
@@ -122,7 +122,7 @@ Required:
 
 Optional:
 
-- `api_version` (String) Customer.io event-stream API version. `v1` uses the existing per-endpoint behavior; `v2` uses the unified /v2/batch event-stream API.
+- `api_version` (String) Customer.io API version for cloud-mode delivery. `v1` uses the existing per-endpoint behavior; `v2` uses the unified /v2/batch API. This setting does not affect device-mode SDK delivery.
 - `auto_track_device_attributes` (Block List, Max: 1) Enable this setting to automatically track device attributes in SDK mode. (see [below for nested schema](#nestedblock--config--auto_track_device_attributes))
 - `background_queue_min_number_of_tasks` (Block List, Max: 1) Configure the minimum number of tasks in the background queue. (see [below for nested schema](#nestedblock--config--background_queue_min_number_of_tasks))
 - `background_queue_seconds_delay` (Block List, Max: 1) Configure the delay in seconds for the background queue. (see [below for nested schema](#nestedblock--config--background_queue_seconds_delay))
@@ -133,7 +133,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `send_page_name_in_sdk` (Block List, Max: 1) Configure whether to send the page name in SDK mode. (see [below for nested schema](#nestedblock--config--send_page_name_in_sdk))
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
-- `user_id_mapping` (String) Customer.io identifier that receives the RudderStack `userId` when `api_version` is `v2`.
+- `user_id_mapping` (String) Customer.io identifier that receives the RudderStack `userId` for cloud-mode delivery when `api_version` is `v2`. This setting does not affect device-mode SDK delivery.
 
 <a id="nestedblock--config--auto_track_device_attributes"></a>
 ### Nested Schema for `config.auto_track_device_attributes`

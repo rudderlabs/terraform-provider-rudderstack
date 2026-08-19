@@ -56,13 +56,13 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Default:          "v1",
-			Description:      "Customer.io event-stream API version. `v1` uses the existing per-endpoint behavior; `v2` uses the unified /v2/batch event-stream API.",
+			Description:      "Customer.io API version for cloud-mode delivery. `v1` uses the existing per-endpoint behavior; `v2` uses the unified /v2/batch API. This setting does not affect device-mode SDK delivery.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(v1|v2)$"),
 		},
 		"user_id_mapping": {
 			Type:             schema.TypeString,
 			Optional:         true,
-			Description:      "Customer.io identifier that receives the RudderStack `userId` when `api_version` is `v2`.",
+			Description:      "Customer.io identifier that receives the RudderStack `userId` for cloud-mode delivery when `api_version` is `v2`. This setting does not affect device-mode SDK delivery.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(id|email|phone|cio_id)$"),
 		},
 		"device_token_event_name": {
