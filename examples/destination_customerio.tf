@@ -9,8 +9,8 @@ resource "rudderstack_destination_customerio" "example" {
 
     # datacenter = "US"
 
-    # api_version = "v1" # Set to "v2" to use Customer.io's unified event-stream API.
-    # user_id_mapping = "id" # Required when api_version is "v2". Valid values: id, email, phone, cio_id.
+    # api_version = "v1" # Cloud-mode delivery only. Set to "v2" to use Customer.io's unified API.
+    # user_id_mapping = "id" # Cloud-mode delivery only. Required when api_version is "v2". Valid values: id, email, phone, cio_id.
 
     # use_native_sdk {
     #   web     = true
