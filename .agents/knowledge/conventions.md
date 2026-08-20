@@ -50,5 +50,6 @@
 
 ## INT-6707 — HubSpot legacy API key compatibility
 
-- HubSpot no longer supports new `legacyApiKey` authorization, so Terraform validation should reject `authorization_type = "legacyApiKey"` while leaving the `api_key` field Optional+Sensitive and mapped with `c.Simple("apiKey", "api_key", c.SkipZeroValue)`.
+- HubSpot no longer supports new `legacyApiKey` authorization, so Terraform should rely on `access_token` for supported configuration and should not expose `authorization_type` as a normal configurable field; keep only compatibility handling needed for legacy API/state payloads.
+- If legacy authorization is still encountered in Terraform/API compatibility paths, reject `authorization_type = "legacyApiKey"` while leaving the `api_key` field Optional+Sensitive and mapped with `c.Simple("apiKey", "api_key", c.SkipZeroValue)`.
 - Keeping the `api_key` state/API mapping preserves decode/import behavior for legacy remote HubSpot destinations that still contain `apiKey`, avoiding noisy diffs or state breakage during migration.
