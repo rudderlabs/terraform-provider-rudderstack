@@ -47,3 +47,8 @@
 
 - For Snowflake destination parity changes, prefer additive schema/mapping updates so existing configurations keep working.
 - Handle OneTrust/Ketch consent solely through the unified `consent_management` block (via `GetCommonConfigMeta`). Do **not** add standalone `one_trust_cookie_categories` / `ketch_consent_purposes` blocks for Snowflake even when those keys appear in the upstream destination schema — the unified block already covers those providers, and standalone blocks would diverge from how every other destination handles consent.
+
+## DEX-690 — Redshift Terraform mapping scope
+
+- Treat the Terraform Redshift destination as a known-mapping reference for CLI re-onboarding work, not as the full CLI/integrations-config surface. The provider mapping already covers `host`, `port`, `database`, `user`, `password`, `namespace`, `enableSSE`, `useRudderStorage`, `syncFrequency`, `syncStartAt`, `excludeWindow` start/end, `bucketName`, `accessKeyID`, `accessKey`, and `consentManagement` via `GetCommonConfigMeta`.
+- When Redshift parity work targets the CLI, avoid editing Terraform-provider files unless the provider mapping is stale or internally inconsistent; larger Redshift config-surface additions belong in the CLI/integrations-config onboarding path.
