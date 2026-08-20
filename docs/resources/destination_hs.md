@@ -17,7 +17,6 @@ resource "rudderstack_destination_hs" "example" {
   name = "my-hubspot"
 
   config {
-    authorization_type = "newPrivateAppApi"
     api_version        = "newApi"
     access_token       = "demo_access_token"
     hub_id             = "74X991"
@@ -71,13 +70,12 @@ resource "rudderstack_destination_hs" "example" {
 
 Required:
 
+- `access_token` (String, Sensitive) Your private app access token.
 - `api_version` (String) HubSpot API version to use.
-- `authorization_type` (String) Authorization type. Only Private Apps (`newPrivateAppApi`) is supported.
 
 Optional:
 
-- `access_token` (String, Sensitive) Your private app access token. Required when Authorization Type is Private Apps.
-- `api_key` (String, Sensitive, Deprecated) Deprecated compatibility field for legacy HubSpot API-key configurations. HubSpot API-key authorization is no longer supported; use `access_token` with Private Apps instead.
+- `api_key` (String, Sensitive, Deprecated) Deprecated compatibility field for legacy HubSpot API-key configurations. HubSpot API-key authorization is no longer supported; use `access_token` instead.
 - `connection_mode` (Block List, Max: 1) Configure the connection mode for HubSpot. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `do_association` (Boolean) Create associations between object records.

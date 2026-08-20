@@ -21,7 +21,6 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 	{
 		// Create: single event, no event_properties
 		TerraformCreate: `
-				authorization_type = "newPrivateAppApi"
 				api_version        = "newApi"
 				access_token       = "my-access-token"
 				lookup_field       = "email"
@@ -35,7 +34,6 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 				]
 			`,
 		APICreate: `{
-				"authorizationType": "newPrivateAppApi",
 				"apiVersion": "newApi",
 				"accessToken": "my-access-token",
 				"lookupField": "email",
@@ -49,7 +47,6 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 			}`,
 		// Update: multiple events, some with event_properties and some without
 		TerraformUpdate: `
-				authorization_type = "newPrivateAppApi"
 				api_version        = "newApi"
 				access_token       = "my-access-token"
 				lookup_field       = "email"
@@ -77,7 +74,6 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 				]
 			`,
 		APIUpdate: `{
-				"authorizationType": "newPrivateAppApi",
 				"apiVersion": "newApi",
 				"accessToken": "my-access-token",
 				"lookupField": "email",
@@ -103,19 +99,16 @@ var hsHubspotEventsTestConfigs = []c.TestConfig{
 var hsTestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
-				authorization_type = "newPrivateAppApi"
 				api_version        = "newApi"
 				access_token       = "my-access-token"
 				lookup_field       = "email"
 			`,
 		APICreate: `{
-				"authorizationType": "newPrivateAppApi",
 				"apiVersion": "newApi",
 				"accessToken": "my-access-token",
 				"lookupField": "email"
 			}`,
 		TerraformUpdate: `
-				authorization_type = "newPrivateAppApi"
 				api_version        = "newApi"
 				access_token       = "my-access-token"
 				hub_id             = "74X991"
@@ -237,7 +230,6 @@ var hsTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
-				"authorizationType": "newPrivateAppApi",
 				"apiVersion": "newApi",
 				"accessToken": "my-access-token",
 				"hubID": "74X991",
@@ -468,7 +460,7 @@ func TestDestinationResourceHsRejectsLegacyAuthorizationType(t *testing.T) {
 						}
 					}
 				`,
-				ExpectError: regexp.MustCompile(`authorization_type.*newPrivateAppApi`),
+				ExpectError: regexp.MustCompile(`Unsupported argument|authorization_type`),
 			},
 		},
 	})
@@ -485,7 +477,6 @@ func TestDestinationResourceHsLegacyAPIKeyStateCompatibility(t *testing.T) {
 	}`)
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
-		"authorization_type": "legacyApiKey",
 		"api_version": "newApi",
 		"api_key": "my-api-key",
 		"lookup_field": "email"

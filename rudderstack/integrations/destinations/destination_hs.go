@@ -11,7 +11,6 @@ func init() {
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{
-		c.Simple("authorizationType", "authorization_type"),
 		c.Simple("apiVersion", "api_version"),
 		c.Simple("apiKey", "api_key", c.SkipZeroValue),
 		c.Simple("accessToken", "access_token", c.SkipZeroValue),
@@ -48,12 +47,6 @@ func init() {
 	properties = append(properties, commonProperties...)
 
 	destinationSchema := map[string]*schema.Schema{
-		"authorization_type": {
-			Type:             schema.TypeString,
-			Required:         true,
-			Description:      "Authorization type. Only Private Apps (`newPrivateAppApi`) is supported.",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(newPrivateAppApi)$"),
-		},
 		"api_version": {
 			Type:             schema.TypeString,
 			Required:         true,
@@ -64,15 +57,15 @@ func init() {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Sensitive:        true,
-			Deprecated:       "HubSpot API-key authorization is no longer supported. Use authorization_type = \"newPrivateAppApi\" with access_token instead.",
-			Description:      "Deprecated compatibility field for legacy HubSpot API-key configurations. HubSpot API-key authorization is no longer supported; use `access_token` with Private Apps instead.",
+			Deprecated:       "HubSpot API-key authorization is no longer supported. Use access_token instead.",
+			Description:      "Deprecated compatibility field for legacy HubSpot API-key configurations. HubSpot API-key authorization is no longer supported; use `access_token` instead.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
 		"access_token": {
 			Type:             schema.TypeString,
-			Optional:         true,
+			Required:         true,
 			Sensitive:        true,
-			Description:      "Your private app access token. Required when Authorization Type is Private Apps.",
+			Description:      "Your private app access token.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
 		"hub_id": {
