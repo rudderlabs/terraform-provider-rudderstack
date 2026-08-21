@@ -442,7 +442,7 @@ func removeCustomerIOAPIVersionFieldsFromAPI(config string) string {
 	return config
 }
 
-func TestCustomerIOAPIVersionStateToAPI(t *testing.T) {
+func TestCustomerIODefaultAPIVersionStateToAPI(t *testing.T) {
 	cm := c.Destinations.Entries()["customerio"]
 
 	api, err := cm.StateToAPI(`{
@@ -451,17 +451,13 @@ func TestCustomerIOAPIVersionStateToAPI(t *testing.T) {
 	}`)
 	require.NoError(t, err)
 
-	assert.JSONEq(t, `{
-		"apiVersion": "v1"
-	}`, api)
+	assert.JSONEq(t, `{}`, api)
 }
 
-func TestCustomerIOAPIVersionAPIToState(t *testing.T) {
+func TestCustomerIODefaultAPIVersionAPIToState(t *testing.T) {
 	cm := c.Destinations.Entries()["customerio"]
 
-	state, err := cm.APIToState(`{
-		"apiVersion": "v1"
-	}`)
+	state, err := cm.APIToState(`{}`)
 	require.NoError(t, err)
 
 	assert.JSONEq(t, `{

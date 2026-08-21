@@ -2,6 +2,8 @@ package destinations
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -13,7 +15,7 @@ func init() {
 	properties := []c.ConfigProperty{
 		c.Simple("siteID", "site_id"),
 		c.Simple("apiKey", "api_key"),
-		c.Simple("apiVersion", "api_version"),
+		customerIOAPIVersionProperty(),
 		c.Simple("userIdMapping", "user_id_mapping", c.SkipZeroValue),
 		c.Simple("deviceTokenEventName", "device_token_event_name", c.SkipZeroValue),
 		c.Simple("datacenter", "datacenter"),
@@ -301,4 +303,25 @@ func init() {
 		Properties:   properties,
 		ConfigSchema: schema,
 	})
+}
+
+func customerIOAPIVersionProperty() c.ConfigProperty {
+	property := c.Simple("apiVersion", "api_version", skipDefaultCustomerIOAPIVersion)
+	toState := property.ToStateFunc
+	property.ToStateFunc = func(state, config string) (string, error) {
+		result, err := toState(state, config)
+		if err != nil {
+			return result, err
+		}
+		if gjson.Get(result, "api_version").Exists() {
+			return result, nil
+		}
+		return sjson.Set(result, "api_version", "v1")
+	}
+
+	return property
+}
+
+func skipDefaultCustomerIOAPIVersion(value interface{}) bool {
+	return value == "v1"
 }
