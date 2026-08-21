@@ -30,6 +30,21 @@ resource "rudderstack_destination_customerio" "cio" {
   }
 }
 
+# api_version deliberately omitted. The schema defaults it to "v1", so the
+# provider sends apiVersion="v1" and the backend stores and echoes it back,
+# closing the round-trip. The drift assertion run.sh performs after apply
+# (terraform plan -detailed-exitcode) must stay at exit 0; a regression that
+# stopped sending the default, or a backend that dropped it, would surface
+# here as a perpetual diff. Unit tests can only assert this against fixtures.
+resource "rudderstack_destination_customerio" "cio_default_api_version" {
+  name = "${local.base_name}-default-apiversion"
+  config {
+    site_id    = var.customerio_site_id
+    api_key    = var.customerio_api_key
+    datacenter = var.customerio_datacenter
+  }
+}
+
 # Customer.io is a VDM v2 / "destination-specific flow": the object must travel
 # inside the API's destinationConfig as {"object":"..."}, which only the typed
 # resource packs. Both supported objects are exercised against the same
@@ -106,4 +121,9 @@ output "connection_id" {
 output "event_connection_id" {
   description = "ID of the created BigQuery→Customer.io rETL connection (object = event)."
   value       = rudderstack_retl_connection_customerio.to_customerio_event.id
+}
+
+output "default_api_version_destination_id" {
+  description = "ID of the Customer.io destination created with api_version unset (defaults to v1)."
+  value       = rudderstack_destination_customerio.cio_default_api_version.id
 }
