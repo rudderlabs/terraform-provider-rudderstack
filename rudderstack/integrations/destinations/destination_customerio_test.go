@@ -1,7 +1,6 @@
 package destinations_test
 
 import (
-	"strings"
 	"testing"
 
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
@@ -407,38 +406,10 @@ var customerioTestConfigs = []c.TestConfig{
 	},
 }
 
-var customerioAcceptanceTestConfigs = customerioConfigsWithoutAPIVersionFields(customerioTestConfigs)
-
-func customerioConfigsWithoutAPIVersionFields(configs []c.TestConfig) []c.TestConfig {
-	out := make([]c.TestConfig, len(configs))
-	copy(out, configs)
-
-	for i := range out {
-		out[i].TerraformCreate = removeCustomerIOAPIVersionFieldsFromTerraform(out[i].TerraformCreate)
-		out[i].TerraformUpdate = removeCustomerIOAPIVersionFieldsFromTerraform(out[i].TerraformUpdate)
-		out[i].APICreate = removeCustomerIOAPIVersionFieldsFromAPI(out[i].APICreate)
-		out[i].APIUpdate = removeCustomerIOAPIVersionFieldsFromAPI(out[i].APIUpdate)
-	}
-
-	return out
-}
-
-func removeCustomerIOAPIVersionFieldsFromTerraform(config string) string {
-	config = strings.ReplaceAll(config, "\n\t\t\t\tapi_version = \"v2\"", "")
-	config = strings.ReplaceAll(config, "\n\t\t\t\tuser_id_mapping = \"id\"", "")
-	return config
-}
-
-func removeCustomerIOAPIVersionFieldsFromAPI(config string) string {
-	config = strings.ReplaceAll(config, "\n\t\t\t\t\"apiVersion\": \"v2\",", "")
-	config = strings.ReplaceAll(config, "\n\t\t\t\t\"userIdMapping\": \"id\",", "")
-	return config
-}
-
 func TestDestinationResourceCustomerIO(t *testing.T) {
 	cmt.AssertDestination(t, "customerio", customerioTestConfigs)
 }
 
 func TestAccDestinationCustomerIO(t *testing.T) {
-	acc.AccAssertDestination(t, "customerio", customerioAcceptanceTestConfigs)
+	acc.AccAssertDestination(t, "customerio", customerioTestConfigs)
 }
