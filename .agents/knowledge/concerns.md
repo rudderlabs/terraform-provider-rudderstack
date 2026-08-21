@@ -63,3 +63,8 @@
 
 - Full destination resource tests and docs generation can be environment-blocked when Terraform CLI auto-install fails with HTTP 403 before test/doc logic executes.
 - In this failure mode, compile-only checks (for example `go test ./rudderstack/integrations/destinations -run '^$' -count=1`) can still validate build integrity, but they do not replace behavior/doc validation.
+
+## CFD-72 — CLI onboarding depends on Terraform destination mappings
+
+- CLI support for `google_adwords_offline_conversions` and `bingads_offline_conversions` should not invent config shapes from scratch; the CLI onboarding flow depends on Terraform provider destination mappings from CFD-71 as the source of truth.
+- If `GOOGLE_ADWORDS_OFFLINE_CONVERSIONS` and `BINGADS_OFFLINE_CONVERSIONS` are still absent under `rudderstack/integrations/destinations`, treat this repository as read-only reference material and defer CLI onboarding until the Terraform mappings land.
