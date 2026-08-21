@@ -12,7 +12,6 @@ func init() {
 
 	properties := []c.ConfigProperty{
 		c.Simple("apiVersion", "api_version"),
-		c.Simple("apiKey", "api_key", c.SkipZeroValue),
 		c.Simple("accessToken", "access_token", c.SkipZeroValue),
 		c.Simple("hubID", "hub_id", c.SkipZeroValue),
 		c.Simple("lookupField", "lookup_field", c.SkipZeroValue),
@@ -52,14 +51,6 @@ func init() {
 			Required:         true,
 			Description:      "HubSpot API version to use.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(newApi|legacyApi)$"),
-		},
-		"api_key": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			Sensitive:        true,
-			Deprecated:       "HubSpot API-key authorization is no longer supported. Use access_token instead.",
-			Description:      "Deprecated compatibility field for legacy HubSpot API-key configurations. HubSpot API-key authorization is no longer supported; use `access_token` instead.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
 		"access_token": {
 			Type:             schema.TypeString,

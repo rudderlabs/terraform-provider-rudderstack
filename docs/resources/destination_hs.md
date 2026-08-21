@@ -75,7 +75,6 @@ Required:
 
 Optional:
 
-- `api_key` (String, Sensitive, Deprecated) Deprecated compatibility field for legacy HubSpot API-key configurations. HubSpot API-key authorization is no longer supported; use `access_token` instead.
 - `connection_mode` (Block List, Max: 1) Configure the connection mode for HubSpot. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `do_association` (Boolean) Create associations between object records.
@@ -291,6 +290,10 @@ Optional:
 - `web` (Boolean)
 
 ## Notes
+
+> **:warning: Breaking Change**
+>
+> HubSpot API-key authentication is no longer supported. Use `access_token` to configure HubSpot Private Apps authentication.
 
 ### `config.hubspot_events` nested fields
 

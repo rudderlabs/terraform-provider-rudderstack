@@ -8,8 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
@@ -462,33 +460,28 @@ func TestDestinationResourceHsRejectsLegacyAuthorizationType(t *testing.T) {
 				`,
 				ExpectError: regexp.MustCompile(`Unsupported argument|authorization_type`),
 			},
+			{
+				PlanOnly: true,
+				Config: `
+					provider "rudderstack" {
+						access_token = "some-access-token"
+					}
+
+					resource "rudderstack_destination_hs" "example" {
+						name = "example"
+
+						config {
+							api_version  = "newApi"
+							access_token = "my-access-token"
+							api_key      = "my-api-key"
+							lookup_field = "email"
+						}
+					}
+				`,
+				ExpectError: regexp.MustCompile(`Unsupported argument|api_key`),
+			},
 		},
 	})
-}
-
-func TestDestinationResourceHsLegacyAPIKeyStateCompatibility(t *testing.T) {
-	cm := c.Destinations.Entries()["hs"]
-
-	state, err := cm.APIToState(`{
-		"authorizationType": "legacyApiKey",
-		"apiVersion": "newApi",
-		"apiKey": "my-api-key",
-		"lookupField": "email"
-	}`)
-	require.NoError(t, err)
-	assert.JSONEq(t, `{
-		"api_version": "newApi",
-		"api_key": "my-api-key",
-		"lookup_field": "email"
-	}`, state)
-
-	api, err := cm.StateToAPI(`{
-		"api_key": "my-api-key"
-	}`)
-	require.NoError(t, err)
-	assert.JSONEq(t, `{
-		"apiKey": "my-api-key"
-	}`, api)
 }
 
 func TestAccDestinationHsHubspotEvents(t *testing.T) {
