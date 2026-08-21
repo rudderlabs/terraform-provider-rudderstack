@@ -4,6 +4,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -437,6 +440,29 @@ func removeCustomerIOAPIVersionFieldsFromAPI(config string) string {
 
 func TestDestinationResourceCustomerIO(t *testing.T) {
 	cmt.AssertDestination(t, "customerio", customerioTestConfigs)
+}
+
+func TestCustomerIODefaultAPIVersionStateToAPI(t *testing.T) {
+	cm := c.Destinations.Entries()["customerio"]
+
+	api, err := cm.StateToAPI(`{
+		"api_version": "v1",
+		"user_id_mapping": ""
+	}`)
+	require.NoError(t, err)
+
+	assert.JSONEq(t, `{}`, api)
+}
+
+func TestCustomerIODefaultAPIVersionAPIToState(t *testing.T) {
+	cm := c.Destinations.Entries()["customerio"]
+
+	state, err := cm.APIToState(`{}`)
+	require.NoError(t, err)
+
+	assert.JSONEq(t, `{
+		"api_version": "v1"
+	}`, state)
 }
 
 func TestAccDestinationCustomerIO(t *testing.T) {
