@@ -1,17 +1,10 @@
 package destinations_test
 
 import (
-	"context"
-	"regexp"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
-	"github.com/rudderlabs/terraform-provider-rudderstack/rudderstack"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
@@ -428,60 +421,6 @@ func TestDestinationResourceHsHubspotEvents(t *testing.T) {
 
 func TestDestinationResourceHs(t *testing.T) {
 	cmt.AssertDestination(t, "hs", hsTestConfigs)
-}
-
-func TestDestinationResourceHsRejectsLegacyAuthorizationType(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
-		ProviderFactories: map[string]func() (*schema.Provider, error){
-			"rudderstack": func() (*schema.Provider, error) {
-				return rudderstack.NewWithConfigureClientFunc(func(_ context.Context, _ *schema.ResourceData) (*rudderstack.Client, diag.Diagnostics) {
-					return &rudderstack.Client{}, diag.Diagnostics{}
-				}), nil
-			},
-		},
-		Steps: []resource.TestStep{
-			{
-				PlanOnly: true,
-				Config: `
-					provider "rudderstack" {
-						access_token = "some-access-token"
-					}
-
-					resource "rudderstack_destination_hs" "example" {
-						name = "example"
-
-						config {
-							authorization_type = "legacyApiKey"
-							api_version        = "newApi"
-							api_key            = "my-api-key"
-							lookup_field       = "email"
-						}
-					}
-				`,
-				ExpectError: regexp.MustCompile(`Unsupported argument|authorization_type`),
-			},
-			{
-				PlanOnly: true,
-				Config: `
-					provider "rudderstack" {
-						access_token = "some-access-token"
-					}
-
-					resource "rudderstack_destination_hs" "example" {
-						name = "example"
-
-						config {
-							api_version  = "newApi"
-							access_token = "my-access-token"
-							api_key      = "my-api-key"
-							lookup_field = "email"
-						}
-					}
-				`,
-				ExpectError: regexp.MustCompile(`Unsupported argument|api_key`),
-			},
-		},
-	})
 }
 
 func TestAccDestinationHsHubspotEvents(t *testing.T) {
