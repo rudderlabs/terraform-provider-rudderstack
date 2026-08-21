@@ -37,3 +37,7 @@
 - `.claude/skills/onboard-integration/SKILL.md` is the repo-local automation
   hook for integration onboarding; it complements the generated-code workflow
   described in `README.md` without changing the provider runtime stack.
+
+## INT-7014 — Deterministic lint CI path
+
+- Prefer the repository `make lint` target for lint CI because it pins `golangci-lint` v2.9.0; the `golangci/golangci-lint-action` wrapper can fail before linting while running `golangci-lint config verify` if fetching the remote schema from `golangci-lint.run` times out.
