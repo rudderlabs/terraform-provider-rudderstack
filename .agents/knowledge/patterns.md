@@ -60,3 +60,8 @@
 
 - `GetCommonConfigMeta` contributes only `consent_management` mappings for declared source types; warehouse controls and other destination-level fields must be mapped in the destination integration itself.
 - Snowflake `supportedSourceTypes` directly gates which nested `consent_management` source-type blocks are exposed in Terraform; omitted source types (for example Android Kotlin / iOS Swift) silently drop corresponding nested keys.
+
+## DEX-500 — Firebase destination mappings
+
+- `rudderstack/integrations/destinations/destination_firebase.go` maps Firebase event filtering through `whitelistedEvents`, `blacklistedEvents`, and `eventFilteringOption`.
+- Firebase connection mode is modeled as per-source `connectionMode` mappings for its supported mobile/native source types.

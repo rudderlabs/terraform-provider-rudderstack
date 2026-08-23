@@ -68,3 +68,8 @@
 
 - The provider maintains separate destination integrations for standard Snowflake and Snowflake Streaming, each with its own implementation/tests/docs surfaces.
 - When task input points to `src/configurations/destinations/snowflake` (non-streaming), changes should be scoped to the standard Snowflake destination unless explicitly requested otherwise.
+
+## DEX-500 — Firebase destination reference
+
+- Firebase is already represented in this Terraform provider by `rudderstack/integrations/destinations/destination_firebase.go` with registry key `firebase` and API type `FIREBASE`.
+- The Firebase destination supports source types `android`, `androidKotlin`, `ios`, `iosSwift`, `unity`, `reactnative`, and `flutter`, and includes common `consent_management` via `GetCommonConfigMeta`.
