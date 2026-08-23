@@ -47,3 +47,8 @@
 
 - For Snowflake destination parity changes, prefer additive schema/mapping updates so existing configurations keep working.
 - Handle OneTrust/Ketch consent solely through the unified `consent_management` block (via `GetCommonConfigMeta`). Do **not** add standalone `one_trust_cookie_categories` / `ketch_consent_purposes` blocks for Snowflake even when those keys appear in the upstream destination schema — the unified block already covers those providers, and standalone blocks would diverge from how every other destination handles consent.
+
+## DEX-529 — VWO CLI destination contract
+
+- Treat the Terraform provider VWO destination as the authoritative mapping contract when onboarding VWO in the CLI/rudder-iac repository; do not modify `rudder-integrations-config` for this task shape.
+- For VWO, expose only the Terraform-mapped destination fields plus the shared `consent_management` block. Do **not** add legacy standalone `one_trust_cookie_categories` or `ketch_consent_purposes` fields even if those appear in upstream schemas.
