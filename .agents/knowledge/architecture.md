@@ -68,3 +68,8 @@
 
 - The provider maintains separate destination integrations for standard Snowflake and Snowflake Streaming, each with its own implementation/tests/docs surfaces.
 - When task input points to `src/configurations/destinations/snowflake` (non-streaming), changes should be scoped to the standard Snowflake destination unless explicitly requested otherwise.
+
+## INT-7023 — ClickHouse jsonPaths ownership boundary
+
+- This provider exposes destination CRUD schema only for integrations registered through `configs.Destinations`; it does not own dashboard component registration or Flagsmith rollout resources.
+- Do not add `rudderstack_destination_clickhouse` or ClickHouse destination schema here solely to support the ClickHouse `jsonPaths` dashboard component. In this checkout, existing warehouse `jsonPaths` support is only Terraform destination config mapping for already-registered destinations, while ClickHouse/component/flag rollout ownership is outside this repo unless a separate task establishes provider-side CRUD support.
