@@ -11,9 +11,7 @@ func init() {
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{
-		c.Simple("authorizationType", "authorization_type"),
 		c.Simple("apiVersion", "api_version"),
-		c.Simple("apiKey", "api_key", c.SkipZeroValue),
 		c.Simple("accessToken", "access_token", c.SkipZeroValue),
 		c.Simple("hubID", "hub_id", c.SkipZeroValue),
 		c.Simple("lookupField", "lookup_field", c.SkipZeroValue),
@@ -48,30 +46,17 @@ func init() {
 	properties = append(properties, commonProperties...)
 
 	destinationSchema := map[string]*schema.Schema{
-		"authorization_type": {
-			Type:             schema.TypeString,
-			Required:         true,
-			Description:      "Authorization type: API Key (legacy) or Private Apps.",
-			ValidateDiagFunc: c.StringMatchesRegexp("^(legacyApiKey|newPrivateAppApi)$"),
-		},
 		"api_version": {
 			Type:             schema.TypeString,
 			Required:         true,
 			Description:      "HubSpot API version to use.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(newApi|legacyApi)$"),
 		},
-		"api_key": {
-			Type:             schema.TypeString,
-			Optional:         true,
-			Sensitive:        true,
-			Description:      "Your API Key (Settings -> Integrations -> API Key). Required when Authorization Type is API Key.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
-		},
 		"access_token": {
 			Type:             schema.TypeString,
-			Optional:         true,
+			Required:         true,
 			Sensitive:        true,
-			Description:      "Your private app access token. Required when Authorization Type is Private Apps.",
+			Description:      "Your private app access token.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
 		"hub_id": {
