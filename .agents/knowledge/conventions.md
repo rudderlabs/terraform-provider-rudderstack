@@ -53,3 +53,8 @@
 - HubSpot no longer supports new `legacyApiKey` authorization, so Terraform should rely on `access_token` for supported configuration and should not expose `authorization_type` as a normal configurable field; keep only compatibility handling needed for legacy API/state payloads.
 - If legacy authorization is still encountered in Terraform/API compatibility paths, reject `authorization_type = "legacyApiKey"` while leaving the `api_key` field Optional+Sensitive and mapped with `c.Simple("apiKey", "api_key", c.SkipZeroValue)`.
 - Keeping the `api_key` state/API mapping preserves decode/import behavior for legacy remote HubSpot destinations that still contain `apiKey`, avoiding noisy diffs or state breakage during migration.
+
+## DEX-702 — HubSpot CLI re-onboarding scope
+
+- When a task asks to re-onboard HubSpot destination `hs` in the CLI while also forbidding Terraform changes, treat Terraform HubSpot files (`rudderstack/integrations/destinations/destination_hs.go` and `_test.go`) as compatibility reference only and make no provider edits.
+- HubSpot `hs` CLI re-onboarding with schema JSON changes belongs in the `rudder-iac` repository using the updated `rudder-integrations-config` schema/db/ui config, not in `terraform-provider-rudderstack`.
