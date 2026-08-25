@@ -88,7 +88,7 @@ func init() {
 					"to": {
 						Type:             schema.TypeString,
 						Required:         true,
-						ValidateDiagFunc: c.StringMatchesRegexp("^(click|call|store|)$"),
+						ValidateDiagFunc: c.StringMatchesRegexp("^(click|call|store)$"),
 					},
 				},
 			},

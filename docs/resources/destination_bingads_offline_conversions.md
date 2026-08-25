@@ -70,7 +70,7 @@ Optional:
 
 - `connection_mode` (Block List, Max: 1) Configure the connection mode for Bing Ads Offline Conversions. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
-- `is_hash_required` (Boolean) Enable this setting if you are not sending hashed data.
+- `is_hash_required` (Boolean) Enable this setting to have RudderStack hash unhashed identifiers before sending them to Bing Ads.
 
 <a id="nestedblock--config--connection_mode"></a>
 ### Nested Schema for `config.connection_mode`

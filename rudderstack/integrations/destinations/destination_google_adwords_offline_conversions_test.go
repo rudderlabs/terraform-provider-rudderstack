@@ -3,6 +3,9 @@ package destinations_test
 import (
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -370,6 +373,16 @@ var googleAdwordsOfflineConversionsTestConfigs = []c.TestConfig{
 
 func TestDestinationResourceGoogleAdwordsOfflineConversions(t *testing.T) {
 	cmt.AssertDestination(t, "google_adwords_offline_conversions", googleAdwordsOfflineConversionsTestConfigs)
+}
+
+func TestDestinationResourceGoogleAdwordsOfflineConversionsRejectsEmptyConversionType(t *testing.T) {
+	configSchema := c.Destinations.Entries()["google_adwords_offline_conversions"].ConfigSchema
+	mappingSchema := configSchema["events_to_offline_conversions_type_mapping"].Elem.(*schema.Resource)
+	toSchema := mappingSchema.Schema["to"]
+
+	if diags := toSchema.ValidateDiagFunc("", cty.Path{}); !diags.HasError() {
+		t.Fatal("expected empty offline conversion type to fail validation")
+	}
 }
 
 func TestAccDestinationGoogleAdwordsOfflineConversions(t *testing.T) {

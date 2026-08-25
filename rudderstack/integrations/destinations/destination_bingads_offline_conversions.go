@@ -42,7 +42,7 @@ func init() {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     false,
-			Description: "Enable this setting if you are not sending hashed data.",
+			Description: "Enable this setting to have RudderStack hash unhashed identifiers before sending them to Bing Ads.",
 		},
 		"connection_mode": {
 			Type:        schema.TypeList,
