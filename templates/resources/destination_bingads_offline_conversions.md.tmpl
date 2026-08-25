@@ -8,7 +8,7 @@ description: |-
 # rudderstack_destination_bingads_offline_conversions (Resource)
 
 This resource represents a Bing Ads Offline Conversions destination. For more information check
-https://www.rudderstack.com/docs/destinations/reverse-etl/bing-ads-offline-conversions/
+https://www.rudderstack.com/docs/destinations/streaming-destinations/bingads-offline-conversions/
 
 ## Example Usage
 
