@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.12.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.11.0...v4.12.0) (2026-08-24)
+
+
+### Features
+
+* **retl:** support Customer.io event object syncs ([#302](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/302)) ([875841a](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/875841add11efef6102d11f85ed3d370304b0faf))
+
+
+### Bug Fixes
+
+* handle backend secret redaction (destination read + e2e verify) ([#301](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/301)) ([b9cd742](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/b9cd7425e03378b6d9fdcb2baaa958f4cf7ceb54))
+* remove HubSpot legacy API-key auth option ([#312](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/312)) ([c893f62](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/c893f62ac154b7ae2ce1f265ed90fd164dbebf99))
+
+
+### Miscellaneous
+
+* **deps:** bump google.golang.org/grpc ([35b97ea](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/35b97ea28a10998aec8fc1c769efb4d7cb8a78d6))
+* **deps:** bump google.golang.org/grpc from 1.80.0 to 1.82.1 in the go_modules group across 1 directory ([#224](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/224)) ([35b97ea](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/35b97ea28a10998aec8fc1c769efb4d7cb8a78d6))
+* **deps:** bump the actions group across 1 directory with 5 updates ([#280](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/280)) ([592b7a1](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/592b7a171a302aa2d5816bcf7bf21ad520cb9393))
+* upgrade rudder-iac to v0.22.0 ([#299](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/299)) ([672fa72](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/672fa72b9a092d5591eee6c107d282f8dbc164c1))
+
 ## [4.11.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.10.0...v4.11.0) (2026-07-30)
 
 
