@@ -266,8 +266,8 @@ func TestGeneratorTerraformNestedListInListOfObjects(t *testing.T) {
 				Type:    "HS",
 				Version: 1,
 				Config: json.RawMessage(`{
-					"authorizationType": "newPrivateAppApi",
 					"apiVersion": "newApi",
+					"accessToken": "my-access-token",
 					"hubspotEvents": [
 						{"rsEventName": "e1", "hubspotEventName": "pe_e1", "eventProperties": []},
 						{"rsEventName": "e2", "hubspotEventName": "pe_e2", "eventProperties": []}
@@ -290,8 +290,8 @@ func TestGeneratorTerraformNestedListInListOfObjects(t *testing.T) {
 				Type:    "HS",
 				Version: 1,
 				Config: json.RawMessage(`{
-					"authorizationType": "newPrivateAppApi",
 					"apiVersion": "newApi",
+					"accessToken": "my-access-token",
 					"hubspotEvents": [
 						{
 							"rsEventName": "e1", "hubspotEventName": "pe_e1",
@@ -320,8 +320,8 @@ func TestGeneratorTerraformNestedListInListOfObjects(t *testing.T) {
 				Type:    "HS",
 				Version: 1,
 				Config: json.RawMessage(`{
-					"authorizationType": "newPrivateAppApi",
 					"apiVersion": "newApi",
+					"accessToken": "my-access-token",
 					"hubspotEvents": [
 						{"rsEventName": "e1", "hubspotEventName": "pe_e1", "eventProperties": []},
 						{

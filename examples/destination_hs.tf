@@ -2,7 +2,6 @@ resource "rudderstack_destination_hs" "example" {
   name = "my-hubspot"
 
   config {
-    authorization_type = "newPrivateAppApi"
     api_version        = "newApi"
     access_token       = "demo_access_token"
     hub_id             = "74X991"
