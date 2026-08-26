@@ -66,3 +66,8 @@
 - OAuth-backed destinations do not have a provider-side account-definition registry; existing OAuth integrations expose `rudderAccountId` as Terraform `rudder_account_id` and rely on backend integrations-config account definitions.
 - Terraform schema defaults that materialize in state should be mapped through `c.Simple` without `SkipZeroValue` when the API/test fixtures expect explicit defaults. For Google Ads Offline Conversions this includes `subAccount:false`, `UserIdentifierSource:"none"`, `conversionEnvironment:"none"`, `defaultUserIdentifier:"email"`, `hashUserIdentifier:true`, and `validateOnly:false`; for Bing Ads Offline Conversions it includes `isHashRequired:false`.
 - For cloud-mode destination `connection_mode` source keys, follow the Confluent Cloud/common consent spelling where source type `reactnative` stays `reactnative` in Terraform and maps to API `connectionMode.reactnative`, rather than using `react_native`.
+
+## DEX-490 — Amplitude defaults reference for CLI onboarding
+
+- Amplitude's Terraform destination mapping is a useful reference for CLI onboarding: `sdk_version.web` maps to API `sdkVersion.web`, and the Terraform resource uses `SimpleWithDefault("sdkVersion.web", ..., 2)` so omitted/empty SDK version resolves to Browser SDK v2.
+- When mirroring Terraform semantics in the CLI, avoid materializing every nested schema default; Amplitude only had a concrete nested-default requirement for `sdk_version.web = 2`, while broader nested web auto-capture defaults were treated as ambiguous and left out.
