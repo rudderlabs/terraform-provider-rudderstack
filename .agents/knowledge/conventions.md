@@ -53,3 +53,8 @@
 - HubSpot no longer supports new `legacyApiKey` authorization, so Terraform should rely on `access_token` for supported configuration and should not expose `authorization_type` as a normal configurable field; keep only compatibility handling needed for legacy API/state payloads.
 - If legacy authorization is still encountered in Terraform/API compatibility paths, reject `authorization_type = "legacyApiKey"` while leaving the `api_key` field Optional+Sensitive and mapped with `c.Simple("apiKey", "api_key", c.SkipZeroValue)`.
 - Keeping the `api_key` state/API mapping preserves decode/import behavior for legacy remote HubSpot destinations that still contain `apiKey`, avoiding noisy diffs or state breakage during migration.
+
+## DEX-518 — Qualtrics destination shape
+
+- Qualtrics exposes `enable_generic_page_title` as a top-level Terraform/CLI-facing boolean even though it maps to the web-scoped API key `enableGenericPageTitle.web`; consumers mirroring Terraform should not model it as nested `enable_generic_page_title.web`.
+- Treat Qualtrics `project_id` as secret-like when a surface supports sensitive fields: Terraform marks it `Sensitive: true` and UI config marks it secret, even if integrations-config `db-config.json` omits it from `secretKeys`.
