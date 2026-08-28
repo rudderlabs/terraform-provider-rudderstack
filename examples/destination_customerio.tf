@@ -9,6 +9,17 @@ resource "rudderstack_destination_customerio" "example" {
 
     # datacenter = "US"
 
+    # api_version = "v2" # Cloud-mode delivery only. Omit to keep Customer.io's existing per-endpoint behavior; set to "v2" to use the unified API.
+    # user_id_identifier_type = "id" # Cloud-mode delivery only. The RudderStack backend requires this when api_version is "v2"; the provider does not enforce it. Valid values: id, email, phone, cio_id.
+
+    # connection_mode {
+    #   web       = "device" # web, android and ios accept "cloud" or "device"
+    #   android   = "cloud"
+    #   ios       = "cloud"
+    #   cloud     = "cloud" # all other source types accept "cloud" only
+    #   warehouse = "cloud"
+    # }
+
     # use_native_sdk {
     #   web     = true
     #   android = true

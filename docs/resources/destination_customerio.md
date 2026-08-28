@@ -23,6 +23,17 @@ resource "rudderstack_destination_customerio" "example" {
 
     # datacenter = "US"
 
+    # api_version = "v2" # Cloud-mode delivery only. Omit to keep Customer.io's existing per-endpoint behavior; set to "v2" to use the unified API.
+    # user_id_identifier_type = "id" # Cloud-mode delivery only. The RudderStack backend requires this when api_version is "v2"; the provider does not enforce it. Valid values: id, email, phone, cio_id.
+
+    # connection_mode {
+    #   web       = "device" # web, android and ios accept "cloud" or "device"
+    #   android   = "cloud"
+    #   ios       = "cloud"
+    #   cloud     = "cloud" # all other source types accept "cloud" only
+    #   warehouse = "cloud"
+    # }
+
     # use_native_sdk {
     #   web     = true
     #   android = true
@@ -119,9 +130,11 @@ Required:
 
 Optional:
 
+- `api_version` (String) Customer.io API version for cloud-mode delivery. `v1` uses the existing per-endpoint behavior; `v2` uses the unified /v2/batch API. This setting does not affect device-mode SDK delivery.
 - `auto_track_device_attributes` (Block List, Max: 1) Enable this setting to automatically track device attributes in SDK mode. (see [below for nested schema](#nestedblock--config--auto_track_device_attributes))
 - `background_queue_min_number_of_tasks` (Block List, Max: 1) Configure the minimum number of tasks in the background queue. (see [below for nested schema](#nestedblock--config--background_queue_min_number_of_tasks))
 - `background_queue_seconds_delay` (Block List, Max: 1) Configure the delay in seconds for the background queue. (see [below for nested schema](#nestedblock--config--background_queue_seconds_delay))
+- `connection_mode` (Block List, Max: 1) Configure the connection mode per source type for Customer.io. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `data_use_in_app` (Block List, Max: 1) Enable this setting to send in-app messages to your website. (see [below for nested schema](#nestedblock--config--data_use_in_app))
 - `datacenter` (String) Input your Customer.io Data Center. (US or EU)
@@ -129,6 +142,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `send_page_name_in_sdk` (Block List, Max: 1) Configure whether to send the page name in SDK mode. (see [below for nested schema](#nestedblock--config--send_page_name_in_sdk))
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
+- `user_id_identifier_type` (String) Customer.io identifier that receives the RudderStack `userId` for cloud-mode delivery when `api_version` is `v2`. This setting does not affect device-mode SDK delivery.
 
 <a id="nestedblock--config--auto_track_device_attributes"></a>
 ### Nested Schema for `config.auto_track_device_attributes`
@@ -153,6 +167,26 @@ Optional:
 Optional:
 
 - `android` (String)
+
+
+<a id="nestedblock--config--connection_mode"></a>
+### Nested Schema for `config.connection_mode`
+
+Optional:
+
+- `amp` (String)
+- `android` (String)
+- `android_kotlin` (String)
+- `cloud` (String)
+- `cordova` (String)
+- `flutter` (String)
+- `ios` (String)
+- `ios_swift` (String)
+- `reactnative` (String)
+- `shopify` (String)
+- `unity` (String)
+- `warehouse` (String)
+- `web` (String)
 
 
 <a id="nestedblock--config--consent_management"></a>

@@ -14,6 +14,16 @@ var customerioTestConfigs = []c.TestConfig{
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
 				datacenter = "US"
+				api_version = "v2"
+				user_id_identifier_type = "id"
+
+				connection_mode {
+					web       = "device"
+					android   = "cloud"
+					ios       = "cloud"
+					cloud     = "cloud"
+					warehouse = "cloud"
+				}
 
 				use_native_sdk {
 					web     = true
@@ -46,6 +56,15 @@ var customerioTestConfigs = []c.TestConfig{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "US",
+				"apiVersion": "v2",
+				"userIdIdentifierType": "id",
+				"connectionMode": {
+					"web": "device",
+					"android": "cloud",
+					"ios": "cloud",
+					"cloud": "cloud",
+					"warehouse": "cloud"
+				},
 				"useNativeSDK": {
 					"web": true,
 					"android": true,
@@ -72,6 +91,8 @@ var customerioTestConfigs = []c.TestConfig{
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
 				datacenter = "EU"
+				api_version = "v2"
+				user_id_identifier_type = "id"
 				device_token_event_name = "name"
 
 				event_filtering {
@@ -151,6 +172,8 @@ var customerioTestConfigs = []c.TestConfig{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "EU",
+				"apiVersion": "v2",
+				"userIdIdentifierType": "id",
 				"deviceTokenEventName": "name",
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [{
