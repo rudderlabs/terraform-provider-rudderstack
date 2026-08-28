@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.13.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.12.0...v4.13.0) (2026-08-28)
+
+
+### Features
+
+* **destinations:** add offline conversions destinations ([#316](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/316)) ([d520068](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/d5200684d1e8011bbb2a8a3b515a2f963b002ca0))
+* expose customerio connection mode config ([#317](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/317)) ([655b6b9](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/655b6b9d90468c13db477a099025d53a26551b20))
+
 ## [4.12.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.11.0...v4.12.0) (2026-08-24)
 
 
