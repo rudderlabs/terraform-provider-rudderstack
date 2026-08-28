@@ -14,7 +14,7 @@ func init() {
 		c.Simple("siteID", "site_id"),
 		c.Simple("apiKey", "api_key"),
 		c.Simple("apiVersion", "api_version"),
-		c.Simple("userIdMapping", "user_id_mapping", c.SkipZeroValue),
+		c.Simple("userIdIdentifierType", "user_id_identifier_type", c.SkipZeroValue),
 		c.Simple("deviceTokenEventName", "device_token_event_name", c.SkipZeroValue),
 		c.Simple("datacenter", "datacenter"),
 		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
@@ -70,7 +70,7 @@ func init() {
 			Description:      "Customer.io API version for cloud-mode delivery. `v1` uses the existing per-endpoint behavior; `v2` uses the unified /v2/batch API. This setting does not affect device-mode SDK delivery.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(v1|v2)$"),
 		},
-		"user_id_mapping": {
+		"user_id_identifier_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "Customer.io identifier that receives the RudderStack `userId` for cloud-mode delivery when `api_version` is `v2`. This setting does not affect device-mode SDK delivery.",

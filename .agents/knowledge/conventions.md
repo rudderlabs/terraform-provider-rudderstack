@@ -56,6 +56,6 @@
 
 ## INT-7014 — Customer.io v2 mapping ownership
 
-- Keep Customer.io `user_id_mapping` optional in the Terraform provider even when `api_version = "v2"`; the conditional requirement belongs to the `rudder-integrations-config` schema, while transformer retains an unset-value fallback for safety.
-- Avoid adding destination-specific Terraform `CustomizeDiff` validation for the Customer.io v2/userIdMapping dependency unless provider-level enforcement is explicitly requested.
-- Document Customer.io `api_version` and `user_id_mapping` as cloud-mode delivery settings only; do not imply they affect Customer.io SDK/device-mode behavior.
+- Keep Customer.io `user_id_identifier_type` optional in the Terraform provider even when `api_version = "v2"`; the conditional requirement belongs to the `rudder-integrations-config` schema, while transformer retains an unset-value fallback for safety.
+- Avoid adding destination-specific Terraform `CustomizeDiff` validation for the Customer.io v2/userIdIdentifierType dependency unless provider-level enforcement is explicitly requested.
+- Document Customer.io `api_version` and `user_id_identifier_type` as cloud-mode delivery settings only; do not imply they affect Customer.io SDK/device-mode behavior.

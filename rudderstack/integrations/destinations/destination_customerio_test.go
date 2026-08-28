@@ -15,7 +15,7 @@ var customerioTestConfigs = []c.TestConfig{
 				api_key = "cg044d23bc1beb3031c5"
 				datacenter = "US"
 				api_version = "v2"
-				user_id_mapping = "id"
+				user_id_identifier_type = "id"
 
 				connection_mode {
 					web       = "device"
@@ -57,7 +57,7 @@ var customerioTestConfigs = []c.TestConfig{
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "US",
 				"apiVersion": "v2",
-				"userIdMapping": "id",
+				"userIdIdentifierType": "id",
 				"connectionMode": {
 					"web": "device",
 					"android": "cloud",
@@ -92,7 +92,7 @@ var customerioTestConfigs = []c.TestConfig{
 				api_key = "cg044d23bc1beb3031c5"
 				datacenter = "EU"
 				api_version = "v2"
-				user_id_mapping = "id"
+				user_id_identifier_type = "id"
 				device_token_event_name = "name"
 
 				event_filtering {
@@ -173,7 +173,7 @@ var customerioTestConfigs = []c.TestConfig{
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "EU",
 				"apiVersion": "v2",
-				"userIdMapping": "id",
+				"userIdIdentifierType": "id",
 				"deviceTokenEventName": "name",
 				"eventFilteringOption": "blacklistedEvents",
 				"blacklistedEvents": [{

@@ -15,5 +15,5 @@
 
 ## INT-7014 — Customer.io live API drops new config keys
 
-- Customer.io live acceptance and staging-smoke fixtures should not include `api_version = "v2"` or `user_id_mapping` until the backend integrations-config deployment persists and echoes API keys `apiVersion` and `userIdMapping`; otherwise CRUD tests can fail when create/read drops those keys from the API response.
-- Keep mock/unit coverage for Terraform serialization of explicit `api_version = "v2"` and `user_id_mapping`, while relying on the default `api_version = "v1"` path to skip API writes and restore the default in Terraform state on reads.
+- Customer.io live acceptance and staging-smoke fixtures should not include `api_version = "v2"` or `user_id_identifier_type` until the backend integrations-config deployment persists and echoes API keys `apiVersion` and `userIdIdentifierType`; otherwise CRUD tests can fail when create/read drops those keys from the API response.
+- Keep mock/unit coverage for Terraform serialization of explicit `api_version` and `user_id_identifier_type`. `api_version` is a plain optional field with no schema `Default`: when the user omits it, nothing is written to the API config and nothing is read back into state, so the round-trip stays symmetric without a custom `ToStateFunc`.

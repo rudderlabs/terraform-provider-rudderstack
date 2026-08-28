@@ -24,7 +24,7 @@ resource "rudderstack_destination_customerio" "example" {
     # datacenter = "US"
 
     # api_version = "v2" # Cloud-mode delivery only. Omit to keep Customer.io's existing per-endpoint behavior; set to "v2" to use the unified API.
-    # user_id_mapping = "id" # Cloud-mode delivery only. Required when api_version is "v2". Valid values: id, email, phone, cio_id.
+    # user_id_identifier_type = "id" # Cloud-mode delivery only. Required when api_version is "v2". Valid values: id, email, phone, cio_id.
 
     # connection_mode {
     #   web       = "device" # web, android and ios accept "cloud" or "device"
@@ -142,7 +142,7 @@ Optional:
 - `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `send_page_name_in_sdk` (Block List, Max: 1) Configure whether to send the page name in SDK mode. (see [below for nested schema](#nestedblock--config--send_page_name_in_sdk))
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
-- `user_id_mapping` (String) Customer.io identifier that receives the RudderStack `userId` for cloud-mode delivery when `api_version` is `v2`. This setting does not affect device-mode SDK delivery.
+- `user_id_identifier_type` (String) Customer.io identifier that receives the RudderStack `userId` for cloud-mode delivery when `api_version` is `v2`. This setting does not affect device-mode SDK delivery.
 
 <a id="nestedblock--config--auto_track_device_attributes"></a>
 ### Nested Schema for `config.auto_track_device_attributes`

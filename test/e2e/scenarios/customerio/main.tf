@@ -22,11 +22,11 @@ module "bq" {
 resource "rudderstack_destination_customerio" "cio" {
   name = local.base_name
   config {
-    site_id         = var.customerio_site_id
-    api_key         = var.customerio_api_key
-    datacenter      = var.customerio_datacenter
-    api_version     = "v2"
-    user_id_mapping = "id"
+    site_id                 = var.customerio_site_id
+    api_key                 = var.customerio_api_key
+    datacenter              = var.customerio_datacenter
+    api_version             = "v2"
+    user_id_identifier_type = "id"
   }
 }
 
