@@ -59,3 +59,8 @@
 - Keep Customer.io `user_id_identifier_type` optional in the Terraform provider even when `api_version = "v2"`; the conditional requirement belongs to the `rudder-integrations-config` schema, while transformer retains an unset-value fallback for safety.
 - Avoid adding destination-specific Terraform `CustomizeDiff` validation for the Customer.io v2/userIdIdentifierType dependency unless provider-level enforcement is explicitly requested.
 - Document Customer.io `api_version` and `user_id_identifier_type` as cloud-mode delivery settings only; do not imply they affect Customer.io SDK/device-mode behavior.
+
+## INT-7071 — Customer.io api_version default migration
+
+- Customer.io `api_version` is an Optional Terraform field with a schema default; flipping that default changes omitted HCL to plan/apply `apiVersion = "v2"`, while remote `apiVersion` is still read back into state through the normal `resourceDestinationRead` → `storeDestinationToState` → `ConfigMeta.APIToState` mapping.
+- Existing Customer.io destinations that should remain on legacy behavior need `api_version = "v1"` pinned in HCL if their configuration omits the field; do not switch to `Optional+Computed` or a custom read-time default just to suppress this planned default change unless a broader lifecycle migration is explicitly requested.
