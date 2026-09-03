@@ -2,8 +2,6 @@ package destinations
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
@@ -15,7 +13,7 @@ func init() {
 	properties := []c.ConfigProperty{
 		c.Simple("siteID", "site_id"),
 		c.Simple("apiKey", "api_key"),
-		customerIOAPIVersionProperty(),
+		c.Simple("apiVersion", "api_version"),
 		c.Simple("userIdIdentifierType", "user_id_identifier_type", c.SkipZeroValue),
 		c.Simple("deviceTokenEventName", "device_token_event_name", c.SkipZeroValue),
 		c.Simple("datacenter", "datacenter"),
@@ -68,7 +66,7 @@ func init() {
 		"api_version": {
 			Type:             schema.TypeString,
 			Optional:         true,
-			Computed:         true,
+			Default:          "v2",
 			Description:      "Customer.io API version for cloud-mode delivery. Defaults to `v2` for the unified /v2/batch API; set to `v1` for legacy per-endpoint behavior. This setting does not affect device-mode SDK delivery.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(v1|v2)$"),
 		},
@@ -303,25 +301,4 @@ func init() {
 		Properties:   properties,
 		ConfigSchema: schema,
 	})
-}
-
-func customerIOAPIVersionProperty() c.ConfigProperty {
-	return c.ConfigProperty{
-		FromStateFunc: func(config, state string) (string, error) {
-			apiVersion := gjson.Get(state, "api_version")
-			if apiVersion.Exists() && apiVersion.String() != "" {
-				return sjson.Set(config, "apiVersion", apiVersion.String())
-			}
-
-			return sjson.Set(config, "apiVersion", "v2")
-		},
-		ToStateFunc: func(state, config string) (string, error) {
-			apiVersion := gjson.Get(config, "apiVersion")
-			if !apiVersion.Exists() {
-				return state, nil
-			}
-
-			return sjson.Set(state, "api_version", apiVersion.String())
-		},
-	}
 }

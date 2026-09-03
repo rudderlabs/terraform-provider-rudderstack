@@ -3,8 +3,6 @@ package destinations_test
 import (
 	"testing"
 
-	"github.com/tidwall/gjson"
-
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -466,46 +464,6 @@ func TestDestinationResourceCustomerIOApiVersionV1Override(t *testing.T) {
 			}`,
 		},
 	})
-}
-
-func TestDestinationResourceCustomerIOApiVersionOmittedPreservesLegacyV1(t *testing.T) {
-	cmt.AssertDestination(t, "customerio", []c.TestConfig{
-		{
-			TerraformCreate: `
-				site_id = "cd820c1b31d8f2696f3b"
-				api_key = "cg044d23bc1beb3031c5"
-				api_version = "v1"
-			`,
-			APICreate: `{
-				"siteID": "cd820c1b31d8f2696f3b",
-				"apiKey": "cg044d23bc1beb3031c5",
-				"apiVersion": "v1",
-				"datacenter": "US"
-			}`,
-			TerraformUpdate: `
-				site_id = "cd820c1b31d8f2696f3b"
-				api_key = "cg044d23bc1beb3031c5"
-			`,
-			APIUpdate: `{
-				"siteID": "cd820c1b31d8f2696f3b",
-				"apiKey": "cg044d23bc1beb3031c5",
-				"apiVersion": "v1",
-				"datacenter": "US"
-			}`,
-		},
-	})
-}
-
-func TestDestinationResourceCustomerIOAPIToStatePreservesLegacyV1(t *testing.T) {
-	cm := c.Destinations.Entries()["customerio"]
-	state, err := cm.APIToState(`{"apiVersion":"v1"}`)
-	if err != nil {
-		t.Fatalf("APIToState returned error: %v", err)
-	}
-
-	if apiVersion := gjson.Get(state, "api_version").String(); apiVersion != "v1" {
-		t.Fatalf("api_version = %q, want %q", apiVersion, "v1")
-	}
 }
 
 func TestAccDestinationCustomerIO(t *testing.T) {
