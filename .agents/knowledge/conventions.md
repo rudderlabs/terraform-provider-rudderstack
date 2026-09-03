@@ -63,4 +63,5 @@
 ## INT-7071 — Customer.io api_version default migration
 
 - Customer.io `api_version` is an Optional Terraform field with a schema default; flipping that default changes omitted HCL to plan/apply `apiVersion = "v2"`, while remote `apiVersion` is still read back into state through the normal `resourceDestinationRead` → `storeDestinationToState` → `ConfigMeta.APIToState` mapping.
+- Keep the Customer.io `apiVersion` mapping on the normal `c.Simple("apiVersion", "api_version")` path; do not add Customer.io-specific `ConfigProperty` helpers or state-aware default injection unless a future task explicitly requests a broader lifecycle migration.
 - Existing Customer.io destinations that should remain on legacy behavior need `api_version = "v1"` pinned in HCL if their configuration omits the field; do not switch to `Optional+Computed` or a custom read-time default just to suppress this planned default change unless a broader lifecycle migration is explicitly requested.
