@@ -66,8 +66,8 @@ func init() {
 		"api_version": {
 			Type:             schema.TypeString,
 			Optional:         true,
-			Default:          "v1",
-			Description:      "Customer.io API version for cloud-mode delivery. `v1` uses the existing per-endpoint behavior; `v2` uses the unified /v2/batch API. This setting does not affect device-mode SDK delivery.",
+			Default:          "v2",
+			Description:      "Customer.io API version for cloud-mode delivery. Defaults to `v2` for the unified /v2/batch API; set to `v1` for legacy per-endpoint behavior. This setting does not affect device-mode SDK delivery.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(v1|v2)$"),
 		},
 		"user_id_identifier_type": {

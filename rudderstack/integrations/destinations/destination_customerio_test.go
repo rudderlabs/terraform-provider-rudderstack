@@ -410,6 +410,62 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 	cmt.AssertDestination(t, "customerio", customerioTestConfigs)
 }
 
+func TestDestinationResourceCustomerIOApiVersionDefault(t *testing.T) {
+	cmt.AssertDestination(t, "customerio", []c.TestConfig{
+		{
+			TerraformCreate: `
+				site_id = "cd820c1b31d8f2696f3b"
+				api_key = "cg044d23bc1beb3031c5"
+			`,
+			APICreate: `{
+				"siteID": "cd820c1b31d8f2696f3b",
+				"apiKey": "cg044d23bc1beb3031c5",
+				"apiVersion": "v2",
+				"datacenter": "US"
+			}`,
+			TerraformUpdate: `
+				site_id = "cd820c1b31d8f2696f3b"
+				api_key = "cg044d23bc1beb3031c5"
+			`,
+			APIUpdate: `{
+				"siteID": "cd820c1b31d8f2696f3b",
+				"apiKey": "cg044d23bc1beb3031c5",
+				"apiVersion": "v2",
+				"datacenter": "US"
+			}`,
+		},
+	})
+}
+
+func TestDestinationResourceCustomerIOApiVersionV1Override(t *testing.T) {
+	cmt.AssertDestination(t, "customerio", []c.TestConfig{
+		{
+			TerraformCreate: `
+				site_id = "cd820c1b31d8f2696f3b"
+				api_key = "cg044d23bc1beb3031c5"
+				api_version = "v1"
+			`,
+			APICreate: `{
+				"siteID": "cd820c1b31d8f2696f3b",
+				"apiKey": "cg044d23bc1beb3031c5",
+				"apiVersion": "v1",
+				"datacenter": "US"
+			}`,
+			TerraformUpdate: `
+				site_id = "cd820c1b31d8f2696f3b"
+				api_key = "cg044d23bc1beb3031c5"
+				api_version = "v1"
+			`,
+			APIUpdate: `{
+				"siteID": "cd820c1b31d8f2696f3b",
+				"apiKey": "cg044d23bc1beb3031c5",
+				"apiVersion": "v1",
+				"datacenter": "US"
+			}`,
+		},
+	})
+}
+
 func TestAccDestinationCustomerIO(t *testing.T) {
 	acc.AccAssertDestination(t, "customerio", customerioTestConfigs)
 }
