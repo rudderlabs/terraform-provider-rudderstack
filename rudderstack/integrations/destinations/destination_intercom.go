@@ -16,7 +16,6 @@ func init() {
 		c.Simple("useNativeSDK.web", "use_native_sdk.0.web", c.SkipZeroValue),
 		c.Simple("useNativeSDK.ios", "use_native_sdk.0.ios", c.SkipZeroValue),
 		c.Simple("useNativeSDK.android", "use_native_sdk.0.android", c.SkipZeroValue),
-		c.Simple("collectContext", "collect_context", c.SkipZeroValue),
 		c.Simple("sendAnonymousId", "send_anonymous_id", c.SkipZeroValue),
 		c.Simple("updateLastRequestAt", "update_last_request_at", c.SkipZeroValue),
 		c.Simple("mobileApiKeyAndroid.android", "mobile_api_key_android", c.SkipZeroValue),
@@ -56,11 +55,6 @@ func init() {
 			Optional:         true,
 			Description:      "Enter the iOS API Key.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
-		},
-		"collect_context": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Description: "Enable this setting to include the user context along with your identify calls.",
 		},
 		"send_anonymous_id": {
 			Type:        schema.TypeBool,

@@ -141,7 +141,7 @@ var adjustTestConfigs = []c.TestConfig{
 						"to": "def456"
 					}
 				],
-				"partnerParamKeys": [
+				"partnerParamsKeys": [
 					{
 						"from": "userId",
 						"to": "user_id"
