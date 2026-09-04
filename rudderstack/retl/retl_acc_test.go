@@ -132,6 +132,25 @@ func TestAccRETLConnectionCustomerIOAudience_Manual(t *testing.T) {
 	})
 }
 
+// TestAccRETLConnectionCustomerIO_Manual exercises the typed
+// rudderstack_retl_connection_customerio resource (VDM v2 flow). Plan-only (the
+// CI default) validates HCL/schema — including the top-level object field — with
+// no creds. The live path is gated on RUDDERSTACK_RETL_TEST_ACCOUNT_ID and
+// skips when unset.
+func TestAccRETLConnectionCustomerIO_Manual(t *testing.T) {
+	acc.AccAssertRETLConnectionCustomerIO(t, acc.RETLConnectionTestConfig{
+		Variant:       "cio-manual",
+		SyncBehaviour: "upsert",
+		Schedule:      `type = "manual"`,
+		Identifiers: `
+			identifiers {
+				from = "email"
+				to   = "email"
+			}
+		`,
+	})
+}
+
 // TestAccRETLConnection_ManualSchedule covers the manual schedule branch.
 // `full` sync_behaviour flexes a non-upsert path (the JSON Mapper flow accepts
 // only "upsert" or "full" — "mirror" is rejected by the API).
