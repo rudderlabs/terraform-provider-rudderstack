@@ -23,7 +23,7 @@ resource "rudderstack_destination_customerio" "example" {
 
     # datacenter = "US"
 
-    # api_version = "v2" # Cloud-mode delivery only. Omit to keep Customer.io's existing per-endpoint behavior; set to "v2" to use the unified API.
+    # api_version = "v1" # Cloud-mode delivery only. Defaults to "v2" (unified batch API); set to "v1" for legacy per-endpoint behavior.
     # user_id_identifier_type = "id" # Cloud-mode delivery only. The RudderStack backend requires this when api_version is "v2"; the provider does not enforce it. Valid values: id, email, phone, cio_id.
 
     # connection_mode {
@@ -130,7 +130,7 @@ Required:
 
 Optional:
 
-- `api_version` (String) Customer.io API version for cloud-mode delivery. `v1` uses the existing per-endpoint behavior; `v2` uses the unified /v2/batch API. This setting does not affect device-mode SDK delivery.
+- `api_version` (String) Customer.io API version for cloud-mode delivery. Defaults to `v2` for the unified /v2/batch API; set to `v1` for legacy per-endpoint behavior. This setting does not affect device-mode SDK delivery.
 - `auto_track_device_attributes` (Block List, Max: 1) Enable this setting to automatically track device attributes in SDK mode. (see [below for nested schema](#nestedblock--config--auto_track_device_attributes))
 - `background_queue_min_number_of_tasks` (Block List, Max: 1) Configure the minimum number of tasks in the background queue. (see [below for nested schema](#nestedblock--config--background_queue_min_number_of_tasks))
 - `background_queue_seconds_delay` (Block List, Max: 1) Configure the delay in seconds for the background queue. (see [below for nested schema](#nestedblock--config--background_queue_seconds_delay))
