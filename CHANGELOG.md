@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.13.1](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.13.0...v4.13.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **customerio:** default api version to v2 ([#325](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/325)) ([227176b](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/227176b2988543c7b0c26daf7e3bc03753662a25))
+
 ## [4.13.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.12.0...v4.13.0) (2026-08-28)
 
 
