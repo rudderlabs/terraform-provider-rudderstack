@@ -67,3 +67,7 @@
 ## INT-7014 — Customer.io docs regeneration scope
 
 - Running `make docs` for a focused Customer.io update can also regenerate unrelated destination docs with sensitivity-marker changes (observed for ActiveCampaign `event_key`, Intercom `api_key`, Redis `ca_certificate`, and Redshift/S3/S3 Datalake `access_key_id`); keep only the intended Customer.io doc diff unless the broader sensitivity changes are in scope.
+
+## RUD-3119 — Destination docs regeneration churn
+
+- Running `make docs` while adding Spotify Pixel again regenerated unrelated destination docs for ActiveCampaign, Intercom, Redis, Redshift, S3, and S3 Datalake with sensitivity-marker-only changes; keep those unrelated doc diffs out of focused destination PRs unless explicitly in scope.
