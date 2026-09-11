@@ -8,3 +8,7 @@
 ## CFD-71 — Bing Ads Offline Conversions docs URL
 
 - For `templates/resources/destination_bingads_offline_conversions.md.tmpl`, use the RudderStack docs URL `https://www.rudderstack.com/docs/destinations/streaming-destinations/bingads-offline-conversions/`. The public destination docs slug is `bingads-offline-conversions` and it lives under `streaming-destinations`, not `reverse-etl` or `bing-ads-offline-conversions`.
+
+## RUD-3119 — Spotify Pixel field sensitivity
+
+- For the Spotify Pixel Terraform destination, do not mark `config.pixel_id` as sensitive unless the upstream destination `db-config.json` lists `pixelId` under `secretKeys`; UI-only `secret: true` metadata is not sufficient for provider sensitivity.
