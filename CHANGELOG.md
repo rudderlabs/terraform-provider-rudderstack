@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.13.1...v4.14.0) (2026-09-11)
+
+
+### Features
+
+* add spotify pixel destination resource ([#328](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/328)) ([e7a216c](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/e7a216ca9614bdf03d7774ccd4a9d53d26faa11b))
+
 ## [4.13.1](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.13.0...v4.13.1) (2026-09-09)
 
 
