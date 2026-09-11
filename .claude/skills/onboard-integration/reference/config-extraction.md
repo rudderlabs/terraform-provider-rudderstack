@@ -118,6 +118,8 @@ c.Simple("eventUploadPeriodMillis.web", "event_upload_period_millis.0.web", c.Sk
 
 Look at `schema.json` to determine which source types each field applies to and the allowed values/types. Study an existing destination with similar patterns (e.g., `destination_amplitude.go` for many per-source-type fields, `destination_bqstream.go` for connectionMode only).
 
+**Do not skip `connectionMode` just because `ui-config.json` renders no selector for it, or because `db-config.json`'s `supportedConnectionModes` lists only one value for a source type.** `supportedConnectionModes` in `db-config.json` (equivalently, `connectionMode.{sourceType}` in `schema.json`) is the authoritative source for whether the field exists — not whether the console UI happens to expose a picker for it. A source type with only one valid connection mode (e.g. `"web": ["device"]`) still gets a `connection_mode` block, exactly like every other per-source-type field: `Optional`, validated to that single value if that's all `schema.json` allows (e.g. `^(device)$`), mapped via plain `c.Simple(..., c.SkipZeroValue)` — no schema `Default` and no `c.SimpleWithDefault`, so it stays absent from the API payload when the user leaves it unset, matching every other `connectionMode.*` mapping in the provider. (RUD-3119: an earlier Spotify Pixel version reasoned "no UI selector + only one valid value" into skipping the field entirely, which was wrong on both counts — see `.agents/knowledge/feedback.md`.)
+
 ## Naming Conventions
 
 - API keys are camelCase (e.g., `webhookUrl`)

@@ -65,3 +65,8 @@
 - Customer.io `api_version` is an Optional Terraform field with a schema default; flipping that default changes omitted HCL to plan/apply `apiVersion = "v2"`, while remote `apiVersion` is still read back into state through the normal `resourceDestinationRead` → `storeDestinationToState` → `ConfigMeta.APIToState` mapping.
 - Keep the Customer.io `apiVersion` mapping on the normal `c.Simple("apiVersion", "api_version")` path; do not add Customer.io-specific `ConfigProperty` helpers or state-aware default injection unless a future task explicitly requests a broader lifecycle migration.
 - Existing Customer.io destinations that should remain on legacy behavior need `api_version = "v1"` pinned in HCL if their configuration omits the field; do not switch to `Optional+Computed` or a custom read-time default just to suppress this planned default change unless a broader lifecycle migration is explicitly requested.
+
+## RUD-3119 — Spotify Pixel web-only surface
+
+- Spotify Pixel exposes a Terraform `connection_mode` block for web, validated to the sole supported value `device`; omitting the block leaves `connectionMode` absent from the API payload, while setting it explicitly sends device mode.
+- Use `GetCommonConfigMeta([]string{"web"})` for Spotify Pixel so the generated consent surface is limited to `consent_management.web`.

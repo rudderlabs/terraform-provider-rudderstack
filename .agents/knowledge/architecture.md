@@ -68,3 +68,8 @@
 
 - The provider maintains separate destination integrations for standard Snowflake and Snowflake Streaming, each with its own implementation/tests/docs surfaces.
 - When task input points to `src/configurations/destinations/snowflake` (non-streaming), changes should be scoped to the standard Snowflake destination unless explicitly requested otherwise.
+
+## RUD-3119 — Spotify Pixel destination registration
+
+- Spotify Pixel registers as destination key `spotify_pixel` with Public API type `SPOTIFYPIXEL`, which exposes Terraform resource `rudderstack_destination_spotify_pixel` through the standard destination registry path.
+- Destination source/connection support is not modeled in `ConfigMeta`; Spotify Pixel is web/device-only by its config schema surface rather than by provider-level source or connection-mode registry fields.
