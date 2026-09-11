@@ -15,6 +15,10 @@ resource "rudderstack_destination_spotify_pixel" "example" {
     #   whitelist = ["one", "two", "three"]
     # }
 
+    # connection_mode {
+    #   web = "device"
+    # }
+
     # consent_management {
     #   web = [{
     #     provider            = "oneTrust"

@@ -21,6 +21,7 @@ func init() {
 			"event_filtering.0.whitelist": "whitelistedEvents",
 			"event_filtering.0.blacklist": "blacklistedEvents",
 		}),
+		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -87,6 +88,22 @@ func init() {
 						Elem: &schema.Schema{
 							Type: schema.TypeString,
 						},
+					},
+				},
+			},
+		},
+		"connection_mode": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Set the connection mode used to send events to Spotify Pixel for each source type.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						Description:      "Connection mode for web sources. Spotify Pixel only supports device mode.",
+						ValidateDiagFunc: c.StringMatchesRegexp("^(device)$"),
 					},
 				},
 			},

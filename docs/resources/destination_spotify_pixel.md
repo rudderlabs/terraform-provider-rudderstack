@@ -30,6 +30,10 @@ resource "rudderstack_destination_spotify_pixel" "example" {
     #   whitelist = ["one", "two", "three"]
     # }
 
+    # connection_mode {
+    #   web = "device"
+    # }
+
     # consent_management {
     #   web = [{
     #     provider            = "oneTrust"
@@ -68,10 +72,19 @@ Required:
 
 Optional:
 
+- `connection_mode` (Block List, Max: 1) Set the connection mode used to send events to Spotify Pixel for each source type. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `enable_alias_call` (Boolean) Enable this setting to send identify calls to Spotify Pixel as alias events.
 - `event_filtering` (Block List, Max: 1) This setting lets you determine which events are blocked or allowed to flow through to Spotify Pixel. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `events_to_spotify_pixel_events` (List of Object) You can map your events to standard Spotify Pixel events using this setting. (see [below for nested schema](#nestedatt--config--events_to_spotify_pixel_events))
+
+<a id="nestedblock--config--connection_mode"></a>
+### Nested Schema for `config.connection_mode`
+
+Optional:
+
+- `web` (String) Connection mode for web sources. Spotify Pixel only supports device mode.
+
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`

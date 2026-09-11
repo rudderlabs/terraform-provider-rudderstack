@@ -41,6 +41,10 @@ var spotifyPixelTestConfigs = []c.TestConfig{
 						whitelist = ["one", "two", "three"]
 					}
 
+					connection_mode {
+						web = "device"
+					}
+
 					consent_management {
 						web = [
 							{
@@ -75,6 +79,9 @@ var spotifyPixelTestConfigs = []c.TestConfig{
 						{ "eventName": "three" }
 					],
 					"eventFilteringOption": "whitelistedEvents",
+					"connectionMode": {
+						"web": "device"
+					},
 					"consentManagement": {
 						"web": [
 							{
@@ -190,6 +197,23 @@ func TestDestinationResourceSpotifyPixelDoesNotExposeNativeSDKToggle(t *testing.
 	}
 }
 
+func TestDestinationResourceSpotifyPixelConnectionModeOmittedWhenUnset(t *testing.T) {
+	// connection_mode is Optional with no provider-injected default, matching the
+	// c.Simple + c.SkipZeroValue convention every other destination in this
+	// provider uses for connectionMode.{sourceType}. If the user never sets it,
+	// it is left out of the API payload entirely rather than the provider
+	// assuming "device" on their behalf.
+	cm := c.Destinations.Entries()["spotify_pixel"]
+
+	got, err := cm.StateToAPI(`{"pixel_id": "spotify-pixel-id"}`)
+	if err != nil {
+		t.Fatalf("StateToAPI failed: %v", err)
+	}
+	if strings.Contains(got, "connectionMode") {
+		t.Fatalf("expected connectionMode to stay out of API config when unset, got: %s", got)
+	}
+}
+
 func TestDestinationResourceSpotifyPixelValidation(t *testing.T) {
 	configSchema := c.Destinations.Entries()["spotify_pixel"].ConfigSchema
 
@@ -214,6 +238,15 @@ func TestDestinationResourceSpotifyPixelValidation(t *testing.T) {
 	}
 	if diags := toSchema.ValidateDiagFunc("purchase", cty.Path{}); diags.HasError() {
 		t.Fatalf("expected valid Spotify event mapping target to pass validation: %v", diags)
+	}
+
+	connectionModeSchema := configSchema["connection_mode"].Elem.(*schema.Resource)
+	webModeSchema := connectionModeSchema.Schema["web"]
+	if diags := webModeSchema.ValidateDiagFunc("cloud", cty.Path{}); !diags.HasError() {
+		t.Fatal("expected cloud connection mode to fail validation because Spotify Pixel only supports device mode")
+	}
+	if diags := webModeSchema.ValidateDiagFunc("device", cty.Path{}); diags.HasError() {
+		t.Fatalf("expected device connection mode to pass validation: %v", diags)
 	}
 }
 
