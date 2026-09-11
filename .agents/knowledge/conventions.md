@@ -68,5 +68,5 @@
 
 ## RUD-3119 — Spotify Pixel web-only surface
 
-- Spotify Pixel should not expose a Terraform `connection_mode` block: upstream includes no `connectionMode` config key and supports only web/device, so device-mode support is implicit in the backend-backed destination shape.
+- Spotify Pixel exposes a Terraform `connection_mode` block for web, validated to the sole supported value `device`; omitting the block leaves `connectionMode` absent from the API payload, while setting it explicitly sends device mode.
 - Use `GetCommonConfigMeta([]string{"web"})` for Spotify Pixel so the generated consent surface is limited to `consent_management.web`.
