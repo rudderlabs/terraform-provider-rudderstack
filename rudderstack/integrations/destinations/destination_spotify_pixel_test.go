@@ -194,6 +194,9 @@ func TestDestinationResourceSpotifyPixelValidation(t *testing.T) {
 	configSchema := c.Destinations.Entries()["spotify_pixel"].ConfigSchema
 
 	pixelIDSchema := configSchema["pixel_id"]
+	if pixelIDSchema.Sensitive {
+		t.Fatal("expected pixel_id not to be sensitive because pixelId is not listed in Spotify Pixel secretKeys")
+	}
 	if diags := pixelIDSchema.ValidateDiagFunc("", cty.Path{}); !diags.HasError() {
 		t.Fatal("expected empty pixel_id to fail validation")
 	}

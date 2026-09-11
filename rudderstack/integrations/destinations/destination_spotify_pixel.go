@@ -29,7 +29,6 @@ func init() {
 		"pixel_id": {
 			Type:             schema.TypeString,
 			Required:         true,
-			Sensitive:        true,
 			Description:      "Enter your Spotify Pixel ID.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(.{1,100})$"),
 		},

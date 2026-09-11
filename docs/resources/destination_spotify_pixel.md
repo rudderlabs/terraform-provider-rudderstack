@@ -64,7 +64,7 @@ resource "rudderstack_destination_spotify_pixel" "example" {
 
 Required:
 
-- `pixel_id` (String, Sensitive) Enter your Spotify Pixel ID.
+- `pixel_id` (String) Enter your Spotify Pixel ID.
 
 Optional:
 
@@ -107,5 +107,3 @@ Optional:
 
 - `from` (String)
 - `to` (String)
-
-
