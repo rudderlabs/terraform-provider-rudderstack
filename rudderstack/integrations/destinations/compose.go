@@ -105,6 +105,7 @@ func ComposeConfigMeta(base c.ConfigMeta, delta Delta, version int) c.ConfigMeta
 		Properties:     propsClone,
 		SettingsSchema: base.SettingsSchema,
 		Settings:       base.Settings,
+		CustomizeDiff:  base.CustomizeDiff,
 	}
 }
 

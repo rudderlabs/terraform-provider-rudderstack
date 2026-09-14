@@ -31,17 +31,23 @@ func resourceDestination(cm configs.ConfigMeta) *schema.Resource {
 }
 
 func resourceDestinationCustomizeDiff(cm configs.ConfigMeta) schema.CustomizeDiffFunc {
-	return func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 		if cm.SkipConfig {
 			return nil
 		}
 
 		consentManagement := d.Get("config.0.consent_management.0")
-		if consentManagement == nil {
-			return nil
+		if consentManagement != nil {
+			if err := destinations.ValidateConsentManagementUniqueProviders(consentManagement); err != nil {
+				return err
+			}
 		}
 
-		return destinations.ValidateConsentManagementUniqueProviders(consentManagement)
+		if cm.CustomizeDiff != nil {
+			return cm.CustomizeDiff(ctx, d, meta)
+		}
+
+		return nil
 	}
 }
 

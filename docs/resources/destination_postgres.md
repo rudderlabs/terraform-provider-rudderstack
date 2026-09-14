@@ -17,12 +17,18 @@ resource "rudderstack_destination_postgres" "example" {
   name = "my-postgres-tf"
 
   config {
-    host        = "host"
-    database    = "database"
-    user        = "user"
-    password    = "..."
-    port        = "1234"
-    use_rudder_storage = true
+    host               = "host"
+    database           = "database"
+    user               = "user"
+    password           = "..."
+    port               = "1234"
+    use_rudder_storage = false
+
+    s3 {
+      bucket_name   = "rudder-postgres-staging"
+      access_key_id = "..."
+      access_key    = "..."
+    }
     # consent_management {
     # 	web = [
     # 		{
@@ -145,14 +151,33 @@ Required:
 
 Optional:
 
+- `azure` (Block List, Max: 1) Configure Azure Blob Storage for staging PostgreSQL warehouse data. (see [below for nested schema](#nestedblock--config--azure))
 - `client_cert` (String) Enter your Client Cert Pem File
 - `client_key` (String) Enter your Client Key Pem File
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
+- `gcp` (Block List, Max: 1) Configure Google Cloud Storage for staging PostgreSQL warehouse data. (see [below for nested schema](#nestedblock--config--gcp))
+- `minio` (Block List, Max: 1) Configure MinIO object storage for staging PostgreSQL warehouse data. (see [below for nested schema](#nestedblock--config--minio))
 - `namespace` (String) Enter the namespace of your PostgreSQL database.
 - `port` (String) Enter the port number of your PostgreSQL database.
+- `s3` (Block List, Max: 1) Configure S3 object storage for staging PostgreSQL warehouse data. (see [below for nested schema](#nestedblock--config--s3))
 - `server_ca` (String) Enter your Server CA Pem File
 - `ssl_mode` (String) Enter the SSL mode of your PostgreSQL database.
 - `sync_frequency` (String) Enter the frequency at which the data should be synced from your PostgreSQL database.
+
+<a id="nestedblock--config--azure"></a>
+### Nested Schema for `config.azure`
+
+Required:
+
+- `account_name` (String) Enter the account name for the Azure container.
+- `container_name` (String) Specify the name of your Azure container where RudderStack will store the data before loading it into PostgreSQL.
+
+Optional:
+
+- `account_key` (String, Sensitive) Enter the account key for your Azure container. Required when `use_sas_tokens` is `false`.
+- `sas_token` (String, Sensitive) Enter the SAS token for your Azure container. Required when `use_sas_tokens` is `true`.
+- `use_sas_tokens` (Boolean) Use a shared access signature (SAS) token instead of an account key.
+
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`
@@ -301,3 +326,49 @@ Optional:
 - `consents` (List of String)
 - `provider` (String)
 - `resolution_strategy` (String)
+
+
+
+<a id="nestedblock--config--gcp"></a>
+### Nested Schema for `config.gcp`
+
+Required:
+
+- `bucket_name` (String) Specify the name of your GCS bucket where RudderStack will store the data before loading it into PostgreSQL.
+- `credentials` (String, Sensitive) GCP Service Account credentials JSON for RudderStack to use in loading data into your Google Cloud Storage.
+
+
+<a id="nestedblock--config--minio"></a>
+### Nested Schema for `config.minio`
+
+Required:
+
+- `access_key_id` (String, Sensitive) Enter your MinIO access key ID.
+- `bucket_name` (String) Specify the name of your MinIO bucket where RudderStack will store the data before loading it into PostgreSQL.
+- `end_point` (String) Enter the MinIO endpoint.
+- `secret_access_key` (String, Sensitive) Enter your MinIO secret access key.
+
+Optional:
+
+- `use_ssl` (Boolean) Use SSL for the MinIO connection.
+
+
+<a id="nestedblock--config--s3"></a>
+### Nested Schema for `config.s3`
+
+Required:
+
+- `bucket_name` (String) Specify the name of your S3 bucket where RudderStack will store the data before loading it into PostgreSQL.
+
+Optional:
+
+- `access_key` (String, Sensitive) Enter your AWS secret access key.
+- `access_key_id` (String, Sensitive) Enter your AWS access key ID obtained from the AWS console.
+- `role_based_authentication` (Block List, Max: 1) Use IAM role-based authentication for S3 access. (see [below for nested schema](#nestedblock--config--s3--role_based_authentication))
+
+<a id="nestedblock--config--s3--role_based_authentication"></a>
+### Nested Schema for `config.s3.role_based_authentication`
+
+Required:
+
+- `i_am_role_arn` (String) The IAM role ARN to use for authentication.

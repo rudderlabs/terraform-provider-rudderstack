@@ -82,9 +82,9 @@ func SkipZeroValue(a interface{}) bool {
 
 // conditional returns a ConfigProperty that maps an API config key to a terraform config key
 // only if provided condition is satisfied for that API config.
-func Conditional(apiKey, terraformKey string, condition ConfigConditionFunc) ConfigProperty {
+func Conditional(apiKey, terraformKey string, condition ConfigConditionFunc, filters ...ValueFilter) ConfigProperty {
 	return ConfigProperty{
-		FromStateFunc: copyFromState(apiKey, terraformKey),
+		FromStateFunc: copyFromState(apiKey, terraformKey, filters...),
 		ToStateFunc:   copyToStateConditional(apiKey, terraformKey, condition),
 	}
 }

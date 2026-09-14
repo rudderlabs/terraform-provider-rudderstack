@@ -2,12 +2,18 @@ resource "rudderstack_destination_postgres" "example" {
   name = "my-postgres-tf"
 
   config {
-    host        = "host"
-    database    = "database"
-    user        = "user"
-    password    = "..."
-    port        = "1234"
-    use_rudder_storage = true
+    host               = "host"
+    database           = "database"
+    user               = "user"
+    password           = "..."
+    port               = "1234"
+    use_rudder_storage = false
+
+    s3 {
+      bucket_name   = "rudder-postgres-staging"
+      access_key_id = "..."
+      access_key    = "..."
+    }
     # consent_management {
     # 	web = [
     # 		{

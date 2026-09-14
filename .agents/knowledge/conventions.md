@@ -70,3 +70,9 @@
 
 - Spotify Pixel exposes a Terraform `connection_mode` block for web, validated to the sole supported value `device`; omitting the block leaves `connectionMode` absent from the API payload, while setting it explicitly sends device mode.
 - Use `GetCommonConfigMeta([]string{"web"})` for Spotify Pixel so the generated consent surface is limited to `consent_management.web`.
+
+## DEX-881 — Postgres object storage block names
+
+- Postgres object-storage settings should use mutually exclusive Terraform nested blocks `s3`, `gcp`, `azure`, and `minio` while preserving the flat Public API payload.
+- The Google Cloud Storage block is provider-facing `gcp` to align with Snowflake warehouse-storage Terraform conventions, but it still maps to API `bucketProvider = "GCS"` and flat keys such as `bucketName` and `credentials`.
+- Group MinIO with the other Postgres storage providers instead of exposing top-level legacy-style bucket/provider credentials; this avoids ambiguous duplicate flat mappings such as `accessKeyID`.

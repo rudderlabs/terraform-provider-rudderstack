@@ -16,6 +16,7 @@ type ConfigMeta struct {
 	Properties     []ConfigProperty
 	SettingsSchema map[string]*schema.Schema
 	Settings       []ConfigProperty
+	CustomizeDiff  schema.CustomizeDiffFunc
 }
 
 // SensitiveConfigPaths returns the terraform state paths of every Sensitive
