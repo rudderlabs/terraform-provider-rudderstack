@@ -71,3 +71,9 @@
 ## RUD-3119 — Destination docs regeneration churn
 
 - Running `make docs` while adding Spotify Pixel again regenerated unrelated destination docs for ActiveCampaign, Intercom, Redis, Redshift, S3, and S3 Datalake with sensitivity-marker-only changes; keep those unrelated doc diffs out of focused destination PRs unless explicitly in scope.
+
+## INT-7142 — Singular gaps and Impact generation guard
+
+- Singular `src/configurations/destinations/singular/db-config.json` currently omits `connectionMode` from `destConfig.web`, even though `supportedConnectionModes.web = ["cloud"]` and `schema.json` allows `connectionMode.web`; the Terraform provider includes `connection_mode.web` and this runtime no-op gap is tracked separately in `rudder-integrations-config`.
+- Singular `match_id.unity` is deliberately sent in the nested API-validated shape (`match_id: { unity: ... }`); backend `getDestinationConfigForSource` later flattens `match_id[sourceType]` to the transformer's flat `Config.match_id` runtime value.
+- `cmd/generatetf` must skip Impact destinations when the API config has a missing or blank `apiKey`: Impact's Terraform `api_key` is required and Sensitive, so redacted API reads would otherwise make generated HCL/import output invalid. Impact destinations with a non-empty `apiKey` can still generate normally.
