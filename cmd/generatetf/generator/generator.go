@@ -66,10 +66,6 @@ func GenerateImportScript(
 	for _, dst := range destinations {
 		t, cm := configMetaByVersion(destinationConfigs, dst.Type, int(dst.Version))
 		if cm != nil {
-			if reason, ok := canGenerateDestination(dst, t); !ok {
-				logger.Printf("skipping destination '%s': %s", dst.ID, reason)
-				continue
-			}
 			foundDestinations[dst.ID] = true
 			destinationTerraformTypes[dst.ID] = t
 			lines = append(lines, fmt.Sprintf(`terraform import "rudderstack_destination_%s.%s" "%s"`, t, destinationName(dst), dst.ID))
@@ -167,10 +163,6 @@ func GenerateTerraform(
 	for _, dst := range destinations {
 		terraformType, cm := configMetaByVersion(destinationConfigs, dst.Type, int(dst.Version))
 		if cm != nil {
-			if reason, ok := canGenerateDestination(dst, terraformType); !ok {
-				logger.Printf("could not generate resource block for destination '%s': %s", dst.ID, reason)
-				continue
-			}
 			b, err := generateDestination(dst, terraformType, cm)
 			if err != nil {
 				logger.Printf("could not generate resource block for destination '%s': %v", dst.ID, err)
@@ -439,28 +431,6 @@ func destinationType(terraformType string) string {
 
 func destinationName(destination client.Destination) string {
 	return fmt.Sprintf("dst_%s", destination.ID)
-}
-
-func canGenerateDestination(destination client.Destination, terraformType string) (string, bool) {
-	if terraformType != "impact" {
-		return "", true
-	}
-
-	// Impact's apiKey is required in Terraform but can be redacted from API reads.
-	// If it is absent or blank, generating either the resource block or an import
-	// command would leave users with HCL that cannot plan.
-	var config map[string]any
-	if len(destination.Config) == 0 {
-		return "impact apiKey is redacted or missing; skipping to avoid invalid HCL", false
-	}
-	if err := json.Unmarshal(destination.Config, &config); err != nil {
-		return fmt.Sprintf("impact config is not valid JSON (%v); skipping to avoid invalid HCL", err), false
-	}
-	apiKey, ok := config["apiKey"].(string)
-	if !ok || strings.TrimSpace(apiKey) == "" {
-		return "impact apiKey is redacted or missing; skipping to avoid invalid HCL", false
-	}
-	return "", true
 }
 
 // configMeta finds a ConfigMeta of a specific api type. Returns the terraform type and the ConfigMeta if found.

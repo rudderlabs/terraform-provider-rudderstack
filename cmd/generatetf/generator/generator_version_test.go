@@ -2,7 +2,6 @@ package generator
 
 import (
 	"bytes"
-	"encoding/json"
 	"log"
 	"testing"
 
@@ -142,52 +141,6 @@ func TestGenerateImportScript_LogsVersionMismatch(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, string(data))
 	assert.Contains(t, buf.String(), "skipping destination 'id-braze': type 'BRAZE' version 3 is not supported (available versions: 1)")
-}
-
-func TestGenerateTerraform_SkipsImpactWithoutAPIKey(t *testing.T) {
-	for _, tc := range []struct {
-		name   string
-		config json.RawMessage
-	}{
-		{name: "missing apiKey", config: json.RawMessage(`{"accountSID":"account-sid","campaignId":"123"}`)},
-		{name: "blank apiKey", config: json.RawMessage(`{"accountSID":"account-sid","apiKey":"","campaignId":"123"}`)},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			buf := captureLogger(t)
-
-			destinations := []client.Destination{
-				{ID: "id-impact", Name: "impact", Type: "IMPACT", Version: 1, Config: tc.config},
-			}
-
-			data, err := GenerateTerraform(nil, destinations, nil, nil, nil)
-			require.NoError(t, err)
-			assert.Empty(t, string(data))
-			assert.Contains(t, buf.String(), "could not generate resource block for destination 'id-impact': impact apiKey is redacted or missing; skipping to avoid invalid HCL")
-		})
-	}
-}
-
-func TestGenerateImportScript_SkipsImpactWithoutAPIKey(t *testing.T) {
-	for _, tc := range []struct {
-		name   string
-		config json.RawMessage
-	}{
-		{name: "missing apiKey", config: json.RawMessage(`{"accountSID":"account-sid","campaignId":"123"}`)},
-		{name: "blank apiKey", config: json.RawMessage(`{"accountSID":"account-sid","apiKey":"","campaignId":"123"}`)},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			buf := captureLogger(t)
-
-			destinations := []client.Destination{
-				{ID: "id-impact", Name: "impact", Type: "IMPACT", Version: 1, Config: tc.config},
-			}
-
-			data, err := GenerateImportScript(nil, destinations, nil, nil, nil)
-			require.NoError(t, err)
-			assert.Empty(t, string(data))
-			assert.Contains(t, buf.String(), "skipping destination 'id-impact': impact apiKey is redacted or missing; skipping to avoid invalid HCL")
-		})
-	}
 }
 
 func captureLogger(t *testing.T) *bytes.Buffer {
