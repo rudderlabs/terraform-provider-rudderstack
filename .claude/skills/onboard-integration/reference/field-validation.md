@@ -40,7 +40,7 @@ If a `schema.json` property is an **object whose keys are source types** (e.g. `
 
 ## Completeness check — all must hold before codegen
 
-- [ ] `# table rows + # skipped == # schema.json properties` (nothing unaccounted).
+- [ ] Every `schema.json` property maps to exactly one of: a field row, a source-scoped block (which itself expands to one sub-row per source type), or the skip-list — nothing unaccounted. Count *properties* covered, not table rows (a source-scoped property is many rows but one property).
 - [ ] Every `db-config` `supportedSourceTypes` entry has a `connection_mode` sub-row (unless the destination has no `connectionMode` property at all).
 - [ ] Every field with a `schema.json` `pattern` has a `StringMatchesRegexp` carrying that verbatim pattern (RE2-translated where needed).
 - [ ] Every field with a `schema.json` `enum` has a matching validator.

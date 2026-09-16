@@ -25,10 +25,12 @@ Parse positional arguments: integration name = `$0`, type = `$1`. If either is m
 
    ```bash
    # {kind} = destinations | sources ; {name} = the integration's config folder
+   cfgdir="$(mktemp -d)"   # fetch into a temp dir — never the provider checkout
    base="https://raw.githubusercontent.com/rudderlabs/rudder-integrations-config/main/src/configurations/{kind}/{name}"
    for f in db-config schema ui-config; do
-     curl -fsSL "$base/$f.json" -o "$f.json" || echo "MISSING: $f.json"
+     curl -fsSL "$base/$f.json" -o "$cfgdir/$f.json" || echo "MISSING: $f.json"
    done
+   # then read the 3 files from $cfgdir
    ```
 
    **Opt-in override — local clone:** use a local checkout *only* if the user explicitly provides a path or asks for it, reading the 3 files from `<path>/src/configurations/{kind}/{name}/`.

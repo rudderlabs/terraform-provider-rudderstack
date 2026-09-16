@@ -3,7 +3,6 @@ package acc
 import (
 	"context"
 	"crypto/rand"
-	"encoding/json"
 	"fmt"
 	"math/big"
 	"os"
@@ -175,19 +174,17 @@ func testAccCheckDestinationAPIConfig(resourceName, step, expectedJSON string, r
 			return err
 		}
 
-		// Log what was actually verified so a passing CRUD run isn't a black box:
-		// the reviewer can see the destination was created/updated and which fields
-		// were asserted against the live API config.
+		// Log which fields were verified so a passing CRUD run isn't a black box.
+		// Field *names* only — never the values: a destination whose db-config
+		// declares no secretKeys has credential-like fields that aren't in
+		// redactedFields, and CI logs must not carry those values.
 		validated, redacted := summarizeValidatedFields(expectedJSON, redactedFields)
-		var stored map[string]any
-		_ = json.Unmarshal(dest.Config, &stored)
-		pretty, _ := json.MarshalIndent(stored, "", "  ")
 		fmt.Printf("\n=== E2E %s verified: %s (destination %s) ===\nvalidated %d field(s): %s\n",
 			step, resourceName, rs.Primary.ID, len(validated), strings.Join(validated, ", "))
 		if len(redacted) > 0 {
 			fmt.Printf("redacted (not asserted): %s\n", strings.Join(redacted, ", "))
 		}
-		fmt.Printf("stored API config:\n%s\n===\n", pretty)
+		fmt.Printf("===\n")
 		return nil
 	}
 }
