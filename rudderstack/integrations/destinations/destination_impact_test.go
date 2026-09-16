@@ -200,8 +200,5 @@ func TestDestinationResourceImpact(t *testing.T) {
 }
 
 func TestAccDestinationImpact(t *testing.T) {
-	if !acc.PlanOnly() {
-		t.Skip("skipping: API create returns 500 in the shared E2E workspace for this destination")
-	}
 	acc.AccAssertDestination(t, "impact", impactTestConfigs)
 }
