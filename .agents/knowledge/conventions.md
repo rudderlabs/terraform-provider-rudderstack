@@ -70,3 +70,7 @@
 
 - Spotify Pixel exposes a Terraform `connection_mode` block for web, validated to the sole supported value `device`; omitting the block leaves `connectionMode` absent from the API payload, while setting it explicitly sends device mode.
 - Use `GetCommonConfigMeta([]string{"web"})` for Spotify Pixel so the generated consent surface is limited to `consent_management.web`.
+
+## INT-7142 — Singular credential sensitivity
+
+- Singular destination `api_key` and `api_secret` intentionally remain non-Sensitive in Terraform because upstream `src/configurations/destinations/singular/db-config.json` has `secretKeys: []`; this follows the RUD-3119 convention that provider sensitivity comes from db-config secretKeys, not credential-like field names alone.
