@@ -52,13 +52,13 @@ func init() {
 			Type:             schema.TypeString,
 			Required:         true,
 			Description:      "Your Singular API Key.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^[a-zA-Z0-9_]*$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|^[a-zA-Z0-9_]*$"),
 		},
 		"api_secret": {
 			Type:             schema.TypeString,
 			Optional:         true,
 			Description:      "Your Singular API Secret.",
-			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^[a-zA-Z0-9]*$"),
+			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|^[a-zA-Z0-9]*$"),
 		},
 		"session_event_list": {
 			Type:        schema.TypeList,
@@ -66,7 +66,7 @@ func init() {
 			Description: "List of session events.",
 			Elem: &schema.Schema{
 				Type:             schema.TypeString,
-				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{0,100})$"),
+				ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|^(.{0,100})$"),
 			},
 		},
 		"match_id": {
