@@ -78,7 +78,7 @@ If the user chooses **add new fields**:
    Would you like to add **all** of these fields, or select specific ones? (Enter `all` or comma-separated numbers like `1,2`)"
 
 5. Wait for the user to respond. Only add the fields the user selects.
-6. Proceed with the implementation, adding only the selected fields to the `.go`, `_test.go`, example `.tf`, and docs template files. Then continue from Step 3 (Run Unit Tests) onwards.
+6. **Before implementing, run the Step 1.6 field-by-field validation gate for the selected new fields** (build the table, run the completeness check). Updates must pass the same gate as new integrations — an added field must not skip the field-by-field check. Only once every selected field reconciles, add them to the `.go`, `_test.go`, example `.tf`, and docs template files. Then continue from Step 3 (Run Unit Tests) onwards.
 
 If the user chooses **something else**, **stop the skill** and tell them: "This skill only supports onboarding new integrations or adding new fields to existing ones. For other changes (refactoring, fixing types, updating descriptions, etc.), please make those changes manually."
 

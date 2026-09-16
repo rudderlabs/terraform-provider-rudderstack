@@ -26,7 +26,7 @@ It is a *self-verification* gate: a clean table needs no human sign-off; only an
 | Validator | `schema.json` `pattern` → `c.StringMatchesRegexp("<verbatim>")`; `enum` → `StringInSlice` / `^(a|b)$` | copy the pattern **verbatim**, then RE2-translate per config-extraction.md |
 | Required | is it in `schema.json` `required[]`? | else Optional |
 | Default | `schema.json` `default` | omit the column if none |
-| Secret | is it in `db-config` `secretKeys`? | `Sensitive` **only** if yes — never from ui-config `secret: true` |
+| Secret | is it in `db-config` `secretKeys`? | `Sensitive` **only** if yes — never from ui-config `secret: true` (RUD-3119: marking a field the backend echoes back as `Sensitive` causes perpetual drift). **But** if a field looks credential-like (name contains `key`/`secret`/`token`/`password`) yet is **absent** from `secretKeys`, don't silently leave it non-Sensitive — flag it (see completeness check) and confirm intent with a human. |
 | Description | `ui-config.json` — this field's `label` / `footerNote` | becomes the TF `Description:`; this is the column read from `ui-config.json` (so the table genuinely spans all three files) |
 | Source-type scoped | is the property an object keyed by source types? | if yes → one sub-row per source type + its allowed values |
 | Skip | in the `GetCommonConfigMeta` skip-list? | `consentManagement` / `oneTrustCookieCategories` / `ketchConsentPurposes` |
@@ -47,6 +47,7 @@ If a `schema.json` property is an **object whose keys are source types** (e.g. `
 - [ ] Every field with a `schema.json` `pattern` has a `StringMatchesRegexp` carrying that verbatim pattern (RE2-translated where needed).
 - [ ] Every field with a `schema.json` `enum` has a matching validator.
 - [ ] `Sensitive` is set on exactly the `db-config` `secretKeys` fields — no more, no fewer.
+- [ ] No credential-like field (name suggests `key`/`secret`/`token`/`password`) is left silently non-Sensitive: it is either in `secretKeys`, or a human has confirmed it is intentionally non-Sensitive (RUD-3119).
 - [ ] Every per-source-type object property is a nested block, not a scalar.
 
 ## Worked example (excerpt)
