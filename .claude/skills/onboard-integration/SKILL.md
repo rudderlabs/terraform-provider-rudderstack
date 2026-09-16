@@ -21,32 +21,24 @@ Parse positional arguments: integration name = `$0`, type = `$1`. If either is m
 
 1. **Integration name** — the snake_case name (e.g., `webhook`, `slack`, `google_analytics`).
 2. **Type** — `source` or `destination`.
-3. **Config files from `rudder-integrations-config`** — The 3 config JSON files for the integration are required. Try to locate them in this order:
+3. **Config files from `rudder-integrations-config`** — the 3 config JSON files are required. **Default: fetch the latest from GitHub.** The repo is public, so no auth or MCP connector is needed, and fetching `main` guarantees you validate against the currently published config rather than a stale local clone (a stale clone is the main cause of missed or removed fields):
 
-   **Option A: Local sibling repo** — Auto-detect by checking for a sibling folder:
    ```bash
-   ls -d ../rudder-integrations-config 2>/dev/null
+   # {kind} = destinations | sources ; {name} = the integration's config folder
+   base="https://raw.githubusercontent.com/rudderlabs/rudder-integrations-config/main/src/configurations/{kind}/{name}"
+   for f in db-config schema ui-config; do
+     curl -fsSL "$base/$f.json" -o "$f.json" || echo "MISSING: $f.json"
+   done
    ```
-   If found, use that path and tell the user: "Found `rudder-integrations-config` at `{resolved_path}`, using it."
 
-   **Option B: Fetch from GitHub** — If the local repo is not found, ask the user:
-   "I couldn't find `rudder-integrations-config` locally. Would you like me to:
-   1. Fetch the config files directly from GitHub (requires the GitHub MCP connector)
-   2. Provide the local path to your `rudder-integrations-config` clone"
+   **Opt-in override — local clone:** use a local checkout *only* if the user explicitly provides a path or asks for it, reading the 3 files from `<path>/src/configurations/{kind}/{name}/`.
 
-   If fetching from GitHub, read the files from `https://github.com/rudderlabs/rudder-integrations-config` at:
-   - `src/configurations/{destinations|sources}/{name}/db-config.json`
-   - `src/configurations/{destinations|sources}/{name}/schema.json`
-   - `src/configurations/{destinations|sources}/{name}/ui-config.json`
-
-   **Option C: User provides path** — If the user provides a custom path, use that.
-
-Once you have the config files (from any option), verify all 3 exist:
+Once you have the config files (from either source), verify all 3 exist:
 - `db-config.json`
 - `schema.json`
 - `ui-config.json`
 
-Read ALL THREE files. If any are missing, tell the user which are missing and stop — all three files are required.
+Read ALL THREE files. If any are missing (a `curl` printed `MISSING:`, or the name/kind is wrong), tell the user which are missing and stop — all three files are required.
 
 ### Check for Existing Integration
 
@@ -58,6 +50,8 @@ ls rudderstack/integrations/destinations/destination_*{name}*.go 2>/dev/null
 # For sources — check sources.go for a matching Register call:
 grep -i '{name}' rudderstack/integrations/sources/sources.go 2>/dev/null
 ```
+
+If **no match** is found, this is a new integration — continue to Step 1.
 
 If a match is found, **stop and ask the user** what they'd like to do:
 
@@ -113,6 +107,18 @@ Before generating files, find an existing destination/source with similar field 
 - **Event filtering / complex nested config?** → Look for a destination with similar structure in `rudderstack/integrations/destinations/`
 
 Read both the `.go` file and the `_test.go` file to understand the exact patterns used.
+
+---
+
+## Step 1.6: Field-by-Field Validation Table (self-verification gate)
+
+Before generating any `.go`, build an exhaustive field-by-field validation table following [reference/field-validation.md](reference/field-validation.md). One row per field — the union of every `schema.json` property and every `db-config` `defaultConfig`/`destConfig` key — with each cell copied from a **named source location** (Go type, verbatim `pattern`, `enum`, `required`, `default`, secret-from-`secretKeys`, per-source-type scoping + allowed values).
+
+Then run the completeness check in that reference. **This is a hard gate:**
+- If every field reconciles, proceed to Step 2 automatically and include the table in the PR description / tech spec so the reviewer can verify what was generated.
+- If any field cannot be reconciled across the three files (present in one but not another, ambiguous type, a `pattern` you cannot faithfully translate to RE2), STOP and ask — do not guess.
+
+The most common first-draft errors are silent omissions the model doesn't notice: a per-source-type `connection_mode` enum that differs between source types, a field-level regex left off, a nested source-type object flattened to a scalar. Enumerating every field against its source file — rather than summarizing from memory — is what catches them.
 
 ---
 
@@ -230,6 +236,7 @@ If the full CRUD test fails, analyze the error and fix. Common issues:
 
 Before finishing, verify:
 
+- [ ] Field-by-field validation table completed and reconciled against `schema.json` + `db-config.json` + `ui-config.json` (Step 1.6) — every property accounted for
 - [ ] All files created/modified
 - [ ] `init()` function registers the integration (self-registering, no provider.go changes needed)
 - [ ] Unit tests pass
