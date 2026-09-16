@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.14.0...v4.15.0) (2026-09-16)
+
+
+### Features
+
+* add Singular and impact.com destination resources ([#331](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/331)) ([82f8d59](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/82f8d592b215b29b62f21602e2fe05b3f67437fe))
+
 ## [4.14.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.13.1...v4.14.0) (2026-09-11)
 
 
