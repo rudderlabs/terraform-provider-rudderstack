@@ -17,3 +17,8 @@
 
 - Customer.io live acceptance and staging-smoke fixtures may only include `api_version = "v2"` and `user_id_identifier_type` once the target backend's integrations-config deployment persists and echoes API keys `apiVersion` and `userIdIdentifierType`. If the backend drops them on create/read, the post-apply drift assertion (`terraform plan -detailed-exitcode`) fails with a perpetual diff. As of the INT-7014 rename these keys are on rudder-integrations-config `develop` but not yet released to `main`, so an environment tracking released config can still fail; fall back to mock/unit coverage for serialization there.
 - Keep mock/unit coverage for Terraform serialization of explicit `api_version` and `user_id_identifier_type`. `api_version` is Optional with schema `Default: "v1"`, so an omitted attribute still resolves to `v1` and is written to the API config as `apiVersion`; the round-trip stays symmetric because the backend echoes that value back. `user_id_identifier_type` is Optional with no default and uses `c.SkipZeroValue`, so it is omitted from the payload entirely when unset.
+
+## INT-7142 — Singular and Impact live CRUD acceptance failures
+
+- Singular and impact.com destination acceptance tests cannot run live CRUD in the shared E2E workspace with dummy destination credentials: `TestAccDestinationSingular` and `TestAccDestinationImpact` failed on Step 1 create with `could not create destination: http status code: 500`.
+- Keep those `TestAccDestination...` functions plan-only by skipping when `!acc.PlanOnly()`, while preserving mock `AssertDestination` converter coverage and `TF_ACC_PLAN_ONLY=1` schema validation.

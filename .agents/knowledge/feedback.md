@@ -28,3 +28,4 @@
 
 - Do not add destination-specific guards such as `terraformType == "impact"` in `cmd/generatetf/generator` to work around redacted Required+Sensitive fields; this is a generic generator issue across destinations.
 - Any future generated-HCL/import handling for redacted Required+Sensitive fields should derive policy from `configs.ConfigMeta` / registered schema metadata and be handled separately from individual destination onboarding PRs.
+- For newly onboarded Terraform destination resources, do not include `(^env[.].+)` in new `c.StringMatchesRegexp(...)` validators. Keep existing dynamic-config support for the `{{ ... || ... }}` form when required, but do not add new `env.` validator support because env-based dynamic configuration is discontinued and upstream integration-config cleanup is pending.
