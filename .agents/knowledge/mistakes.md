@@ -20,5 +20,6 @@
 
 ## INT-7142 — Singular and Impact live CRUD acceptance failures
 
-- Singular and impact.com destination acceptance tests cannot run live CRUD in the shared E2E workspace with dummy destination credentials: `TestAccDestinationSingular` and `TestAccDestinationImpact` failed on Step 1 create with `could not create destination: http status code: 500`.
-- Keep those `TestAccDestination...` functions plan-only by skipping when `!acc.PlanOnly()`, while preserving mock `AssertDestination` converter coverage and `TF_ACC_PLAN_ONLY=1` schema validation.
+- Singular and impact.com destination acceptance tests failed in the shared E2E workspace on Step 1 create with `could not create destination: http status code: 500` when using dummy destination credentials.
+- Reviewer guidance clarified that transient shared-workspace 5xx/API create failures should be handled by rerunning CI, not by adding permanent `if !acc.PlanOnly() { t.Skip(...) }` guards. Reserve plan-only live-CRUD skips for destinations with genuine documented prerequisites the shared workspace cannot satisfy, such as vendor OAuth account requirements.
+- Preserve mock `AssertDestination` converter coverage and `TF_ACC_PLAN_ONLY=1` schema validation when live CRUD is unreliable.
