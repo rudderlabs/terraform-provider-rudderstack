@@ -72,12 +72,20 @@ func summarizeValidatedFields(expectedJSON string, redactedFields map[string]boo
 func leafPaths(prefix string, val any) []string {
 	switch v := val.(type) {
 	case map[string]any:
+		// An empty object/array is still an asserted leaf (compareValue checks its
+		// type), so emit its path rather than dropping it from the count.
+		if len(v) == 0 {
+			return []string{prefix}
+		}
 		var out []string
 		for k, sub := range v {
 			out = append(out, leafPaths(prefix+"."+k, sub)...)
 		}
 		return out
 	case []any:
+		if len(v) == 0 {
+			return []string{prefix}
+		}
 		var out []string
 		for i, sub := range v {
 			out = append(out, leafPaths(fmt.Sprintf("%s[%d]", prefix, i), sub)...)

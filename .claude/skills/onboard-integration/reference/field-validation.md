@@ -27,6 +27,7 @@ It is a *self-verification* gate: a clean table needs no human sign-off; only an
 | Required | is it in `schema.json` `required[]`? | else Optional |
 | Default | `schema.json` `default` | omit the column if none |
 | Secret | is it in `db-config` `secretKeys`? | `Sensitive` **only** if yes — never from ui-config `secret: true` |
+| Description | `ui-config.json` — this field's `label` / `footerNote` | becomes the TF `Description:`; this is the column read from `ui-config.json` (so the table genuinely spans all three files) |
 | Source-type scoped | is the property an object keyed by source types? | if yes → one sub-row per source type + its allowed values |
 | Skip | in the `GetCommonConfigMeta` skip-list? | `consentManagement` / `oneTrustCookieCategories` / `ketchConsentPurposes` |
 
@@ -36,6 +37,7 @@ If a `schema.json` property is an **object whose keys are source types** (e.g. `
 
 - Add one sub-row **per source type**, each carrying that source type's own allowed values. For `connectionMode`, cross-check `db-config.json` → `supportedConnectionModes.<sourceType>`.
 - Model it as `TypeList` + `MaxItems: 1` with one nested field per source type, mapped `c.Simple("<key>.<sourceType>", "<key>.0.<snake_sourceType>", c.SkipZeroValue)`.
+- **Omit `c.SkipZeroValue` when a source-scoped field has a non-zero `schema.json` default** (e.g. a bool defaulting to `true`, like `useNativeSDK.web`). `SkipZeroValue` drops the Go zero value (`false`/`""`), so an explicit `false` would be silently discarded and revert to the backend default — the user could never turn the field off. Pair the TF-schema `Default` with a plain `c.Simple` in that case.
 - **Enums can differ per source type.** e.g. `android: ["cloud","device"]` but `web: ["cloud"]` → the android validator is `^(cloud|device)$` and web's is `^(cloud)$`. Never apply one blanket enum to all source types.
 
 ## Completeness check — all must hold before codegen
