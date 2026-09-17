@@ -119,10 +119,7 @@ This repo includes a Claude Code skill (`/onboard-integration`) that automates o
 Before running the skill, make sure you have:
 
 1. **[Claude Code CLI](https://claude.com/claude-code)** installed
-2. **Integration config files** — The skill needs 3 JSON files (`db-config.json`, `schema.json`, `ui-config.json`) from the [`rudder-integrations-config`](https://github.com/rudderlabs/rudder-integrations-config) repo. You can provide them in one of three ways:
-   - **Auto-detect** — Clone `rudder-integrations-config` as a sibling directory (i.e., `../rudder-integrations-config`). The skill finds it automatically.
-   - **GitHub fetch** — If you have the GitHub MCP connector configured, the skill can fetch the files directly from GitHub.
-   - **Manual path** — Provide the absolute path to your local clone when prompted.
+2. **Integration config files** — The skill needs 3 JSON files (`db-config.json`, `schema.json`, `ui-config.json`) from the [`rudder-integrations-config`](https://github.com/rudderlabs/rudder-integrations-config) repo. By default the skill fetches them directly from GitHub (public repo, no auth needed). To use a local checkout instead, provide its path when prompted.
 3. **For E2E testing** — A `.env` file at the repo root with `RUDDERSTACK_ACCESS_TOKEN` and `RUDDERSTACK_API_URL` (see [E2E Testing](#e2e-testing) below).
 
 ## Usage

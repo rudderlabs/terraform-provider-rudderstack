@@ -66,7 +66,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APICreate, redactedFields),
+					testAccCheckDestinationAPIConfig(resourceName, "create", cfg.APICreate, redactedFields),
 					// Exact wire version must match the destination's registered
 					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
 					// The automatic post-apply plan check also asserts no plan
@@ -81,7 +81,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, cfg.APIUpdate, redactedFields),
+					testAccCheckDestinationAPIConfig(resourceName, "update", cfg.APIUpdate, redactedFields),
 				),
 			},
 			{
@@ -149,7 +149,7 @@ func testAccCheckDestinationExists(resourceName string) resource.TestCheckFunc {
 // testAccCheckDestinationAPIConfig fetches the destination from the API and verifies
 // its config contains all expected fields from the test's API JSON. redactedFields
 // are secret API keys the backend omits from responses and must not be asserted.
-func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, redactedFields map[string]bool) resource.TestCheckFunc {
+func testAccCheckDestinationAPIConfig(resourceName, step, expectedJSON string, redactedFields map[string]bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if expectedJSON == "" {
 			return nil
@@ -170,7 +170,22 @@ func testAccCheckDestinationAPIConfig(resourceName, expectedJSON string, redacte
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		return compareConfig(dest.Config, expectedJSON, redactedFields)
+		if err := compareConfig(dest.Config, expectedJSON, redactedFields); err != nil {
+			return err
+		}
+
+		// Log which fields were verified so a passing CRUD run isn't a black box.
+		// Field *names* only — never the values: a destination whose db-config
+		// declares no secretKeys has credential-like fields that aren't in
+		// redactedFields, and CI logs must not carry those values.
+		validated, redacted := summarizeValidatedFields(expectedJSON, redactedFields)
+		fmt.Printf("\n=== E2E %s verified: %s (destination %s) ===\nvalidated %d field(s): %s\n",
+			step, resourceName, rs.Primary.ID, len(validated), strings.Join(validated, ", "))
+		if len(redacted) > 0 {
+			fmt.Printf("redacted (not asserted): %s\n", strings.Join(redacted, ", "))
+		}
+		fmt.Printf("===\n")
+		return nil
 	}
 }
 

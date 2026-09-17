@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 )
 
@@ -40,6 +41,59 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string, redactedField
 		return fmt.Errorf("API config verification failed:\n%s", strings.Join(mismatches, "\n"))
 	}
 	return nil
+}
+
+// summarizeValidatedFields returns the sorted leaf field paths that compareConfig
+// asserts for expectedJSON, plus the top-level keys it skips as redacted. Used to
+// log what a passing CRUD verification actually checked (reviewer visibility).
+func summarizeValidatedFields(expectedJSON string, redactedFields map[string]bool) (validated, redacted []string) {
+	expectedJSON = strings.TrimSpace(expectedJSON)
+	if expectedJSON == "" || expectedJSON == "{}" {
+		return nil, nil
+	}
+	var expected map[string]any
+	if err := json.Unmarshal([]byte(expectedJSON), &expected); err != nil {
+		return nil, nil
+	}
+	for key, val := range expected {
+		if redactedFields[key] {
+			redacted = append(redacted, key)
+			continue
+		}
+		validated = append(validated, leafPaths(key, val)...)
+	}
+	sort.Strings(validated)
+	sort.Strings(redacted)
+	return validated, redacted
+}
+
+// leafPaths returns the dotted paths of every scalar leaf under val at prefix,
+// mirroring how compareConfig descends objects and arrays.
+func leafPaths(prefix string, val any) []string {
+	switch v := val.(type) {
+	case map[string]any:
+		// An empty object/array is still an asserted leaf (compareValue checks its
+		// type), so emit its path rather than dropping it from the count.
+		if len(v) == 0 {
+			return []string{prefix}
+		}
+		var out []string
+		for k, sub := range v {
+			out = append(out, leafPaths(prefix+"."+k, sub)...)
+		}
+		return out
+	case []any:
+		if len(v) == 0 {
+			return []string{prefix}
+		}
+		var out []string
+		for i, sub := range v {
+			out = append(out, leafPaths(fmt.Sprintf("%s[%d]", prefix, i), sub)...)
+		}
+		return out
+	default:
+		return []string{prefix}
+	}
 }
 
 // compareFields recursively checks that every key in expected exists in actual with the

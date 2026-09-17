@@ -122,3 +122,15 @@ func TestCompareConfig_SkipsRedactedSecret(t *testing.T) {
 		redacted,
 	), "a redacted field returned blanked must not fail")
 }
+
+// summarizeValidatedFields lists the leaf paths CRUD verification asserts (sorted)
+// and the redacted top-level keys it skips — used for the passing-run log line.
+func TestSummarizeValidatedFields(t *testing.T) {
+	validated, redacted := summarizeValidatedFields(
+		`{"apiKey":"abc","apiSecret":"shh","connectionMode":{"web":"cloud","android":"device"},"events":[{"from":"a"}],"tags":[]}`,
+		map[string]bool{"apiSecret": true},
+	)
+	// "tags":[] is an empty array — still asserted, so it must appear in the count.
+	assert.Equal(t, []string{"apiKey", "connectionMode.android", "connectionMode.web", "events[0].from", "tags"}, validated)
+	assert.Equal(t, []string{"apiSecret"}, redacted)
+}
