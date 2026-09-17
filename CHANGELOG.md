@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.1](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.15.0...v4.15.1) (2026-09-17)
+
+
+### Miscellaneous
+
+* strengthen onboard-integration skill and log E2E CRUD configs ([#333](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/333)) ([ae03ddc](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/ae03ddc6dba61b66ae2a31a334994719e03fbdaa))
+
 ## [4.15.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.14.0...v4.15.0) (2026-09-16)
 
 
