@@ -19,8 +19,10 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				namespace = "example_namespace"
 				enable_iceberg = true
 				external_volume = "EXT_VOLUME0"
-				// allow_users_context_traits is immutable upstream and ForceNew here,
-				// so it is set once at Create and left alone by the Update step.
+				// underscore_divide_numbers and allow_users_context_traits are
+				// immutable upstream and ForceNew here, so they are set once at
+				// Create and left alone by the Update step.
+				underscore_divide_numbers = true
 				allow_users_context_traits = true
 			`,
 		APICreate: `{
@@ -33,7 +35,7 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				"skipTracksTable": false,
 				"enableIceberg": true,
 				"externalVolume": "EXT_VOLUME0",
-				"underscoreDivideNumbers": false,
+				"underscoreDivideNumbers": true,
 				"allowUsersContextTraits": true
 			}`,
 		TerraformUpdate: `

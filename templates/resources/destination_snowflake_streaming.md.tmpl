@@ -16,6 +16,6 @@ https://www.rudderstack.com/docs/destinations/streaming-destinations/snowflake-s
 
 > **:warning: Breaking Change**
 > 
-> Note that from the provider versions 5.0.0 and above, changing `allow_users_context_traits` forces a new destination to be created. The control plane treats the underlying field as immutable and rejects any update to it, so an in-place change could never succeed. Terraform now replaces the destination instead — which assigns a **new destination ID**, so any connection pointing at it has to be re-pointed. Plan carefully before changing this value on an existing destination.
+> Note that from the provider versions 5.0.0 and above, changing either `allow_users_context_traits` or `underscore_divide_numbers` forces a new destination to be created. Both are one-time flags that distinguish older destination behaviour from newer, and the control plane now rejects any update to them, so an in-place change could never succeed. Terraform replaces the destination instead — which assigns a **new destination ID**, so any connection pointing at it has to be re-pointed, and the warehouse will receive a different column set from the one it already holds. Plan carefully before changing either value on an existing destination.
 
 {{ .SchemaMarkdown | trimspace }}
