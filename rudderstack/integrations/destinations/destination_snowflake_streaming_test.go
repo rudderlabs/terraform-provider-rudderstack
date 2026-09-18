@@ -19,6 +19,9 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				namespace = "example_namespace"
 				enable_iceberg = true
 				external_volume = "EXT_VOLUME0"
+				// allow_users_context_traits is immutable upstream and ForceNew here,
+				// so it is set once at Create and left alone by the Update step.
+				allow_users_context_traits = true
 			`,
 		APICreate: `{
 				"account": "example-account",
@@ -31,7 +34,7 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				"enableIceberg": true,
 				"externalVolume": "EXT_VOLUME0",
 				"underscoreDivideNumbers": false,
-				"allowUsersContextTraits": false
+				"allowUsersContextTraits": true
 			}`,
 		TerraformUpdate: `
 				account   = "updated-account"

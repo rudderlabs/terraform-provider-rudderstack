@@ -128,10 +128,15 @@ func init() {
 			Description: "Use underscores to split numeric segments.",
 		},
 		"allow_users_context_traits": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     false,
-			Description: "Allow users context traits.",
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+			// The control plane rejects any change to allowUsersContextTraits
+			// ("Field ... is immutable and cannot be modified"), so an in-place
+			// update can never succeed. ForceNew makes Terraform replace the
+			// destination instead of planning an update the API will refuse.
+			ForceNew:    true,
+			Description: "Allow users context traits. Changing this forces a new destination to be created, because the control plane treats the field as immutable.",
 		},
 		"connection_mode": {
 			Type:        schema.TypeList,

@@ -14,4 +14,8 @@ https://www.rudderstack.com/docs/destinations/streaming-destinations/snowflake-s
 
 {{tffile "examples/destination_snowflake_streaming.tf"}}
 
+> **:warning: Breaking Change**
+> 
+> Note that from the provider versions 5.0.0 and above, changing `allow_users_context_traits` forces a new destination to be created. The control plane treats the underlying field as immutable and rejects any update to it, so an in-place change could never succeed. Terraform now replaces the destination instead — which assigns a **new destination ID**, so any connection pointing at it has to be re-pointed. Plan carefully before changing this value on an existing destination.
+
 {{ .SchemaMarkdown | trimspace }}
