@@ -40,9 +40,13 @@ func init() {
 			Description: "Enter the credentials JSON used by the client library to access the Google Sheets API.",
 		},
 		"event_key_map": {
-			Type:        schema.TypeList,
-			ConfigMode:  schema.SchemaConfigModeAttr,
-			Optional:    true,
+			Type:       schema.TypeList,
+			ConfigMode: schema.SchemaConfigModeAttr,
+			// The GOOGLESHEETS schema requires eventKeyMap, and ArrayWithObjects
+			// omits the key entirely for an empty list — so an unset event_key_map
+			// made the control plane reject Create with a 400. Required here means
+			// the error surfaces at plan time instead.
+			Required:    true,
 			Description: "Add Event Properties to map to Google-Sheets Column.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
