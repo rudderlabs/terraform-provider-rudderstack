@@ -97,7 +97,6 @@ Optional:
 - `enable_local_storage_persistence` (Block List, Max: 1) Use this setting to enable local storage persistence. (see [below for nested schema](#nestedblock--config--enable_local_storage_persistence))
 - `event_filtering` (Block List, Max: 1) This option allows you filter the events you want to send to PostHog. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `person_profiles` (Block List, Max: 1) Use this setting to enable person profiles. (see [below for nested schema](#nestedblock--config--person_profiles))
-- `property_blacklist` (List of Object) Use this setting to enable property blacklist. (see [below for nested schema](#nestedatt--config--property_blacklist))
 - `use_native_sdk` (Block List, Max: 1) Use this setting to enable native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 - `use_v2_group` (Boolean) Whether to use v2 grouping for your PostHog service.
 - `xhr_headers` (List of Object) Use this setting to enable property blacklist. (see [below for nested schema](#nestedatt--config--xhr_headers))
@@ -319,14 +318,6 @@ Optional:
 Optional:
 
 - `web` (String)
-
-
-<a id="nestedatt--config--property_blacklist"></a>
-### Nested Schema for `config.property_blacklist`
-
-Optional:
-
-- `property` (String)
 
 
 <a id="nestedblock--config--use_native_sdk"></a>

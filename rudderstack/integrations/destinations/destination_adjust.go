@@ -18,7 +18,13 @@ func init() {
 			"from": "from",
 			"to":   "to",
 		}),
-		c.ArrayWithObjects("partnerParamKeys", "partner_param_keys", map[string]interface{}{
+		// API key is partnerParamsKeys (plural "Params"). db-config.json,
+		// schema.json, ui-config.json and rudder-transformer
+		// (src/v0/destinations/adj/transform.js) all use that spelling; this
+		// mapping wrote partnerParamKeys, which nothing reads — so every
+		// Terraform-managed Adjust destination silently sent no partner params.
+		// The terraform attribute name is unchanged, so no HCL needs editing.
+		c.ArrayWithObjects("partnerParamsKeys", "partner_param_keys", map[string]interface{}{
 			"from": "from",
 			"to":   "to",
 		}),
