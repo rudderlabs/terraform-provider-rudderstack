@@ -17,7 +17,7 @@ resource "rudderstack_destination_google_analytics4" "example" {
   name = "my-google-analytics4"
 
   config {
-    measurement_id  = "..."
+    measurement_id = "..."
 
     # firebase_app_id = "..."
 
@@ -25,9 +25,7 @@ resource "rudderstack_destination_google_analytics4" "example" {
 
     # client_type = "gtag"
 
-    # block_page_view_event   = false
     # extend_page_view_params = false
-    # send_user_id            = false
 
     # use_native_sdk {
     #   web = true
@@ -113,6 +111,10 @@ resource "rudderstack_destination_google_analytics4" "example" {
 
 > **:warning: Breaking Change**
 > 
+> Note that from the provider versions 5.0.0 and above, the `block_page_view_event` and `send_user_id` properties have been removed. They were never part of the GA4 destination definition, so the control plane did not store or read them and setting them had no effect. Remove them from your configuration. Note that `send_user_id` remains available on the Google Analytics (Universal Analytics) destination, where it is part of the definition.
+
+> **:warning: Breaking Change**
+> 
 > Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
@@ -147,7 +149,6 @@ Required:
 
 Optional:
 
-- `block_page_view_event` (Boolean) Enable this setting to disable sending `page_view` events on load. This setting is applicable only for device mode.
 - `capture_page_view` (Block List, Max: 1) Choose whether to send page view events through the RudderStack JS SDK or through automatic collection using GA4 Enhanced Measurement. (see [below for nested schema](#nestedblock--config--capture_page_view))
 - `client_type` (String) Select the client type as gtag or Firebase.
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
@@ -159,7 +160,6 @@ Optional:
 - `override_client_and_session_ids` (Block List, Max: 1) Override the gtag client ID and session ID with RudderStack's to ensure attribution is properly unified across page and track events. (see [below for nested schema](#nestedblock--config--override_client_and_session_ids))
 - `pii_properties_to_ignore` (List of Object) Use this field to filter sensitive PII fields from your events before sending them to GA4. (see [below for nested schema](#nestedatt--config--pii_properties_to_ignore))
 - `sdk_base_url` (String) Enter your GA4 Custom Domain URL. By default, it is https://www.googletagmanager.com.
-- `send_user_id` (Boolean) If enabled, the user ID is set to the identified visitors and sent to Google Analytics 4.
 - `server_container_url` (String) Enter your GA4 Server Side Container URL.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 
