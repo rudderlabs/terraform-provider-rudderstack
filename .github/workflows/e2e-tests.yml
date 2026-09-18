@@ -171,11 +171,27 @@ jobs:
           RUDDERSTACK_API_URL: ${{ vars.RUDDERSTACK_ACC_TEST_API_URL }}
           DEST_NAME: ${{ matrix.destination }}
         run: |
-          DEST_PATTERN=$(echo "$DEST_NAME" | sed 's/_/.*/g')
+          # Select this destination's tests by exact name, read out of its own
+          # test file. A fuzzy "(?i)...*${DEST_NAME}" regex bled across
+          # destinations that share a prefix: the google_analytics entry also ran
+          # TestAccDestinationGoogleAnalytics4, and snowflake also ran
+          # TestAccDestinationSnowflakeStreaming. Anchoring alone is not enough
+          # either, since destination_hs_test.go legitimately holds two tests.
+          TEST_FILE="rudderstack/integrations/destinations/destination_${DEST_NAME}_test.go"
+          if [ ! -f "$TEST_FILE" ]; then
+            echo "No test file for destination '${DEST_NAME}' at ${TEST_FILE}" >&2
+            exit 1
+          fi
+          NAMES=$(sed -n 's/^func \(TestAccDestination[A-Za-z0-9_]*\)(.*/\1/p' "$TEST_FILE" | paste -sd'|' -)
+          if [ -z "$NAMES" ]; then
+            echo "No TestAccDestination functions found in ${TEST_FILE}" >&2
+            exit 1
+          fi
+          echo "Running: $NAMES"
           go test \
             ./rudderstack/integrations/destinations/ \
             -v \
-            -run "(?i)TestAccDestination.*${DEST_PATTERN}" \
+            -run "^(${NAMES})$" \
             -timeout 10m \
             -count=1
 
