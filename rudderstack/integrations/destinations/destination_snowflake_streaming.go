@@ -122,16 +122,27 @@ func init() {
 			ValidateDiagFunc: c.StringMatchesRegexp("^(.{1,100})$"),
 		},
 		"underscore_divide_numbers": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     false,
-			Description: "Use underscores to split numeric segments.",
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+			// underscore_divide_numbers and allow_users_context_traits are both
+			// declared "rs-immutable" upstream (rudder-integrations-config#2647).
+			// They are one-time flags distinguishing old destination generations
+			// from new: flipping one rewrites the column set emitted into a
+			// warehouse that already holds data written under the old convention.
+			// The control plane refuses the update outright, so an in-place change
+			// can never apply. ForceNew makes Terraform replace the destination
+			// instead of planning something the API will reject.
+			ForceNew:    true,
+			Description: "Use underscores to split numeric segments. Changing this forces a new destination to be created, because the control plane treats the field as immutable.",
 		},
 		"allow_users_context_traits": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Default:     false,
-			Description: "Allow users context traits.",
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+			// Immutable upstream — see the note on underscore_divide_numbers.
+			ForceNew:    true,
+			Description: "Allow users context traits. Changing this forces a new destination to be created, because the control plane treats the field as immutable.",
 		},
 		"connection_mode": {
 			Type:        schema.TypeList,
