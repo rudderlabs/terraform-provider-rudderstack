@@ -7,8 +7,6 @@ resource "rudderstack_destination_adobe_analytics" "example" {
     # tracking_server_secure_url = "https://securesampleurl.com"
     # ssl_heartbeat = true
     # heartbeat_tracking_server_url= "http://heartbeaturl.com"
-    # use_utf8_charset = false
-    # use_secure_server_side = false
     # proxy_normal_url = "http://normalproxy.com"
     # proxy_heartbeat_url = "http://heartbeatproxy.com"
     # marketing_cloud_org_id = "test_234"
@@ -18,9 +16,6 @@ resource "rudderstack_destination_adobe_analytics" "example" {
     # prefer_visitor_id = false
     # track_page_name = false
     # context_data_prefix = "ruddertest"
-    # use_legacy_link_name = false
-    # page_name_fallback_tostring = false
-    # send_false_values = false
     # product_identifier = "sku"
     # events_to_types = [{
     #   from = "video start"

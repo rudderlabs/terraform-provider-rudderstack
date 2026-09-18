@@ -14,18 +14,6 @@ resource "rudderstack_destination_amplitude" "example" {
     # track_products_once       = true
     # track_revenue_per_product = true
 
-    # track_gclid {
-    #   web = true
-    # }
-
-    # track_referrer {
-    #   web = true
-    # }
-
-    # track_utm_properties {
-    #   web = true
-    # }
-
     # track_session_events {
     #   web          = true
     #   android      = true
@@ -45,26 +33,6 @@ resource "rudderstack_destination_amplitude" "example" {
     # traits_to_prepend   = ["one", "two", "three"]
 
     # prefer_anonymous_id_for_device_id {
-    #   web = true
-    # }
-
-    # device_id_from_url_param {
-    #   web = true
-    # }
-
-    # force_https {
-    #   web = true
-    # }
-
-    # save_params_referrer_once_per_session {
-    #   web = true
-    # }
-
-    # unset_params_referrer_on_new_session {
-    #   web = true
-    # }
-
-    # batch_events {
     #   web = true
     # }
 

@@ -2,7 +2,7 @@ resource "rudderstack_destination_google_analytics4" "example" {
   name = "my-google-analytics4"
 
   config {
-    measurement_id  = "..."
+    measurement_id = "..."
 
     # firebase_app_id = "..."
 
@@ -10,9 +10,7 @@ resource "rudderstack_destination_google_analytics4" "example" {
 
     # client_type = "gtag"
 
-    # block_page_view_event   = false
     # extend_page_view_params = false
-    # send_user_id            = false
 
     # use_native_sdk {
     #   web = true
