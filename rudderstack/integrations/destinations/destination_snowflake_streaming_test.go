@@ -46,7 +46,7 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				json_paths = "event.properties.a,event.properties.b"
 				enable_iceberg = true
 				external_volume = "EXT_VOLUME1"
-				underscore_divide_numbers = true
+				underscore_divide_numbers = false
 				allow_users_context_traits = false
 				connection_mode {
 					android = "cloud"
@@ -89,7 +89,7 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				"jsonPaths": "event.properties.a,event.properties.b",
 				"enableIceberg": true,
 				"externalVolume": "EXT_VOLUME1",
-				"underscoreDivideNumbers": true,
+				"underscoreDivideNumbers": false,
 				"allowUsersContextTraits": false,
 				"connectionMode": {
 					"android": "cloud",
