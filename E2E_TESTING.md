@@ -39,6 +39,12 @@ grep -rh --include='*.go' "^func TestAcc" rudderstack/integrations \
 
 **OAuth destination accounts.** Full-CRUD tests for OAuth destinations resolve a real `rudderAccountId` at runtime by listing accounts in the test workspace and matching the destination account definition type. A missing matching destination-category account is a hard failure: connect the required account in the workspace associated with `RUDDERSTACK_ACCESS_TOKEN`. In `TF_ACC_PLAN_ONLY=1` mode, these tests retain their fixture placeholder and perform schema validation with zero API calls.
 
+**Plan-only exceptions.** `TestAccSourceFacebookLeadAds` skips full CRUD because the source is catalog-hidden and the backend blocks creating it. It still runs in plan-only mode. To find all remaining exceptions:
+
+```bash
+grep -rB1 -A2 --include='*_test.go' "acc.PlanOnly()" rudderstack/integrations
+```
+
 ---
 
 ## 3. How a run executes
