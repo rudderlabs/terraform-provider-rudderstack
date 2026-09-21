@@ -66,7 +66,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttrSet(resourceName, "created_at"),
 					resource.TestCheckResourceAttrSet(resourceName, "updated_at"),
-					testAccCheckDestinationAPIConfig(resourceName, "create", cfg.APICreate, redactedFields),
+					testAccCheckDestinationAPIConfig(resourceName, "create", cfg.APICreate, redactedFields, cfg.APIResponseOptionalFields),
 					// Exact wire version must match the destination's registered
 					// ConfigMeta.Version (v1 today; future _v2 resources expect 2).
 					// The automatic post-apply plan check also asserts no plan
@@ -81,7 +81,7 @@ func AccAssertDestination(t *testing.T, destination string, testConfigs []config
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDestinationExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", name+"-updated"),
-					testAccCheckDestinationAPIConfig(resourceName, "update", cfg.APIUpdate, redactedFields),
+					testAccCheckDestinationAPIConfig(resourceName, "update", cfg.APIUpdate, redactedFields, cfg.APIResponseOptionalFields),
 				),
 			},
 			{
@@ -148,8 +148,9 @@ func testAccCheckDestinationExists(resourceName string) resource.TestCheckFunc {
 
 // testAccCheckDestinationAPIConfig fetches the destination from the API and verifies
 // its config contains all expected fields from the test's API JSON. redactedFields
-// are secret API keys the backend omits from responses and must not be asserted.
-func testAccCheckDestinationAPIConfig(resourceName, step, expectedJSON string, redactedFields map[string]bool) resource.TestCheckFunc {
+// are secret API keys the backend omits from responses and must not be asserted;
+// optionalFields are verified when returned but may be omitted by the backend.
+func testAccCheckDestinationAPIConfig(resourceName, step, expectedJSON string, redactedFields map[string]bool, optionalFields []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if expectedJSON == "" {
 			return nil
@@ -170,7 +171,8 @@ func testAccCheckDestinationAPIConfig(resourceName, step, expectedJSON string, r
 			return fmt.Errorf("failed to get destination from API: %w", err)
 		}
 
-		if err := compareConfig(dest.Config, expectedJSON, redactedFields); err != nil {
+		optionalFieldSet := stringSet(optionalFields)
+		if err := compareConfig(dest.Config, expectedJSON, redactedFields, optionalFieldSet); err != nil {
 			return err
 		}
 
@@ -178,11 +180,14 @@ func testAccCheckDestinationAPIConfig(resourceName, step, expectedJSON string, r
 		// Field *names* only — never the values: a destination whose db-config
 		// declares no secretKeys has credential-like fields that aren't in
 		// redactedFields, and CI logs must not carry those values.
-		validated, redacted := summarizeValidatedFields(expectedJSON, redactedFields)
+		validated, redacted, optional := summarizeValidatedFields(expectedJSON, redactedFields, optionalFieldSet)
 		fmt.Printf("\n=== E2E %s verified: %s (destination %s) ===\nvalidated %d field(s): %s\n",
 			step, resourceName, rs.Primary.ID, len(validated), strings.Join(validated, ", "))
 		if len(redacted) > 0 {
 			fmt.Printf("redacted (not asserted): %s\n", strings.Join(redacted, ", "))
+		}
+		if len(optional) > 0 {
+			fmt.Printf("response-optional (verified when present): %s\n", strings.Join(optional, ", "))
 		}
 		fmt.Printf("===\n")
 		return nil

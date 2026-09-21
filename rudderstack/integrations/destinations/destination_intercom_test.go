@@ -397,6 +397,7 @@ var intercomTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
+		APIResponseOptionalFields: []string{"collectContext"},
 	},
 }
 

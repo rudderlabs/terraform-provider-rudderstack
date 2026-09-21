@@ -386,5 +386,5 @@ func TestDestinationResourceGoogleAdwordsOfflineConversionsRejectsEmptyConversio
 }
 
 func TestAccDestinationGoogleAdwordsOfflineConversions(t *testing.T) {
-	acc.AccAssertOAuthDestination(t, "google_adwords_offline_conversions", "google_adwords_offline_conversions", googleAdwordsOfflineConversionsTestConfigs)
+	acc.AccAssertOAuthDestination(t, "google_adwords_offline_conversions", "GOOGLE_ADWORDS_OFFLINE_CONVERSIONS", googleAdwordsOfflineConversionsTestConfigs)
 }

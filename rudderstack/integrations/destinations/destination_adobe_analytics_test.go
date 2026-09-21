@@ -541,6 +541,13 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 				"timestampOption": "disabled",
 				"productIdentifier": "name"
 			  }`,
+		APIResponseOptionalFields: []string{
+			"pageNameFallbackTostring",
+			"sendFalseValues",
+			"useLegacyLinkName",
+			"useSecureServerSide",
+			"useUtf8Charset",
+		},
 	},
 }
 

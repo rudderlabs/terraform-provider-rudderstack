@@ -83,5 +83,5 @@ func TestDestinationResourceBingadsOfflineConversions(t *testing.T) {
 }
 
 func TestAccDestinationBingadsOfflineConversions(t *testing.T) {
-	acc.AccAssertOAuthDestination(t, "bingads_offline_conversions", "bingads_offline_conversions", bingadsOfflineConversionsTestConfigs)
+	acc.AccAssertOAuthDestination(t, "bingads_offline_conversions", "BINGADS_OFFLINE_CONVERSIONS", bingadsOfflineConversionsTestConfigs)
 }

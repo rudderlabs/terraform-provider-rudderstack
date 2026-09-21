@@ -362,6 +362,7 @@ var adjustTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
+		APIResponseOptionalFields: []string{"partnerParamKeys"},
 	},
 }
 

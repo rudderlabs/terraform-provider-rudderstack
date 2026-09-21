@@ -455,6 +455,7 @@ var snowflakeTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
+		APIResponseOptionalFields: []string{"additionalProperties"},
 	},
 }
 

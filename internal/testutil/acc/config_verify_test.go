@@ -103,12 +103,14 @@ func TestCompareConfig_SkipsRedactedSecret(t *testing.T) {
 		json.RawMessage(`{"apiKey":"abc"}`),
 		`{"apiKey":"abc","apiSecret":"shh"}`,
 		redacted,
+		nil,
 	), "redacted apiSecret missing from response must not fail")
 
 	err := compareConfig(
 		json.RawMessage(`{"apiKey":"abc"}`),
 		`{"apiKey":"abc","residencyServer":"standard"}`,
 		redacted,
+		nil,
 	)
 	require.Error(t, err, "a non-redacted missing field must still fail")
 	assert.Contains(t, err.Error(), "residencyServer")
@@ -120,17 +122,37 @@ func TestCompareConfig_SkipsRedactedSecret(t *testing.T) {
 		json.RawMessage(`{"apiKey":"abc","apiSecret":""}`),
 		`{"apiKey":"abc","apiSecret":"right"}`,
 		redacted,
+		nil,
 	), "a redacted field returned blanked must not fail")
+}
+
+func TestCompareConfig_ResponseOptionalField(t *testing.T) {
+	optional := map[string]bool{"deprecatedOption": true}
+	require.NoError(t, compareConfig(
+		json.RawMessage(`{"apiKey":"abc"}`),
+		`{"apiKey":"abc","deprecatedOption":true}`,
+		nil,
+		optional,
+	), "an optional response field may be omitted")
+
+	err := compareConfig(
+		json.RawMessage(`{"apiKey":"abc","deprecatedOption":false}`),
+		`{"apiKey":"abc","deprecatedOption":true}`,
+		nil,
+		optional,
+	)
+	require.Error(t, err, "an optional response field must still match when present")
 }
 
 // summarizeValidatedFields lists the leaf paths CRUD verification asserts (sorted)
 // and the redacted top-level keys it skips — used for the passing-run log line.
 func TestSummarizeValidatedFields(t *testing.T) {
-	validated, redacted := summarizeValidatedFields(
+	validated, redacted, optional := summarizeValidatedFields(
 		`{"apiKey":"abc","apiSecret":"shh","connectionMode":{"web":"cloud","android":"device"},"events":[{"from":"a"}],"tags":[]}`,
 		map[string]bool{"apiSecret": true},
+		map[string]bool{"tags": true},
 	)
-	// "tags":[] is an empty array — still asserted, so it must appear in the count.
-	assert.Equal(t, []string{"apiKey", "connectionMode.android", "connectionMode.web", "events[0].from", "tags"}, validated)
+	assert.Equal(t, []string{"apiKey", "connectionMode.android", "connectionMode.web", "events[0].from"}, validated)
 	assert.Equal(t, []string{"apiSecret"}, redacted)
+	assert.Equal(t, []string{"tags"}, optional)
 }

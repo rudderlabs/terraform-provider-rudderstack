@@ -1,6 +1,7 @@
 package acc
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -74,7 +75,7 @@ func TestSubstituteAccountIDCopiesAllConfigFields(t *testing.T) {
 		APICreate:       "real-account-id-after",
 		APIUpdate:       "real-account-idreal-account-id",
 	}
-	if got[0] != want {
+	if !reflect.DeepEqual(got[0], want) {
 		t.Fatalf("substituted config = %#v, want %#v", got[0], want)
 	}
 }

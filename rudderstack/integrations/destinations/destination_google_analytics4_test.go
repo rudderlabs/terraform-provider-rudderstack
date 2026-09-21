@@ -391,6 +391,7 @@ var googleAnalytics4TestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
+		APIResponseOptionalFields: []string{"blockPageViewEvent", "sendUserId"},
 	},
 }
 
