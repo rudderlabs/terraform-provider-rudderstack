@@ -14,16 +14,11 @@ var googleSheetsTestConfigs = []c.TestConfig{
 				sheet_name = "sheet"
                 credentials = "..."
                 sheet_id = "123"
-				event_key_map = [{
-					from = "a"
-					to   = "b"
-				}]
 			`,
 		APICreate: `{
 				"sheetName": "sheet",
                  "credentials": "...",
-				 "sheetId": "123",
-				 "eventKeyMap": [{"from": "a", "to": "b"}]
+                 "sheetId": "123"
 			}`,
 		TerraformUpdate: `
 				sheet_name = "sheetName"

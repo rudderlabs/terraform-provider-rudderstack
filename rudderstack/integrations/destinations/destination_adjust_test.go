@@ -44,6 +44,12 @@ var adjustTestConfigs = []c.TestConfig{
 					to = "def456"
 				}
 			]
+			partner_param_keys = [
+				{
+					from = "userId"
+					to = "user_id"
+				}
+			]
 			enable_install_attribution_tracking {
 				android = true
 				ios = true
@@ -133,6 +139,12 @@ var adjustTestConfigs = []c.TestConfig{
 					{
 						"from": "Signup",
 						"to": "def456"
+					}
+				],
+				"partnerParamKeys": [
+					{
+						"from": "userId",
+						"to": "user_id"
 					}
 				],
 				"enableInstallAttributionTracking": {

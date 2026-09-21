@@ -324,5 +324,5 @@ func TestDestinationResourceLinkedinAds(t *testing.T) {
 }
 
 func TestAccDestinationLinkedinAds(t *testing.T) {
-	acc.AccAssertOAuthDestination(t, "linkedin_ads", "LINKEDIN_ADS", linkedinAdsTestConfigs)
+	acc.AccAssertOAuthDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
 }

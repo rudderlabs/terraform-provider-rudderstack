@@ -69,8 +69,7 @@
 
 ## RUD-3134 — OAuth destination acceptance account resolution
 
-- `internal/testutil/acc/oauth_destinations.go::AccAssertOAuthDestination` resolves a real workspace account for full-CRUD acceptance runs by filtering account definitions on uppercase `ConfigMeta.APIType` plus category `destination`; the lowercase Terraform registry key and uppercase account-definition type are separate namespaces.
+- `internal/testutil/acc/oauth_destinations.go::AccAssertOAuthDestination` resolves a real workspace account for full-CRUD acceptance runs by filtering account definitions on the lowercase Terraform destination key plus category `destination`; the registry key and `client.Account.Definition.Type` are the same value.
 - `internal/testutil/acc/oauth_destinations.go::resolveOAuthAccountID` chooses deterministically: oldest non-nil `CreatedAt` first, then account ID as the tiebreaker. Plan-only runs retain the literal `account-id-1` and perform no account lookup.
 - `internal/testutil/acc/oauth_destinations.go::substituteAccountID` copies the shared `[]configs.TestConfig` before replacing the placeholder in all four Terraform/API create/update strings, preserving exact fixture equality for `internal/testutil/cm/destinations.go` unit tests.
 - `internal/testutil/acc/oauth_destinations.go::AccAssertOAuthDestination` delegates directly to `AccAssertDestination` when `TF_ACC` is unset so ordinary `go test` retains the Terraform SDK's standard acceptance-test skip; `PlanOnly()` remains the only full-versus-plan-only mode predicate.
-- `configs.TestConfig.APIResponseOptionalFields` keeps outbound payload coverage in `cm.AssertDestination` while allowing the live API to omit named top-level fields on reads; `acc.compareConfig` still compares an optional field whenever the API returns it.

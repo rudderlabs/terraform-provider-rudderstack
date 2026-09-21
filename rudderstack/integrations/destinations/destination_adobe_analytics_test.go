@@ -12,35 +12,25 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
 				report_suite_ids = "id001, id002"
-				use_utf8_charset = false
-				use_secure_server_side = false
-				use_legacy_link_name = false
-				page_name_fallback_tostring = false
-				send_false_values = false
 							`,
 		APICreate: `{
 				"reportSuiteIds": "id001, id002",
   				"sslHeartbeat": true,
-				"useUtf8Charset": false,
-				"useSecureServerSide": false,
+  				"useUtf8Charset": true,
+  				"useSecureServerSide": true,
   				"dropVisitorId": true,
   				"timestampOptionalReporting": false,
   				"noFallbackVisitorId": false,
   				"preferVisitorId": false,
   				"trackPageName": true,
-				"useLegacyLinkName": false,
-				"pageNameFallbackTostring": false,
-				"sendFalseValues": false,
+  				"useLegacyLinkName": true,
+  				"pageNameFallbackTostring": true,
+  				"sendFalseValues": true,
   				"timestampOption": "disabled",
   				"productIdentifier": "name"
 			}`,
 		TerraformUpdate: `
 				report_suite_ids = "id003, id004"
-				use_utf8_charset = false
-				use_secure_server_side = false
-				use_legacy_link_name = false
-				page_name_fallback_tostring = false
-				send_false_values = false
 				events_to_types = [{
 					from = "video start"
 					to = "heartbeatPlaybackStarted"
@@ -185,8 +175,8 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 		APIUpdate: `{
 				"reportSuiteIds": "id003, id004",
 				"sslHeartbeat": true,
-				"useUtf8Charset": false,
-				"useSecureServerSide": false,
+				"useUtf8Charset": true,
+				"useSecureServerSide": true,
 				"eventsToTypes": [
 				  {
 					"from": "video start",
@@ -210,15 +200,15 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 					"to": "pName"
 				  }
 				],
-				"useLegacyLinkName": false,
-				"pageNameFallbackTostring": false,
+				"useLegacyLinkName": true,
+				"pageNameFallbackTostring": true,
 				"mobileEventMapping": [
 				  {
 					"from": "page.name",
 					"to": "pName"
 				  }
 				],
-				"sendFalseValues": false,
+				"sendFalseValues": true,
 				"eVarMapping": [
 				  {
 					"from": "phone",
@@ -551,13 +541,6 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 				"timestampOption": "disabled",
 				"productIdentifier": "name"
 			  }`,
-		APIResponseOptionalFields: []string{
-			"pageNameFallbackTostring",
-			"sendFalseValues",
-			"useLegacyLinkName",
-			"useSecureServerSide",
-			"useUtf8Charset",
-		},
 	},
 }
 

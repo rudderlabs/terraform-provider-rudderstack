@@ -17,7 +17,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 				user = "example-user"
 				password = "example-password"
 				use_rudder_storage = true
-				additional_properties = false
 				sync {
 					frequency = "30"
 				}
@@ -35,7 +34,7 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"skipTracksTable": false,
 				"manualSync": false,
 				"useRudderStorage": true,
-				"additionalProperties": false
+				"additionalProperties": true
 			}`,
 		TerraformUpdate: `
 				account = "example-account"
@@ -45,7 +44,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 				password = "example-password"
 				role = "example-role"
 				use_rudder_storage = false
-				additional_properties = false
 				sync {
 					frequency = "60"
 					start_at                  = "10:00"
@@ -178,7 +176,7 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"preferAppend": true,
 				"manualSync": true,
 				"useRudderStorage": false,
-				"additionalProperties": false,
+				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
 				"connectionMode": {
 					"web": "cloud",
@@ -457,7 +455,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 					]
 				}
 			}`,
-		APIResponseOptionalFields: []string{"additionalProperties"},
 	},
 }
 

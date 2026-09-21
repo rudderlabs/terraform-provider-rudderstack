@@ -46,8 +46,8 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				json_paths = "event.properties.a,event.properties.b"
 				enable_iceberg = true
 				external_volume = "EXT_VOLUME1"
-				underscore_divide_numbers = false
-				allow_users_context_traits = false
+				underscore_divide_numbers = true
+				allow_users_context_traits = true
 				connection_mode {
 					android = "cloud"
 					android_kotlin = "cloud"
@@ -89,8 +89,8 @@ var snowflakeStreamingTestConfigs = []c.TestConfig{
 				"jsonPaths": "event.properties.a,event.properties.b",
 				"enableIceberg": true,
 				"externalVolume": "EXT_VOLUME1",
-				"underscoreDivideNumbers": false,
-				"allowUsersContextTraits": false,
+				"underscoreDivideNumbers": true,
+				"allowUsersContextTraits": true,
 				"connectionMode": {
 					"android": "cloud",
 					"androidKotlin": "cloud",

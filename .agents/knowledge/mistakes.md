@@ -24,9 +24,8 @@
 - Reviewer guidance clarified that transient shared-workspace 5xx/API create failures should be handled by rerunning CI, not by adding permanent `if !acc.PlanOnly() { t.Skip(...) }` guards. Reserve plan-only live-CRUD skips for destinations with genuine documented prerequisites the shared workspace cannot satisfy, such as vendor OAuth account requirements.
 - Preserve mock `AssertDestination` converter coverage and `TF_ACC_PLAN_ONLY=1` schema validation when live CRUD is unreliable.
 
-## RUD-3134 — OAuth account type namespace mismatch
+## RUD-3134 — Missing OAuth accounts in the dev workspace
 
 <!-- session: 2026-09-21 -->
 
-- The OAuth acceptance tests initially passed lowercase Terraform registry keys such as `linkedin_ads` to `internal/testutil/acc/oauth_destinations.go::resolveOAuthAccountID`; CI then failed with `no OAuth account found` because `client.Account.Definition.Type` uses the destination's uppercase `ConfigMeta.APIType`. Pass `LINKEDIN_ADS`, `BINGADS_OFFLINE_CONVERSIONS`, and `GOOGLE_ADWORDS_OFFLINE_CONVERSIONS` while keeping the lowercase destination key as the separate resource argument.
-- `configs.TestConfig.APIResponseOptionalFields` only permits an omitted field during `acc.compareConfig`; Terraform SDK acceptance tests still run an automatic post-apply plan and fail if configured state does not round-trip. Live fixtures in `rudderstack/integrations/destinations/*_test.go` must omit backend-discarded options, keep immutable fields unchanged between create/update, or explicitly configure an omitted boolean default to the API read-back value.
+- `client.Account.Definition.Type` uses the lowercase Terraform destination key, such as `linkedin_ads`, `bingads_offline_conversions`, or `google_adwords_offline_conversions`. Earlier `no OAuth account found` failures from `internal/testutil/acc/oauth_destinations.go::resolveOAuthAccountID` occurred because those accounts were not yet connected in the dev workspace, not because the lookup used the wrong namespace.

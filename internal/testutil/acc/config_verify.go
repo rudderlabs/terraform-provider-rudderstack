@@ -12,10 +12,10 @@ import (
 // Extra fields in the actual config are allowed (the API may add defaults).
 // Returns nil if expectedJSON is empty (nothing to verify).
 //
-// redactedFields lists top-level API config keys whose values are never compared
-// because the backend redacts them. optionalFields lists fields the backend may
-// omit from read responses; when returned, their values are still compared.
-func compareConfig(actualRaw json.RawMessage, expectedJSON string, redactedFields, optionalFields map[string]bool) error {
+// redactedFields lists top-level API config keys the backend intentionally omits
+// from responses (secret/Sensitive fields — a security-hardening change). An
+// expected field in that set that is absent from actual is not a mismatch.
+func compareConfig(actualRaw json.RawMessage, expectedJSON string, redactedFields map[string]bool) error {
 	expectedJSON = strings.TrimSpace(expectedJSON)
 	if expectedJSON == "" || expectedJSON == "{}" {
 		return nil
@@ -32,7 +32,7 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string, redactedField
 	}
 
 	var mismatches []string
-	compareFields("", expected, actual, redactedFields, optionalFields, &mismatches)
+	compareFields("", expected, actual, redactedFields, &mismatches)
 
 	if len(mismatches) > 0 {
 		expectedPretty, _ := json.MarshalIndent(expected, "", "  ")
@@ -44,40 +44,27 @@ func compareConfig(actualRaw json.RawMessage, expectedJSON string, redactedField
 }
 
 // summarizeValidatedFields returns the sorted leaf field paths that compareConfig
-// always asserts for expectedJSON, plus top-level redacted and response-optional
-// keys. Used to log what a passing CRUD verification checked.
-func summarizeValidatedFields(expectedJSON string, redactedFields, optionalFields map[string]bool) (validated, redacted, optional []string) {
+// asserts for expectedJSON, plus the top-level keys it skips as redacted. Used to
+// log what a passing CRUD verification actually checked (reviewer visibility).
+func summarizeValidatedFields(expectedJSON string, redactedFields map[string]bool) (validated, redacted []string) {
 	expectedJSON = strings.TrimSpace(expectedJSON)
 	if expectedJSON == "" || expectedJSON == "{}" {
-		return nil, nil, nil
+		return nil, nil
 	}
 	var expected map[string]any
 	if err := json.Unmarshal([]byte(expectedJSON), &expected); err != nil {
-		return nil, nil, nil
+		return nil, nil
 	}
 	for key, val := range expected {
 		if redactedFields[key] {
 			redacted = append(redacted, key)
 			continue
 		}
-		if optionalFields[key] {
-			optional = append(optional, key)
-			continue
-		}
 		validated = append(validated, leafPaths(key, val)...)
 	}
 	sort.Strings(validated)
 	sort.Strings(redacted)
-	sort.Strings(optional)
-	return validated, redacted, optional
-}
-
-func stringSet(values []string) map[string]bool {
-	set := make(map[string]bool, len(values))
-	for _, value := range values {
-		set[value] = true
-	}
-	return set
+	return validated, redacted
 }
 
 // leafPaths returns the dotted paths of every scalar leaf under val at prefix,
@@ -111,7 +98,7 @@ func leafPaths(prefix string, val any) []string {
 
 // compareFields recursively checks that every key in expected exists in actual with the
 // correct value. It collects all mismatches rather than failing on the first one.
-func compareFields(prefix string, expected, actual map[string]any, redactedFields, optionalFields map[string]bool, mismatches *[]string) {
+func compareFields(prefix string, expected, actual map[string]any, redactedFields map[string]bool, mismatches *[]string) {
 	for key, expectedVal := range expected {
 		path := key
 		if prefix != "" {
@@ -129,14 +116,11 @@ func compareFields(prefix string, expected, actual map[string]any, redactedField
 
 		actualVal, exists := actual[key]
 		if !exists {
-			if optionalFields[path] {
-				continue
-			}
 			*mismatches = append(*mismatches, fmt.Sprintf("  missing field %q: expected %v", path, expectedVal))
 			continue
 		}
 
-		compareValue(path, expectedVal, actualVal, redactedFields, optionalFields, mismatches)
+		compareValue(path, expectedVal, actualVal, redactedFields, mismatches)
 	}
 }
 
@@ -144,11 +128,11 @@ func compareFields(prefix string, expected, actual map[string]any, redactedField
 //   - objects: all expected keys must exist in actual, but extra actual keys are allowed
 //   - arrays: all expected elements must exist in actual at the same indexes, but extra actual
 //     elements are allowed; objects within arrays also use subset semantics
-func compareValue(path string, expectedVal, actualVal any, redactedFields, optionalFields map[string]bool, mismatches *[]string) {
+func compareValue(path string, expectedVal, actualVal any, redactedFields map[string]bool, mismatches *[]string) {
 	switch ev := expectedVal.(type) {
 	case map[string]any:
 		if av, ok := actualVal.(map[string]any); ok {
-			compareFields(path, ev, av, redactedFields, optionalFields, mismatches)
+			compareFields(path, ev, av, redactedFields, mismatches)
 		} else {
 			*mismatches = append(*mismatches, fmt.Sprintf("  field %q: expected object, got %T", path, actualVal))
 		}
@@ -162,7 +146,7 @@ func compareValue(path string, expectedVal, actualVal any, redactedFields, optio
 			*mismatches = append(*mismatches, fmt.Sprintf("  field %q: expected array length >= %d, got %d", path, len(ev), len(av)))
 		}
 		for i := 0; i < len(ev) && i < len(av); i++ {
-			compareValue(fmt.Sprintf("%s[%d]", path, i), ev[i], av[i], redactedFields, optionalFields, mismatches)
+			compareValue(fmt.Sprintf("%s[%d]", path, i), ev[i], av[i], redactedFields, mismatches)
 		}
 	default:
 		if !reflect.DeepEqual(expectedVal, actualVal) {

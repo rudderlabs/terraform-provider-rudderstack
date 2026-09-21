@@ -18,7 +18,7 @@ const oauthAccountIDPlaceholder = "account-id-1"
 
 // AccAssertOAuthDestination resolves a real workspace account for full CRUD runs.
 // Plan-only runs retain the placeholder and make no account API calls.
-func AccAssertOAuthDestination(t *testing.T, destination, accountType string, testConfigs []configs.TestConfig) {
+func AccAssertOAuthDestination(t *testing.T, destination string, testConfigs []configs.TestConfig) {
 	t.Helper()
 	if os.Getenv(resource.EnvTfAcc) == "" || PlanOnly() {
 		// Delegate so the SDK retains its normal TF_ACC-unset skip and plan-only behavior.
@@ -27,13 +27,14 @@ func AccAssertOAuthDestination(t *testing.T, destination, accountType string, te
 	}
 
 	TestAccPreCheck(t)
-	accountID := resolveOAuthAccountID(t, accountType)
+	accountID := resolveOAuthAccountID(t, destination)
 	AccAssertDestination(t, destination, substituteAccountID(testConfigs, accountID))
 }
 
 // resolveOAuthAccountID returns the oldest destination-category account whose
-// definition type matches accountType. Lookup is the only source of the ID.
-func resolveOAuthAccountID(t *testing.T, accountType string) string {
+// definition type matches the lowercase destination key. Lookup is the only
+// source of the ID.
+func resolveOAuthAccountID(t *testing.T, destination string) string {
 	t.Helper()
 
 	cl, err := newTestAPIClient()
@@ -43,22 +44,22 @@ func resolveOAuthAccountID(t *testing.T, accountType string) string {
 
 	accounts, err := cl.Accounts.ListAll(context.Background())
 	if err != nil {
-		t.Fatalf("list OAuth accounts for type %q: %v", accountType, err)
+		t.Fatalf("list OAuth accounts for type %q: %v", destination, err)
 	}
 
-	account, ok := selectOAuthAccount(accounts, accountType)
+	account, ok := selectOAuthAccount(accounts, destination)
 	if !ok {
-		t.Fatalf("no OAuth account found for type %q (category \"destination\") in the test workspace:\nconnect a %s account in the workspace that RUDDERSTACK_ACCESS_TOKEN belongs to,\nor run with TF_ACC_PLAN_ONLY=1 to validate the plan only", accountType, accountType)
+		t.Fatalf("no OAuth account found for type %q (category \"destination\") in the test workspace:\nconnect a %s account in the workspace that RUDDERSTACK_ACCESS_TOKEN belongs to,\nor run with TF_ACC_PLAN_ONLY=1 to validate the plan only", destination, destination)
 	}
 
-	t.Logf("using OAuth account id %q, name %q for type %q", account.ID, account.Name, accountType)
+	t.Logf("using OAuth account id %q for type %q", account.ID, destination)
 	return account.ID
 }
 
-func selectOAuthAccount(accounts []client.Account, accountType string) (client.Account, bool) {
+func selectOAuthAccount(accounts []client.Account, destination string) (client.Account, bool) {
 	matches := make([]client.Account, 0)
 	for _, account := range accounts {
-		if account.Definition.Type == accountType && account.Definition.Category == "destination" {
+		if account.Definition.Type == destination && account.Definition.Category == "destination" {
 			matches = append(matches, account)
 		}
 	}
