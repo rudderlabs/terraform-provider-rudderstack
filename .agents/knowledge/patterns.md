@@ -66,3 +66,7 @@
 - OAuth-backed destinations do not have a provider-side account-definition registry; existing OAuth integrations expose `rudderAccountId` as Terraform `rudder_account_id` and rely on backend integrations-config account definitions.
 - Terraform schema defaults that materialize in state should be mapped through `c.Simple` without `SkipZeroValue` when the API/test fixtures expect explicit defaults. For Google Ads Offline Conversions this includes `subAccount:false`, `UserIdentifierSource:"none"`, `conversionEnvironment:"none"`, `defaultUserIdentifier:"email"`, `hashUserIdentifier:true`, and `validateOnly:false`; for Bing Ads Offline Conversions it includes `isHashRequired:false`.
 - For cloud-mode destination `connection_mode` source keys, follow the Confluent Cloud/common consent spelling where source type `reactnative` stays `reactnative` in Terraform and maps to API `connectionMode.reactnative`, rather than using `react_native`.
+
+## RUD-3127 — Reddit connection-mode naming
+
+- Reddit maps API `connectionMode.reactnative` to Terraform `connection_mode.0.reactnative`, following the current cloud-mode/common-consent spelling rather than copying the older LinkedIn Ads `react_native` inconsistency.

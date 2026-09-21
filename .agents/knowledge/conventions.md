@@ -74,3 +74,10 @@
 ## INT-7142 — Singular credential sensitivity
 
 - Singular destination `api_key` and `api_secret` intentionally remain non-Sensitive in Terraform because upstream `src/configurations/destinations/singular/db-config.json` has `secretKeys: []`; this follows the RUD-3119 convention that provider sensitivity comes from db-config secretKeys, not credential-like field names alone.
+
+## RUD-3127 — Reddit destination reconciliation
+
+- Reddit intentionally exposes `events_mapping` even though upstream currently lists `eventsMapping` only in db-config/ui-config and omits it from `schema.json`; the approved provider contract treats that mismatch as an explicit exception because the transformer consumes the field.
+- Reddit omits the plain `useNativeSDK` field because it is schema-only and absent from every upstream `destConfig` list. Its `version` and `hash_data` fields remain Optional-with-Default despite appearing in the upstream required list, so Terraform supplies valid API values without combining incompatible Required and Default schema flags.
+- Reddit Pixel keeps `use_native_sdk.web` mapped with plain `c.Simple`, preserving an explicit `false`, because upstream schema and destination config both define that source-scoped field. Its `advertiser_id` is length-validated only, while event-mapping `from` values retain the `{{ ... || ... }}` dynamic form without discontinued `env.` support.
+- Reddit Pixel event-filter list elements intentionally follow the Spotify Pixel discriminator/`ExactlyOneOf` pattern without additional per-element validators.
