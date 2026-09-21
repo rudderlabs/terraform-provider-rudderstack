@@ -83,8 +83,5 @@ func TestDestinationResourceBingadsOfflineConversions(t *testing.T) {
 }
 
 func TestAccDestinationBingadsOfflineConversions(t *testing.T) {
-	if !acc.PlanOnly() {
-		t.Skip("skipping: requires valid OAuth account in workspace")
-	}
-	acc.AccAssertDestination(t, "bingads_offline_conversions", bingadsOfflineConversionsTestConfigs)
+	acc.AccAssertOAuthDestination(t, "bingads_offline_conversions", "bingads_offline_conversions", bingadsOfflineConversionsTestConfigs)
 }

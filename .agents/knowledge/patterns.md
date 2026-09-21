@@ -66,3 +66,10 @@
 - OAuth-backed destinations do not have a provider-side account-definition registry; existing OAuth integrations expose `rudderAccountId` as Terraform `rudder_account_id` and rely on backend integrations-config account definitions.
 - Terraform schema defaults that materialize in state should be mapped through `c.Simple` without `SkipZeroValue` when the API/test fixtures expect explicit defaults. For Google Ads Offline Conversions this includes `subAccount:false`, `UserIdentifierSource:"none"`, `conversionEnvironment:"none"`, `defaultUserIdentifier:"email"`, `hashUserIdentifier:true`, and `validateOnly:false`; for Bing Ads Offline Conversions it includes `isHashRequired:false`.
 - For cloud-mode destination `connection_mode` source keys, follow the Confluent Cloud/common consent spelling where source type `reactnative` stays `reactnative` in Terraform and maps to API `connectionMode.reactnative`, rather than using `react_native`.
+
+## RUD-3134 — OAuth destination acceptance account resolution
+
+- `internal/testutil/acc/oauth_destinations.go::AccAssertOAuthDestination` resolves a real workspace account for full-CRUD acceptance runs by filtering account definitions on lowercase type plus category `destination`; destination keys and account-definition types remain separate parameters even though current values match.
+- `internal/testutil/acc/oauth_destinations.go::resolveOAuthAccountID` chooses deterministically: oldest non-nil `CreatedAt` first, then account ID as the tiebreaker. Plan-only runs retain the literal `account-id-1` and perform no account lookup.
+- `internal/testutil/acc/oauth_destinations.go::substituteAccountID` copies the shared `[]configs.TestConfig` before replacing the placeholder in all four Terraform/API create/update strings, preserving exact fixture equality for `internal/testutil/cm/destinations.go` unit tests.
+- `internal/testutil/acc/oauth_destinations.go::AccAssertOAuthDestination` delegates directly to `AccAssertDestination` when `TF_ACC` is unset so ordinary `go test` retains the Terraform SDK's standard acceptance-test skip; `PlanOnly()` remains the only full-versus-plan-only mode predicate.

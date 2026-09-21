@@ -386,8 +386,5 @@ func TestDestinationResourceGoogleAdwordsOfflineConversionsRejectsEmptyConversio
 }
 
 func TestAccDestinationGoogleAdwordsOfflineConversions(t *testing.T) {
-	if !acc.PlanOnly() {
-		t.Skip("skipping: requires valid OAuth account in workspace")
-	}
-	acc.AccAssertDestination(t, "google_adwords_offline_conversions", googleAdwordsOfflineConversionsTestConfigs)
+	acc.AccAssertOAuthDestination(t, "google_adwords_offline_conversions", "google_adwords_offline_conversions", googleAdwordsOfflineConversionsTestConfigs)
 }

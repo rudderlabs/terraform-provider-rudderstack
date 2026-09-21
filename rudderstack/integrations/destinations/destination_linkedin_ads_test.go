@@ -324,8 +324,5 @@ func TestDestinationResourceLinkedinAds(t *testing.T) {
 }
 
 func TestAccDestinationLinkedinAds(t *testing.T) {
-	if !acc.PlanOnly() {
-		t.Skip("skipping: requires valid OAuth account in workspace")
-	}
-	acc.AccAssertDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
+	acc.AccAssertOAuthDestination(t, "linkedin_ads", "linkedin_ads", linkedinAdsTestConfigs)
 }

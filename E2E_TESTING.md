@@ -37,10 +37,7 @@ grep -rh --include='*.go' "^func TestAcc" rudderstack/integrations \
   | sed 's/func //; s/(t.*//' | sort
 ```
 
-**Plan-only exceptions.** A small number of tests `t.Skip` in full-CRUD mode because they need a vendor account that can't be provisioned generically. `TestAccDestinationLinkedinAds` is currently the only one (requires a valid LinkedIn OAuth account in the workspace) — it runs in `TF_ACC_PLAN_ONLY=1` mode but is skipped under `TF_ACC=1`. To find all such skips:
-```bash
-grep -rB1 -A2 --include='*_test.go' "acc.PlanOnly()" rudderstack/integrations
-```
+**OAuth destination accounts.** Full-CRUD tests for OAuth destinations resolve a real `rudderAccountId` at runtime by listing accounts in the test workspace and matching the destination account definition type. A missing matching destination-category account is a hard failure: connect the required account in the workspace associated with `RUDDERSTACK_ACCESS_TOKEN`. In `TF_ACC_PLAN_ONLY=1` mode, these tests retain their fixture placeholder and perform schema validation with zero API calls.
 
 ---
 
