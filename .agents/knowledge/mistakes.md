@@ -29,3 +29,4 @@
 <!-- session: 2026-09-21 -->
 
 - `client.Account.Definition.Type` uses the lowercase Terraform destination key, such as `linkedin_ads`, `bingads_offline_conversions`, or `google_adwords_offline_conversions`. Earlier `no OAuth account found` failures from `internal/testutil/acc/oauth_destinations.go::resolveOAuthAccountID` occurred because those accounts were not yet connected in the dev workspace, not because the lookup used the wrong namespace.
+- `configs.TestConfig.APIResponseOptionalFields` only relaxes the explicit live API comparison; it does not bypass Terraform SDK acceptance tests' automatic post-apply empty-plan check. Live fixtures must round-trip through API reads: omit unsupported explicit options, avoid changing immutable values on update, and use the backend's read-back zero value for omitted boolean defaults when outbound serialization still needs coverage.
