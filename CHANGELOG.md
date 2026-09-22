@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.16.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.15.0...v4.16.0) (2026-09-22)
+
+
+### Features
+
+* **destinations:** add Reddit integrations ([#340](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/340)) ([4744be9](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/4744be971a77f3db688bdf643c0414d4f9a7c45d))
+
+
+### Miscellaneous
+
+* **e2e:** resolve OAuth destination accounts at runtime ([#341](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/341)) ([9e9d26b](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/9e9d26b847c09dfc9a79e3fd2d19113962021579))
+* strengthen onboard-integration skill and log E2E CRUD configs ([#333](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/333)) ([ae03ddc](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/ae03ddc6dba61b66ae2a31a334994719e03fbdaa))
+
 ## [4.15.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.14.0...v4.15.0) (2026-09-16)
 
 
