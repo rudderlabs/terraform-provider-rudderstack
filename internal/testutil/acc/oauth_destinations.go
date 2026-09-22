@@ -14,7 +14,7 @@ import (
 
 // oauthAccountIDPlaceholder is the literal used in shared destination test configs.
 // Unit tests assert those fixtures exactly; only the acceptance path substitutes it.
-const oauthAccountIDPlaceholder = "account-id-1"
+const oauthAccountIDPlaceholder = "__ACCOUNT_ID__"
 
 // AccAssertOAuthDestination resolves a real workspace account for full CRUD runs.
 // Plan-only runs retain the placeholder and make no account API calls.
