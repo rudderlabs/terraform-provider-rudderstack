@@ -21,6 +21,25 @@ This requires the `acc` import:
 acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 ```
 
+### OAuth destinations
+
+OAuth destinations that expose `rudderAccountId` must use the shared placeholder
+`__ACCOUNT_ID__` for every `rudder_account_id` value in `TerraformCreate` and
+`TerraformUpdate`, and every `rudderAccountId` value in `APICreate` and
+`APIUpdate`. Use the OAuth acceptance helper:
+
+```go
+func TestAccDestination{PascalCaseName}(t *testing.T) {
+	acc.AccAssertOAuthDestination(t, "{name}", {camelCaseName}TestConfigs)
+}
+```
+
+Full CRUD resolves an account whose destination-category definition type matches
+the lowercase integration name. Before enabling the test, connect an account of
+that type in the E2E workspace associated with `RUDDERSTACK_ACC_TEST_TOKEN`.
+Missing accounts fail the test; plan-only mode retains `__ACCOUNT_ID__` and makes
+no account API calls.
+
 ## For Sources
 
 Add this function to `sources_test.go`:

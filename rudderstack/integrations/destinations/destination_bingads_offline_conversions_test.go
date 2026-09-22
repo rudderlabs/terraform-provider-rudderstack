@@ -11,18 +11,18 @@ import (
 var bingadsOfflineConversionsTestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
-				rudder_account_id   = "account-id-1"
+				rudder_account_id   = "__ACCOUNT_ID__"
 				customer_account_id = "53212345"
 				customer_id         = "343598"
 			`,
 		APICreate: `{
-				"rudderAccountId": "account-id-1",
+				"rudderAccountId": "__ACCOUNT_ID__",
 				"customerAccountId": "53212345",
 				"customerId": "343598",
 				"isHashRequired": false
 			}`,
 		TerraformUpdate: `
-				rudder_account_id   = "account-id-1"
+				rudder_account_id   = "__ACCOUNT_ID__"
 				customer_account_id = "53212345"
 				customer_id         = "343598"
 				is_hash_required    = true
@@ -47,7 +47,7 @@ var bingadsOfflineConversionsTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
-				"rudderAccountId": "account-id-1",
+				"rudderAccountId": "__ACCOUNT_ID__",
 				"customerAccountId": "53212345",
 				"customerId": "343598",
 				"isHashRequired": true,
@@ -83,8 +83,5 @@ func TestDestinationResourceBingadsOfflineConversions(t *testing.T) {
 }
 
 func TestAccDestinationBingadsOfflineConversions(t *testing.T) {
-	if !acc.PlanOnly() {
-		t.Skip("skipping: requires valid OAuth account in workspace")
-	}
-	acc.AccAssertDestination(t, "bingads_offline_conversions", bingadsOfflineConversionsTestConfigs)
+	acc.AccAssertOAuthDestination(t, "bingads_offline_conversions", bingadsOfflineConversionsTestConfigs)
 }

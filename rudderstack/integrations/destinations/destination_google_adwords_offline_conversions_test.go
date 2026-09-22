@@ -14,11 +14,11 @@ import (
 var googleAdwordsOfflineConversionsTestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
-				rudder_account_id = "account-id-1"
+				rudder_account_id = "__ACCOUNT_ID__"
 				customer_id       = "1234567890"
 			`,
 		APICreate: `{
-				"rudderAccountId": "account-id-1",
+				"rudderAccountId": "__ACCOUNT_ID__",
 				"customerId": "1234567890",
 				"subAccount": false,
 				"UserIdentifierSource": "none",
@@ -28,7 +28,7 @@ var googleAdwordsOfflineConversionsTestConfigs = []c.TestConfig{
 				"validateOnly": false
 			}`,
 		TerraformUpdate: `
-				rudder_account_id          = "account-id-1"
+				rudder_account_id          = "__ACCOUNT_ID__"
 				customer_id                = "1234567890"
 				sub_account                = true
 				login_customer_id          = "0987654321"
@@ -168,7 +168,7 @@ var googleAdwordsOfflineConversionsTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
-				"rudderAccountId": "account-id-1",
+				"rudderAccountId": "__ACCOUNT_ID__",
 				"customerId": "1234567890",
 				"subAccount": true,
 				"loginCustomerId": "0987654321",
@@ -386,8 +386,5 @@ func TestDestinationResourceGoogleAdwordsOfflineConversionsRejectsEmptyConversio
 }
 
 func TestAccDestinationGoogleAdwordsOfflineConversions(t *testing.T) {
-	if !acc.PlanOnly() {
-		t.Skip("skipping: requires valid OAuth account in workspace")
-	}
-	acc.AccAssertDestination(t, "google_adwords_offline_conversions", googleAdwordsOfflineConversionsTestConfigs)
+	acc.AccAssertOAuthDestination(t, "google_adwords_offline_conversions", googleAdwordsOfflineConversionsTestConfigs)
 }
