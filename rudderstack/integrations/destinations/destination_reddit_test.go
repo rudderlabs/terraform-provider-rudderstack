@@ -16,17 +16,17 @@ import (
 var redditTestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
-					rudder_account_id = "oauth-account-id"
+					rudder_account_id = "__ACCOUNT_ID__"
 					account_id        = "reddit-pixel-id"
 				`,
 		APICreate: `{
-					"rudderAccountId": "oauth-account-id",
+					"rudderAccountId": "__ACCOUNT_ID__",
 					"accountId": "reddit-pixel-id",
 					"version": "v3",
 					"hashData": true
 				}`,
 		TerraformUpdate: `
-					rudder_account_id = "oauth-account-id"
+					rudder_account_id = "__ACCOUNT_ID__"
 					account_id        = "reddit-pixel-id-updated"
 					version           = "v2"
 					hash_data         = false
@@ -130,7 +130,7 @@ var redditTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
-					"rudderAccountId": "oauth-account-id",
+					"rudderAccountId": "__ACCOUNT_ID__",
 					"accountId": "reddit-pixel-id-updated",
 					"version": "v2",
 					"hashData": false,
@@ -364,8 +364,5 @@ func TestDestinationResourceRedditValidation(t *testing.T) {
 }
 
 func TestAccDestinationReddit(t *testing.T) {
-	if !acc.PlanOnly() {
-		t.Skip("skipping: requires valid OAuth account in workspace")
-	}
-	acc.AccAssertDestination(t, "reddit", redditTestConfigs)
+	acc.AccAssertOAuthDestination(t, "reddit", redditTestConfigs)
 }
