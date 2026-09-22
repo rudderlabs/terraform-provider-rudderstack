@@ -21,9 +21,12 @@ func TestSelectOAuthAccount(t *testing.T) {
 		newAccount("oldest-a", "expected", "destination", &oldest),
 	}
 
-	got, ok := selectOAuthAccount(accounts, "expected")
-	if !ok {
+	got, matchCount := selectOAuthAccount(accounts, "expected")
+	if matchCount == 0 {
 		t.Fatal("expected a matching OAuth account")
+	}
+	if matchCount != 4 {
+		t.Fatalf("matching account count = %d, want %d", matchCount, 4)
 	}
 	if got.ID != "oldest-a" {
 		t.Fatalf("selected account ID = %q, want %q", got.ID, "oldest-a")
@@ -36,9 +39,12 @@ func TestSelectOAuthAccountOrdersNilCreatedAtByID(t *testing.T) {
 		newAccount("account-a", "expected", "destination", nil),
 	}
 
-	got, ok := selectOAuthAccount(accounts, "expected")
-	if !ok {
+	got, matchCount := selectOAuthAccount(accounts, "expected")
+	if matchCount == 0 {
 		t.Fatal("expected a matching OAuth account")
+	}
+	if matchCount != 2 {
+		t.Fatalf("matching account count = %d, want %d", matchCount, 2)
 	}
 	if got.ID != "account-a" {
 		t.Fatalf("selected account ID = %q, want %q", got.ID, "account-a")
@@ -51,8 +57,8 @@ func TestSelectOAuthAccountNoMatch(t *testing.T) {
 		newAccount("wrong-type", "other", "destination", nil),
 	}
 
-	if _, ok := selectOAuthAccount(accounts, "expected"); ok {
-		t.Fatal("expected no matching OAuth account")
+	if _, matchCount := selectOAuthAccount(accounts, "expected"); matchCount != 0 {
+		t.Fatalf("matching account count = %d, want %d", matchCount, 0)
 	}
 }
 

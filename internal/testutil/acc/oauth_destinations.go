@@ -47,19 +47,23 @@ func resolveOAuthAccountID(t *testing.T, destination string) string {
 		t.Fatalf("list OAuth accounts for type %q: %v", destination, err)
 	}
 
-	account, ok := selectOAuthAccount(accounts, destination)
-	if !ok {
+	account, matchCount := selectOAuthAccount(accounts, destination)
+	if matchCount == 0 {
 		t.Fatalf("no OAuth account found for type %q (category \"destination\") in the test workspace:\nconnect a %s account in the workspace that RUDDERSTACK_ACCESS_TOKEN belongs to,\nor run with TF_ACC_PLAN_ONLY=1 to validate the plan only", destination, destination)
 	}
 	if strings.TrimSpace(account.ID) == "" {
 		t.Fatalf("failed to resolve OAuth account ID for type %q (category \"destination\"): matched account has an empty ID", destination)
 	}
 
-	t.Logf("using OAuth account id %q for type %q", account.ID, destination)
+	if matchCount > 1 {
+		t.Logf("warning: found %d OAuth accounts for type %q; using account id %q", matchCount, destination, account.ID)
+	} else {
+		t.Logf("using OAuth account id %q for type %q", account.ID, destination)
+	}
 	return account.ID
 }
 
-func selectOAuthAccount(accounts []client.Account, destination string) (client.Account, bool) {
+func selectOAuthAccount(accounts []client.Account, destination string) (client.Account, int) {
 	matches := make([]client.Account, 0)
 	for _, account := range accounts {
 		if account.Definition.Type == destination && account.Definition.Category == "destination" {
@@ -67,7 +71,7 @@ func selectOAuthAccount(accounts []client.Account, destination string) (client.A
 		}
 	}
 	if len(matches) == 0 {
-		return client.Account{}, false
+		return client.Account{}, 0
 	}
 
 	sort.Slice(matches, func(i, j int) bool {
@@ -83,7 +87,7 @@ func selectOAuthAccount(accounts []client.Account, destination string) (client.A
 			return left.ID < right.ID
 		}
 	})
-	return matches[0], true
+	return matches[0], len(matches)
 }
 
 func substituteAccountID(testConfigs []configs.TestConfig, accountID string) []configs.TestConfig {
