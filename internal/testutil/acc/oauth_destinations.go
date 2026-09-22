@@ -51,6 +51,9 @@ func resolveOAuthAccountID(t *testing.T, destination string) string {
 	if !ok {
 		t.Fatalf("no OAuth account found for type %q (category \"destination\") in the test workspace:\nconnect a %s account in the workspace that RUDDERSTACK_ACCESS_TOKEN belongs to,\nor run with TF_ACC_PLAN_ONLY=1 to validate the plan only", destination, destination)
 	}
+	if strings.TrimSpace(account.ID) == "" {
+		t.Fatalf("failed to resolve OAuth account ID for type %q (category \"destination\"): matched account has an empty ID", destination)
+	}
 
 	t.Logf("using OAuth account id %q for type %q", account.ID, destination)
 	return account.ID
