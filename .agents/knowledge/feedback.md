@@ -29,3 +29,9 @@
 - Do not add destination-specific guards such as `terraformType == "impact"` in `cmd/generatetf/generator` to work around redacted Required+Sensitive fields; this is a generic generator issue across destinations.
 - Any future generated-HCL/import handling for redacted Required+Sensitive fields should derive policy from `configs.ConfigMeta` / registered schema metadata and be handled separately from individual destination onboarding PRs.
 - For newly onboarded Terraform destination resources, do not include `(^env[.].+)` in new `c.StringMatchesRegexp(...)` validators. Keep existing dynamic-config support for the `{{ ... || ... }}` form when required, but do not add new `env.` validator support because env-based dynamic configuration is discontinued and upstream integration-config cleanup is pending.
+
+## RUD-3134 — OAuth acceptance account lookup review guidance
+
+- Match `client.Account.Definition.Type` directly against the lowercase Terraform destination key (for example, `linkedin_ads`) with `Definition.Category == "destination"`; do not substitute the uppercase destination API type or add a separate API-type lookup argument.
+- OAuth account names can contain vendor login emails or usernames. Acceptance-test diagnostics should log only the selected account ID and type, never `Account.Name`.
+- Keep `E2E_TESTING.md`'s `Plan-only exceptions` note: identify `TestAccSourceFacebookLeadAds` as intentionally skipping full CRUD because the catalog-hidden source is blocked by the backend resource gate, and retain the grep command that discovers all `acc.PlanOnly()` skip branches.

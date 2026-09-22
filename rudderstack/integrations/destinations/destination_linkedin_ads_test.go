@@ -11,15 +11,15 @@ import (
 var linkedinAdsTestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
-				rudder_account_id = "account-id-1"
+				rudder_account_id = "__ACCOUNT_ID__"
 				hash_data         = true
 			`,
 		APICreate: `{
-				"rudderAccountId": "account-id-1",
+				"rudderAccountId": "__ACCOUNT_ID__",
 				"hashData": true
 			}`,
 		TerraformUpdate: `
-				rudder_account_id  = "account-id-1"
+				rudder_account_id  = "__ACCOUNT_ID__"
 				hash_data          = true
 				ad_account_id      = "123456789"
 				deduplication_key  = "messageId"
@@ -129,7 +129,7 @@ var linkedinAdsTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
-				"rudderAccountId": "account-id-1",
+				"rudderAccountId": "__ACCOUNT_ID__",
 				"hashData": true,
 				"adAccountId": "123456789",
 				"deduplicationKey": "messageId",
@@ -324,8 +324,5 @@ func TestDestinationResourceLinkedinAds(t *testing.T) {
 }
 
 func TestAccDestinationLinkedinAds(t *testing.T) {
-	if !acc.PlanOnly() {
-		t.Skip("skipping: requires valid OAuth account in workspace")
-	}
-	acc.AccAssertDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
+	acc.AccAssertOAuthDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
 }

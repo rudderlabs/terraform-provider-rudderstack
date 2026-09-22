@@ -70,3 +70,10 @@
 ## RUD-3127 — Reddit connection-mode naming
 
 - Reddit maps API `connectionMode.reactnative` to Terraform `connection_mode.0.reactnative`, following the current cloud-mode/common-consent spelling rather than copying the older LinkedIn Ads `react_native` inconsistency.
+
+## RUD-3134 — OAuth destination acceptance account resolution
+
+- `internal/testutil/acc/oauth_destinations.go::AccAssertOAuthDestination` resolves a real workspace account for full-CRUD acceptance runs by filtering account definitions on the lowercase Terraform destination key plus category `destination`; the registry key and `client.Account.Definition.Type` are the same value.
+- `internal/testutil/acc/oauth_destinations.go::resolveOAuthAccountID` chooses deterministically: oldest non-nil `CreatedAt` first, then account ID as the tiebreaker. Plan-only runs retain the literal `__ACCOUNT_ID__` and perform no account lookup.
+- `internal/testutil/acc/oauth_destinations.go::substituteAccountID` copies the shared `[]configs.TestConfig` before replacing the placeholder in all four Terraform/API create/update strings, preserving exact fixture equality for `internal/testutil/cm/destinations.go` unit tests.
+- `internal/testutil/acc/oauth_destinations.go::AccAssertOAuthDestination` delegates directly to `AccAssertDestination` when `TF_ACC` is unset so ordinary `go test` retains the Terraform SDK's standard acceptance-test skip; `PlanOnly()` remains the only full-versus-plan-only mode predicate.
