@@ -22,8 +22,6 @@ resource "rudderstack_destination_adobe_analytics" "example" {
     # tracking_server_secure_url = "https://securesampleurl.com"
     # ssl_heartbeat = true
     # heartbeat_tracking_server_url= "http://heartbeaturl.com"
-    # use_utf8_charset = false
-    # use_secure_server_side = false
     # proxy_normal_url = "http://normalproxy.com"
     # proxy_heartbeat_url = "http://heartbeatproxy.com"
     # marketing_cloud_org_id = "test_234"
@@ -33,9 +31,6 @@ resource "rudderstack_destination_adobe_analytics" "example" {
     # prefer_visitor_id = false
     # track_page_name = false
     # context_data_prefix = "ruddertest"
-    # use_legacy_link_name = false
-    # page_name_fallback_tostring = false
-    # send_false_values = false
     # product_identifier = "sku"
     # events_to_types = [{
     #   from = "video start"
@@ -189,6 +184,10 @@ resource "rudderstack_destination_adobe_analytics" "example" {
 
 > **:warning: Breaking Change**
 > 
+> Note that from the provider versions 5.0.0 and above, the `use_utf8_charset`, `use_secure_server_side`, `use_legacy_link_name`, `page_name_fallback_tostring` and `send_false_values` properties have been removed. They were never part of the destination definition, so the control plane did not store or read them and setting them had no effect. Remove them from your configuration.
+
+> **:warning: Breaking Change**
+> 
 > Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
@@ -239,7 +238,6 @@ Optional:
 - `marketing_cloud_org_id` (String) Enter your Marketing Cloud Organization Id.
 - `mobile_event_mapping` (List of Object) You can map Rudder mobile events. (see [below for nested schema](#nestedatt--config--mobile_event_mapping))
 - `no_fallback_visitor_id` (Boolean) Check to enable no fallbacks for Visitor ID
-- `page_name_fallback_tostring` (Boolean) Check to allow Page Name Fallback to Screen
 - `prefer_visitor_id` (Boolean) Check to prefer Visitor Id
 - `product_identifier` (String) Enter your Product Identifier
 - `product_merch_evars_map` (List of Object) You can map Rudder properties to eVars at product level (see [below for nested schema](#nestedatt--config--product_merch_evars_map))
@@ -249,17 +247,13 @@ Optional:
 - `proxy_heartbeat_url` (String) Enter your Adobe Analytics Hearbeat SDK URL
 - `proxy_normal_url` (String) Enter your Adobe Analytics Javascript SDK URL
 - `rudder_events_to_adobe_events` (List of Object) You can map Rudder Events to Adobe Custom Events. (see [below for nested schema](#nestedatt--config--rudder_events_to_adobe_events))
-- `send_false_values` (Boolean) Check to allow sending false value from properties
 - `ssl_heartbeat` (Boolean) Check for Heartbeat calls to be made over https
 - `timestamp_option` (String) Enter your Timestamp Option.
 - `timestamp_optional_reporting` (Boolean) Check to send both Timestamp and VisitorID for Timestamp Optional Reporting Suites
 - `track_page_name` (Boolean) Check to enable pageName for Track Events
 - `tracking_server_secure_url` (String) Enter your Tracking Server Secure URL
 - `tracking_server_url` (String) Enter your Tracking Server URL
-- `use_legacy_link_name` (Boolean) Check to use Legacy LinkName
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send events to Adobe Analytics via the device mode. (see [below for nested schema](#nestedblock--config--use_native_sdk))
-- `use_secure_server_side` (Boolean) Use Secure URL for Server-side
-- `use_utf8_charset` (Boolean) Use UTF-8 charset
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`

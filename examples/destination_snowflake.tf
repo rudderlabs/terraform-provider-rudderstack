@@ -3,10 +3,10 @@ resource "rudderstack_destination_snowflake" "example" {
   name = "my-snowflake"
 
   config {
-    account = "..."
-    database = "..."
+    account   = "..."
+    database  = "..."
     warehouse = "..."
-    user = "..."
+    user      = "..."
     # Password-based auth (default):
     password = "..."
     # Key pair auth (set use_key_pair_auth = true to use instead of password):
@@ -42,7 +42,6 @@ resource "rudderstack_destination_snowflake" "example" {
     # }
     # namespace = "..."
     # prefix = "..."
-    # additional_properties = true
     # S3 with access keys:
     # s3 {
     #   bucket_name = "..."
