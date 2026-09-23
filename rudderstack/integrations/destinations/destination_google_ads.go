@@ -32,6 +32,7 @@ func init() {
 			"event_filtering.0.blacklist": "blacklistedEvents",
 		}),
 		c.Simple("useNativeSDK.web", "use_native_sdk.0.web"),
+		c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue),
 	}
 
 	properties = append(properties, commonProperties...)
@@ -162,6 +163,22 @@ func init() {
 					"web": {
 						Type:     schema.TypeBool,
 						Optional: true,
+					},
+				},
+			},
+		},
+		"connection_mode": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Set the connection mode used to send events to Google Ads for each source type.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						Description:      "Connection mode for web sources. Google Ads only supports device mode.",
+						ValidateDiagFunc: c.StringMatchesRegexp("^(device)$"),
 					},
 				},
 			},
