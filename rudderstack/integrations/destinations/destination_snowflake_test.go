@@ -33,8 +33,7 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"preferAppend": true,
 				"skipTracksTable": false,
 				"manualSync": false,
-				"useRudderStorage": true,
-				"additionalProperties": true
+				"useRudderStorage": true
 			}`,
 		TerraformUpdate: `
 				account = "example-account"
@@ -176,7 +175,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 				"preferAppend": true,
 				"manualSync": true,
 				"useRudderStorage": false,
-				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
 				"connectionMode": {
 					"web": "cloud",
@@ -495,8 +493,7 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"preferAppend": true,
 				"skipTracksTable": false,
 				"manualSync": false,
-				"useRudderStorage": true,
-				"additionalProperties": true
+				"useRudderStorage": true
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -522,8 +519,7 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				"preferAppend": true,
 				"skipTracksTable": false,
 				"manualSync": false,
-				"useRudderStorage": false,
-				"additionalProperties": true
+				"useRudderStorage": false
 			}`,
 		},
 	})
@@ -555,8 +551,7 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"preferAppend": true,
 				"skipTracksTable": false,
 				"manualSync": false,
-				"useRudderStorage": true,
-				"additionalProperties": true
+				"useRudderStorage": true
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -597,7 +592,6 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				"skipTracksTable": false,
 				"manualSync": false,
 				"useRudderStorage": false,
-				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
 				"cloudProvider": "GCP",
 				"prefix": "example-prefix",
@@ -635,8 +629,7 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"preferAppend": true,
 				"skipTracksTable": false,
 				"manualSync": false,
-				"useRudderStorage": true,
-				"additionalProperties": true
+				"useRudderStorage": true
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -678,7 +671,6 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				"skipTracksTable": false,
 				"manualSync": false,
 				"useRudderStorage": false,
-				"additionalProperties": true,
 				"jsonPaths": "./example-paths",
 				"cloudProvider": "AZURE",
 				"containerName": "example-container-name",
@@ -718,8 +710,7 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"preferAppend": true,
 				"skipTracksTable": false,
 				"manualSync": false,
-				"useRudderStorage": true,
-				"additionalProperties": true
+				"useRudderStorage": true
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -745,8 +736,7 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				"preferAppend": true,
 				"skipTracksTable": false,
 				"manualSync": false,
-				"useRudderStorage": true,
-				"additionalProperties": true
+				"useRudderStorage": true
 			}`,
 		},
 	})
@@ -778,8 +768,7 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"preferAppend": true,
 				"skipTracksTable": false,
 				"manualSync": false,
-				"useRudderStorage": true,
-				"additionalProperties": true
+				"useRudderStorage": true
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -812,7 +801,6 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				"skipTracksTable": false,
 				"manualSync": false,
 				"useRudderStorage": false,
-				"additionalProperties": true,
 				"cloudProvider": "AWS",
 				"bucketName": "example-bucket-name",
 				"roleBasedAuth": true,
@@ -858,8 +846,7 @@ func TestDestinationResourceSnowflakeExplicitBooleanFalse(t *testing.T) {
 				"preferAppend": false,
 				"skipTracksTable": false,
 				"manualSync": false,
-				"useRudderStorage": true,
-				"additionalProperties": true
+				"useRudderStorage": true
 			}`,
 			TerraformUpdate: `
 				account = "example-account"
@@ -888,8 +875,7 @@ func TestDestinationResourceSnowflakeExplicitBooleanFalse(t *testing.T) {
 				"preferAppend": true,
 				"skipTracksTable": true,
 				"manualSync": true,
-				"useRudderStorage": true,
-				"additionalProperties": true
+				"useRudderStorage": true
 			}`,
 		},
 	})

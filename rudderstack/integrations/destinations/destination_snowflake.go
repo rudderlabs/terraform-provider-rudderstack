@@ -53,7 +53,6 @@ func init() {
 			"gcp":   "GCP",
 			"azure": "AZURE",
 		}),
-		c.Simple("additionalProperties", "additional_properties"),
 		c.Conditional("bucketName", "s3.0.bucket_name", c.Equals("cloudProvider", "AWS")),
 		c.Simple("accessKeyID", "s3.0.access_key_id", c.SkipZeroValue),
 		c.Simple("accessKey", "s3.0.access_key", c.SkipZeroValue),
@@ -292,11 +291,6 @@ func init() {
 					},
 				},
 			},
-		},
-		"additional_properties": {
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
 		},
 		"s3": {
 			Type:          schema.TypeList,
