@@ -144,7 +144,15 @@ RUDDERSTACK_ACCESS_TOKEN=<paste from vault>
 RUDDERSTACK_API_URL=https://api.dev.rudderlabs.com
 ```
 
-The single-integration targets (`testacc-dest`, `testacc-source`) — and the CI destination CRUD job — use a `(?i)`-prefixed Go regex, so `DEST=webhook` matches `TestAccDestinationWebhook` and `DEST=customer_io` matches `TestAccDestinationCustomerIO` (underscores become `.*`). The bulk targets (`testacc-plan`, `testacc-all`, `testacc-conn`) and the CI source/connection jobs use a case-sensitive `TestAcc*` prefix instead, which works because every generated test name starts with `TestAcc`.
+`testacc-dest` — and the CI destination CRUD job — select tests **by exact name**, read out of `rudderstack/integrations/destinations/destination_<name>_test.go`. So `DEST=snowflake` runs exactly the `TestAccDestination*` functions declared in `destination_snowflake_test.go`, and nothing from `destination_snowflake_streaming_test.go`.
+
+> This replaced a fuzzy `(?i)TestAccDestination.*<name>` regex that bled across destinations sharing a prefix — `google_analytics` also ran GA4's suite, and `customerio`, `s3` and `snowflake` each pulled in a sibling. Anchoring the regex was not sufficient on its own, because `destination_hs_test.go` legitimately declares two tests (`TestAccDestinationHs` and `TestAccDestinationHsHubspotEvents`) and both must run under the `hs` entry.
+
+If `DEST` does not name a real test file, `testacc-dest` falls back to the old fuzzy regex, so partial names like `DEST=webhook` still work for quick local runs — but the exact-name path is what CI uses.
+
+`testacc-source` still uses the fuzzy `(?i)` regex (source tests are not laid out one-file-per-source), so `SRC=android` also runs `TestAccSourceAndroidKotlin`. This is harmless in CI, where the source job runs every `TestAccSource` in one go, but worth knowing locally.
+
+The bulk targets (`testacc-plan`, `testacc-all`, `testacc-conn`) and the CI source/connection jobs use a case-sensitive `TestAcc*` prefix instead, which works because every generated test name starts with `TestAcc`.
 
 ---
 
