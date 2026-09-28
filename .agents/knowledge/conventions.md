@@ -81,3 +81,8 @@
 - Reddit omits the plain `useNativeSDK` field because it is schema-only and absent from every upstream `destConfig` list. Its `version` and `hash_data` fields remain Optional-with-Default despite appearing in the upstream required list, so Terraform supplies valid API values without combining incompatible Required and Default schema flags.
 - Reddit Pixel keeps `use_native_sdk.web` mapped with plain `c.Simple`, preserving an explicit `false`, because upstream schema and destination config both define that source-scoped field. Its `advertiser_id` is length-validated only, while event-mapping `from` values retain the `{{ ... || ... }}` dynamic form without discontinued `env.` support.
 - Reddit Pixel event-filter list elements intentionally follow the Spotify Pixel discriminator/`ExactlyOneOf` pattern without additional per-element validators.
+
+## INT-7189 — Google Ads connection mode semantics
+
+- Google Ads keeps `use_native_sdk` unchanged and adds `connection_mode.web` as an independent Optional field constrained to `device`; map it with `c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue)`.
+- Do not infer the upstream UI's device-mode default in Terraform with `Default`, `Computed`, or `SimpleWithDefault`. Omitting `connection_mode` must leave `connectionMode` absent from the API payload, matching Spotify Pixel and the provider-wide connection-mode convention.
