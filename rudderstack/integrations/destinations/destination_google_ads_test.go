@@ -52,7 +52,11 @@ var googleAdsTestConfigs = []c.TestConfig{
 				use_native_sdk {
 					web = true
 				}
-			
+
+				connection_mode {
+					web = "device"
+				}
+
 				event_filtering {
 					blacklist = ["one", "two", "three"]
 				}
@@ -112,6 +116,9 @@ var googleAdsTestConfigs = []c.TestConfig{
 				"eventFilteringOption": "blacklistedEvents",
 				"useNativeSDK": {
 				  "web": true
+				},
+				"connectionMode": {
+				  "web": "device"
 				},
 				"consentManagement": {
 					"web": [
