@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.17.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.16.0...v4.17.0) (2026-09-29)
+
+
+### Features
+
+* add connection mode support to Google Ads destination ([#342](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/342)) ([f0f0b79](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/f0f0b79dd24a8a82dc236b2488eae9ad57165289))
+
+
+### Miscellaneous
+
+* **google_ads:** set connection mode alongside native SDK in e2e update ([#344](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/344)) ([5c62eed](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/5c62eeddc06157fceba312d9b539cbed5a9bf786))
+
 ## [4.16.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.15.0...v4.16.0) (2026-09-22)
 
 
