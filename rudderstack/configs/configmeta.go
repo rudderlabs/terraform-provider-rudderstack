@@ -16,6 +16,9 @@ type ConfigMeta struct {
 	Properties     []ConfigProperty
 	SettingsSchema map[string]*schema.Schema
 	Settings       []ConfigProperty
+	// CustomizeConfigDiff optionally validates integration-specific config rules.
+	// The shared resource lifecycle invokes this after Terraform schema validation.
+	CustomizeConfigDiff schema.CustomizeDiffFunc
 }
 
 // SensitiveConfigPaths returns the terraform state paths of every Sensitive

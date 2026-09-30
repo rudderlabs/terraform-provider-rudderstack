@@ -22,16 +22,26 @@ module "bq" {
 resource "rudderstack_destination_customerio" "cio" {
   name = local.base_name
   config {
-    site_id                 = var.customerio_site_id
-    api_key                 = var.customerio_api_key
     datacenter              = var.customerio_datacenter
     api_version             = "v2"
     user_id_identifier_type = "id"
+
+    connection_mode {
+      web = "device"
+    }
+
+    sdk_version {
+      web = "v2"
+    }
+
+    write_key {
+      web = var.customerio_write_key
+    }
   }
 }
 
-# api_version deliberately omitted. The schema defaults it to "v1", so the
-# provider sends apiVersion="v1" and the backend stores and echoes it back,
+# api_version deliberately omitted. The schema defaults it to "v2", so the
+# provider sends apiVersion="v2" and the backend stores and echoes it back,
 # closing the round-trip. The drift assertion run.sh performs after apply
 # (terraform plan -detailed-exitcode) must stay at exit 0; a regression that
 # stopped sending the default, or a backend that dropped it, would surface
@@ -124,6 +134,6 @@ output "event_connection_id" {
 }
 
 output "default_api_version_destination_id" {
-  description = "ID of the Customer.io destination created with api_version unset (defaults to v1)."
+  description = "ID of the Customer.io destination created with api_version unset (defaults to v2)."
   value       = rudderstack_destination_customerio.cio_default_api_version.id
 }

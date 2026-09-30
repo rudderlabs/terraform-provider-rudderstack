@@ -85,6 +85,13 @@ variable "customerio_api_key" {
   sensitive   = true
 }
 
+variable "customerio_write_key" {
+  description = "Customer.io Data Pipelines write key for web device-mode SDK v2."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "customerio_datacenter" {
   description = "Customer.io data center (US or EU)."
   type        = string

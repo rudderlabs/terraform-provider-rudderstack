@@ -98,13 +98,14 @@ func ComposeConfigMeta(base c.ConfigMeta, delta Delta, version int) c.ConfigMeta
 	propsClone = append(propsClone, delta.AddedProperties...)
 
 	return c.ConfigMeta{
-		APIType:        base.APIType,
-		Version:        version,
-		SkipConfig:     base.SkipConfig,
-		ConfigSchema:   schemaClone,
-		Properties:     propsClone,
-		SettingsSchema: base.SettingsSchema,
-		Settings:       base.Settings,
+		APIType:             base.APIType,
+		Version:             version,
+		SkipConfig:          base.SkipConfig,
+		ConfigSchema:        schemaClone,
+		Properties:          propsClone,
+		SettingsSchema:      base.SettingsSchema,
+		Settings:            base.Settings,
+		CustomizeConfigDiff: base.CustomizeConfigDiff,
 	}
 }
 

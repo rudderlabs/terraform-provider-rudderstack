@@ -63,6 +63,7 @@ EOT
 # customerio scenario (BigQuery → Customer.io VDM v2):
 customerio_site_id    = "REPLACE_ME"
 customerio_api_key    = "REPLACE_ME"
+customerio_write_key  = "REPLACE_ME"
 customerio_datacenter = "US"   # or "EU"; optional, defaults to US
 
 # customerio_audience scenario (BigQuery → Customer.io Audience):

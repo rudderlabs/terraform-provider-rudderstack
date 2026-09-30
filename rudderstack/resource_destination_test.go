@@ -222,6 +222,129 @@ func TestResourceDestinationConsentManagementAllowsDistinctAndPerSourceType(t *t
 	})
 }
 
+func TestResourceDestinationCustomerIOConditionalFields(t *testing.T) {
+	cm := configs.Destinations.Entries()["customerio"]
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"rudderstack": func() (*schema.Provider, error) {
+				return &schema.Provider{
+					ConfigureContextFunc: func(_ context.Context, _ *schema.ResourceData) (interface{}, diag.Diagnostics) {
+						return nil, nil
+					},
+					ResourcesMap: map[string]*schema.Resource{
+						"rudderstack_destination_customerio": resourceDestination(cm),
+					},
+				}, nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				Config: `
+					resource "rudderstack_destination_customerio" "example" {
+						name = "customerio-web-device-v2"
+						config {
+							connection_mode { web = "device" }
+							write_key { web = "write-key" }
+						}
+					}
+				`,
+			},
+			{
+				PlanOnly: true,
+				Config: `
+					resource "rudderstack_destination_customerio" "example" {
+						name = "customerio-web-device-v2"
+						config {
+							connection_mode { web = "device" }
+							sdk_version { web = "v2" }
+						}
+					}
+				`,
+				ExpectError: regexp.MustCompile(`write_key\.0\.web must be non-empty`),
+			},
+			{
+				PlanOnly: true,
+				Config: `
+					resource "rudderstack_destination_customerio" "example" {
+						name = "customerio-cloud"
+						config { site_id = "site-id" }
+					}
+				`,
+				ExpectError: regexp.MustCompile(`api_key must be non-empty`),
+			},
+			{
+				PlanOnly: true,
+				Config: `
+					resource "rudderstack_destination_customerio" "example" {
+						name = "customerio-web-device-v1"
+						config {
+							connection_mode { web = "device" }
+							sdk_version { web = "v1" }
+						}
+					}
+				`,
+				ExpectError: regexp.MustCompile(`site_id must be non-empty`),
+			},
+		},
+	})
+}
+
+func TestResourceDestinationCustomerIOComputedWriteKeyDefersValidation(t *testing.T) {
+	cm := configs.Destinations.Entries()["customerio"]
+
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"rudderstack": func() (*schema.Provider, error) {
+				return &schema.Provider{
+					ConfigureContextFunc: func(_ context.Context, _ *schema.ResourceData) (interface{}, diag.Diagnostics) {
+						return nil, nil
+					},
+					ResourcesMap: map[string]*schema.Resource{
+						"rudderstack_destination_customerio": resourceDestination(cm),
+						"rudderstack_test_write_key": {
+							Schema: map[string]*schema.Schema{
+								"result": {Type: schema.TypeString, Computed: true},
+							},
+							CreateContext: func(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+								d.SetId("write-key")
+								return diag.FromErr(d.Set("result", "computed-write-key"))
+							},
+							ReadContext: func(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+								return diag.FromErr(d.Set("result", "computed-write-key"))
+							},
+							DeleteContext: func(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+								d.SetId("")
+								return nil
+							},
+						},
+					},
+				}, nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				Config: `
+					resource "rudderstack_test_write_key" "customerio" {}
+
+					resource "rudderstack_destination_customerio" "example" {
+						name = "customerio-web-device-v2"
+						config {
+							connection_mode { web = "device" }
+							sdk_version { web = "v2" }
+							write_key { web = rudderstack_test_write_key.customerio.result }
+						}
+					}
+				`,
+			},
+		},
+	})
+}
+
 func TestPopulateDestinationFromState_SetsVersionFromConfigMeta(t *testing.T) {
 	cm := configs.ConfigMeta{
 		APIType:    "TEST",
