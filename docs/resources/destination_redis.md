@@ -144,7 +144,7 @@ Required:
 
 Optional:
 
-- `ca_certificate` (String) Enter the certificate which needs to be verified while establishing a secure connection. Skip setting this if Root CA of your server can be verified with any client, e.g. AWS Elasticache.
+- `ca_certificate` (String, Sensitive) Enter the certificate which needs to be verified while establishing a secure connection. Skip setting this if Root CA of your server can be verified with any client, e.g. AWS Elasticache.
 - `cluster_mode` (Boolean) Use this setting to enable the Redis cluster mode.
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `database` (String) RudderStack stores the user traits in the default database of the Redis instance. A different database inside the Redis instance can be configured using this setting.

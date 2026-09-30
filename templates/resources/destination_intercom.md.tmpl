@@ -16,6 +16,10 @@ https://www.rudderstack.com/docs/destinations/streaming-destinations/intercom/
 
 > **:warning: Breaking Change**
 > 
+> Note that from the provider versions 5.0.0 and above, the `collect_context` property has been removed. It was never part of the destination definition, so the control plane did not store or read it and setting it had no effect. Remove it from your configuration.
+
+> **:warning: Breaking Change**
+> 
 > Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**

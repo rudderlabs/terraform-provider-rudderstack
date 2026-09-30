@@ -113,6 +113,10 @@ resource "rudderstack_destination_intercom" "example" {
 
 > **:warning: Breaking Change**
 > 
+> Note that from the provider versions 5.0.0 and above, the `collect_context` property has been removed. It was never part of the destination definition, so the control plane did not store or read it and setting it had no effect. Remove it from your configuration.
+
+> **:warning: Breaking Change**
+> 
 > Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
@@ -142,12 +146,11 @@ resource "rudderstack_destination_intercom" "example" {
 
 Required:
 
-- `api_key` (String) Enter your Intercom access token.
+- `api_key` (String, Sensitive) Enter your Intercom access token.
 - `app_id` (String) Enter your app ID.
 
 Optional:
 
-- `collect_context` (Boolean) Enable this setting to include the user context along with your identify calls.
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `event_filtering` (Block List, Max: 1) Use this setting to determine which events should be blocked or allowed to flow through. (see [below for nested schema](#nestedblock--config--event_filtering))
 - `mobile_api_key_android` (String) Enter the Android API Key.

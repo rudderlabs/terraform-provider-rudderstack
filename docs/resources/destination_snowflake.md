@@ -17,10 +17,10 @@ resource "rudderstack_destination_snowflake" "example" {
   name = "my-snowflake"
 
   config {
-    account = "..."
-    database = "..."
+    account   = "..."
+    database  = "..."
     warehouse = "..."
-    user = "..."
+    user      = "..."
     # Password-based auth (default):
     password = "..."
     # Key pair auth (set use_key_pair_auth = true to use instead of password):
@@ -56,7 +56,6 @@ resource "rudderstack_destination_snowflake" "example" {
     # }
     # namespace = "..."
     # prefix = "..."
-    # additional_properties = true
     # S3 with access keys:
     # s3 {
     #   bucket_name = "..."
@@ -169,6 +168,10 @@ resource "rudderstack_destination_snowflake" "example" {
 
 > **:warning: Breaking Change**
 > 
+> Note that from the provider versions 5.0.0 and above, the `additional_properties` property has been removed. It was never part of the destination definition, so the control plane did not store or read it and setting it had no effect. Remove it from your configuration.
+
+> **:warning: Breaking Change**
+> 
 > Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
@@ -206,7 +209,6 @@ Required:
 
 Optional:
 
-- `additional_properties` (Boolean)
 - `azure` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--azure))
 - `connection_mode` (Block List, Max: 1) Use this setting to set how you want to route events from your source to destination. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))

@@ -16,6 +16,10 @@ https://www.rudderstack.com/docs/destinations/streaming-destinations/adobe-analy
 
 > **:warning: Breaking Change**
 > 
+> Note that from the provider versions 5.0.0 and above, the `use_utf8_charset`, `use_secure_server_side`, `use_legacy_link_name`, `page_name_fallback_tostring` and `send_false_values` properties have been removed. They were never part of the destination definition, so the control plane did not store or read them and setting them had no effect. Remove them from your configuration.
+
+> **:warning: Breaking Change**
+> 
 > Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
