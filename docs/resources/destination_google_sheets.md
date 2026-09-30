@@ -21,16 +21,16 @@ resource "rudderstack_destination_google_sheets" "example" {
     credentials = "..."
     sheet_id = "123"
 
-#    event_key_map = [
-#      {
-#        from = "header-1"
-#        to   = "value-1"
-#      },
-#      {
-#        from = "header-2"
-#        to   = "value-2"
-#      }
-#    ]
+    event_key_map = [
+      {
+        from = "header-1"
+        to   = "value-1"
+      },
+      {
+        from = "header-2"
+        to   = "value-2"
+      }
+    ]
 
     # consent_management {
     # 	web = [
@@ -117,6 +117,10 @@ resource "rudderstack_destination_google_sheets" "example" {
 
 > **:warning: Breaking Change**
 > 
+> Note that from the provider versions 5.0.0 and above, `event_key_map` is a required property. The Google Sheets destination definition requires `eventKeyMap`, so a configuration that omitted it was already being rejected by the API at apply time with a `400`; making it required surfaces the error at plan time instead. Add an `event_key_map` block to your configuration — see the example above.
+
+> **:warning: Breaking Change**
+> 
 > Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**
@@ -147,13 +151,22 @@ resource "rudderstack_destination_google_sheets" "example" {
 Required:
 
 - `credentials` (String, Sensitive) Enter the credentials JSON used by the client library to access the Google Sheets API.
+- `event_key_map` (List of Object) Add Event Properties to map to Google-Sheets Column. (see [below for nested schema](#nestedatt--config--event_key_map))
 - `sheet_id` (String) Enter your Google sheet ID. You can find it in the spreadsheet URL.
 - `sheet_name` (String) Specify the name of the Google spreadsheet to which you want to send the data.
 
 Optional:
 
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
-- `event_key_map` (List of Object) Add Event Properties to map to Google-Sheets Column. (see [below for nested schema](#nestedatt--config--event_key_map))
+
+<a id="nestedatt--config--event_key_map"></a>
+### Nested Schema for `config.event_key_map`
+
+Required:
+
+- `from` (String)
+- `to` (String)
+
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`
@@ -302,13 +315,3 @@ Optional:
 - `consents` (List of String)
 - `provider` (String)
 - `resolution_strategy` (String)
-
-
-
-<a id="nestedatt--config--event_key_map"></a>
-### Nested Schema for `config.event_key_map`
-
-Optional:
-
-- `from` (String)
-- `to` (String)
