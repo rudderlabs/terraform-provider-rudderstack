@@ -29,8 +29,6 @@ var googleAnalytics4TestConfigs = []c.TestConfig{
 				firebase_app_id = "..."
 
 				debug_mode              = true
-				block_page_view_event   = true
-				send_user_id            = true
 				sdk_base_url            = "https://www.example.com"
 				server_container_url    = "https://analytics.example.com"
 
@@ -137,8 +135,6 @@ var googleAnalytics4TestConfigs = []c.TestConfig{
 				"measurementId": "G-000000",
 				"firebaseAppId": "...",
 				"debugMode": true,
-				"blockPageViewEvent": true,
-				"sendUserId": true,
 				"sdkBaseUrl": "https://www.example.com",
 				"serverContainerUrl": "https://analytics.example.com",
 				"piiPropertiesToIgnore": [

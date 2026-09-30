@@ -18,9 +18,7 @@ func init() {
 		c.Simple("measurementId", "measurement_id", c.SkipZeroValue),
 		c.Simple("firebaseAppId", "firebase_app_id", c.SkipZeroValue),
 		c.Simple("debugMode", "debug_mode"),
-		c.Simple("blockPageViewEvent", "block_page_view_event", c.SkipZeroValue),
 		c.Simple("extendPageViewParams", "extend_page_view_params", c.SkipZeroValue),
-		c.Simple("sendUserId", "send_user_id", c.SkipZeroValue),
 		c.Simple("sdkBaseUrl", "sdk_base_url", c.SkipZeroValue),
 		c.Simple("serverContainerUrl", "server_container_url", c.SkipZeroValue),
 		c.ArrayWithObjects("piiPropertiesToIgnore", "pii_properties_to_ignore", map[string]interface{}{
@@ -102,20 +100,10 @@ func init() {
 				},
 			},
 		},
-		"block_page_view_event": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Description: "Enable this setting to disable sending `page_view` events on load. This setting is applicable only for device mode.",
-		},
 		"extend_page_view_params": {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Description: "Enable this setting to send `url` and `search` along with any other custom property to the `page` call of the RudderStack SDK. This setting is applicable only for device mode.",
-		},
-		"send_user_id": {
-			Type:        schema.TypeBool,
-			Optional:    true,
-			Description: "If enabled, the user ID is set to the identified visitors and sent to Google Analytics 4.",
 		},
 		"event_filtering": {
 			Type:        schema.TypeList,

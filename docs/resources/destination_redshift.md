@@ -345,4 +345,4 @@ Required:
 Optional:
 
 - `access_key` (String, Sensitive) Enter your AWS secret access key.
-- `access_key_id` (String) Enter your AWS access key ID.
+- `access_key_id` (String, Sensitive) Enter your AWS access key ID.
