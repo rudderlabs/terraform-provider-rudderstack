@@ -30,8 +30,20 @@ resource "rudderstack_destination_customerio" "example" {
     #   web = true
     # }
 
-    # data_use_in_app {
+    # data_use_in_app { # Web device mode with SDK v1 only.
     #   web = false
+    # }
+
+    # sdk_version { # Web device mode only. Defaults to "v2".
+    #   web = "v2"
+    # }
+
+    # write_key { # Required for web device mode with SDK v2.
+    #   web = "customer io data pipelines write key"
+    # }
+
+    # anonymous_in_app { # Web device mode with SDK v2 only.
+    #   web = true
     # }
 
     # auto_track_device_attributes {

@@ -39,6 +39,18 @@ var customerioTestConfigs = []c.TestConfig{
 					web = true
 				}
 
+				sdk_version {
+					web = "v2"
+				}
+
+				write_key {
+					web = "write-key"
+				}
+
+				anonymous_in_app {
+					web = true
+				}
+
 				auto_track_device_attributes {
 					android = true
 					ios     = false
@@ -74,6 +86,15 @@ var customerioTestConfigs = []c.TestConfig{
 					"web": true
 				},
 				"dataUseInApp": {
+					"web": true
+				},
+				"sdkVersion": {
+					"web": "v2"
+				},
+				"writeKey": {
+					"web": "write-key"
+				},
+				"anonymousInApp": {
 					"web": true
 				},
 				"autoTrackDeviceAttributes": {
@@ -173,6 +194,7 @@ var customerioTestConfigs = []c.TestConfig{
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "EU",
 				"apiVersion": "v2",
+				"sdkVersion": { "web": "v2" },
 				"userIdIdentifierType": "id",
 				"deviceTokenEventName": "name",
 				"eventFilteringOption": "blacklistedEvents",
@@ -410,6 +432,38 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 	cmt.AssertDestination(t, "customerio", customerioTestConfigs)
 }
 
+func TestDestinationResourceCustomerIOWebDeviceV2(t *testing.T) {
+	cmt.AssertDestination(t, "customerio", []c.TestConfig{
+		{
+			TerraformCreate: `
+				connection_mode { web = "device" }
+				write_key { web = "write-key" }
+			`,
+			APICreate: `{
+				"apiVersion": "v2",
+				"datacenter": "US",
+				"connectionMode": { "web": "device" },
+				"sdkVersion": { "web": "v2" },
+				"writeKey": { "web": "write-key" }
+			}`,
+			TerraformUpdate: `
+				connection_mode { web = "device" }
+				sdk_version { web = "v2" }
+				write_key { web = "updated-write-key" }
+				anonymous_in_app { web = true }
+			`,
+			APIUpdate: `{
+				"apiVersion": "v2",
+				"datacenter": "US",
+				"connectionMode": { "web": "device" },
+				"sdkVersion": { "web": "v2" },
+				"writeKey": { "web": "updated-write-key" },
+				"anonymousInApp": { "web": true }
+			}`,
+		},
+	})
+}
+
 func TestDestinationResourceCustomerIOApiVersionDefault(t *testing.T) {
 	cmt.AssertDestination(t, "customerio", []c.TestConfig{
 		{
@@ -421,7 +475,8 @@ func TestDestinationResourceCustomerIOApiVersionDefault(t *testing.T) {
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v2",
-				"datacenter": "US"
+				"datacenter": "US",
+				"sdkVersion": { "web": "v2" }
 			}`,
 			TerraformUpdate: `
 				site_id = "cd820c1b31d8f2696f3b"
@@ -431,7 +486,8 @@ func TestDestinationResourceCustomerIOApiVersionDefault(t *testing.T) {
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v2",
-				"datacenter": "US"
+				"datacenter": "US",
+				"sdkVersion": { "web": "v2" }
 			}`,
 		},
 	})
@@ -449,7 +505,8 @@ func TestDestinationResourceCustomerIOApiVersionV1Override(t *testing.T) {
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v1",
-				"datacenter": "US"
+				"datacenter": "US",
+				"sdkVersion": { "web": "v2" }
 			}`,
 			TerraformUpdate: `
 				site_id = "cd820c1b31d8f2696f3b"
@@ -460,7 +517,8 @@ func TestDestinationResourceCustomerIOApiVersionV1Override(t *testing.T) {
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v1",
-				"datacenter": "US"
+				"datacenter": "US",
+				"sdkVersion": { "web": "v2" }
 			}`,
 		},
 	})

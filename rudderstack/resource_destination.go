@@ -31,9 +31,15 @@ func resourceDestination(cm configs.ConfigMeta) *schema.Resource {
 }
 
 func resourceDestinationCustomizeDiff(cm configs.ConfigMeta) schema.CustomizeDiffFunc {
-	return func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	return func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 		if cm.SkipConfig {
 			return nil
+		}
+
+		if cm.CustomizeConfigDiff != nil {
+			if err := cm.CustomizeConfigDiff(ctx, d, m); err != nil {
+				return err
+			}
 		}
 
 		consentManagement := d.Get("config.0.consent_management.0")

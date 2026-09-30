@@ -44,8 +44,20 @@ resource "rudderstack_destination_customerio" "example" {
     #   web = true
     # }
 
-    # data_use_in_app {
+    # data_use_in_app { # Web device mode with SDK v1 only.
     #   web = false
+    # }
+
+    # sdk_version { # Web device mode only. Defaults to "v2".
+    #   web = "v2"
+    # }
+
+    # write_key { # Required for web device mode with SDK v2.
+    #   web = "customer io data pipelines write key"
+    # }
+
+    # anonymous_in_app { # Web device mode with SDK v2 only.
+    #   web = true
     # }
 
     # auto_track_device_attributes {
@@ -123,26 +135,34 @@ resource "rudderstack_destination_customerio" "example" {
 <a id="nestedblock--config"></a>
 ### Nested Schema for `config`
 
-Required:
-
-- `api_key` (String, Sensitive) Enter your Customer.io API key.
-- `site_id` (String) Enter your Customer.io site ID.
-
 Optional:
 
+- `anonymous_in_app` (Block List, Max: 1) Enable in-app messages for anonymous users in web device mode with SDK v2. (see [below for nested schema](#nestedblock--config--anonymous_in_app))
+- `api_key` (String, Sensitive) Enter your Customer.io API key. Required unless only web device mode is configured.
 - `api_version` (String) Customer.io API version for cloud-mode delivery. Defaults to `v2` for the unified /v2/batch API; set to `v1` for legacy per-endpoint behavior. This setting does not affect device-mode SDK delivery.
 - `auto_track_device_attributes` (Block List, Max: 1) Enable this setting to automatically track device attributes in SDK mode. (see [below for nested schema](#nestedblock--config--auto_track_device_attributes))
 - `background_queue_min_number_of_tasks` (Block List, Max: 1) Configure the minimum number of tasks in the background queue. (see [below for nested schema](#nestedblock--config--background_queue_min_number_of_tasks))
 - `background_queue_seconds_delay` (Block List, Max: 1) Configure the delay in seconds for the background queue. (see [below for nested schema](#nestedblock--config--background_queue_seconds_delay))
 - `connection_mode` (Block List, Max: 1) Configure the connection mode per source type for Customer.io. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
-- `data_use_in_app` (Block List, Max: 1) Enable this setting to send in-app messages to your website. (see [below for nested schema](#nestedblock--config--data_use_in_app))
+- `data_use_in_app` (Block List, Max: 1) Enable this setting to send in-app messages to your website in web device mode with SDK v1. (see [below for nested schema](#nestedblock--config--data_use_in_app))
 - `datacenter` (String) Input your Customer.io Data Center. (US or EU)
 - `device_token_event_name` (String) Enter the name of the event that is fired immediately after setting the device token.
 - `event_filtering` (Block List, Max: 1) RudderStack lets you determine which events should be allowed to flow through or blocked. (see [below for nested schema](#nestedblock--config--event_filtering))
+- `sdk_version` (Block List, Max: 1) Choose the Customer.io SDK version for web device mode. Defaults to `v2` when this block is omitted. (see [below for nested schema](#nestedblock--config--sdk_version))
 - `send_page_name_in_sdk` (Block List, Max: 1) Configure whether to send the page name in SDK mode. (see [below for nested schema](#nestedblock--config--send_page_name_in_sdk))
+- `site_id` (String) Enter your Customer.io site ID. Required unless only web device mode with SDK v2 is configured.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
 - `user_id_identifier_type` (String) Customer.io identifier that receives the RudderStack `userId` for cloud-mode delivery when `api_version` is `v2`. This setting does not affect device-mode SDK delivery.
+- `write_key` (Block List, Max: 1) Enter the Customer.io Data Pipelines write key for web device mode with SDK v2. (see [below for nested schema](#nestedblock--config--write_key))
+
+<a id="nestedblock--config--anonymous_in_app"></a>
+### Nested Schema for `config.anonymous_in_app`
+
+Optional:
+
+- `web` (Boolean)
+
 
 <a id="nestedblock--config--auto_track_device_attributes"></a>
 ### Nested Schema for `config.auto_track_device_attributes`
@@ -356,6 +376,14 @@ Optional:
 - `whitelist` (List of String) Enter the event names to be allowlisted.
 
 
+<a id="nestedblock--config--sdk_version"></a>
+### Nested Schema for `config.sdk_version`
+
+Optional:
+
+- `web` (String)
+
+
 <a id="nestedblock--config--send_page_name_in_sdk"></a>
 ### Nested Schema for `config.send_page_name_in_sdk`
 
@@ -372,3 +400,11 @@ Optional:
 - `android` (Boolean)
 - `ios` (Boolean)
 - `web` (Boolean)
+
+
+<a id="nestedblock--config--write_key"></a>
+### Nested Schema for `config.write_key`
+
+Optional:
+
+- `web` (String)

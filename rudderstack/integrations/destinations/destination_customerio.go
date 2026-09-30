@@ -1,6 +1,9 @@
 package destinations
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -11,8 +14,8 @@ func init() {
 	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
 
 	properties := []c.ConfigProperty{
-		c.Simple("siteID", "site_id"),
-		c.Simple("apiKey", "api_key"),
+		c.Simple("siteID", "site_id", c.SkipZeroValue),
+		c.Simple("apiKey", "api_key", c.SkipZeroValue),
 		c.Simple("apiVersion", "api_version"),
 		c.Simple("userIdIdentifierType", "user_id_identifier_type", c.SkipZeroValue),
 		c.Simple("deviceTokenEventName", "device_token_event_name", c.SkipZeroValue),
@@ -35,6 +38,9 @@ func init() {
 		c.Simple("useNativeSDK.ios", "use_native_sdk.0.ios"),
 		c.Simple("sendPageNameInSDK.web", "send_page_name_in_sdk.0.web"),
 		c.Simple("dataUseInApp.web", "data_use_in_app.0.web"),
+		c.SimpleWithDefault("sdkVersion.web", "sdk_version.0.web", "v2"),
+		c.Simple("writeKey.web", "write_key.0.web", c.SkipZeroValue),
+		c.Simple("anonymousInApp.web", "anonymous_in_app.0.web"),
 		c.Simple("autoTrackDeviceAttributes.android", "auto_track_device_attributes.0.android"),
 		c.Simple("autoTrackDeviceAttributes.ios", "auto_track_device_attributes.0.ios"),
 		c.Simple("backgroundQueueMinNumberOfTasks.android", "background_queue_min_number_of_tasks.0.android", c.SkipZeroValue),
@@ -52,15 +58,15 @@ func init() {
 	schema := map[string]*schema.Schema{
 		"site_id": {
 			Type:             schema.TypeString,
-			Required:         true,
-			Description:      "Enter your Customer.io site ID.",
+			Optional:         true,
+			Description:      "Enter your Customer.io site ID. Required unless only web device mode with SDK v2 is configured.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
 		"api_key": {
 			Type:             schema.TypeString,
-			Required:         true,
+			Optional:         true,
 			Sensitive:        true,
-			Description:      "Enter your Customer.io API key.",
+			Description:      "Enter your Customer.io API key. Required unless only web device mode is configured.",
 			ValidateDiagFunc: c.StringMatchesRegexp("(^\\{\\{.*\\|\\|(.*)\\}\\}$)|(^env[.].+)|^(.{1,100})$"),
 		},
 		"api_version": {
@@ -203,7 +209,52 @@ func init() {
 			Type:        schema.TypeList,
 			MaxItems:    1,
 			Optional:    true,
-			Description: "Enable this setting to send in-app messages to your website.",
+			Description: "Enable this setting to send in-app messages to your website in web device mode with SDK v1.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:     schema.TypeBool,
+						Optional: true,
+					},
+				},
+			},
+		},
+		"sdk_version": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Computed:    true,
+			Description: "Choose the Customer.io SDK version for web device mode. Defaults to `v2` when this block is omitted.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(v1|v2)$"),
+					},
+				},
+			},
+		},
+		"write_key": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enter the Customer.io Data Pipelines write key for web device mode with SDK v2.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"web": {
+						Type:             schema.TypeString,
+						Optional:         true,
+						ValidateDiagFunc: c.StringMatchesRegexp("^(.{0,100})$"),
+					},
+				},
+			},
+		},
+		"anonymous_in_app": {
+			Type:        schema.TypeList,
+			MaxItems:    1,
+			Optional:    true,
+			Description: "Enable in-app messages for anonymous users in web device mode with SDK v2.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"web": {
@@ -296,9 +347,85 @@ func init() {
 	}
 
 	c.Destinations.Register("customerio", c.ConfigMeta{
-		APIType:      "CUSTOMERIO",
-		Version:      1,
-		Properties:   properties,
-		ConfigSchema: schema,
+		APIType:             "CUSTOMERIO",
+		Version:             1,
+		Properties:          properties,
+		ConfigSchema:        schema,
+		CustomizeConfigDiff: validateCustomerIODestinationConfig,
 	})
+}
+
+func validateCustomerIODestinationConfig(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	webDeviceMode, webDeviceModeKnown := customerIOOptionalListStringConfigValue(d, "config.0.connection_mode.#", "config.0.connection_mode.0.web", "")
+	sdkVersion, sdkVersionKnown := customerIOOptionalListStringConfigValue(d, "config.0.sdk_version.#", "config.0.sdk_version.0.web", "v2")
+
+	if webDeviceModeKnown && sdkVersionKnown && webDeviceMode == "device" && sdkVersion == "v2" {
+		writeKey, writeKeyKnown := customerIOOptionalListStringConfigValue(d, "config.0.write_key.#", "config.0.write_key.0.web", "")
+		if writeKeyKnown && writeKey == "" {
+			return fmt.Errorf("config.0.write_key.0.web must be non-empty when connection_mode.0.web is %q and sdk_version.0.web is %q", "device", "v2")
+		}
+	}
+
+	exactWebDeviceMode, exactWebDeviceModeKnown := customerIOConnectionModeIsWebOnly(d)
+	if !exactWebDeviceModeKnown {
+		return nil
+	}
+	if !exactWebDeviceMode {
+		apiKey, apiKeyKnown := customerIOStringConfigValue(d, "config.0.api_key")
+		if apiKeyKnown && apiKey == "" {
+			return fmt.Errorf("config.0.api_key must be non-empty unless connection_mode sets only web to %q", "device")
+		}
+	}
+	if !exactWebDeviceMode || (sdkVersionKnown && sdkVersion != "v2") {
+		siteID, siteIDKnown := customerIOStringConfigValue(d, "config.0.site_id")
+		if siteIDKnown && siteID == "" {
+			return fmt.Errorf("config.0.site_id must be non-empty unless connection_mode sets only web to %q and sdk_version.0.web is %q", "device", "v2")
+		}
+	}
+
+	return nil
+}
+
+func customerIOOptionalListStringConfigValue(d *schema.ResourceDiff, countKey, valueKey, defaultValue string) (string, bool) {
+	if customerIOListBlockCount(d, countKey) == 0 {
+		return defaultValue, true
+	}
+	return customerIOStringConfigValue(d, valueKey)
+}
+
+func customerIOStringConfigValue(d *schema.ResourceDiff, key string) (string, bool) {
+	if !d.NewValueKnown(key) {
+		return "", false
+	}
+
+	stringValue, _ := d.Get(key).(string)
+	return stringValue, true
+}
+
+func customerIOConnectionModeIsWebOnly(d *schema.ResourceDiff) (bool, bool) {
+	if customerIOListBlockCount(d, "config.0.connection_mode.#") == 0 {
+		return false, true
+	}
+
+	for _, sourceType := range []string{"web", "android", "android_kotlin", "ios", "ios_swift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"} {
+		mode, known := customerIOStringConfigValue(d, "config.0.connection_mode.0."+sourceType)
+		if !known {
+			return false, false
+		}
+		if sourceType == "web" {
+			if mode != "device" {
+				return false, true
+			}
+			continue
+		}
+		if mode != "" {
+			return false, true
+		}
+	}
+	return true, true
+}
+
+func customerIOListBlockCount(d *schema.ResourceDiff, key string) int {
+	count, _ := d.Get(key).(int)
+	return count
 }
