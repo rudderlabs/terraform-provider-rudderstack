@@ -1,7 +1,6 @@
 package destinations
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -355,7 +354,7 @@ func init() {
 	})
 }
 
-func validateCustomerIODestinationConfig(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func validateCustomerIODestinationConfig(d *schema.ResourceDiff) error {
 	webDeviceMode, webDeviceModeKnown := customerIOOptionalListStringConfigValue(d, "config.0.connection_mode.#", "config.0.connection_mode.0.web", "")
 	sdkVersion, sdkVersionKnown := customerIOOptionalListStringConfigValue(d, "config.0.sdk_version.#", "config.0.sdk_version.0.web", "v2")
 

@@ -1,6 +1,7 @@
 package destinations
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,6 +34,21 @@ func TestComposeConfigMeta_SetsVersionAndAPIType(t *testing.T) {
 	assert.Equal(t, base.APIType, v2.APIType)
 	assert.Equal(t, 2, v2.Version)
 	assert.Equal(t, 1, base.Version, "base.Version must be untouched")
+}
+
+func TestComposeConfigMeta_InheritsAndOverridesCustomizeConfigDiff(t *testing.T) {
+	baseErr := errors.New("base validator")
+	overrideErr := errors.New("override validator")
+	base := baseConfigMetaForComposeTest()
+	base.CustomizeConfigDiff = func(_ *schema.ResourceDiff) error { return baseErr }
+
+	inherited := ComposeConfigMeta(base, Delta{}, 2)
+	require.ErrorIs(t, inherited.CustomizeConfigDiff(nil), baseErr)
+
+	overridden := ComposeConfigMeta(base, Delta{
+		CustomizeConfigDiff: func(_ *schema.ResourceDiff) error { return overrideErr },
+	}, 2)
+	require.ErrorIs(t, overridden.CustomizeConfigDiff(nil), overrideErr)
 }
 
 func TestComposeConfigMeta_AddsRenamesAndRemovesSchemaFields(t *testing.T) {
