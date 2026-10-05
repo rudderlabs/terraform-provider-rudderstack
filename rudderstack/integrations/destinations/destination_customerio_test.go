@@ -436,17 +436,21 @@ func TestDestinationResourceCustomerIOWebDeviceV2(t *testing.T) {
 	cmt.AssertDestination(t, "customerio", []c.TestConfig{
 		{
 			TerraformCreate: `
+				user_id_identifier_type = "id"
 				connection_mode { web = "device" }
+				sdk_version {}
 				write_key { web = "write-key" }
 			`,
 			APICreate: `{
 				"apiVersion": "v2",
+				"userIdIdentifierType": "id",
 				"datacenter": "US",
 				"connectionMode": { "web": "device" },
 				"sdkVersion": { "web": "v2" },
 				"writeKey": { "web": "write-key" }
 			}`,
 			TerraformUpdate: `
+				user_id_identifier_type = "id"
 				connection_mode { web = "device" }
 				sdk_version { web = "v2" }
 				write_key { web = "updated-write-key" }
@@ -454,6 +458,7 @@ func TestDestinationResourceCustomerIOWebDeviceV2(t *testing.T) {
 			`,
 			APIUpdate: `{
 				"apiVersion": "v2",
+				"userIdIdentifierType": "id",
 				"datacenter": "US",
 				"connectionMode": { "web": "device" },
 				"sdkVersion": { "web": "v2" },
@@ -470,22 +475,26 @@ func TestDestinationResourceCustomerIOApiVersionDefault(t *testing.T) {
 			TerraformCreate: `
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
+				user_id_identifier_type = "id"
 			`,
 			APICreate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v2",
+				"userIdIdentifierType": "id",
 				"datacenter": "US",
 				"sdkVersion": { "web": "v2" }
 			}`,
 			TerraformUpdate: `
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
+				user_id_identifier_type = "id"
 			`,
 			APIUpdate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v2",
+				"userIdIdentifierType": "id",
 				"datacenter": "US",
 				"sdkVersion": { "web": "v2" }
 			}`,

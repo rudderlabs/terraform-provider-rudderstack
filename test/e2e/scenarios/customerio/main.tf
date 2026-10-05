@@ -49,9 +49,10 @@ resource "rudderstack_destination_customerio" "cio" {
 resource "rudderstack_destination_customerio" "cio_default_api_version" {
   name = "${local.base_name}-default-apiversion"
   config {
-    site_id    = var.customerio_site_id
-    api_key    = var.customerio_api_key
-    datacenter = var.customerio_datacenter
+    site_id                 = var.customerio_site_id
+    api_key                 = var.customerio_api_key
+    datacenter              = var.customerio_datacenter
+    user_id_identifier_type = "id"
   }
 }
 

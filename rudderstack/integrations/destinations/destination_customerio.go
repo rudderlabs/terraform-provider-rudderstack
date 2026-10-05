@@ -1,6 +1,7 @@
 package destinations
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -8,9 +9,10 @@ import (
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
+var customerIOSupportedSourceTypes = []string{"web", "android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
+
 func init() {
-	supportedSourceTypes := []string{"web", "android", "androidKotlin", "ios", "iosSwift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"}
-	commonProperties, commonSchema := GetCommonConfigMeta(supportedSourceTypes)
+	commonProperties, commonSchema := GetCommonConfigMeta(customerIOSupportedSourceTypes)
 
 	properties := []c.ConfigProperty{
 		c.Simple("siteID", "site_id", c.SkipZeroValue),
@@ -78,7 +80,7 @@ func init() {
 		"user_id_identifier_type": {
 			Type:             schema.TypeString,
 			Optional:         true,
-			Description:      "Customer.io identifier that receives the RudderStack `userId` for cloud-mode delivery when `api_version` is `v2`. This setting does not affect device-mode SDK delivery.",
+			Description:      "Customer.io identifier that receives the RudderStack `userId`. Required when `api_version` is `v2`, regardless of connection mode.",
 			ValidateDiagFunc: c.StringMatchesRegexp("^(id|email|phone|cio_id)$"),
 		},
 		"device_token_event_name": {
@@ -229,6 +231,7 @@ func init() {
 					"web": {
 						Type:             schema.TypeString,
 						Optional:         true,
+						Default:          "v2",
 						ValidateDiagFunc: c.StringMatchesRegexp("^(v1|v2)$"),
 					},
 				},
@@ -355,6 +358,15 @@ func init() {
 }
 
 func validateCustomerIODestinationConfig(d *schema.ResourceDiff) error {
+	return errors.Join(
+		validateCustomerIOWriteKey(d),
+		validateCustomerIOAPIKey(d),
+		validateCustomerIOSiteID(d),
+		validateCustomerIOUserIDIdentifier(d),
+	)
+}
+
+func validateCustomerIOWriteKey(d *schema.ResourceDiff) error {
 	webDeviceMode, webDeviceModeKnown := customerIOOptionalListStringConfigValue(d, "config.0.connection_mode.#", "config.0.connection_mode.0.web", "")
 	sdkVersion, sdkVersionKnown := customerIOOptionalListStringConfigValue(d, "config.0.sdk_version.#", "config.0.sdk_version.0.web", "v2")
 
@@ -364,7 +376,10 @@ func validateCustomerIODestinationConfig(d *schema.ResourceDiff) error {
 			return fmt.Errorf("config.0.write_key.0.web must be non-empty when connection_mode.0.web is %q and sdk_version.0.web is %q", "device", "v2")
 		}
 	}
+	return nil
+}
 
+func validateCustomerIOAPIKey(d *schema.ResourceDiff) error {
 	exactWebDeviceMode, exactWebDeviceModeKnown := customerIOConnectionModeIsWebOnly(d)
 	if !exactWebDeviceModeKnown {
 		return nil
@@ -375,6 +390,19 @@ func validateCustomerIODestinationConfig(d *schema.ResourceDiff) error {
 			return fmt.Errorf("config.0.api_key must be non-empty unless connection_mode sets only web to %q", "device")
 		}
 	}
+	return nil
+}
+
+func validateCustomerIOSiteID(d *schema.ResourceDiff) error {
+	exactWebDeviceMode, exactWebDeviceModeKnown := customerIOConnectionModeIsWebOnly(d)
+	if !exactWebDeviceModeKnown {
+		return nil
+	}
+
+	sdkVersion, sdkVersionKnown := customerIOOptionalListStringConfigValue(d, "config.0.sdk_version.#", "config.0.sdk_version.0.web", "v2")
+	if exactWebDeviceMode && !sdkVersionKnown {
+		return nil
+	}
 	if !exactWebDeviceMode || (sdkVersionKnown && sdkVersion != "v2") {
 		siteID, siteIDKnown := customerIOStringConfigValue(d, "config.0.site_id")
 		if siteIDKnown && siteID == "" {
@@ -382,6 +410,19 @@ func validateCustomerIODestinationConfig(d *schema.ResourceDiff) error {
 		}
 	}
 
+	return nil
+}
+
+func validateCustomerIOUserIDIdentifier(d *schema.ResourceDiff) error {
+	apiVersion, apiVersionKnown := customerIOStringConfigValue(d, "config.0.api_version")
+	if !apiVersionKnown || apiVersion != "v2" {
+		return nil
+	}
+
+	identifier, identifierKnown := customerIOStringConfigValue(d, "config.0.user_id_identifier_type")
+	if identifierKnown && identifier == "" {
+		return errors.New(`config.0.user_id_identifier_type must be set when api_version is "v2"`)
+	}
 	return nil
 }
 
@@ -406,12 +447,13 @@ func customerIOConnectionModeIsWebOnly(d *schema.ResourceDiff) (bool, bool) {
 		return false, true
 	}
 
-	for _, sourceType := range []string{"web", "android", "android_kotlin", "ios", "ios_swift", "unity", "reactnative", "flutter", "cordova", "amp", "cloud", "warehouse", "shopify"} {
-		mode, known := customerIOStringConfigValue(d, "config.0.connection_mode.0."+sourceType)
+	for _, sourceType := range customerIOSupportedSourceTypes {
+		terraformSourceType := camelToSnake(sourceType)
+		mode, known := customerIOStringConfigValue(d, "config.0.connection_mode.0."+terraformSourceType)
 		if !known {
 			return false, false
 		}
-		if sourceType == "web" {
+		if terraformSourceType == "web" {
 			if mode != "device" {
 				return false, true
 			}

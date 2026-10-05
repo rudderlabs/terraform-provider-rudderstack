@@ -16,16 +16,15 @@ resource "rudderstack_destination_customerio" "example" {
   name = "my-customerio"
 
   config {
-    site_id = "customer io site id"
-    api_key = "customer io api key"
+    site_id                 = "customer io site id"
+    api_key                 = "customer io api key"
+    user_id_identifier_type = "id" # Required when api_version is "v2" (the default). Valid values: id, email, phone, cio_id.
 
     # device_token_event_name = ""
 
     # datacenter = "US"
 
     # api_version = "v1" # Cloud-mode delivery only. Defaults to "v2" (unified batch API); set to "v1" for legacy per-endpoint behavior.
-    # user_id_identifier_type = "id" # Cloud-mode delivery only. The RudderStack backend requires this when api_version is "v2"; the provider does not enforce it. Valid values: id, email, phone, cio_id.
-
     # connection_mode {
     #   web       = "device" # web, android and ios accept "cloud" or "device"
     #   android   = "cloud"
@@ -153,7 +152,7 @@ Optional:
 - `send_page_name_in_sdk` (Block List, Max: 1) Configure whether to send the page name in SDK mode. (see [below for nested schema](#nestedblock--config--send_page_name_in_sdk))
 - `site_id` (String) Enter your Customer.io site ID. Required unless only web device mode with SDK v2 is configured.
 - `use_native_sdk` (Block List, Max: 1) Enable this setting to send the events through Customer.io's native SDK. (see [below for nested schema](#nestedblock--config--use_native_sdk))
-- `user_id_identifier_type` (String) Customer.io identifier that receives the RudderStack `userId` for cloud-mode delivery when `api_version` is `v2`. This setting does not affect device-mode SDK delivery.
+- `user_id_identifier_type` (String) Customer.io identifier that receives the RudderStack `userId`. Required when `api_version` is `v2`, regardless of connection mode.
 - `write_key` (Block List, Max: 1) Enter the Customer.io Data Pipelines write key for web device mode with SDK v2. (see [below for nested schema](#nestedblock--config--write_key))
 
 <a id="nestedblock--config--anonymous_in_app"></a>
