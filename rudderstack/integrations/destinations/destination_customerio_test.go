@@ -554,6 +554,21 @@ func TestAccDestinationCustomerIO(t *testing.T) {
 					Config: `
 						provider "rudderstack" { access_token = "plan-only-dummy-token" }
 
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-omitted-sdk-version-and-write-key"
+							config {
+								user_id_identifier_type = "id"
+								connection_mode { web = "device" }
+							}
+						}
+					`,
+					ExpectError: regexp.MustCompile(`write_key.0.web must be non-empty`),
+				},
+				{
+					PlanOnly: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
 						resource "terraform_data" "web_mode" {
 							input = "device"
 						}
@@ -568,6 +583,30 @@ func TestAccDestinationCustomerIO(t *testing.T) {
 						}
 					`,
 					ExpectError: regexp.MustCompile(`site_id must be non-empty`),
+				},
+				{
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "sdk_versions" {
+							input = [{ web = "v1" }]
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-unknown-sdk-version-block"
+							config {
+								site_id = "site-id"
+								user_id_identifier_type = "id"
+								connection_mode { web = "device" }
+								dynamic "sdk_version" {
+									for_each = terraform_data.sdk_versions.output
+									content { web = sdk_version.value.web }
+								}
+							}
+						}
+					`,
 				},
 				{
 					PlanOnly: true,

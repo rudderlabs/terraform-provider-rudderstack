@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
@@ -368,7 +369,7 @@ func validateCustomerIODestinationConfig(d *schema.ResourceDiff) error {
 
 func validateCustomerIOWriteKey(d *schema.ResourceDiff) error {
 	webDeviceMode, webDeviceModeKnown := customerIOOptionalListStringConfigValue(d, "config.0.connection_mode.#", "config.0.connection_mode.0.web", "")
-	sdkVersion, sdkVersionKnown := customerIOOptionalListStringConfigValue(d, "config.0.sdk_version.#", "config.0.sdk_version.0.web", "v2")
+	sdkVersion, sdkVersionKnown := customerIOSDKVersionConfigValue(d)
 
 	if webDeviceModeKnown && sdkVersionKnown && webDeviceMode == "device" && sdkVersion == "v2" {
 		writeKey, writeKeyKnown := customerIOOptionalListStringConfigValue(d, "config.0.write_key.#", "config.0.write_key.0.web", "")
@@ -395,7 +396,7 @@ func validateCustomerIOAPIKey(d *schema.ResourceDiff) error {
 
 func validateCustomerIOSiteID(d *schema.ResourceDiff) error {
 	exactWebDeviceMode, exactWebDeviceModeKnown := customerIOConnectionModeIsWebOnly(d)
-	sdkVersion, sdkVersionKnown := customerIOOptionalListStringConfigValue(d, "config.0.sdk_version.#", "config.0.sdk_version.0.web", "v2")
+	sdkVersion, sdkVersionKnown := customerIOSDKVersionConfigValue(d)
 	siteIDRequired := (exactWebDeviceModeKnown && !exactWebDeviceMode) || (sdkVersionKnown && sdkVersion != "v2")
 	if !siteIDRequired {
 		return nil
@@ -431,6 +432,53 @@ func customerIOOptionalListStringConfigValue(d *schema.ResourceDiff, countKey, v
 		return defaultValue, true
 	}
 	return customerIOStringConfigValue(d, valueKey)
+}
+
+func customerIOSDKVersionConfigValue(d *schema.ResourceDiff) (string, bool) {
+	sdkVersion, known := customerIOOptionalListStringConfigValue(d, "config.0.sdk_version.#", "config.0.sdk_version.0.web", "v2")
+	if known {
+		return sdkVersion, true
+	}
+
+	// On create, Terraform reports the count of an omitted Optional+Computed
+	// block as unknown. The raw config distinguishes that case from a dynamic
+	// block whose count is genuinely unknown. Preserve the latter as unknown so
+	// validation can defer until apply.
+	if customerIORawConfigListBlockOmitted(d.GetRawConfig(), "sdk_version") {
+		return "v2", true
+	}
+	return "", false
+}
+
+func customerIORawConfigListBlockOmitted(raw cty.Value, blockName string) bool {
+	if !raw.IsKnown() || raw.IsNull() || !raw.Type().IsObjectType() || !raw.Type().HasAttribute("config") {
+		return false
+	}
+
+	config := raw.GetAttr("config")
+	if !config.IsKnown() || config.IsNull() || !config.CanIterateElements() {
+		return false
+	}
+	configIterator := config.ElementIterator()
+	if !configIterator.Next() {
+		return false
+	}
+	_, configValue := configIterator.Element()
+	if !configValue.IsKnown() || configValue.IsNull() || !configValue.Type().IsObjectType() || !configValue.Type().HasAttribute(blockName) {
+		return false
+	}
+
+	block := configValue.GetAttr(blockName)
+	if !block.IsKnown() {
+		return false
+	}
+	if block.IsNull() {
+		return true
+	}
+	if !block.CanIterateElements() {
+		return false
+	}
+	return block.LengthInt() == 0
 }
 
 func customerIOStringConfigValue(d *schema.ResourceDiff, key string) (string, bool) {
