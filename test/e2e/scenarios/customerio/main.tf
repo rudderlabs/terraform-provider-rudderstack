@@ -40,6 +40,65 @@ resource "rudderstack_destination_customerio" "cio" {
   }
 }
 
+# Keep the dynamic block count unknown on the first plan, then feed the
+# Customer.io write key through terraform_data once it is available at apply.
+resource "terraform_data" "customerio_write_key" {
+  input = var.customerio_write_key
+}
+
+resource "rudderstack_destination_customerio" "cio_dynamic_write_key" {
+  name = "${local.base_name}-dynamic-write-key"
+  config {
+    user_id_identifier_type = "id"
+
+    connection_mode {
+      web = "device"
+    }
+
+    sdk_version {
+      web = "v2"
+    }
+
+    dynamic "write_key" {
+      for_each = terraform_data.customerio_write_key.id == "" ? [] : [true]
+      content {
+        web = terraform_data.customerio_write_key.output
+      }
+    }
+  }
+}
+
+# Supply a mixed web-device/iOS-cloud mode through terraform_data so the first
+# plan exercises unknown mode values and the post-apply plan verifies readback.
+resource "terraform_data" "customerio_mixed_connection_mode" {
+  input = {
+    web = "device"
+    ios = "cloud"
+  }
+}
+
+resource "rudderstack_destination_customerio" "cio_mixed_connection_mode" {
+  name = "${local.base_name}-mixed-connection-mode"
+  config {
+    site_id                 = var.customerio_site_id
+    api_key                 = var.customerio_api_key
+    user_id_identifier_type = "id"
+
+    connection_mode {
+      web = terraform_data.customerio_mixed_connection_mode.output.web
+      ios = terraform_data.customerio_mixed_connection_mode.output.ios
+    }
+
+    sdk_version {
+      web = "v2"
+    }
+
+    write_key {
+      web = var.customerio_write_key
+    }
+  }
+}
+
 # api_version deliberately omitted. The schema defaults it to "v2", so the
 # provider sends apiVersion="v2" and the backend stores and echoes it back,
 # closing the round-trip. The drift assertion run.sh performs after apply

@@ -395,19 +395,15 @@ func validateCustomerIOAPIKey(d *schema.ResourceDiff) error {
 
 func validateCustomerIOSiteID(d *schema.ResourceDiff) error {
 	exactWebDeviceMode, exactWebDeviceModeKnown := customerIOConnectionModeIsWebOnly(d)
-	if !exactWebDeviceModeKnown {
+	sdkVersion, sdkVersionKnown := customerIOOptionalListStringConfigValue(d, "config.0.sdk_version.#", "config.0.sdk_version.0.web", "v2")
+	siteIDRequired := (exactWebDeviceModeKnown && !exactWebDeviceMode) || (sdkVersionKnown && sdkVersion != "v2")
+	if !siteIDRequired {
 		return nil
 	}
 
-	sdkVersion, sdkVersionKnown := customerIOOptionalListStringConfigValue(d, "config.0.sdk_version.#", "config.0.sdk_version.0.web", "v2")
-	if exactWebDeviceMode && !sdkVersionKnown {
-		return nil
-	}
-	if !exactWebDeviceMode || (sdkVersionKnown && sdkVersion != "v2") {
-		siteID, siteIDKnown := customerIOStringConfigValue(d, "config.0.site_id")
-		if siteIDKnown && siteID == "" {
-			return fmt.Errorf("config.0.site_id must be non-empty unless connection_mode sets only web to %q and sdk_version.0.web is %q", "device", "v2")
-		}
+	siteID, siteIDKnown := customerIOStringConfigValue(d, "config.0.site_id")
+	if siteIDKnown && siteID == "" {
+		return fmt.Errorf("config.0.site_id must be non-empty unless connection_mode sets only web to %q and sdk_version.0.web is %q", "device", "v2")
 	}
 
 	return nil
@@ -427,7 +423,11 @@ func validateCustomerIOUserIDIdentifier(d *schema.ResourceDiff) error {
 }
 
 func customerIOOptionalListStringConfigValue(d *schema.ResourceDiff, countKey, valueKey, defaultValue string) (string, bool) {
-	if customerIOListBlockCount(d, countKey) == 0 {
+	count, countKnown := customerIOListBlockCount(d, countKey)
+	if !countKnown {
+		return "", false
+	}
+	if count == 0 {
 		return defaultValue, true
 	}
 	return customerIOStringConfigValue(d, valueKey)
@@ -443,15 +443,21 @@ func customerIOStringConfigValue(d *schema.ResourceDiff, key string) (string, bo
 }
 
 func customerIOConnectionModeIsWebOnly(d *schema.ResourceDiff) (bool, bool) {
-	if customerIOListBlockCount(d, "config.0.connection_mode.#") == 0 {
+	count, countKnown := customerIOListBlockCount(d, "config.0.connection_mode.#")
+	if !countKnown {
+		return false, false
+	}
+	if count == 0 {
 		return false, true
 	}
 
+	valueUnknown := false
 	for _, sourceType := range customerIOSupportedSourceTypes {
 		terraformSourceType := camelToSnake(sourceType)
 		mode, known := customerIOStringConfigValue(d, "config.0.connection_mode.0."+terraformSourceType)
 		if !known {
-			return false, false
+			valueUnknown = true
+			continue
 		}
 		if terraformSourceType == "web" {
 			if mode != "device" {
@@ -463,10 +469,17 @@ func customerIOConnectionModeIsWebOnly(d *schema.ResourceDiff) (bool, bool) {
 			return false, true
 		}
 	}
+	if valueUnknown {
+		return false, false
+	}
 	return true, true
 }
 
-func customerIOListBlockCount(d *schema.ResourceDiff, key string) int {
+func customerIOListBlockCount(d *schema.ResourceDiff, key string) (int, bool) {
+	if !d.NewValueKnown(key) {
+		return 0, false
+	}
+
 	count, _ := d.Get(key).(int)
-	return count
+	return count, true
 }

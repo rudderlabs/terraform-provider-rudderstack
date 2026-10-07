@@ -1,7 +1,10 @@
 package destinations_test
 
 import (
+	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
@@ -534,5 +537,110 @@ func TestDestinationResourceCustomerIOApiVersionV1Override(t *testing.T) {
 }
 
 func TestAccDestinationCustomerIO(t *testing.T) {
-	acc.AccAssertDestination(t, "customerio", customerioTestConfigs)
+	t.Run("lifecycle", func(t *testing.T) {
+		acc.AccAssertDestination(t, "customerio", customerioTestConfigs)
+	})
+
+	if !acc.PlanOnly() {
+		return
+	}
+
+	t.Run("unknown values", func(t *testing.T) {
+		resource.UnitTest(t, resource.TestCase{
+			ProviderFactories: acc.TestAccProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					PlanOnly: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "web_mode" {
+							input = "device"
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-unknown-web-mode-v1"
+							config {
+								user_id_identifier_type = "id"
+								connection_mode { web = terraform_data.web_mode.output }
+								sdk_version { web = "v1" }
+							}
+						}
+					`,
+					ExpectError: regexp.MustCompile(`site_id must be non-empty`),
+				},
+				{
+					PlanOnly: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "android_mode" {
+							input = "cloud"
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-known-ios-cloud"
+							config {
+								site_id = "site-id"
+								user_id_identifier_type = "id"
+								connection_mode {
+									web = "device"
+									android = terraform_data.android_mode.output
+									ios = "cloud"
+								}
+								write_key { web = "write-key" }
+							}
+						}
+					`,
+					ExpectError: regexp.MustCompile(`api_key must be non-empty`),
+				},
+				{
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "write_keys" {
+							input = ["write-key"]
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-unknown-write-key-block"
+							config {
+								user_id_identifier_type = "id"
+								connection_mode { web = "device" }
+								sdk_version { web = "v2" }
+								dynamic "write_key" {
+									for_each = terraform_data.write_keys.output
+									content { web = write_key.value }
+								}
+							}
+						}
+					`,
+				},
+				{
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "connection_modes" {
+							input = [{ web = "device" }]
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-unknown-connection-mode-block"
+							config {
+								user_id_identifier_type = "id"
+								dynamic "connection_mode" {
+									for_each = terraform_data.connection_modes.output
+									content { web = connection_mode.value.web }
+								}
+							}
+						}
+					`,
+				},
+			},
+		})
+	})
 }
