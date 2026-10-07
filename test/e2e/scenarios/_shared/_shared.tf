@@ -11,6 +11,8 @@
 # run.sh, so `terraform init` resolves the local module offline (no registry).
 
 terraform {
+  required_version = ">= 1.4"
+
   required_providers {
     rudderstack = { source = "rudderstack.com/rudderlabs/rudderstack" }
   }

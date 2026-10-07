@@ -36,7 +36,7 @@ no "undeclared variable" warnings (all variables are declared in one place).
 
 ## Prerequisites
 
-- Terraform ≥ 1.0
+- Terraform ≥ 1.4 (required for the built-in `terraform_data` fixtures)
 - Go ≥ 1.21 (to build the provider locally)
 - A RudderStack staging personal access token
 - A GCP service-account JSON key with BigQuery access
