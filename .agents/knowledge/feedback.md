@@ -35,3 +35,7 @@
 - Match `client.Account.Definition.Type` directly against the lowercase Terraform destination key (for example, `linkedin_ads`) with `Definition.Category == "destination"`; do not substitute the uppercase destination API type or add a separate API-type lookup argument.
 - OAuth account names can contain vendor login emails or usernames. Acceptance-test diagnostics should log only the selected account ID and type, never `Account.Name`.
 - Keep `E2E_TESTING.md`'s `Plan-only exceptions` note: identify `TestAccSourceFacebookLeadAds` as intentionally skipping full CRUD because the catalog-hidden source is blocked by the backend resource gate, and retain the grep command that discovers all `acc.PlanOnly()` skip branches.
+
+## RUD-3184 — Customer.io staging smoke credentials
+
+- Supply a fixed placeholder `customerio_write_key` in generated staging-smoke tfvars. Continue selecting the Customer.io scenario using the existing site ID and API key credentials: the smoke only creates, reads back, and destroys the destination, so it does not validate the write key with Customer.io and should not require provisioning another secret.
