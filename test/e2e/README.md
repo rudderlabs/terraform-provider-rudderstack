@@ -72,6 +72,9 @@ customerio_audience_id          = 16     # a real Customer.io audience ID
 customerio_audience_region      = "US"   # optional, defaults to US
 ```
 
+A placeholder Customer.io write key is sufficient for the staging smoke scenario,
+which only creates, reads back, and destroys these resources.
+
 Optional overrides (have defaults): `api_url` (defaults to staging),
 `bq_location` (defaults to `US`).
 
