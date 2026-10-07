@@ -39,3 +39,4 @@
 ## RUD-3184 — Customer.io staging smoke credentials
 
 - Supply a fixed placeholder `customerio_write_key` in generated staging-smoke tfvars. Continue selecting the Customer.io scenario using the existing site ID and API key credentials: the smoke only creates, reads back, and destroys the destination, so it does not validate the write key with Customer.io and should not require provisioning another secret.
+- Keep the shared E2E scenario's Terraform constraint, prerequisite documentation, and runner comments aligned on Terraform 1.4 or newer because the fixtures use the built-in `terraform_data` resource introduced in Terraform 1.4.
