@@ -16,6 +16,10 @@ https://www.rudderstack.com/docs/destinations/analytics/google-analytics-4/
 
 > **:warning: Breaking Change**
 > 
+> Note that from the provider versions 5.0.0 and above, the `block_page_view_event` and `send_user_id` properties have been removed. They were never part of the GA4 destination definition, so the control plane did not store or read them and setting them had no effect. Remove them from your configuration. Note that `send_user_id` remains available on the Google Analytics (Universal Analytics) destination, where it is part of the definition.
+
+> **:warning: Breaking Change**
+> 
 > Note that from the provider versions 3.0.0 and above, `onetrust_cookie_categories` property is replaced with `consent_management` that supports multiple consent management providers. Please refer to the example above.
 
 > **:warning: Breaking Change**

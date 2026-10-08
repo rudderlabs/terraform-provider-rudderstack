@@ -16,16 +16,11 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 		APICreate: `{
 				"reportSuiteIds": "id001, id002",
   				"sslHeartbeat": true,
-  				"useUtf8Charset": true,
-  				"useSecureServerSide": true,
   				"dropVisitorId": true,
   				"timestampOptionalReporting": false,
   				"noFallbackVisitorId": false,
   				"preferVisitorId": false,
   				"trackPageName": true,
-  				"useLegacyLinkName": true,
-  				"pageNameFallbackTostring": true,
-  				"sendFalseValues": true,
   				"timestampOption": "disabled",
   				"productIdentifier": "name"
 			}`,
@@ -175,8 +170,6 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 		APIUpdate: `{
 				"reportSuiteIds": "id003, id004",
 				"sslHeartbeat": true,
-				"useUtf8Charset": true,
-				"useSecureServerSide": true,
 				"eventsToTypes": [
 				  {
 					"from": "video start",
@@ -200,15 +193,12 @@ var adobeAnalyticsTestConfigs = []c.TestConfig{
 					"to": "pName"
 				  }
 				],
-				"useLegacyLinkName": true,
-				"pageNameFallbackTostring": true,
 				"mobileEventMapping": [
 				  {
 					"from": "page.name",
 					"to": "pName"
 				  }
 				],
-				"sendFalseValues": true,
 				"eVarMapping": [
 				  {
 					"from": "phone",
