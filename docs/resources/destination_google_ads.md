@@ -47,6 +47,10 @@ resource "rudderstack_destination_google_ads" "example" {
     #   web = true
     # }
 
+    # connection_mode {
+    #   web = "device"
+    # }
+
     # event_filtering {
     #   whitelist = ["one", "two", "three"]
     #   blacklist = ["one", "two", "three"]
@@ -111,6 +115,7 @@ Required:
 Optional:
 
 - `click_event_conversions` (List of Object) For `track` calls, you can configure these fields. (see [below for nested schema](#nestedatt--config--click_event_conversions))
+- `connection_mode` (Block List, Max: 1) Set the connection mode used to send events to Google Ads for each source type. (see [below for nested schema](#nestedblock--config--connection_mode))
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `conversion_linker` (Boolean) This setting is enabled by default. If you don't want the global site tag (gtag.js) to set first-party cookies on your website domain, you should disable this setting.
 - `default_page_conversion` (String) Enter the default conversion label.
@@ -128,6 +133,14 @@ Optional:
 
 - `label` (String)
 - `name` (String)
+
+
+<a id="nestedblock--config--connection_mode"></a>
+### Nested Schema for `config.connection_mode`
+
+Optional:
+
+- `web` (String) Connection mode for web sources. Google Ads only supports device mode.
 
 
 <a id="nestedblock--config--consent_management"></a>
