@@ -26,7 +26,7 @@
 #
 # Prerequisites:
 #   - Go ≥ 1.21
-#   - Terraform ≥ 1.0
+#   - Terraform ≥ 1.4 (required for the built-in terraform_data fixtures)
 #   - secret.tfvars (or --tfvars / $TFVARS_FILE) with at least:
 #       access_token, bq_project, bq_dataset, bq_table, bq_credentials
 #     plus the creds each selected scenario needs (see README).

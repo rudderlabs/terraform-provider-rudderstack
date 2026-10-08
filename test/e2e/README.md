@@ -36,7 +36,7 @@ no "undeclared variable" warnings (all variables are declared in one place).
 
 ## Prerequisites
 
-- Terraform ≥ 1.0
+- Terraform ≥ 1.4 (required for the built-in `terraform_data` fixtures)
 - Go ≥ 1.21 (to build the provider locally)
 - A RudderStack staging personal access token
 - A GCP service-account JSON key with BigQuery access
@@ -63,6 +63,7 @@ EOT
 # customerio scenario (BigQuery → Customer.io VDM v2):
 customerio_site_id    = "REPLACE_ME"
 customerio_api_key    = "REPLACE_ME"
+customerio_write_key  = "REPLACE_ME"
 customerio_datacenter = "US"   # or "EU"; optional, defaults to US
 
 # customerio_audience scenario (BigQuery → Customer.io Audience):
@@ -70,6 +71,9 @@ customerio_audience_app_api_key = "REPLACE_ME"
 customerio_audience_id          = 16     # a real Customer.io audience ID
 customerio_audience_region      = "US"   # optional, defaults to US
 ```
+
+A placeholder Customer.io write key is sufficient for the staging smoke scenario,
+which only creates, reads back, and destroys these resources.
 
 Optional overrides (have defaults): `api_url` (defaults to staging),
 `bq_location` (defaults to `US`).
