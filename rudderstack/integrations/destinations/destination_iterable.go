@@ -25,7 +25,7 @@ func init() {
 		c.Simple("displayInterval.web", "display_interval.0.web"),
 		c.Simple("onOpenScreenReaderMessage.web", "on_open_screen_reader_message.0.web"),
 		c.Simple("onOpenNodeToTakeFocus.web", "on_open_node_to_take_focus.0.web"),
-		c.Simple("packageName.web", "package_name.0.web"),
+		c.Simple("packageName", "package_name.0.web"),
 		c.Simple("rightOffset.web", "right_offset.0.web"),
 		c.Simple("topOffset.web", "top_offset.0.web"),
 		c.Simple("bottomOffset.web", "bottom_offset.0.web"),

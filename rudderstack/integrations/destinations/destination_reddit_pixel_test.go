@@ -25,7 +25,7 @@ var redditPixelTestConfigs = []c.TestConfig{
 				{ from = "Order Completed", to = "Purchase" }
 			]
 			event_filtering { whitelist = ["one", "two", "three"] }
-			use_native_sdk { web = false }
+			use_native_sdk { web = true }
 			connection_mode { web = "device" }
 			consent_management {
 				web = [
@@ -44,7 +44,7 @@ var redditPixelTestConfigs = []c.TestConfig{
 			],
 			"whitelistedEvents":[{"eventName":"one"},{"eventName":"two"},{"eventName":"three"}],
 			"eventFilteringOption":"whitelistedEvents",
-			"useNativeSDK":{"web":false},
+			"useNativeSDK":{"web":true},
 			"connectionMode":{"web":"device"},
 			"consentManagement":{"web":[
 				{"provider":"oneTrust","resolutionStrategy":"","consents":[{"consent":"one_web"},{"consent":"two_web"},{"consent":"three_web"}]},

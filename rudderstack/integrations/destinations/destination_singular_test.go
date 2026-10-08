@@ -104,12 +104,24 @@ var singularTestConfigs = []c.TestConfig{
 					android = "device"
 					ios     = "device"
 				}
+				use_native_sdk {
+					android     = true
+					ios         = true
+					reactnative = false
+					cordova     = false
+				}
 			`,
 		APICreate: `{
 				"apiKey": "test_api_key",
 				"connectionMode": {
 					"android": "device",
 					"ios": "device"
+				},
+				"useNativeSDK": {
+					"android": true,
+					"ios": true,
+					"reactnative": false,
+					"cordova": false
 				}
 			}`,
 		TerraformUpdate: `

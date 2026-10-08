@@ -50,7 +50,7 @@ func init() {
 			"key":   "key",
 			"value": "value",
 		}),
-		c.ArrayWithObjects("propertyBlacklist.web", "property_blacklist", map[string]interface{}{
+		c.ArrayWithObjects("propertyBlackList.web", "property_blacklist", map[string]interface{}{
 			"property": "property",
 		}),
 		c.Simple("personProfiles.web", "person_profiles.0.web"),

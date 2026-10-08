@@ -115,7 +115,7 @@ var posthogTestConfigs = []c.TestConfig{
 				"enableLocalStoragePersistence": {
 					"web": true
 				},
-				"propertyBlacklist": {
+				"propertyBlackList": {
 					"web": [
 						{
 							"property": "property1"

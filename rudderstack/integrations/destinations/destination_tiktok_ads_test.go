@@ -38,7 +38,7 @@ var tiktokAdsTestConfigs = []c.TestConfig{
 				}
 
 				use_native_sdk {
-					web = true
+					web = false
 				}
 
 				connection_mode {
@@ -153,7 +153,7 @@ var tiktokAdsTestConfigs = []c.TestConfig{
 					{ "eventName": "three" }
 				],
 				"eventFilteringOption": "blacklistedEvents",
-				"useNativeSDK": { "web": true },
+				"useNativeSDK": { "web": false },
 				"connectionMode": {
 					"web": "cloud",
 					"cloud": "cloud",

@@ -18,12 +18,18 @@ var mixpanelTestConfigs = []c.TestConfig{
 				connection_mode {
 					web = "cloud"
 				}
+				use_native_sdk {
+					web = false
+				}
 			`,
 		APICreate: `{
 				"token": "...",
 				"dataResidency": "us",
 				"connectionMode": {
 					"web": "cloud"
+				},
+				"useNativeSDK": {
+					"web": false
 				},
 				"identityMergeApi": "simplified",
 				"consolidatedPageCalls": false,
