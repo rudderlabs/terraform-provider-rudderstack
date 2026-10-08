@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.0.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.17.0...v5.0.0) (2026-10-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* HCL still setting any of these attributes now fails at plan time with "An argument named ... is not expected here". No data-plane behaviour changes, since the keys were never stored or read. Remove the attributes from your configuration.
+* event_key_map is now a required property on rudderstack_destination_google_sheets. Configurations omitting it were already failing at apply with a 400; they now fail at plan with a clear required-argument error. Add an event_key_map block.
+* changing allow_users_context_traits on rudderstack_destination_snowflake_streaming now destroys and recreates the destination, which assigns a new destination ID and requires any connection pointing at it to be re-pointed. Previously such a change produced a plan that always failed to apply.
+
+### Features
+
+* remove dead config keys from five destinations ([#337](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/337)) ([68e5b45](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/68e5b45e7c63ba2cfa86a68fbc6894c20da3db0d))
+
+
+### Bug Fixes
+
+* **adjust:** write partnerParamsKeys, not partnerParamKeys ([#335](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/335)) ([3a2b860](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/3a2b86008db428fb8e5048e26899e12c2c89ecdf))
+* align e2e inputs and posthog/iterable keys with config-backend ([#347](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/347)) ([5f1f6a3](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/5f1f6a3b523a426c4bc30ef19de77023b0353e06))
+* **ci:** select destination e2e tests by exact name ([#336](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/336)) ([8681e6f](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/8681e6f7a1e2022a4a1523fafb9b4a5bf5eb08ff))
+* force replacement on snowflake_streaming immutable fields ([#339](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/339)) ([55187a4](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/55187a451990cc708ca3654958d2525e5619f65a))
+* require event_key_map on google_sheets ([#338](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/338)) ([a9dc4bd](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/a9dc4bdbfde1370b3a934b5fc13e2d0c563bb734))
+
 ## [4.17.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.16.0...v4.17.0) (2026-09-29)
 
 
