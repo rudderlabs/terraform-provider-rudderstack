@@ -23,3 +23,10 @@
 - Singular and impact.com destination acceptance tests failed in the shared E2E workspace on Step 1 create with `could not create destination: http status code: 500` when using dummy destination credentials.
 - Reviewer guidance clarified that transient shared-workspace 5xx/API create failures should be handled by rerunning CI, not by adding permanent `if !acc.PlanOnly() { t.Skip(...) }` guards. Reserve plan-only live-CRUD skips for destinations with genuine documented prerequisites the shared workspace cannot satisfy, such as vendor OAuth account requirements.
 - Preserve mock `AssertDestination` converter coverage and `TF_ACC_PLAN_ONLY=1` schema validation when live CRUD is unreliable.
+
+## RUD-3134 — Missing OAuth accounts in the dev workspace
+
+<!-- session: 2026-09-21 -->
+
+- `client.Account.Definition.Type` uses the lowercase Terraform destination key, such as `linkedin_ads`, `bingads_offline_conversions`, or `google_adwords_offline_conversions`. Earlier `no OAuth account found` failures from `internal/testutil/acc/oauth_destinations.go::resolveOAuthAccountID` occurred because those accounts were not yet connected in the dev workspace, not because the lookup used the wrong namespace.
+- The live API config comparison is subset-based, but it does not suppress the Terraform SDK's automatic post-apply empty-plan check. Live acceptance fixtures must round-trip through API reads: omit unsupported explicit options, keep immutable update values unchanged, and configure backend-omitted boolean defaults to the read-back zero value when outbound serialization still needs coverage.

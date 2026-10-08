@@ -32,6 +32,10 @@ resource "rudderstack_destination_google_ads" "example" {
     #   web = true
     # }
 
+    # connection_mode {
+    #   web = "device"
+    # }
+
     # event_filtering {
     #   whitelist = ["one", "two", "three"]
     #   blacklist = ["one", "two", "three"]
