@@ -219,7 +219,7 @@ resource "rudderstack_destination_amplitude" "example" {
 
 > **:warning: Breaking Change**
 > 
-> Note that from the provider versions 5.0.0 and above, the `batch_events`, `device_id_from_url_param`, `force_https`, `save_params_referrer_once_per_session`, `track_gclid`, `track_referrer`, `track_utm_properties` and `unset_params_referrer_on_new_session` properties have been removed. They were never part of the destination definition, so the control plane did not store or read them and setting them had no effect. Remove them from your configuration.
+> Note that from the provider versions 5.0.0 and above, the `batch_events`, `device_id_from_url_param`, `force_https`, `save_params_referrer_once_per_session`, `track_gclid`, `track_referrer`, `track_utm_properties` and `unset_params_referrer_on_new_session` properties have been removed. The control plane's destination config does not allow them, so it did not store or read them and setting them had no effect. Remove them from your configuration.
 
 > **:warning: Breaking Change**
 > 
