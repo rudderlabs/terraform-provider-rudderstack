@@ -418,6 +418,128 @@ resource "rudderstack_retl_connection_customerio_audience" "test" {
 `, srcName, accountID, dstName, cfg.SyncBehaviour, audienceID, cfg.Schedule, cfg.Identifiers, mappingsBlock)
 }
 
+// AccAssertRETLConnectionCustomerIO wires a model source + Customer.io
+// destination + rudderstack_retl_connection_customerio and runs the lifecycle.
+// The typed connection carries `object` as a top-level field; VDM v2 does not
+// support field mappings.
+//
+// Plan-only (CI default): validates HCL/schema with placeholder creds, zero API
+// calls. Live: gated on retlAccountIDEnv; skips when unset.
+func AccAssertRETLConnectionCustomerIO(t *testing.T, cfg RETLConnectionTestConfig) {
+	t.Helper()
+
+	planOnly := PlanOnly()
+	if planOnly {
+		t.Parallel()
+	}
+
+	connResource := "rudderstack_retl_connection_customerio.test"
+	srcResource := "rudderstack_retl_source_model.test"
+	dstResource := "rudderstack_destination_customerio.test"
+
+	suffix := cfg.Variant
+	if suffix == "" {
+		suffix = "cio"
+	}
+	srcName := RandomName("retl-src-" + suffix)
+	dstName := RandomName("retl-dst-" + suffix)
+
+	accountID := planOnlyAccountID
+	if !planOnly {
+		accountID = os.Getenv(retlAccountIDEnv)
+		if accountID == "" {
+			t.Skipf("%s is not set; skipping live Customer.io connection test", retlAccountIDEnv)
+		}
+	}
+
+	createHCL := retlCustomerIOHCL(srcName, dstName, accountID, cfg)
+
+	if planOnly {
+		ensureDummyToken(t)
+		resource.UnitTest(t, resource.TestCase{
+			ProviderFactories: TestAccProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					Config:             createHCL,
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+				},
+			},
+		})
+		return
+	}
+
+	steps := []resource.TestStep{
+		{
+			Config: createHCL,
+			Check: resource.ComposeTestCheckFunc(
+				testAccCheckRETLConnectionExists(connResource),
+				resource.TestCheckResourceAttrSet(connResource, "id"),
+				resource.TestCheckResourceAttr(connResource, "object", "person"),
+				resource.TestCheckResourceAttr(connResource, "sync_behaviour", cfg.SyncBehaviour),
+				resource.TestCheckResourceAttrPair(connResource, "source_id", srcResource, "id"),
+				resource.TestCheckResourceAttrPair(connResource, "destination_id", dstResource, "id"),
+			),
+		},
+	}
+
+	steps = append(steps, resource.TestStep{
+		ResourceName:      connResource,
+		ImportState:       true,
+		ImportStateVerify: true,
+	})
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { TestAccPreCheck(t) },
+		ProviderFactories: TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRETLConnectionDestroy("rudderstack_retl_connection_customerio"),
+		Steps:             steps,
+	})
+}
+
+// retlCustomerIOHCL builds the source + Customer.io destination + typed
+// connection pipeline. Destination creds are placeholders — the control-plane
+// API stores them without validating against Customer.io, so live runs only need
+// a warehouse account.
+func retlCustomerIOHCL(srcName, dstName, accountID string, cfg RETLConnectionTestConfig) string {
+	cursorAttr := ""
+	if cfg.CursorColumn != "" {
+		cursorAttr = fmt.Sprintf("\n  cursor_column  = %q", cfg.CursorColumn)
+	}
+
+	return fmt.Sprintf(`
+resource "rudderstack_retl_source_model" "test" {
+  name                   = %q
+  source_definition_name = "bigquery"
+  account_id             = %q
+  config {
+    primary_key = "id"
+    sql         = "select 1 as id"
+  }
+}
+
+resource "rudderstack_destination_customerio" "test" {
+  name = %q
+  config {
+    site_id = "tf-acc-site"
+    api_key = "tf-acc-api-key"
+  }
+}
+
+resource "rudderstack_retl_connection_customerio" "test" {
+  source_id      = rudderstack_retl_source_model.test.id
+  destination_id = rudderstack_destination_customerio.test.id
+  enabled        = true
+  sync_behaviour = %q
+  object         = "person"%s
+  schedule {
+    %s
+  }
+  %s
+}
+`, srcName, accountID, dstName, cfg.SyncBehaviour, cursorAttr, cfg.Schedule, cfg.Identifiers)
+}
+
 // retlSourceHCL builds the HCL for a single RETL source resource.
 func retlSourceHCL(resourceType, name, sourceDefinitionName, accountID, configBlock string) string {
 	return fmt.Sprintf(`
