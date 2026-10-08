@@ -1,38 +1,39 @@
 package destinations_test
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil"
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
 	c "github.com/rudderlabs/terraform-provider-rudderstack/rudderstack/configs"
 )
 
-var linkedinAdsTestConfigs = []c.TestConfig{
+var redditTestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
-				rudder_account_id = "__ACCOUNT_ID__"
-				hash_data         = true
-			`,
+					rudder_account_id = "__ACCOUNT_ID__"
+					account_id        = "reddit-pixel-id"
+				`,
 		APICreate: `{
-				"rudderAccountId": "__ACCOUNT_ID__",
-				"hashData": true
-			}`,
+					"rudderAccountId": "__ACCOUNT_ID__",
+					"accountId": "reddit-pixel-id",
+					"version": "v3",
+					"hashData": true
+				}`,
 		TerraformUpdate: `
-				rudder_account_id  = "__ACCOUNT_ID__"
-				hash_data          = true
-				ad_account_id      = "123456789"
-				deduplication_key  = "messageId"
-				conversion_mapping = [
-					{
-						from = "Order Completed"
-						to   = "123456"
-					},
-					{
-						from = "Product Added"
-						to   = "789012"
-					}
-				]
+					rudder_account_id = "__ACCOUNT_ID__"
+					account_id        = "reddit-pixel-id-updated"
+					version           = "v2"
+					hash_data         = false
+					events_mapping = [
+						{ from = "Order Completed", to = "Purchase" },
+						{ from = "Order Completed", to = "Lead" }
+					]
 				connection_mode {
 					web           = "cloud"
 					android       = "cloud"
@@ -43,7 +44,7 @@ var linkedinAdsTestConfigs = []c.TestConfig{
 					amp           = "cloud"
 					cloud         = "cloud"
 					warehouse     = "cloud"
-					react_native  = "cloud"
+					reactnative   = "cloud"
 					flutter       = "cloud"
 					cordova       = "cloud"
 					shopify       = "cloud"
@@ -129,14 +130,14 @@ var linkedinAdsTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
-				"rudderAccountId": "__ACCOUNT_ID__",
-				"hashData": true,
-				"adAccountId": "123456789",
-				"deduplicationKey": "messageId",
-				"conversionMapping": [
-					{ "from": "Order Completed", "to": "123456" },
-					{ "from": "Product Added", "to": "789012" }
-				],
+					"rudderAccountId": "__ACCOUNT_ID__",
+					"accountId": "reddit-pixel-id-updated",
+					"version": "v2",
+					"hashData": false,
+					"eventsMapping": [
+						{ "from": "Order Completed", "to": "Purchase" },
+						{ "from": "Order Completed", "to": "Lead" }
+					],
 				"connectionMode": {
 					"web": "cloud",
 					"android": "cloud",
@@ -319,10 +320,49 @@ var linkedinAdsTestConfigs = []c.TestConfig{
 	},
 }
 
-func TestDestinationResourceLinkedinAds(t *testing.T) {
-	cmt.AssertDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
+func TestDestinationResourceReddit(t *testing.T) {
+	cmt.AssertDestination(t, "reddit", redditTestConfigs)
 }
 
-func TestAccDestinationLinkedinAds(t *testing.T) {
-	acc.AccAssertOAuthDestination(t, "linkedin_ads", linkedinAdsTestConfigs)
+func TestDestinationResourceRedditDefaultsAndZeroValues(t *testing.T) {
+	cm := c.Destinations.Entries()["reddit"]
+	got, err := cm.StateToAPI(`{"rudder_account_id":"oauth-account-id","account_id":"reddit-pixel-id","version":"v3","hash_data":false}`)
+	if err != nil {
+		t.Fatalf("StateToAPI failed: %v", err)
+	}
+	want := `{"rudderAccountId":"oauth-account-id","accountId":"reddit-pixel-id","version":"v3","hashData":false}`
+	if !testutil.JSONEq(got, want) {
+		t.Fatalf("API config mismatch\ngot: %s\nwant: %s", got, want)
+	}
+	if strings.Contains(got, "connectionMode") {
+		t.Fatalf("expected connectionMode omitted when unset, got: %s", got)
+	}
+}
+
+func TestDestinationResourceRedditValidation(t *testing.T) {
+	configSchema := c.Destinations.Entries()["reddit"].ConfigSchema
+	if configSchema["rudder_account_id"].Sensitive || configSchema["account_id"].Sensitive {
+		t.Fatal("expected no sensitive Reddit fields because secretKeys is empty")
+	}
+	if _, ok := configSchema["use_native_sdk"]; ok {
+		t.Fatal("reddit must not expose schema-only useNativeSDK")
+	}
+	accountIDSchema := configSchema["account_id"]
+	if diags := accountIDSchema.ValidateDiagFunc("", cty.Path{}); !diags.HasError() {
+		t.Fatal("expected empty account_id to fail")
+	}
+	if diags := accountIDSchema.ValidateDiagFunc("{{ pixel || fallback }}", cty.Path{}); diags.HasError() {
+		t.Fatalf("expected dynamic account_id to pass: %v", diags)
+	}
+	mappingSchema := configSchema["events_mapping"].Elem.(*schema.Resource)
+	if diags := mappingSchema.Schema["to"].ValidateDiagFunc("PageVisit", cty.Path{}); diags.HasError() {
+		t.Fatalf("expected PageVisit to pass: %v", diags)
+	}
+	if diags := mappingSchema.Schema["to"].ValidateDiagFunc("Custom", cty.Path{}); !diags.HasError() {
+		t.Fatal("expected unsupported target to fail")
+	}
+}
+
+func TestAccDestinationReddit(t *testing.T) {
+	acc.AccAssertOAuthDestination(t, "reddit", redditTestConfigs)
 }
