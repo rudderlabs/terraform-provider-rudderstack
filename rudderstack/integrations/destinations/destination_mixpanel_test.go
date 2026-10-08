@@ -77,7 +77,7 @@ var mixpanelTestConfigs = []c.TestConfig{
 				group_key_settings = ["one","two","three"]
 				
 				use_native_sdk {
-					web = true
+					web = false
 				}
 		
 				event_filtering {
@@ -255,7 +255,7 @@ var mixpanelTestConfigs = []c.TestConfig{
 					}
 				],
 				"useNativeSDK": {
-					"web": true
+					"web": false
 				},
 				"eventFilteringOption": "whitelistedEvents",
 				"whitelistedEvents": [{
