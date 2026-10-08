@@ -117,7 +117,7 @@ resource "rudderstack_destination_google_sheets" "example" {
 
 > **:warning: Breaking Change**
 > 
-> Note that from the provider versions 5.0.0 and above, `event_key_map` is a required property. The Google Sheets destination definition requires `eventKeyMap`, so a configuration that omitted it was already being rejected by the API at apply time with a `400`; making it required surfaces the error at plan time instead. Add an `event_key_map` block to your configuration — see the example above.
+> Note that from the provider versions 5.0.0 and above, `event_key_map` is a required property and must contain at least one entry. The Google Sheets destination definition requires `eventKeyMap`, so a configuration that omitted it or left it empty was already being rejected by the API at apply time with a `400`; making it required surfaces the error at plan time instead. Add at least one `event_key_map` entry to your configuration — see the example above.
 
 > **:warning: Breaking Change**
 > 

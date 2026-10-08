@@ -396,3 +396,10 @@ func TestDestinationResourceGoogleSheets(t *testing.T) {
 func TestAccDestinationGoogleSheets(t *testing.T) {
 	acc.AccAssertDestination(t, "google_sheets", googleSheetsTestConfigs)
 }
+
+func TestDestinationResourceGoogleSheetsEventKeyMapRequiresEntry(t *testing.T) {
+	eventKeyMap := c.Destinations.Entries()["google_sheets"].ConfigSchema["event_key_map"]
+	if !eventKeyMap.Required || eventKeyMap.MinItems != 1 {
+		t.Fatalf("event_key_map must be required with MinItems 1 so an empty list fails at plan time, got Required=%v MinItems=%d", eventKeyMap.Required, eventKeyMap.MinItems)
+	}
+}
