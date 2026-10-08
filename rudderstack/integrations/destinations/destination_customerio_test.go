@@ -27,8 +27,8 @@ var customerioTestConfigs = []c.TestConfig{
 
 				use_native_sdk {
 					web     = true
-					android = true
-					ios     = true
+					android = false
+					ios     = false
 				}
 
 				send_page_name_in_sdk {
@@ -67,8 +67,8 @@ var customerioTestConfigs = []c.TestConfig{
 				},
 				"useNativeSDK": {
 					"web": true,
-					"android": true,
-					"ios": true
+					"android": false,
+					"ios": false
 				},
 				"sendPageNameInSDK": {
 					"web": true

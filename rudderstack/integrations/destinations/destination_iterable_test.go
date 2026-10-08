@@ -201,7 +201,7 @@ var iterableTestConfigs = []c.TestConfig{
 				"displayInterval": { "web": "2500" },
 				"onOpenScreenReaderMessage": { "web": "..." },
 				"onOpenNodeToTakeFocus": { "web": "..." },
-				"packageName": { "web": "my-package-test" },
+				"packageName": "my-package-test",
 				"rightOffset": { "web": "15" },
 				"topOffset": { "web": "11" },
 				"bottomOffset": { "web": "24%" },

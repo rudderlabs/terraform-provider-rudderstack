@@ -18,12 +18,18 @@ var mixpanelTestConfigs = []c.TestConfig{
 				connection_mode {
 					web = "cloud"
 				}
+				use_native_sdk {
+					web = false
+				}
 			`,
 		APICreate: `{
 				"token": "...",
 				"dataResidency": "us",
 				"connectionMode": {
 					"web": "cloud"
+				},
+				"useNativeSDK": {
+					"web": false
 				},
 				"identityMergeApi": "simplified",
 				"consolidatedPageCalls": false,
@@ -71,7 +77,7 @@ var mixpanelTestConfigs = []c.TestConfig{
 				group_key_settings = ["one","two","three"]
 				
 				use_native_sdk {
-					web = true
+					web = false
 				}
 		
 				event_filtering {
@@ -249,7 +255,7 @@ var mixpanelTestConfigs = []c.TestConfig{
 					}
 				],
 				"useNativeSDK": {
-					"web": true
+					"web": false
 				},
 				"eventFilteringOption": "whitelistedEvents",
 				"whitelistedEvents": [{
