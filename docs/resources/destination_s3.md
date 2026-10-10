@@ -23,6 +23,10 @@ resource "rudderstack_destination_s3" "example" {
     # access_key_id = "..."
     # access_key    = "..."
 
+    # role_based_authentication {
+    #    i_am_role_arn = "arn:aws:iam::123456789012:role/S3Access"
+    # }
+
     # enable_sse    = true
     # consent_management {
     # 	web = [
@@ -147,6 +151,7 @@ Optional:
 - `consent_management` (Block List, Max: 1) Allows you to specify consent configuration data for multiple providers for each source type. (see [below for nested schema](#nestedblock--config--consent_management))
 - `enable_sse` (Boolean) This setting enables server-side encryption.
 - `prefix` (String) Enter a prefix which RudderStack associates as the path prefix to all the files stored in your S3 bucket.
+- `role_based_authentication` (Block List, Max: 1) Use IAM role-based authentication instead of access keys. (see [below for nested schema](#nestedblock--config--role_based_authentication))
 
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`
@@ -295,3 +300,12 @@ Optional:
 - `consents` (List of String)
 - `provider` (String)
 - `resolution_strategy` (String)
+
+
+
+<a id="nestedblock--config--role_based_authentication"></a>
+### Nested Schema for `config.role_based_authentication`
+
+Required:
+
+- `i_am_role_arn` (String) The IAM role ARN to use for authentication.
