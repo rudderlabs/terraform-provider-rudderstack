@@ -12,9 +12,15 @@ var s3TestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
 				bucket_name = "bucket"
+
+				role_based_authentication {
+					i_am_role_arn = "arn:aws:iam::123456789012:role/S3Access"
+				}
 			`,
 		APICreate: `{
-				"bucketName": "bucket"
+				"bucketName": "bucket",
+				"roleBasedAuth": true,
+				"iamRoleARN": "arn:aws:iam::123456789012:role/S3Access"
 			}`,
 		TerraformUpdate: `
 				bucket_name = "bucket"
@@ -109,6 +115,7 @@ var s3TestConfigs = []c.TestConfig{
 				"prefix": "prefix",
 				"accessKeyID": "...",
 				"accessKey": "...",
+				"roleBasedAuth": false,
 				"enableSSE": true,
 				"consentManagement": {
 					"web": [
