@@ -9,7 +9,7 @@ resource "rudderstack_destination_s3" "example" {
     # access_key    = "..."
 
     # role_based_authentication {
-    #    iam_role_arn = "arn:aws:iam::123456789012:role/S3Access"
+    #    i_am_role_arn = "arn:aws:iam::123456789012:role/S3Access"
     # }
 
     # enable_sse    = true

@@ -385,7 +385,7 @@ func TestDestinationResourceS3WithRoleBasedAuth(t *testing.T) {
 				bucket_name = "bucket"
 
 				role_based_authentication {
-					iam_role_arn = "arn:aws:iam::123456789012:role/S3Access"
+					i_am_role_arn = "arn:aws:iam::123456789012:role/S3Access"
 				}
 			`,
 			APIUpdate: `{

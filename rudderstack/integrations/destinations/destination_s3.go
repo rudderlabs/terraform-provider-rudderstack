@@ -15,7 +15,7 @@ func init() {
 		c.Simple("prefix", "prefix", c.SkipZeroValue),
 		c.Simple("accessKeyID", "access_key_id", c.SkipZeroValue),
 		c.Simple("accessKey", "access_key", c.SkipZeroValue),
-		c.Simple("iamRoleARN", "role_based_authentication.0.iam_role_arn", c.SkipZeroValue),
+		c.Simple("iamRoleARN", "role_based_authentication.0.i_am_role_arn", c.SkipZeroValue),
 		c.Discriminator("roleBasedAuth", c.DiscriminatorValues{
 			"access_key_id":             false,
 			"access_key":                false,
@@ -63,7 +63,7 @@ func init() {
 			ConflictsWith: []string{"config.0.access_key_id", "config.0.access_key"},
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"iam_role_arn": {
+					"i_am_role_arn": {
 						Type:             schema.TypeString,
 						Required:         true,
 						Description:      "The IAM role ARN to use for authentication.",
