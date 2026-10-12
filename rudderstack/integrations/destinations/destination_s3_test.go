@@ -12,15 +12,9 @@ var s3TestConfigs = []c.TestConfig{
 	{
 		TerraformCreate: `
 				bucket_name = "bucket"
-
-				role_based_authentication {
-					i_am_role_arn = "arn:aws:iam::123456789012:role/S3Access"
-				}
 			`,
 		APICreate: `{
-				"bucketName": "bucket",
-				"roleBasedAuth": true,
-				"iamRoleARN": "arn:aws:iam::123456789012:role/S3Access"
+				"bucketName": "bucket"
 			}`,
 		TerraformUpdate: `
 				bucket_name = "bucket"
@@ -376,6 +370,31 @@ var s3TestConfigs = []c.TestConfig{
 
 func TestDestinationResourceS3(t *testing.T) {
 	cmt.AssertDestination(t, "s3", s3TestConfigs)
+}
+
+func TestDestinationResourceS3WithRoleBasedAuth(t *testing.T) {
+	cmt.AssertDestination(t, "s3", []c.TestConfig{
+		{
+			TerraformCreate: `
+				bucket_name = "bucket"
+			`,
+			APICreate: `{
+				"bucketName": "bucket"
+			}`,
+			TerraformUpdate: `
+				bucket_name = "bucket"
+
+				role_based_authentication {
+					iam_role_arn = "arn:aws:iam::123456789012:role/S3Access"
+				}
+			`,
+			APIUpdate: `{
+				"bucketName": "bucket",
+				"roleBasedAuth": true,
+				"iamRoleARN": "arn:aws:iam::123456789012:role/S3Access"
+			}`,
+		},
+	})
 }
 
 func TestAccDestinationS3(t *testing.T) {
