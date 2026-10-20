@@ -73,3 +73,8 @@
 
 - Spotify Pixel registers as destination key `spotify_pixel` with Public API type `SPOTIFYPIXEL`, which exposes Terraform resource `rudderstack_destination_spotify_pixel` through the standard destination registry path.
 - Destination source/connection support is not modeled in `ConfigMeta`; Spotify Pixel is web/device-only by its config schema surface rather than by provider-level source or connection-mode registry fields.
+
+## INT-7371 — Custom Activation remains unregistered
+
+- The provider intentionally has no Custom Activation destination implementation. A focused negative provider-registration test guards registry key `custom_audience`, API type `CUSTOM_AUDIENCE` under any registry key, and resource type `rudderstack_destination_custom_audience`, preventing Terraform create/update support from being introduced accidentally after legacy inline authentication removal.
+- Keep this guard registration-specific rather than banning generic credential field names, because unrelated destinations such as HTTP legitimately use those names.
