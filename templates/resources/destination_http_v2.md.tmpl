@@ -1,0 +1,18 @@
+---
+page_title: "rudderstack_destination_http_v2 Resource - terraform-provider-rudderstack"
+subcategory: ""
+description: |-
+
+---
+
+# rudderstack_destination_http_v2 (Resource)
+
+Configure the HTTP v2 destination with a JSONata request body template over `$$.events`, optional message-type filtering, and batches of up to 5,000 events. Verify the template and request-field expressions before saving. The existing `rudderstack_destination_http` resource remains on version 1.
+
+For more information, see https://www.rudderstack.com/docs/destinations/streaming-destinations/http/.
+
+## Example Usage
+
+{{tffile "examples/destination_http_v2.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

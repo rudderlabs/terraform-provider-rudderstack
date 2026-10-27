@@ -86,3 +86,9 @@
 
 - Google Ads keeps `use_native_sdk` unchanged and adds `connection_mode.web` as an independent Optional field constrained to `device`; map it with `c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue)`.
 - Do not infer the upstream UI's device-mode default in Terraform with `Default`, `Computed`, or `SimpleWithDefault`. Omitting `connection_mode` must leave `connectionMode` absent from the API payload, matching Spotify Pixel and the provider-wide connection-mode convention.
+
+## INT-7453 — HTTP v2 Terraform config surface
+
+- Declare HTTP v2 independently of v1 rather than composing v1 metadata: v1 mapping properties have no removable `Name` identifiers, so composing would leak `propertiesMapping`/`isDefaultMapping` and unsupported XML/FORM fields into the v2 resource. Preserve the common HTTP URL/auth, event-filter, connection-mode and consent fields explicitly.
+- Keep `request_body_template` optional because GET/DELETE may have no body; expose `supported_message_types` as an optional list without inventing an enum/default. Use JSON-only body format and retain `max_batch_size` as a string with a 1–5,000 validator to match the v1 API type until an authoritative v2 contract specifies otherwise.
+- Do not carry v1 JSONPath validators onto HTTP v2 header, query-param or path expression values: these request fields use JSONata.

@@ -36,6 +36,22 @@ func resourceDestinationCustomizeDiff(cm configs.ConfigMeta) schema.CustomizeDif
 			return nil
 		}
 
+		if cm.APIType == "HTTP" && cm.Version == 2 {
+			if d.Get("config.0.is_batching_enabled").(bool) && d.Get("config.0.max_batch_size").(string) == "" && d.NewValueKnown("config.0.max_batch_size") {
+				return fmt.Errorf("config.0.max_batch_size is required when is_batching_enabled is true")
+			}
+			if raw, ok := d.GetOk("config.0.supported_message_types"); ok {
+				seen := make(map[string]bool)
+				for _, value := range raw.([]interface{}) {
+					messageType := value.(string)
+					if seen[messageType] {
+						return fmt.Errorf("duplicate supported_message_types value %q", messageType)
+					}
+					seen[messageType] = true
+				}
+			}
+		}
+
 		consentManagement := d.Get("config.0.consent_management.0")
 		if consentManagement == nil {
 			return nil
@@ -132,6 +148,12 @@ func resourceDestinationRead(cm configs.ConfigMeta) schema.ReadContextFunc {
 				return diag.Diagnostics{}
 			}
 			return diag.FromErr(err)
+		}
+
+		// A v2 resource must not adopt a v1 destination: its state schema would
+		// silently drop the v1-only fields. Keep the existing v1 read behavior.
+		if cm.Version > 1 && (destination.Type != cm.APIType || int64(cm.Version) != destination.Version) {
+			return diag.FromErr(fmt.Errorf("destination %q has type %q version %d; expected type %q version %d", id, destination.Type, destination.Version, cm.APIType, cm.Version))
 		}
 
 		if err := storeDestinationToState(cm, destination, d); err != nil {
