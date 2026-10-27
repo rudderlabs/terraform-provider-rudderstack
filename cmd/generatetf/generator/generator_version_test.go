@@ -2,6 +2,7 @@ package generator
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"testing"
 
@@ -141,6 +142,39 @@ func TestGenerateImportScript_LogsVersionMismatch(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, string(data))
 	assert.Contains(t, buf.String(), "skipping destination 'id-braze': type 'BRAZE' version 3 is not supported (available versions: 1)")
+}
+
+func TestGenerateHTTPVersions(t *testing.T) {
+	buf := captureLogger(t)
+	destinations := []client.Destination{
+		{ID: "http-v1", Name: "old", Type: "HTTP", Version: 1, Config: json.RawMessage(`{"apiUrl":"https://example.com/old","auth":"noAuth","method":"POST","format":"JSON","isBatchingEnabled":false,"isDefaultMapping":true}`)},
+		{ID: "http-v2", Name: "new", Type: "HTTP", Version: 2, Config: json.RawMessage(`{"apiUrl":"https://example.com/new","auth":"noAuth","method":"POST","format":"JSON","requestBodyTemplate":"[$$.events.{\"customer\":{\"id\":userId},\"items\":properties.items}]","supportedMessageTypes":["track","identify"],"maxBatchSize":"5000","headers":[{"to":"x-customer","from":"$$.message.userId"}],"pathParams":[{"path":"$$.message.properties.region"}]}`)},
+		{ID: "http-absent", Name: "absent", Type: "HTTP", Version: 0, Config: json.RawMessage(`{}`)},
+		{ID: "http-future", Name: "future", Type: "HTTP", Version: 3, Config: json.RawMessage(`{}`)},
+	}
+
+	hcl, err := GenerateTerraform(nil, destinations, nil, nil, nil)
+	require.NoError(t, err)
+	assert.Contains(t, string(hcl), `resource "rudderstack_destination_http" "dst_http-v1"`)
+	assert.Contains(t, string(hcl), `resource "rudderstack_destination_http_v2" "dst_http-v2"`)
+	assert.Contains(t, string(hcl), `request_body_template   = "[$$.events.{\"customer\":{\"id\":userId},\"items\":properties.items}]"`)
+	assert.Contains(t, string(hcl), `supported_message_types = ["track", "identify"]`)
+	assert.Regexp(t, `max_batch_size\s+= "5000"`, string(hcl))
+	assert.Contains(t, string(hcl), `x-customer`)
+	assert.Contains(t, string(hcl), `properties.region`)
+	assert.Contains(t, string(hcl), `is_default_mapping`)
+	assert.NotContains(t, string(hcl), `properties_mapping`)
+	assert.NotContains(t, string(hcl), `dst_http-absent`)
+	assert.NotContains(t, string(hcl), `dst_http-future`)
+	assert.Contains(t, buf.String(), "type 'HTTP' version 0 is not supported (available versions: 1, 2)")
+	assert.Contains(t, buf.String(), "type 'HTTP' version 3 is not supported (available versions: 1, 2)")
+
+	imports, err := GenerateImportScript(nil, destinations, nil, nil, nil)
+	require.NoError(t, err)
+	assert.Contains(t, string(imports), `terraform import "rudderstack_destination_http.dst_http-v1" "http-v1"`)
+	assert.Contains(t, string(imports), `terraform import "rudderstack_destination_http_v2.dst_http-v2" "http-v2"`)
+	assert.NotContains(t, string(imports), "http-absent")
+	assert.NotContains(t, string(imports), "http-future")
 }
 
 func captureLogger(t *testing.T) *bytes.Buffer {

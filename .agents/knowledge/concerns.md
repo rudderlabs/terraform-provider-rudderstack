@@ -76,3 +76,7 @@
 
 - Singular `src/configurations/destinations/singular/db-config.json` currently omits `connectionMode` from `destConfig.web`, even though `supportedConnectionModes.web = ["cloud"]` and `schema.json` allows `connectionMode.web`; the Terraform provider includes `connection_mode.web` and this runtime no-op gap is tracked separately in `rudder-integrations-config`.
 - Singular `match_id.unity` is deliberately sent in the nested API-validated shape (`match_id: { unity: ... }`); backend `getDestinationConfigForSource` later flattens `match_id[sourceType]` to the transformer's flat `Config.match_id` runtime value.
+
+## INT-7453 — HTTP v2 upstream contract reconciliation
+
+- The HTTP v2 Terraform resource was shaped before the authoritative integrations-config v2 `db-config.json`, `schema.json` and `ui-config.json` were available. Reconcile the provider's assumed field types, defaults and supported-message-type allowlist against those upstream definitions when published; in particular, `max_batch_size` currently follows v1's string API type rather than an independently verified v2 type.

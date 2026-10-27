@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/rudderlabs/rudder-iac/api/client"
@@ -220,6 +221,76 @@ func TestResourceDestinationConsentManagementAllowsDistinctAndPerSourceType(t *t
 			},
 		},
 	})
+}
+
+type mockDestinationReads struct {
+	mock.Mock
+	DestinationsService
+}
+
+func (m *mockDestinationReads) Get(ctx context.Context, id string) (*client.Destination, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(*client.Destination), args.Error(1)
+}
+
+func TestHTTPV2ConfigConditionalValidation(t *testing.T) {
+	cm := configs.Destinations.Entries()["http_v2"]
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"rudderstack": func() (*schema.Provider, error) {
+				return &schema.Provider{
+					ConfigureContextFunc: func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) { return nil, nil },
+					ResourcesMap:         map[string]*schema.Resource{"rudderstack_destination_http_v2": resourceDestination(cm)},
+				}, nil
+			},
+		},
+		Steps: []resource.TestStep{
+			{PlanOnly: true, Config: `resource "rudderstack_destination_http_v2" "example" {
+				name = "test"
+				config {
+					api_url = "https://example.com"
+					is_batching_enabled = true
+					request_body_template = "[$$.events]"
+				}
+			}`, ExpectError: regexp.MustCompile("max_batch_size is required")},
+			{PlanOnly: true, Config: `resource "rudderstack_destination_http_v2" "example" {
+				name = "test"
+				config {
+					api_url = "https://example.com"
+					request_body_template = "[$$.events]"
+					supported_message_types = ["track", "track"]
+				}
+			}`, ExpectError: regexp.MustCompile("duplicate supported_message_types")},
+		},
+	})
+}
+
+func TestHTTPV2ImportRejectsWrongDestinationTypeOrVersion(t *testing.T) {
+	cm := configs.Destinations.Entries()["http_v2"]
+	for _, tc := range []struct {
+		name    string
+		apiType string
+		version int64
+	}{
+		{"v1 HTTP", "HTTP", 1},
+		{"different type", "WEBHOOK", 2},
+		{"absent version", "HTTP", 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			service := &mockDestinationReads{}
+			service.On("Get", mock.Anything, "existing-id").Return(&client.Destination{
+				ID: "existing-id", Type: tc.apiType, Version: tc.version, Name: "existing",
+				Config: json.RawMessage(`{"propertiesMapping":[{"to":"x","from":"$.userId"}]}`),
+			}, nil).Once()
+			d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), nil)
+			d.SetId("existing-id")
+			state, err := resourceDestinationImportState(cm)(context.Background(), d, &Client{Destinations: service})
+			require.ErrorContains(t, err, `expected type "HTTP" version 2`)
+			assert.Nil(t, state)
+			assert.Equal(t, "existing-id", d.Id())
+			service.AssertExpectations(t)
+		})
+	}
 }
 
 func TestPopulateDestinationFromState_SetsVersionFromConfigMeta(t *testing.T) {
