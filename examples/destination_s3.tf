@@ -8,6 +8,10 @@ resource "rudderstack_destination_s3" "example" {
     # access_key_id = "..."
     # access_key    = "..."
 
+    # role_based_authentication {
+    #    i_am_role_arn = "arn:aws:iam::123456789012:role/S3Access"
+    # }
+
     # enable_sse    = true
     # consent_management {
     # 	web = [
