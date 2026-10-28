@@ -10,7 +10,7 @@ NAMESPACE=rudderlabs
 NAME=rudderstack
 BINARY=terraform-provider-${NAME}
 # x-release-please-start-version
-VERSION=5.0.1
+VERSION=5.0.2
 # x-release-please-end-version
 OS_ARCH=$(shell go env GOOS)_$(shell go env GOARCH)
 
