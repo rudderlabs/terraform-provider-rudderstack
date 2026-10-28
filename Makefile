@@ -2,7 +2,7 @@
 export
 
 GO=go
-GOLANGCI=github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.9.0
+GOLANGCI=github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
 TFPLUGINDOCS=github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.24.0
 
 HOSTNAME=rudderstack.com
