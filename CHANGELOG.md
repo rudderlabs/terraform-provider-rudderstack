@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.2](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v5.0.1...v5.0.2) (2026-10-28)
+
+
+### Bug Fixes
+
+* **build:** skip windows/arm, which Go 1.27 no longer supports ([#354](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/354)) ([aa67934](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/aa67934f5ab8e872b2dd2c049f156a9793094f14))
+
 ## [5.0.1](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v5.0.0...v5.0.1) (2026-10-28)
 
 
