@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v5.0.0...v5.0.1) (2026-10-28)
+
+
+### Bug Fixes
+
+* **deps:** build with Go 1.27.3 to reject the compromised eMudhra intermediates ([#352](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/352)) ([c98224f](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/c98224f3f5f01825635c1f0ebda07c72e06648ac))
+
 ## [5.0.0](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v4.17.0...v5.0.0) (2026-10-08)
 
 
