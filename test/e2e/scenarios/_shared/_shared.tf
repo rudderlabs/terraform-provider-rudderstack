@@ -11,6 +11,8 @@
 # run.sh, so `terraform init` resolves the local module offline (no registry).
 
 terraform {
+  required_version = ">= 1.4"
+
   required_providers {
     rudderstack = { source = "rudderstack.com/rudderlabs/rudderstack" }
   }
@@ -80,6 +82,13 @@ variable "customerio_site_id" {
 
 variable "customerio_api_key" {
   description = "Customer.io API key."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "customerio_write_key" {
+  description = "Customer.io Data Pipelines write key for web device-mode SDK v2."
   type        = string
   default     = ""
   sensitive   = true

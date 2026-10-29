@@ -4,6 +4,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// ConfigDiffValidator validates integration-specific resource configuration at plan time.
+type ConfigDiffValidator func(d *schema.ResourceDiff) error
+
 type ConfigMeta struct {
 	APIType string
 	// Version is the major version of the underlying integration definition
@@ -16,6 +19,9 @@ type ConfigMeta struct {
 	Properties     []ConfigProperty
 	SettingsSchema map[string]*schema.Schema
 	Settings       []ConfigProperty
+	// CustomizeConfigDiff optionally validates integration-specific config rules
+	// for destination and source resources after Terraform schema validation.
+	CustomizeConfigDiff ConfigDiffValidator
 }
 
 // SensitiveConfigPaths returns the terraform state paths of every Sensitive

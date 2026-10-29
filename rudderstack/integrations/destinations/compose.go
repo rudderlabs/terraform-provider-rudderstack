@@ -34,6 +34,9 @@ type Delta struct {
 	// Name, so they can't be targeted for removal until the base explicitly
 	// tags them with a Name.
 	RemovedProperties []string
+	// CustomizeConfigDiff replaces the base integration's config validator when
+	// set. A nil validator inherits the base validator.
+	CustomizeConfigDiff c.ConfigDiffValidator
 }
 
 // ComposeConfigMeta builds a new version's ConfigMeta from a base ConfigMeta
@@ -48,8 +51,9 @@ type Delta struct {
 // The clone is shallow: ConfigSchema and Properties get new backing map/slice,
 // but *schema.Schema values for keys that are neither renamed, removed, nor
 // added are shared pointers with base. SettingsSchema and Settings are shared
-// with base (destinations do not use them today). Callers must not mutate a
-// *schema.Schema obtained from base.ConfigSchema in place (e.g. flipping
+// with base (destinations do not use them today). CustomizeConfigDiff is
+// inherited from base unless delta supplies an override. Callers must not
+// mutate a *schema.Schema obtained from base.ConfigSchema in place (e.g. flipping
 // Required/Optional on a renamed field) — build a new *schema.Schema and put
 // it in delta.Added (or Renamed + a follow-up overwrite) instead. Mutating a
 // shared *schema.Schema in place would leak the change back into base's
@@ -97,14 +101,20 @@ func ComposeConfigMeta(base c.ConfigMeta, delta Delta, version int) c.ConfigMeta
 	}
 	propsClone = append(propsClone, delta.AddedProperties...)
 
+	customizeConfigDiff := base.CustomizeConfigDiff
+	if delta.CustomizeConfigDiff != nil {
+		customizeConfigDiff = delta.CustomizeConfigDiff
+	}
+
 	return c.ConfigMeta{
-		APIType:        base.APIType,
-		Version:        version,
-		SkipConfig:     base.SkipConfig,
-		ConfigSchema:   schemaClone,
-		Properties:     propsClone,
-		SettingsSchema: base.SettingsSchema,
-		Settings:       base.Settings,
+		APIType:             base.APIType,
+		Version:             version,
+		SkipConfig:          base.SkipConfig,
+		ConfigSchema:        schemaClone,
+		Properties:          propsClone,
+		SettingsSchema:      base.SettingsSchema,
+		Settings:            base.Settings,
+		CustomizeConfigDiff: customizeConfigDiff,
 	}
 }
 

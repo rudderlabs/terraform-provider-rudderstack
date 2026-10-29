@@ -36,6 +36,10 @@ func resourceDestinationCustomizeDiff(cm configs.ConfigMeta) schema.CustomizeDif
 			return nil
 		}
 
+		if err := validateResourceConfigDiff(cm, d); err != nil {
+			return err
+		}
+
 		consentManagement := d.Get("config.0.consent_management.0")
 		if consentManagement == nil {
 			return nil

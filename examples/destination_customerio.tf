@@ -2,16 +2,15 @@ resource "rudderstack_destination_customerio" "example" {
   name = "my-customerio"
 
   config {
-    site_id = "customer io site id"
-    api_key = "customer io api key"
+    site_id                 = "customer io site id"
+    api_key                 = "customer io api key"
+    user_id_identifier_type = "id" # Required when api_version is "v2" (the default). Valid values: id, email, phone, cio_id.
 
     # device_token_event_name = ""
 
     # datacenter = "US"
 
     # api_version = "v1" # Cloud-mode delivery only. Defaults to "v2" (unified batch API); set to "v1" for legacy per-endpoint behavior.
-    # user_id_identifier_type = "id" # Cloud-mode delivery only. The RudderStack backend requires this when api_version is "v2"; the provider does not enforce it. Valid values: id, email, phone, cio_id.
-
     # connection_mode {
     #   web       = "device" # web, android and ios accept "cloud" or "device"
     #   android   = "cloud"
@@ -30,8 +29,20 @@ resource "rudderstack_destination_customerio" "example" {
     #   web = true
     # }
 
-    # data_use_in_app {
+    # data_use_in_app { # Web device mode with SDK v1 only.
     #   web = false
+    # }
+
+    # sdk_version { # Web device mode only. Defaults to "v2".
+    #   web = "v2"
+    # }
+
+    # write_key { # Required for web device mode with SDK v2.
+    #   web = "customer io data pipelines write key"
+    # }
+
+    # anonymous_in_app { # Web device mode with SDK v2 only.
+    #   web = true
     # }
 
     # auto_track_device_attributes {
