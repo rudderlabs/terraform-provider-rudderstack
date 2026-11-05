@@ -86,3 +86,8 @@
 
 - Google Ads keeps `use_native_sdk` unchanged and adds `connection_mode.web` as an independent Optional field constrained to `device`; map it with `c.Simple("connectionMode.web", "connection_mode.0.web", c.SkipZeroValue)`.
 - Do not infer the upstream UI's device-mode default in Terraform with `Default`, `Computed`, or `SimpleWithDefault`. Omitting `connection_mode` must leave `connectionMode` absent from the API payload, matching Spotify Pixel and the provider-wide connection-mode convention.
+
+## INT-7520 — HTTP v2 provider schema boundary
+
+- Keep HTTP v1 destination registration and metadata unchanged when adding the standalone HTTP v2 destination; do not build v2 by composing v1 metadata, which would leak v1-only `is_batching_enabled` and event-filtering fields into the v2 resource.
+- For HTTP v2 XML/FORM parity, constrain `max_batch_size` for JSON and XML at plan time while allowing FORM without it; FORM is always single-event regardless of any stored batch size.

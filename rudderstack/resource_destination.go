@@ -36,6 +36,12 @@ func resourceDestinationCustomizeDiff(cm configs.ConfigMeta) schema.CustomizeDif
 			return nil
 		}
 
+		if cm.APIType == "HTTP" && cm.Version == 2 {
+			if err := validateHTTPV2BatchSize(d); err != nil {
+				return err
+			}
+		}
+
 		consentManagement := d.Get("config.0.consent_management.0")
 		if consentManagement == nil {
 			return nil
@@ -43,6 +49,14 @@ func resourceDestinationCustomizeDiff(cm configs.ConfigMeta) schema.CustomizeDif
 
 		return destinations.ValidateConsentManagementUniqueProviders(consentManagement)
 	}
+}
+
+func validateHTTPV2BatchSize(d *schema.ResourceDiff) error {
+	if d.NewValueKnown("config.0.format") && d.NewValueKnown("config.0.max_batch_size") &&
+		d.Get("config.0.format").(string) != "FORM" && d.Get("config.0.max_batch_size").(string) == "" {
+		return fmt.Errorf("config.0.max_batch_size is required for JSON and XML HTTP v2 destinations")
+	}
+	return nil
 }
 
 func resourceDestinationSchema(cm configs.ConfigMeta) map[string]*schema.Schema {
@@ -132,6 +146,10 @@ func resourceDestinationRead(cm configs.ConfigMeta) schema.ReadContextFunc {
 				return diag.Diagnostics{}
 			}
 			return diag.FromErr(err)
+		}
+
+		if cm.APIType == "HTTP" && destination.Version != int64(cm.Version) {
+			return diag.FromErr(fmt.Errorf("HTTP destination %q is version %d, but this resource manages version %d; remove the mismatched resource from Terraform state and import it using the resource type for the destination's current version (see HTTP v2 migration docs)", id, destination.Version, cm.Version))
 		}
 
 		if err := storeDestinationToState(cm, destination, d); err != nil {

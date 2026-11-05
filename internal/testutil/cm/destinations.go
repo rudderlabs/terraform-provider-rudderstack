@@ -32,6 +32,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 	})).Return(&client.Destination{
 		ID:        "some-id",
 		Type:      cm.APIType,
+		Version:   int64(cm.Version),
 		Name:      "example",
 		IsEnabled: true,
 		Config:    json.RawMessage(testConfigs[0].APICreate),
@@ -48,6 +49,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 	})).Return(&client.Destination{
 		ID:        "some-id",
 		Type:      cm.APIType,
+		Version:   int64(cm.Version),
 		Name:      "example-updated",
 		IsEnabled: true,
 		Config:    json.RawMessage(testConfigs[0].APIUpdate),
@@ -58,6 +60,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 	destinations.On("Get", mock.Anything, "some-id").Return(&client.Destination{
 		ID:        "some-id",
 		Type:      cm.APIType,
+		Version:   int64(cm.Version),
 		Name:      "example",
 		IsEnabled: true,
 		Config:    json.RawMessage(testConfigs[0].APICreate),
@@ -68,6 +71,7 @@ func AssertDestination(t *testing.T, destination string, testConfigs []configs.T
 	destinations.On("Get", mock.Anything, "some-id").Return(&client.Destination{
 		ID:        "some-id",
 		Type:      cm.APIType,
+		Version:   int64(cm.Version),
 		Name:      "example-updated",
 		IsEnabled: true,
 		Config:    json.RawMessage(testConfigs[0].APIUpdate),

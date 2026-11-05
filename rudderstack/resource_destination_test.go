@@ -3,6 +3,7 @@ package rudderstack
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"testing"
 
@@ -219,6 +220,129 @@ func TestResourceDestinationConsentManagementAllowsDistinctAndPerSourceType(t *t
 				ExpectNonEmptyPlan: true,
 			},
 		},
+	})
+}
+
+func TestHTTPV2BatchSizeConditionalValidation(t *testing.T) {
+	cm := configs.Destinations.Entries()["http_v2"]
+	for _, tc := range []struct {
+		name        string
+		format      string
+		batchSize   string
+		expectError bool
+	}{
+		{"default JSON requires batch size", "", "", true},
+		{"JSON requires batch size", "JSON", "", true},
+		{"XML requires batch size", "XML", "", true},
+		{"JSON with size", "JSON", "5000", false},
+		{"XML with size", "XML", "1", false},
+		{"FORM without size", "FORM", "", false},
+		{"FORM with stale size", "FORM", "5000", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			config := `resource "rudderstack_destination_http_v2" "example" {
+				name = "test"
+				config {
+					api_url = "https://example.com"
+					request_body_template = "{\"event\": $$.events[0]}"
+				`
+			if tc.format != "" {
+				config += fmt.Sprintf("\nformat = %q", tc.format)
+			}
+			if tc.batchSize != "" {
+				config += fmt.Sprintf("\nmax_batch_size = %q", tc.batchSize)
+			}
+			config += "\n}\n}\n"
+
+			step := resource.TestStep{PlanOnly: true, Config: config, ExpectNonEmptyPlan: !tc.expectError}
+			if tc.expectError {
+				step.ExpectError = regexp.MustCompile("max_batch_size is required for JSON and XML")
+			}
+			resource.UnitTest(t, resource.TestCase{
+				ProviderFactories: map[string]func() (*schema.Provider, error){
+					"rudderstack": func() (*schema.Provider, error) {
+						return &schema.Provider{
+							ConfigureContextFunc: func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) { return nil, nil },
+							ResourcesMap:         map[string]*schema.Resource{"rudderstack_destination_http_v2": resourceDestination(cm)},
+						}, nil
+					},
+				},
+				Steps: []resource.TestStep{step},
+			})
+		})
+	}
+}
+
+func TestHTTPDestinationReadRejectsVersionMismatch(t *testing.T) {
+	for _, tc := range []struct {
+		name            string
+		resourceVersion int
+		remoteVersion   int64
+	}{
+		{"v1 resource after migration", 1, 2},
+		{"v2 resource pointing at v1", 2, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			cm := configs.Destinations.Entries()["http"]
+			if tc.resourceVersion == 2 {
+				cm = configs.Destinations.Entries()["http_v2"]
+			}
+			d := schema.TestResourceDataRaw(t, resourceDestinationSchema(cm), map[string]interface{}{"name": "original"})
+			d.SetId("existing-id")
+			service := &versionedDestinationService{destination: &client.Destination{
+				ID: "existing-id", Type: "HTTP", Version: tc.remoteVersion, Name: "migrated",
+				Config: json.RawMessage(`{"apiUrl":"https://example.com","requestBodyTemplate":"{}","format":"FORM"}`),
+			}}
+
+			diagnostics := resourceDestinationRead(cm)(context.Background(), d, &Client{Destinations: service})
+			require.True(t, diagnostics.HasError())
+			assert.Contains(t, diagnostics[0].Summary, fmt.Sprintf("version %d, but this resource manages version %d", tc.remoteVersion, tc.resourceVersion))
+			assert.Equal(t, "existing-id", d.Id(), "a mismatch must not schedule a destroy/recreate")
+			assert.Equal(t, "original", d.Get("name"), "do not read v2 config into the v1 schema")
+		})
+	}
+}
+
+type versionedDestinationService struct {
+	DestinationsService
+	destination *client.Destination
+}
+
+func (s *versionedDestinationService) Get(_ context.Context, _ string) (*client.Destination, error) {
+	return s.destination, nil
+}
+
+func TestHTTPV2BatchSizeUnknownFormat(t *testing.T) {
+	cm := configs.Destinations.Entries()["http_v2"]
+	resource.UnitTest(t, resource.TestCase{
+		ProviderFactories: map[string]func() (*schema.Provider, error){
+			"rudderstack": func() (*schema.Provider, error) {
+				return &schema.Provider{
+					ConfigureContextFunc: func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) { return nil, nil },
+					ResourcesMap:         map[string]*schema.Resource{"rudderstack_destination_http_v2": resourceDestination(cm)},
+				}, nil
+			},
+		},
+		Steps: []resource.TestStep{{
+			PlanOnly: true,
+			Config: `resource "rudderstack_destination_http_v2" "dependency" {
+				name = "dependency"
+				config {
+					api_url = "https://example.com"
+					request_body_template = "{}"
+					max_batch_size = "1"
+				}
+			}
+			resource "rudderstack_destination_http_v2" "example" {
+				name = "example"
+				config {
+					api_url = "https://example.com"
+					request_body_template = "{}"
+					format = rudderstack_destination_http_v2.dependency.id
+				}
+			}`,
+			ExpectNonEmptyPlan: true,
+		}},
 	})
 }
 

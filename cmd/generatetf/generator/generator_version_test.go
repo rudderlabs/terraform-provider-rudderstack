@@ -2,7 +2,9 @@ package generator
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -141,6 +143,37 @@ func TestGenerateImportScript_LogsVersionMismatch(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, string(data))
 	assert.Contains(t, buf.String(), "skipping destination 'id-braze': type 'BRAZE' version 3 is not supported (available versions: 1)")
+}
+
+func TestGenerateHTTPVersionsAndBodyFormats(t *testing.T) {
+	destinations := []client.Destination{
+		{ID: "http-v1", Name: "old", Type: "HTTP", Version: 1, Config: json.RawMessage(`{"apiUrl":"https://example.com/old","auth":"noAuth","method":"POST","format":"JSON","isBatchingEnabled":false,"isDefaultMapping":true}`)},
+		{ID: "http-xml", Name: "xml", Type: "HTTP", Version: 2, Config: json.RawMessage(`{"apiUrl":"https://example.com/xml","auth":"noAuth","method":"POST","format":"XML","xmlRootKey":"Envelope","requestBodyTemplate":"{\"event\": $$.events}","maxBatchSize":"10"}`)},
+		{ID: "http-form", Name: "form", Type: "HTTP", Version: 2, Config: json.RawMessage(`{"apiUrl":"https://example.com/form","auth":"noAuth","method":"POST","format":"FORM","requestBodyTemplate":"{\"email\": $$.events[0].traits.email}"}`)},
+	}
+
+	hcl, err := GenerateTerraform(nil, destinations, nil, nil, nil)
+	require.NoError(t, err)
+	hclText := string(hcl)
+	assert.Contains(t, hclText, `resource "rudderstack_destination_http" "dst_http-v1"`)
+	assert.Contains(t, hclText, `resource "rudderstack_destination_http_v2" "dst_http-xml"`)
+	formResource := `resource "rudderstack_destination_http_v2" "dst_http-form"`
+	assert.Contains(t, hclText, formResource)
+	assert.Contains(t, hclText, `xml_root_key`)
+	assert.Contains(t, hclText, `"Envelope"`)
+	assert.Contains(t, hclText, `max_batch_size`)
+	assert.NotContains(t, hclText, `is_batching_enabled = true`)
+	// FORM has no batch size or XML root key in the generated HCL.
+	form := hclText[strings.Index(hclText, formResource):]
+	assert.Regexp(t, `(?m)^\s*format\s+= "FORM"$`, form)
+	assert.NotContains(t, form, `max_batch_size`)
+	assert.NotContains(t, form, `xml_root_key`)
+
+	imports, err := GenerateImportScript(nil, destinations, nil, nil, nil)
+	require.NoError(t, err)
+	assert.Contains(t, string(imports), `terraform import "rudderstack_destination_http.dst_http-v1" "http-v1"`)
+	assert.Contains(t, string(imports), `terraform import "rudderstack_destination_http_v2.dst_http-xml" "http-xml"`)
+	assert.Contains(t, string(imports), `terraform import "rudderstack_destination_http_v2.dst_http-form" "http-form"`)
 }
 
 func captureLogger(t *testing.T) *bytes.Buffer {
