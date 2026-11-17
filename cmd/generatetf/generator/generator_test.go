@@ -52,6 +52,8 @@ func TestGeneratorTerraform(t *testing.T) {
 				"enableSSE": true,
 				"useRudderStorage": false,
 				"unknown": "unknown value",
+				"allowUsersContextTraits": true,
+				"underscoreDivideNumbers": false,
 				"whiteListedEvents": [],
 				"blacklistedEvents": []
 			}`),

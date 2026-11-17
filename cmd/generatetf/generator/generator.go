@@ -532,6 +532,10 @@ func generateBlock(name string, data map[string]interface{}, configSchema map[st
 	for _, k := range keys {
 		v := data[k]
 		if sch, ok := configSchema[k]; ok {
+			// computed-only attributes cannot be set in config; terraform rejects them if emitted
+			if sch.Computed && !sch.Optional && !sch.Required {
+				continue
+			}
 			// state objects are actually lists with a single object item
 			if r, ok := sch.Elem.(*schema.Resource); ok && sch.Type == schema.TypeList && sch.ConfigMode != schema.SchemaConfigModeAttr {
 				if l, ok := v.([]interface{}); ok && len(l) > 0 {
