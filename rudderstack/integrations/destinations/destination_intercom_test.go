@@ -122,6 +122,7 @@ var intercomTestConfigs = []c.TestConfig{
 			`,
 		APIUpdate: `{
 				"appId": "app-id",
+				"updateLastRequestAt": false,
 				"apiKey": "api-key",
 				"useNativeSDK": {
 					"android": true

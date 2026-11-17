@@ -171,6 +171,11 @@ Optional:
 - `enable_sse` (Boolean) This setting enables server-side encryption.
 - `s3` (Block List, Max: 1) (see [below for nested schema](#nestedblock--config--s3))
 
+Read-Only:
+
+- `allow_users_context_traits` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+- `underscore_divide_numbers` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+
 <a id="nestedblock--config--sync"></a>
 ### Nested Schema for `config.sync`
 

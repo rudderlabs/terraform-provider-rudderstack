@@ -133,6 +133,7 @@ func init() {
 			// The control plane refuses the update outright, so an in-place change
 			// can never apply. ForceNew makes Terraform replace the destination
 			// instead of planning something the API will reject.
+			// Other warehouse destinations expose them read-only via warehouseImmutableFlags.
 			ForceNew:    true,
 			Description: "Use underscores to split numeric segments. Changing this forces a new destination to be created, because the control plane treats the field as immutable.",
 		},

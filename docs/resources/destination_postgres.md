@@ -154,6 +154,11 @@ Optional:
 - `ssl_mode` (String) Enter the SSL mode of your PostgreSQL database.
 - `sync_frequency` (String) Enter the frequency at which the data should be synced from your PostgreSQL database.
 
+Read-Only:
+
+- `allow_users_context_traits` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+- `underscore_divide_numbers` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+
 <a id="nestedblock--config--consent_management"></a>
 ### Nested Schema for `config.consent_management`
 

@@ -167,6 +167,11 @@ Optional:
 - `region` (String) Enter your AWS Glue region. For example, for N.Virginia, it would be `us-east-1`.
 - `role_based_authentication` (Block List, Max: 1) This option allows you select the arn based authentication. (see [below for nested schema](#nestedblock--config--role_based_authentication))
 
+Read-Only:
+
+- `allow_users_context_traits` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+- `underscore_divide_numbers` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+
 <a id="nestedblock--config--sync"></a>
 ### Nested Schema for `config.sync`
 
