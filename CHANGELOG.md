@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.3](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v5.0.2...v5.0.3) (2026-11-16)
+
+
+### Bug Fixes
+
+* retry rate-limited API requests by upgrading rudder-iac to v1.1.0 ([#357](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/357)) ([cd14709](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/cd147092bd0102b4ccfe516ee7988b192cfe0bf5))
+
 ## [5.0.2](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v5.0.1...v5.0.2) (2026-10-28)
 
 
