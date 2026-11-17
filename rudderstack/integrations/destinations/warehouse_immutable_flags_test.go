@@ -10,22 +10,43 @@ import (
 )
 
 // The control plane rejects an update that changes an immutable flag, and it
-// counts an omitted flag as a change. A destination created as `true` must
-// therefore send `true` back on every update, read through state.
+// counts both a flipped value and false-for-undefined as a change. Updates must
+// send back exactly what the API stored, and nothing when it stored nothing.
 func TestWarehouseImmutableFlagsRoundTrip(t *testing.T) {
+	cases := map[string]struct {
+		api  string
+		want string // "" means the key is absent on both sides
+	}{
+		"stored true":  {`{"allowUsersContextTraits": true, "underscoreDivideNumbers": true}`, "true"},
+		"stored false": {`{"allowUsersContextTraits": false, "underscoreDivideNumbers": false}`, "false"},
+		"not stored":   {`{}`, ""},
+	}
 	entries := c.Destinations.Entries()
 	for _, name := range []string{"bigquery", "postgres", "redshift", "s3_datalake", "snowflake"} {
-		t.Run(name, func(t *testing.T) {
-			cm, ok := entries[name]
-			require.True(t, ok, "destination %q not registered", name)
+		cm, ok := entries[name]
+		require.True(t, ok, "destination %q not registered", name)
+		for caseName, tc := range cases {
+			t.Run(name+"/"+caseName, func(t *testing.T) {
+				state, err := cm.APIToState(tc.api)
+				require.NoError(t, err)
+				api, err := cm.StateToAPI(state)
+				require.NoError(t, err)
 
-			state, err := cm.APIToState(`{"allowUsersContextTraits": true, "underscoreDivideNumbers": true}`)
-			require.NoError(t, err)
-
-			api, err := cm.StateToAPI(state)
-			require.NoError(t, err)
-			require.True(t, gjson.Get(api, "allowUsersContextTraits").Bool(), api)
-			require.True(t, gjson.Get(api, "underscoreDivideNumbers").Bool(), api)
-		})
+				for apiKey, tfKey := range map[string]string{
+					"allowUsersContextTraits": "allow_users_context_traits",
+					"underscoreDivideNumbers": "underscore_divide_numbers",
+				} {
+					s, a := gjson.Get(state, tfKey), gjson.Get(api, apiKey)
+					if tc.want == "" {
+						require.False(t, s.Exists(), state)
+						require.False(t, a.Exists(), api)
+						continue
+					}
+					require.Equal(t, tc.want, s.String(), state)
+					require.True(t, a.IsBool(), api)
+					require.Equal(t, tc.want == "true", a.Bool(), api)
+				}
+			})
+		}
 	}
 }

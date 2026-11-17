@@ -22,8 +22,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 				}
 			`,
 		APICreate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -159,8 +157,6 @@ var snowflakeTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -485,8 +481,6 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				}
 			`,
 			APICreate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -514,8 +508,6 @@ func TestDestinationResourceSnowflakeWithKeyPairAuth(t *testing.T) {
 				}
 			`,
 			APIUpdate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -548,8 +540,6 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				}
 			`,
 			APICreate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -585,8 +575,6 @@ func TestDestinationResourceSnowflakeWithGCP(t *testing.T) {
 				}
 			`,
 			APIUpdate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -630,8 +618,6 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				}
 			`,
 			APICreate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -668,8 +654,6 @@ func TestDestinationResourceSnowflakeWithAzure(t *testing.T) {
 				}
 			`,
 			APIUpdate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -715,8 +699,6 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				}
 			`,
 			APICreate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -743,8 +725,6 @@ func TestDestinationResourceSnowflakeWithPEMPrivateKey(t *testing.T) {
 				}
 			`,
 			APIUpdate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -777,8 +757,6 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				}
 			`,
 			APICreate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -811,8 +789,6 @@ func TestDestinationResourceSnowflakeWithRoleBasedAuth(t *testing.T) {
 				}
 			`,
 			APIUpdate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -859,8 +835,6 @@ func TestDestinationResourceSnowflakeExplicitBooleanFalse(t *testing.T) {
 				}
 			`,
 			APICreate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",
@@ -890,8 +864,6 @@ func TestDestinationResourceSnowflakeExplicitBooleanFalse(t *testing.T) {
 				}
 			`,
 			APIUpdate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"account": "example-account",
 				"database": "example-database",
 				"warehouse": "example-warehouse",

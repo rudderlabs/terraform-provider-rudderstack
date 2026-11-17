@@ -22,8 +22,6 @@ var s3DatalakeTestConfigs = []c.TestConfig{
 				}
 			`,
 		APICreate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"bucketName": "bucket",
 				"useGlue": false,
 				"syncFrequency": "30",
@@ -126,8 +124,6 @@ var s3DatalakeTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"bucketName": "bucket",
 				"prefix": "prefix",
 				"accessKeyID": "...",

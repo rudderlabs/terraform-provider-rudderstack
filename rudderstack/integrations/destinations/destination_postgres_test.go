@@ -21,8 +21,6 @@ var postgresTestConfigs = []c.TestConfig{
 				use_rudder_storage = true
 			`,
 		APICreate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"host": "test-host",
 				"database": "test-database",
 				"user": "test-user",
@@ -122,8 +120,6 @@ var postgresTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
-				"allowUsersContextTraits": false,
-				"underscoreDivideNumbers": false,
 				"host": "test-host",
 				"database": "test-database",
 				"user": "test-user",
