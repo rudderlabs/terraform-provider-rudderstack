@@ -16,6 +16,8 @@ import (
 // d.Get cannot tell a null bool from false, and sending false for a flag that was
 // never stored is rejected as a modification. Users cannot set them, so upgrading
 // the provider never plans a change of an existing warehouse destination.
+// snowflake_streaming maps the same keys as user-settable ForceNew bools instead
+// (it predates this helper), so the two are deliberately different.
 func warehouseImmutableFlags() ([]c.ConfigProperty, map[string]*schema.Schema) {
 	properties := []c.ConfigProperty{
 		storedBool("allowUsersContextTraits", "allow_users_context_traits"),

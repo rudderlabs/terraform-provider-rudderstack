@@ -228,6 +228,11 @@ Optional:
 - `use_key_pair_auth` (Boolean) Enable this setting to use key pair authentication instead of password-based authentication.
 - `use_rudder_storage` (Boolean) Enable this setting to use RudderStack-managed buckets for object storage.
 
+Read-Only:
+
+- `allow_users_context_traits` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+- `underscore_divide_numbers` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+
 <a id="nestedblock--config--sync"></a>
 ### Nested Schema for `config.sync`
 
