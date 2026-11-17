@@ -50,6 +50,8 @@ jobs:
             "rudderstack/configs/"
             "rudderstack/integrations/destinations/common_config_meta.go"
             "internal/testutil/acc/"
+            # A dependency bump can replace the API client under every resource.
+            "^go\.mod$"
           )
 
           RUN_ALL=false
