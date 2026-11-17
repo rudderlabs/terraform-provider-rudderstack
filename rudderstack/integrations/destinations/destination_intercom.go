@@ -17,7 +17,7 @@ func init() {
 		c.Simple("useNativeSDK.ios", "use_native_sdk.0.ios", c.SkipZeroValue),
 		c.Simple("useNativeSDK.android", "use_native_sdk.0.android", c.SkipZeroValue),
 		c.Simple("sendAnonymousId", "send_anonymous_id", c.SkipZeroValue),
-		c.Simple("updateLastRequestAt", "update_last_request_at", c.SkipZeroValue),
+		c.Simple("updateLastRequestAt", "update_last_request_at"),
 		c.Simple("mobileApiKeyAndroid.android", "mobile_api_key_android", c.SkipZeroValue),
 		c.Simple("mobileApiKeyIOS.ios", "mobile_api_key_ios", c.SkipZeroValue),
 		c.ArrayWithStrings("whitelistedEvents", "eventName", "event_filtering.0.whitelist"),

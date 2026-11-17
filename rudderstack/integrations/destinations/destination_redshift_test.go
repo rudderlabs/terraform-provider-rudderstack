@@ -24,6 +24,8 @@ var redshiftTestConfigs = []c.TestConfig{
 				}
 			`,
 		APICreate: `{
+				"allowUsersContextTraits": false,
+				"underscoreDivideNumbers": false,
 				"host": "example.com",
 				"port": "5432",
 				"user": "example-user",
@@ -136,6 +138,8 @@ var redshiftTestConfigs = []c.TestConfig{
 				}
 				`,
 		APIUpdate: `{
+				"allowUsersContextTraits": false,
+				"underscoreDivideNumbers": false,
 				"host": "example.com",
 				"port": "5432",
 				"user": "example-user",

@@ -22,6 +22,8 @@ var bigqueryTestConfigs = []c.TestConfig{
 				}
 			`,
 		APICreate: `{
+				"allowUsersContextTraits": false,
+				"underscoreDivideNumbers": false,
 				"project": "project",
 				"bucketName": "bucket",
 				"credentials": "...",
@@ -149,6 +151,8 @@ var bigqueryTestConfigs = []c.TestConfig{
 				}
 			`,
 		APIUpdate: `{
+				"allowUsersContextTraits": false,
+				"underscoreDivideNumbers": false,
 				"project": "project",
 				"bucketName": "bucket",
 				"credentials": "...",

@@ -45,6 +45,8 @@ func init() {
 	}
 
 	properties = append(properties, commonProperties...)
+	flagProperties, flagSchema := warehouseImmutableFlags()
+	properties = append(properties, flagProperties...)
 
 	schema := map[string]*schema.Schema{
 		"host": {
@@ -116,6 +118,9 @@ func init() {
 	}
 
 	for key, value := range commonSchema {
+		schema[key] = value
+	}
+	for key, value := range flagSchema {
 		schema[key] = value
 	}
 
