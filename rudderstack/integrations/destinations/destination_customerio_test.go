@@ -1,7 +1,10 @@
 package destinations_test
 
 import (
+	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	acc "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/acc"
 	cmt "github.com/rudderlabs/terraform-provider-rudderstack/internal/testutil/cm"
@@ -36,6 +39,18 @@ var customerioTestConfigs = []c.TestConfig{
 				}
 
 				data_use_in_app {
+					web = true
+				}
+
+				sdk_version {
+					web = "v2"
+				}
+
+				write_key {
+					web = "write-key"
+				}
+
+				anonymous_in_app {
 					web = true
 				}
 
@@ -74,6 +89,15 @@ var customerioTestConfigs = []c.TestConfig{
 					"web": true
 				},
 				"dataUseInApp": {
+					"web": true
+				},
+				"sdkVersion": {
+					"web": "v2"
+				},
+				"writeKey": {
+					"web": "write-key"
+				},
+				"anonymousInApp": {
 					"web": true
 				},
 				"autoTrackDeviceAttributes": {
@@ -173,6 +197,7 @@ var customerioTestConfigs = []c.TestConfig{
 				"apiKey": "cg044d23bc1beb3031c5",
 				"datacenter": "EU",
 				"apiVersion": "v2",
+				"sdkVersion": { "web": "v2" },
 				"userIdIdentifierType": "id",
 				"deviceTokenEventName": "name",
 				"eventFilteringOption": "blacklistedEvents",
@@ -410,28 +435,71 @@ func TestDestinationResourceCustomerIO(t *testing.T) {
 	cmt.AssertDestination(t, "customerio", customerioTestConfigs)
 }
 
+func TestDestinationResourceCustomerIOWebDeviceV2(t *testing.T) {
+	cmt.AssertDestination(t, "customerio", []c.TestConfig{
+		{
+			TerraformCreate: `
+				user_id_identifier_type = "id"
+				connection_mode { web = "device" }
+				sdk_version {}
+				write_key { web = "write-key" }
+			`,
+			APICreate: `{
+				"apiVersion": "v2",
+				"userIdIdentifierType": "id",
+				"datacenter": "US",
+				"connectionMode": { "web": "device" },
+				"sdkVersion": { "web": "v2" },
+				"writeKey": { "web": "write-key" }
+			}`,
+			TerraformUpdate: `
+				user_id_identifier_type = "id"
+				connection_mode { web = "device" }
+				sdk_version { web = "v2" }
+				write_key { web = "updated-write-key" }
+				anonymous_in_app { web = true }
+			`,
+			APIUpdate: `{
+				"apiVersion": "v2",
+				"userIdIdentifierType": "id",
+				"datacenter": "US",
+				"connectionMode": { "web": "device" },
+				"sdkVersion": { "web": "v2" },
+				"writeKey": { "web": "updated-write-key" },
+				"anonymousInApp": { "web": true }
+			}`,
+		},
+	})
+}
+
 func TestDestinationResourceCustomerIOApiVersionDefault(t *testing.T) {
 	cmt.AssertDestination(t, "customerio", []c.TestConfig{
 		{
 			TerraformCreate: `
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
+				user_id_identifier_type = "id"
 			`,
 			APICreate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v2",
-				"datacenter": "US"
+				"userIdIdentifierType": "id",
+				"datacenter": "US",
+				"sdkVersion": { "web": "v2" }
 			}`,
 			TerraformUpdate: `
 				site_id = "cd820c1b31d8f2696f3b"
 				api_key = "cg044d23bc1beb3031c5"
+				user_id_identifier_type = "id"
 			`,
 			APIUpdate: `{
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v2",
-				"datacenter": "US"
+				"userIdIdentifierType": "id",
+				"datacenter": "US",
+				"sdkVersion": { "web": "v2" }
 			}`,
 		},
 	})
@@ -449,7 +517,8 @@ func TestDestinationResourceCustomerIOApiVersionV1Override(t *testing.T) {
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v1",
-				"datacenter": "US"
+				"datacenter": "US",
+				"sdkVersion": { "web": "v2" }
 			}`,
 			TerraformUpdate: `
 				site_id = "cd820c1b31d8f2696f3b"
@@ -460,12 +529,157 @@ func TestDestinationResourceCustomerIOApiVersionV1Override(t *testing.T) {
 				"siteID": "cd820c1b31d8f2696f3b",
 				"apiKey": "cg044d23bc1beb3031c5",
 				"apiVersion": "v1",
-				"datacenter": "US"
+				"datacenter": "US",
+				"sdkVersion": { "web": "v2" }
 			}`,
 		},
 	})
 }
 
 func TestAccDestinationCustomerIO(t *testing.T) {
-	acc.AccAssertDestination(t, "customerio", customerioTestConfigs)
+	t.Run("lifecycle", func(t *testing.T) {
+		acc.AccAssertDestination(t, "customerio", customerioTestConfigs)
+	})
+
+	if !acc.PlanOnly() {
+		return
+	}
+
+	t.Run("unknown values", func(t *testing.T) {
+		resource.UnitTest(t, resource.TestCase{
+			ProviderFactories: acc.TestAccProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					PlanOnly: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-omitted-sdk-version-and-write-key"
+							config {
+								user_id_identifier_type = "id"
+								connection_mode { web = "device" }
+							}
+						}
+					`,
+					ExpectError: regexp.MustCompile(`write_key.0.web must be non-empty`),
+				},
+				{
+					PlanOnly: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "web_mode" {
+							input = "device"
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-unknown-web-mode-v1"
+							config {
+								user_id_identifier_type = "id"
+								connection_mode { web = terraform_data.web_mode.output }
+								sdk_version { web = "v1" }
+							}
+						}
+					`,
+					ExpectError: regexp.MustCompile(`site_id must be non-empty`),
+				},
+				{
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "sdk_versions" {
+							input = [{ web = "v1" }]
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-unknown-sdk-version-block"
+							config {
+								site_id = "site-id"
+								user_id_identifier_type = "id"
+								connection_mode { web = "device" }
+								dynamic "sdk_version" {
+									for_each = terraform_data.sdk_versions.output
+									content { web = sdk_version.value.web }
+								}
+							}
+						}
+					`,
+				},
+				{
+					PlanOnly: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "android_mode" {
+							input = "cloud"
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-known-ios-cloud"
+							config {
+								site_id = "site-id"
+								user_id_identifier_type = "id"
+								connection_mode {
+									web = "device"
+									android = terraform_data.android_mode.output
+									ios = "cloud"
+								}
+								write_key { web = "write-key" }
+							}
+						}
+					`,
+					ExpectError: regexp.MustCompile(`api_key must be non-empty`),
+				},
+				{
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "write_keys" {
+							input = ["write-key"]
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-unknown-write-key-block"
+							config {
+								user_id_identifier_type = "id"
+								connection_mode { web = "device" }
+								sdk_version { web = "v2" }
+								dynamic "write_key" {
+									for_each = terraform_data.write_keys.output
+									content { web = write_key.value }
+								}
+							}
+						}
+					`,
+				},
+				{
+					PlanOnly:           true,
+					ExpectNonEmptyPlan: true,
+					Config: `
+						provider "rudderstack" { access_token = "plan-only-dummy-token" }
+
+						resource "terraform_data" "connection_modes" {
+							input = [{ web = "device" }]
+						}
+
+						resource "rudderstack_destination_customerio" "test" {
+							name = "customerio-unknown-connection-mode-block"
+							config {
+								user_id_identifier_type = "id"
+								dynamic "connection_mode" {
+									for_each = terraform_data.connection_modes.output
+									content { web = connection_mode.value.web }
+								}
+							}
+						}
+					`,
+				},
+			},
+		})
+	})
 }
