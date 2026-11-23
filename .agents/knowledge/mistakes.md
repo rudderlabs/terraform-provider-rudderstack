@@ -30,3 +30,8 @@
 
 - `client.Account.Definition.Type` uses the lowercase Terraform destination key, such as `linkedin_ads`, `bingads_offline_conversions`, or `google_adwords_offline_conversions`. Earlier `no OAuth account found` failures from `internal/testutil/acc/oauth_destinations.go::resolveOAuthAccountID` occurred because those accounts were not yet connected in the dev workspace, not because the lookup used the wrong namespace.
 - The live API config comparison is subset-based, but it does not suppress the Terraform SDK's automatic post-apply empty-plan check. Live acceptance fixtures must round-trip through API reads: omit unsupported explicit options, keep immutable update values unchanged, and configure backend-omitted boolean defaults to the read-back zero value when outbound serialization still needs coverage.
+
+## RUD-3184 — Core-path changes broaden destination E2E scope
+
+- Changes under an E2E workflow `CORE_PATTERNS` path, including `rudderstack/resource_destination.go` and `rudderstack/configs/`, run every destination acceptance test rather than only the destination being changed.
+- When plan-only coverage passes but unrelated live tests fail against the shared dev API because fields are normalized, newly required, or immutable, distinguish contemporaneous backend contract drift from failures in the changed callback. Do not alter unrelated provider contracts or weaken the E2E matrix without authoritative upstream schema changes.

@@ -20,6 +20,7 @@ func resourceSource(cm configs.ConfigMeta) *schema.Resource {
 		ReadContext:   resourceSourceRead(cm),
 		UpdateContext: resourceSourceUpdate(cm),
 		DeleteContext: resourceSourceDelete(cm),
+		CustomizeDiff: resourceConfigCustomizeDiff(cm),
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceSourceImportState(cm),
 		},

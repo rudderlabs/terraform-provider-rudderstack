@@ -94,6 +94,7 @@ jobs:
           bq_dataset   = "$BQ_DATASET"
           bq_table     = "$BQ_TABLE"
           customerio_site_id    = "$CUSTOMERIO_SITE_ID"
+          customerio_write_key  = "tf-e2e-placeholder-write-key"
           customerio_datacenter = "${CUSTOMERIO_DATACENTER:-US}"
           customerio_audience_id     = ${CUSTOMERIO_AUDIENCE_ID:-0}
           customerio_audience_region = "${CUSTOMERIO_AUDIENCE_REGION:-US}"
