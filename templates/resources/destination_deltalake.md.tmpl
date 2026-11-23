@@ -1,0 +1,25 @@
+---
+page_title: "rudderstack_destination_deltalake Resource - terraform-provider-rudderstack"
+subcategory: ""
+description: |-
+
+---
+
+# rudderstack_destination_deltalake (Resource)
+
+This resource represents a Databricks (Delta Lake) destination. For more information check
+https://www.rudderstack.com/docs/destinations/warehouse-destinations/deltalake/
+
+## Example Usage
+
+{{tffile "examples/destination_deltalake.tf"}}
+
+> **:warning: Note**
+>
+> `bucket_provider` is required and has to match the staging block you declare: `s3` for `S3`, `gcs` for `GCS`, `azure_blob` for `AZURE_BLOB`. Set `use_rudder_storage` to true to stage data in RudderStack-managed buckets and leave all three blocks out; `bucket_provider` is still required by the control plane in that case.
+
+> **:warning: Note**
+>
+> Changing either `allow_users_context_traits` or `underscore_divide_numbers` forces a new destination to be created. Both are one-time flags that distinguish older destination behaviour from newer, and the control plane rejects any update to them, so an in-place change could never succeed. Terraform replaces the destination instead — which assigns a **new destination ID**, so any connection pointing at it has to be re-pointed, and the warehouse will receive a different column set from the one it already holds. Plan carefully before changing either value on an existing destination.
+
+{{ .SchemaMarkdown | trimspace }}
