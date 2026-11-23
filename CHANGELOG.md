@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.4](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v5.0.3...v5.0.4) (2026-11-23)
+
+
+### Miscellaneous
+
+* run all e2e suites when go.mod changes ([#359](https://github.com/rudderlabs/terraform-provider-rudderstack/issues/359)) ([cd2d8d6](https://github.com/rudderlabs/terraform-provider-rudderstack/commit/cd2d8d63c459ede9ece43b379e55e3ce0fd55254))
+
 ## [5.0.3](https://github.com/rudderlabs/terraform-provider-rudderstack/compare/v5.0.2...v5.0.3) (2026-11-16)
 
 
