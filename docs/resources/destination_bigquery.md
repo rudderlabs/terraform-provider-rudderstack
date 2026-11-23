@@ -178,6 +178,11 @@ Optional:
 - `skip_users_table` (Boolean) If enabled, RudderStack will skip sending the event data to the users table.
 - `skip_views` (Boolean) If enabled, RudderStack will skip creating views.
 
+Read-Only:
+
+- `allow_users_context_traits` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+- `underscore_divide_numbers` (String) Read-only. The value RudderStack stored when the destination was created ("true" or "false"), empty if none is stored. Immutable.
+
 <a id="nestedblock--config--sync"></a>
 ### Nested Schema for `config.sync`
 
